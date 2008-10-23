@@ -120,6 +120,8 @@ int
 main (int argc, char **argv)
 {
   sqlite3 *db;
+
+  g_assert (sqlite3_threadsafe ());
   
   g_thread_init (NULL);
   g_type_init ();
