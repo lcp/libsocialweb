@@ -6,6 +6,7 @@
 static SoupSession *session;
 
 static const char sql_get_sources[] = "SELECT rowid, type, url, etag, modified FROM sources;";
+static const char sql_update_source[] = "UPDATE sources SET etag=:etag, modified=:modified WHERE rowid=:rowid;";
 
 typedef struct {
   sqlite3_int64 rowid;
@@ -44,7 +45,7 @@ create_tables (sqlite3 *db)
 }
 
 static void
-update_source (UpdateData *data)
+update_source (UpdateData *data, sqlite3 *db)
 {
   SoupMessage *msg;
 
@@ -68,8 +69,32 @@ update_source (UpdateData *data)
   switch (soup_session_send_message (session, msg)) {
     /* TODO: use SOUP_STATUS_IS_SUCCESSFUL() etc */
   case SOUP_STATUS_OK:
-    g_print ("new data\n");
-    g_print ("ETag %s\n", soup_message_headers_get (msg->response_headers, "ETag"));
+    {
+      sqlite3_stmt *statement;
+      const char *etag, *header;
+      time_t modified = 0;
+      
+      etag = soup_message_headers_get (msg->response_headers, "ETag");
+      
+      header = soup_message_headers_get (msg->response_headers, "Last-Modified");
+      if (header) {
+        SoupDate *date;
+        date = soup_date_new_from_string (header);
+        modified = soup_date_to_time_t (date);
+        soup_date_free (date);
+      }
+      
+      g_print ("new data\n");
+      
+      statement = db_generic_prepare_and_bind (db, sql_update_source,
+                                               ":rowid", BIND_INT64, data->rowid,
+                                               ":etag", BIND_TEXT, etag,
+                                               ":modified", BIND_INT, modified,
+                                               NULL);
+      if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
+        g_error ("Cannot update source: %s", sqlite3_errmsg (db));
+      }
+    }
     break;
   case SOUP_STATUS_NOT_MODIFIED:
     g_print ("nothing changed\n");
@@ -113,7 +138,7 @@ iterate_sources (sqlite3 *db)
     l = g_list_prepend (l, data);
   }
 
-  g_list_foreach (l, (GFunc)update_source, NULL);
+  g_list_foreach (l, (GFunc)update_source, db);
 }
 
 int
