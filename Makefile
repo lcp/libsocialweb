@@ -1,4 +1,5 @@
-CFLAGS = -g -Wall `pkg-config --cflags gobject-2.0 sqlite3 libsoup-2.4`
-LDFLAGS =`pkg-config --libs gobject-2.0 sqlite3 libsoup-2.4`
+PKG = sqlite3 libsoup-2.4 libxml-2.0
+CFLAGS = -g -Wall `pkg-config --cflags $(PKG)`
+LDFLAGS =`pkg-config --libs $(PKG)`
 
 test: test.c generic.c
