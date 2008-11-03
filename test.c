@@ -63,8 +63,6 @@ create_tables (sqlite3 *db)
 #define C(s) ((char*)s)
 #define X(s) ((xmlChar*)s)
 
-typedef void (*for_each_atom_cb) (xmlTextReaderPtr reader);
-
 static gboolean
 is_element (xmlTextReaderPtr reader, const char *namespace, const char *name)
 {
