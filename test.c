@@ -5,8 +5,6 @@
 #include "generic.h"
 #include <libxml/xmlreader.h>
 
-/* #define NO_CACHE */
-
 static SoupSession *session;
 
 static const char sql_get_sources[] = "SELECT rowid, type, url, etag, modified FROM sources;";
