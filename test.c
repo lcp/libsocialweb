@@ -16,7 +16,7 @@ static const char sql_delete_blogs[] = "DELETE FROM blogs WHERE source=:source;"
 
 typedef struct {
   sqlite3_int64 rowid;
-  const char *type, *url, *etag;
+  char *type, *url, *etag;
   time_t last;
 } UpdateData;
 
@@ -119,7 +119,13 @@ update_blog (sqlite3 *db, UpdateData *data, SoupMessage *msg)
     if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
       g_error ("cannot add blog");
     }
+
+    g_free (link);
+    g_free (title);
   }
+  
+  g_list_free (items);
+  g_object_unref (document);
 }
 
 static void
@@ -227,7 +233,17 @@ iterate_sources (sqlite3 *db)
     l = g_list_prepend (l, data);
   }
 
-  g_list_foreach (l, (GFunc)update_source, db);
+  while (l) {
+    UpdateData *data = l->data;
+    update_source (data, db);
+    
+    g_free (data->type);
+    g_free (data->url);
+    g_free (data->etag);
+    g_slice_free (UpdateData, data);
+    
+    l = g_list_delete_link (l, l);
+  }
 }
 
 int
@@ -255,6 +271,9 @@ main (int argc, char **argv)
   session = soup_session_sync_new ();
 
   iterate_sources (db);
+  
+  g_object_unref (parser);
+  g_object_unref (session);
   
   return 0;
 }
