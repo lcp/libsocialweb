@@ -7,3 +7,8 @@ CFLAGS += -DNO_CACHE
 endif
 
 test: test.c generic.c
+
+clean:
+	rm -f test
+
+.PHONY: clean
