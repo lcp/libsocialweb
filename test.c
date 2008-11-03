@@ -2,10 +2,12 @@
 #include <glib-object.h>
 #include <sqlite3.h>
 #include <libsoup/soup.h>
+#include <rss-glib/rss-glib.h>
+
 #include "generic.h"
-#include <libxml/xmlreader.h>
 
 static SoupSession *session;
+static RssParser *parser;
 
 static const char sql_get_sources[] = "SELECT rowid, type, url, etag, modified FROM sources;";
 static const char sql_update_source[] = "UPDATE sources SET etag=:etag, modified=:modified WHERE rowid=:rowid;";
@@ -57,26 +59,6 @@ create_tables (sqlite3 *db)
   return TRUE;
 }
 
-/* libxml, i hate you */
-#define C(s) ((char*)s)
-#define X(s) ((xmlChar*)s)
-
-static gboolean
-is_element (xmlTextReaderPtr reader, const char *namespace, const char *name)
-{
-  return xmlTextReaderNodeType (reader) == XML_READER_TYPE_ELEMENT &&
-    strcmp (C(xmlTextReaderConstNamespaceUri (reader)), namespace) == 0 &&
-    strcmp (C(xmlTextReaderConstLocalName (reader)), name) == 0;
-}
-
-static gboolean
-is_end_element (xmlTextReaderPtr reader, const char *namespace, const char *name)
-{
-  return xmlTextReaderNodeType (reader) == XML_READER_TYPE_END_ELEMENT &&
-    strcmp (C(xmlTextReaderConstNamespaceUri (reader)), namespace) == 0 &&
-    strcmp (C(xmlTextReaderConstLocalName (reader)), name) == 0;
-}
-
 static time_t
 time_t_from_string (const char *s)
 {
@@ -88,11 +70,12 @@ time_t_from_string (const char *s)
   return t;
 }
 
-#define NS_ATOM "http://www.w3.org/2005/Atom"
 static void
 update_blog (sqlite3 *db, UpdateData *data, SoupMessage *msg)
 {
-  xmlTextReaderPtr reader;
+  GError *error = NULL;
+  RssDocument *document;
+  GList *items, *l;
   sqlite3_stmt *statement;
 
   statement = db_generic_prepare_and_bind (db, sql_delete_blogs,
@@ -102,64 +85,39 @@ update_blog (sqlite3 *db, UpdateData *data, SoupMessage *msg)
     g_error ("cannot remove blogs");
   }
 
-  reader = xmlReaderForMemory (msg->response_body->data,
-                               msg->response_body->length,
-                               /* TODO: pass URL */ NULL,
-                               NULL, 0);
-
-  if (!xmlTextReaderRead(reader))
+  if (!rss_parser_load_from_data (parser,
+                                  msg->response_body->data,
+                                  msg->response_body->length,
+                                  &error)) {
+    g_printerr ("Cannot parse feed: %s\n", error->message);
+    g_error_free (error);
     return;
-  
-  if (is_element (reader, NS_ATOM, "feed")) {
-    while (xmlTextReaderRead (reader) == 1) {
-      if (is_element (reader, NS_ATOM, "entry")) {
-        char *title = NULL, *link = NULL;
-        time_t date = 0;
-        int depth;
+  }
 
-        depth = xmlTextReaderDepth (reader);
-        while (xmlTextReaderRead (reader) == 1 && ! is_end_element (reader, NS_ATOM, "entry")) {
-          /* We only care about direct child nodes */
-          if (xmlTextReaderDepth (reader) != depth + 1)
-            continue;
+  document = rss_parser_get_document (parser);
+  items = rss_document_get_items (document);
+  for (l = items; l; l = l->next) {
+    RssItem *item = l->data;
+    sqlite3_stmt *statement;
+    char *link, *date_s, *title;
+    time_t date;
 
-          if (is_element (reader, NS_ATOM, "link")) {
-            const char *rel = NULL;
-            if (xmlTextReaderMoveToAttribute (reader, X("rel")) == 1) {
-              rel = C(xmlTextReaderConstValue (reader));
-            }
-            if ((rel == NULL || strcmp (rel, "alternate") == 0) && 
-                xmlTextReaderMoveToAttribute (reader, X("href")) == 1) {
-              link = C(xmlTextReaderValue (reader));
-            }
-          }
+    g_object_get (item,
+                  "link", &link,
+                  "pub-date", &date_s,
+                  "title", &title,
+                  NULL);
+    date = time_t_from_string (date_s);
+    g_free (date_s);
 
-          if (is_element (reader, NS_ATOM, "title")) {
-            title = C(xmlTextReaderReadString (reader));
-          }
-          if (is_element (reader, NS_ATOM, "updated")) {
-            char *s;
-            s = C(xmlTextReaderReadString (reader));
-            date = time_t_from_string (s);
-            xmlFree (s);
-          }
-        }
-
-        if (link) {
-          sqlite3_stmt *statement;
-          statement = db_generic_prepare_and_bind (db, sql_add_blog,
-                                                   ":source", BIND_INT64, data->rowid,
-                                                   ":link", BIND_TEXT, link,
-                                                   ":date", BIND_INT, date,
-                                                   ":title", BIND_TEXT, title,
-                                                   NULL);
-          if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
-            g_error ("cannot add blog");
-          }
-          g_free (link);
-          g_free (title);
-        }
-      }
+    statement = db_generic_prepare_and_bind (db, sql_add_blog,
+                                             ":source", BIND_INT64, data->rowid,
+                                             ":link", BIND_TEXT, link,
+                                             ":date", BIND_INT, date,
+                                             ":title", BIND_TEXT, title,
+                                             NULL);
+    if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
+      g_error ("cannot add blog");
     }
   }
 }
@@ -281,6 +239,8 @@ main (int argc, char **argv)
   
   g_thread_init (NULL);
   g_type_init ();
+
+  parser = rss_parser_new ();
 
   if (sqlite3_open ("test.db", &db) != SQLITE_OK) {
     g_error (sqlite3_errmsg (db));
