@@ -174,6 +174,12 @@ mojito_core_new (void)
   return g_object_new (MOJITO_TYPE_CORE, NULL);
 }
 
+sqlite3 *
+mojito_core_get_db (MojitoCore *core)
+{
+  return core->priv->db;
+}
+
 void
 mojito_core_run (MojitoCore *core)
 {
