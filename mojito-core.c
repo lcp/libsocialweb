@@ -64,34 +64,13 @@ static void
 populate_sources (MojitoCore *core)
 {
   MojitoCorePrivate *priv = core->priv;
-  sqlite3_stmt *statement;
-  sqlite3_int64 rowid = 0;
-  const char *type = NULL, *url = NULL;
+  MojitoSourceClass *source_class;
 
-  if (sqlite3_prepare_v2 (priv->db, sql_get_sources, -1, &statement, NULL) != SQLITE_OK) {
-    g_warning (sqlite3_errmsg (priv->db));
-    return;
-  }
+  source_class = g_type_class_ref (MOJITO_TYPE_SOURCE_BLOG);
   
-  while (db_generic_fetch (priv->db, statement, FALSE, TRUE,
-                           0, BIND_INT64, &rowid,
-                           1, BIND_TEXT, &type,
-                           2, BIND_TEXT, &url,
-                           -1)) {
-    GType gtype;
-    MojitoSourceClass *source_class;
+  priv->sources = g_list_concat
+    (priv->sources, mojito_source_initialize (source_class, core));
 
-    gtype = GPOINTER_TO_INT
-      (g_hash_table_lookup (core->priv->source_hash, g_intern_string (type)));
-    
-    if (gtype == 0)
-      continue;
-    
-    source_class = g_type_class_ref (gtype);
-    
-    priv->sources = g_list_concat
-      (priv->sources, mojito_source_initialize (source_class, core));
-  }
   g_printerr ("Got %d sources\n", g_list_length (priv->sources));
 }
 
