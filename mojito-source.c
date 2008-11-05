@@ -13,9 +13,9 @@ mojito_source_init (MojitoSource *self)
 }
 
 GList *
-mojito_source_initialize (MojitoCore *core, MojitoSourceClass *source_class)
+mojito_source_initialize (MojitoSourceClass *source_class, MojitoCore *core)
 {
   g_return_val_if_fail (source_class->initialize, NULL);
 
-  return source_class->initialize (core, source_class);
+  return source_class->initialize (source_class, core);
 }

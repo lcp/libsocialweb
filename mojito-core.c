@@ -128,7 +128,7 @@ populate_sources (MojitoCore *core)
     source_class = g_type_class_ref (gtype);
     
     priv->sources = g_list_concat
-      (priv->sources, mojito_source_initialize (core, source_class));
+      (priv->sources, mojito_source_initialize (source_class, core));
   }
   g_printerr ("Got %d sources\n", g_list_length (priv->sources));
 }
