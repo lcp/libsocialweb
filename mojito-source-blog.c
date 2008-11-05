@@ -1,5 +1,6 @@
 #include "mojito-source-blog.h"
 #include <rss-glib/rss-glib.h>
+#include <libsoup/soup.h>
 
 G_DEFINE_TYPE (MojitoSourceBlog, mojito_source_blog, MOJITO_TYPE_SOURCE)
 
@@ -7,15 +8,22 @@ G_DEFINE_TYPE (MojitoSourceBlog, mojito_source_blog, MOJITO_TYPE_SOURCE)
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SOURCE_BLOG, MojitoSourceBlogPrivate))
 
 struct _MojitoSourceBlogPrivate {
-  /* TODO: move to MojitoSource */
-  MojitoCore *core;
+  MojitoCore *core; /* TODO: move to MojitoSource */
   RssParser *parser;
+  SoupURI *uri;
 };
 
 static GList *
 mojito_source_blog_initialize (MojitoCore *core, MojitoSourceClass *source_class)
 {
-  return NULL;
+  /* TODO: replace with configuration file */
+  
+  MojitoSourceBlog *source;
+  source = g_object_new (MOJITO_TYPE_SOURCE_BLOG, NULL);
+  GET_PRIVATE (source)->core = core;
+  GET_PRIVATE (source)->uri = soup_uri_new ("http://planet.gnome.org/atom.xml");
+  
+  return g_list_prepend (NULL, source);
 }
 
 static void
