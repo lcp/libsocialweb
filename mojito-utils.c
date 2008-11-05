@@ -1,5 +1,7 @@
 #include "mojito-utils.h"
 #include <libsoup/soup.h>
+#include <sqlite3.h>
+#include "generic.h"
 
 time_t
 mojito_time_t_from_string (const char *s)
@@ -25,4 +27,26 @@ mojito_time_t_to_string (time_t t)
   soup_date_free (date);
   
   return s;
+}
+
+gboolean
+mojito_create_tables (sqlite3 *db, const char *sql)
+{
+  sqlite3_stmt *statement = NULL;
+  const char *command = sql;
+  
+  do {
+    if (sqlite3_prepare_v2 (db, command, -1, &statement, &command)) {
+      g_printerr ("Cannot create tables (prepare): %s\n", sqlite3_errmsg (db));
+      sqlite3_finalize (statement);
+      return FALSE;
+    }
+    
+    if (statement && db_generic_exec (statement, TRUE) != SQLITE_OK) {
+      g_printerr ("Cannot create tables (step): %s\n", sqlite3_errmsg (db));
+      return FALSE;
+    }
+  } while (statement);
+
+  return TRUE;
 }
