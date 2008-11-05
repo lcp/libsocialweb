@@ -177,5 +177,5 @@ mojito_core_new (void)
 void
 mojito_core_run (MojitoCore *core)
 {
-  // iterate_sources
+  g_list_foreach (core->priv->sources, (GFunc)mojito_source_update, NULL);
 }

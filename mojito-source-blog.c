@@ -27,6 +27,14 @@ mojito_source_blog_initialize (MojitoSourceClass *source_class, MojitoCore *core
 }
 
 static void
+mojito_source_blog_update (MojitoSource *source)
+{
+  MojitoSourceBlog *blog = MOJITO_SOURCE_BLOG (source);
+  
+  g_debug ("Updating %s/%s", blog->priv->uri->host, blog->priv->uri->path);
+}
+
+static void
 mojito_source_blog_dispose (GObject *object)
 {
   MojitoSourceBlogPrivate *priv = MOJITO_SOURCE_BLOG (object)->priv;
@@ -52,6 +60,7 @@ mojito_source_blog_class_init (MojitoSourceBlogClass *klass)
   object_class->dispose = mojito_source_blog_dispose;
   
   source_class->initialize = mojito_source_blog_initialize;  
+  source_class->update = mojito_source_blog_update;
 }
 
 static void

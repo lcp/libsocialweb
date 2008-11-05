@@ -19,3 +19,13 @@ mojito_source_initialize (MojitoSourceClass *source_class, MojitoCore *core)
 
   return source_class->initialize (source_class, core);
 }
+
+void
+mojito_source_update (MojitoSource *source)
+{
+  MojitoSourceClass *source_class = MOJITO_SOURCE_GET_CLASS (source);
+
+  g_return_if_fail (source_class->update);
+
+  source_class->update (source);
+}
