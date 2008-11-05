@@ -1,3 +1,4 @@
+
 #ifndef _MOJITO_SOURCE
 #define _MOJITO_SOURCE
 
@@ -26,13 +27,17 @@ typedef struct {
   GObject parent;
 } MojitoSource;
 
-typedef struct {
+typedef struct _MojitoSourceClass MojitoSourceClass;
+struct _MojitoSourceClass {
   GObjectClass parent_class;
-} MojitoSourceClass;
+  GList * (*initialize) (MojitoSourceClass *source_class);
+};
 
 GType mojito_source_get_type (void);
 
 void mojito_source_start (MojitoSource *source);
+
+GList *mojito_source_initialize (MojitoSourceClass *source_class);
 
 G_END_DECLS
 

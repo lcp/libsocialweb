@@ -11,3 +11,11 @@ static void
 mojito_source_init (MojitoSource *self)
 {
 }
+
+GList *
+mojito_source_initialize (MojitoSourceClass *source_class)
+{
+  g_return_val_if_fail (source_class->initialize, NULL);
+
+  return source_class->initialize (source_class);
+}

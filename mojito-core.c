@@ -117,7 +117,7 @@ populate_sources (MojitoCore *core)
                            2, BIND_TEXT, &url,
                            -1)) {
     GType gtype;
-    MojitoSource *source;
+    MojitoSourceClass *source_class;
 
     gtype = GPOINTER_TO_INT
       (g_hash_table_lookup (core->priv->source_hash, g_intern_string (type)));
@@ -125,8 +125,12 @@ populate_sources (MojitoCore *core)
     if (gtype == 0)
       continue;
     
-    source = g_object_new (gtype, NULL);
+    source_class = g_type_class_ref (gtype);
+    
+    priv->sources = g_list_concat
+      (priv->sources, mojito_source_initialize (source_class));
   }
+  g_printerr ("Got %d sources\n", g_list_length (priv->sources));
 }
 
 static void

@@ -12,6 +12,12 @@ struct _MojitoSourceBlogPrivate {
   RssParser *parser;
 };
 
+static GList *
+mojito_source_blog_initialize (MojitoSourceClass *source_class)
+{
+  return NULL;
+}
+
 static void
 mojito_source_blog_dispose (GObject *object)
 {
@@ -31,10 +37,13 @@ static void
 mojito_source_blog_class_init (MojitoSourceBlogClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
+  MojitoSourceClass *source_class = MOJITO_SOURCE_CLASS (klass);
+  
   g_type_class_add_private (klass, sizeof (MojitoSourceBlogPrivate));
-
+  
   object_class->dispose = mojito_source_blog_dispose;
+  
+  source_class->initialize = mojito_source_blog_initialize;  
 }
 
 static void
