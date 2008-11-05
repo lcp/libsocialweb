@@ -1,6 +1,7 @@
 #include <sqlite3.h>
 #include <libsoup/soup.h>
 #include "mojito-core.h"
+#include "mojito-utils.h"
 #include "generic.h"
 
 #include "mojito-source-blog.h"
@@ -17,45 +18,6 @@ struct _MojitoCorePrivate {
   sqlite3 *db;
   SoupSession *session;
 };
-
-static gboolean
-create_tables (sqlite3 *db)
-{
-  sqlite3_stmt *statement = NULL;
-  const char *command, sql[] = 
-    "CREATE TABLE IF NOT EXISTS sources ("
-    "'uid' INTEGER PRIMARY KEY,"
-    "'type' TEXT NOT NULL," /* string identifier for the type */
-    "'url' TEXT NOT NULL," /* URL */
-    "'etag' TEXT," /* Last seen ETag */
-    "'modified' INTEGER" /* Last modified time in UTC as seconds from 1970-1-1 */
-    ");"
-    
-    "CREATE TABLE IF NOT EXISTS items ("
-    "'rowid' INTEGER PRIMARY KEY,"
-    "'source' INTEGER NOT NULL,"
-    "'link' TEXT NOT NULL,"
-    "'date' INTEGER NOT NULL,"
-    "'title' TEXT"
-    ");";
-  command = sql;
-  
-  do {
-    if (sqlite3_prepare_v2 (db, command, -1, &statement, &command)) {
-      g_warning ("Cannot create tables (prepare): %s", sqlite3_errmsg (db));
-      sqlite3_finalize (statement);
-      return FALSE;
-    }
-    
-    if (statement && db_generic_exec (statement, TRUE) != SQLITE_OK) {
-      g_warning ("Cannot create tables (step): %s", sqlite3_errmsg (db));
-      return FALSE;
-    }
-  } while (statement);
-
-  return TRUE;
-}
-
 
 static void
 mojito_core_dispose (GObject *object)
@@ -136,7 +98,16 @@ populate_sources (MojitoCore *core)
 static void
 mojito_core_init (MojitoCore *self)
 {
+  const char sql[] = 
+    "CREATE TABLE IF NOT EXISTS items ("
+    "'rowid' INTEGER PRIMARY KEY,"
+    "'source' INTEGER NOT NULL,"
+    "'link' TEXT NOT NULL,"
+    "'date' INTEGER NOT NULL,"
+    "'title' TEXT"
+    ");";
   MojitoCorePrivate *priv = GET_PRIVATE (self);
+  
   self->priv = priv;
 
   g_assert (sqlite3_threadsafe ());
@@ -159,8 +130,8 @@ mojito_core_init (MojitoCore *self)
     g_error (sqlite3_errmsg (priv->db));
     return;
   }
-
-  if (!create_tables (priv->db)) {
+  
+  if (!mojito_create_tables (priv->db, sql)) {
     g_error (sqlite3_errmsg (priv->db));
     return;
   }
