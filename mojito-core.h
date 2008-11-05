@@ -2,6 +2,7 @@
 #define _MOJITO_CORE
 
 #include <glib-object.h>
+#include <libsoup/soup.h>
 #include <sqlite3.h>
 
 G_BEGIN_DECLS
@@ -41,6 +42,8 @@ MojitoCore* mojito_core_new (void);
 void mojito_core_run (MojitoCore *core);
 
 sqlite3 *mojito_core_get_db (MojitoCore *core);
+
+SoupSession *mojito_core_get_session (MojitoCore *core);
 
 G_END_DECLS
 

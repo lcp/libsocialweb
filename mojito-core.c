@@ -180,6 +180,12 @@ mojito_core_get_db (MojitoCore *core)
   return core->priv->db;
 }
 
+SoupSession *
+mojito_core_get_session (MojitoCore *core)
+{
+  return core->priv->session;
+}
+
 void
 mojito_core_run (MojitoCore *core)
 {
