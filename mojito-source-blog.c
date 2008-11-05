@@ -13,7 +13,7 @@ struct _MojitoSourceBlogPrivate {
 };
 
 static GList *
-mojito_source_blog_initialize (MojitoSourceClass *source_class)
+mojito_source_blog_initialize (MojitoCore *core, MojitoSourceClass *source_class)
 {
   return NULL;
 }
