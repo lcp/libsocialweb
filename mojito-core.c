@@ -118,7 +118,7 @@ mojito_core_new (void)
 sqlite3 *
 mojito_core_get_db (MojitoCore *core)
 {
-  g_return_if_fail (MOJITO_IS_CORE (core));
+  g_return_val_if_fail (MOJITO_IS_CORE (core), NULL);
 
   return core->priv->db;
 }
@@ -126,7 +126,7 @@ mojito_core_get_db (MojitoCore *core)
 SoupSession *
 mojito_core_get_session (MojitoCore *core)
 {
-  g_return_if_fail (MOJITO_IS_CORE (core));
+  g_return_val_if_fail (MOJITO_IS_CORE (core), NULL);
 
   return core->priv->session;
 }
