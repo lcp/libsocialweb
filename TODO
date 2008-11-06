@@ -1,0 +1,5 @@
+Connect to session dbus, for single instance and change notifications
+
+Install sources as modules and load at runtime
+
+Move database to ~/.cache/
