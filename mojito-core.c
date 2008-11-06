@@ -12,8 +12,6 @@ G_DEFINE_TYPE (MojitoCore, mojito_core, G_TYPE_OBJECT)
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_CORE, MojitoCorePrivate))
 
 struct _MojitoCorePrivate {
-  /* Hash of interned source identifiers to GTypes */
-  GHashTable *source_hash;
   GList *sources;
   sqlite3 *db;
   SoupSession *session;
@@ -91,19 +89,12 @@ mojito_core_init (MojitoCore *self)
 
   g_assert (sqlite3_threadsafe ());
   
-  priv->source_hash = g_hash_table_new (g_direct_hash, g_direct_equal);
-
   priv->sources = NULL;
 
   /* Make async when we use DBus etc */
   priv->session = soup_session_sync_new ();
 
   /* TODO: move here onwards into a separate function so we can return errors */
-  
-  /* TODO: load these at runtime */
-  g_hash_table_insert (priv->source_hash,
-                       (gpointer)g_intern_static_string ("blog"),
-                       GINT_TO_POINTER (MOJITO_TYPE_SOURCE_BLOG));
   
   if (sqlite3_open ("test.db", &priv->db) != SQLITE_OK) {
     g_error (sqlite3_errmsg (priv->db));
