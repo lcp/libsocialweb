@@ -79,10 +79,10 @@ mojito_core_init (MojitoCore *self)
 {
   const char sql[] = 
     "CREATE TABLE IF NOT EXISTS items ("
-    "'rowid' INTEGER PRIMARY KEY,"
-    "'source' INTEGER NOT NULL,"
-    "'link' TEXT NOT NULL,"
+    "'source' TEXT NOT NULL," /* source identifier */
+    "'uuid' TEXT NOT NULL," /* item id */
     "'date' INTEGER NOT NULL,"
+    "'link' TEXT NOT NULL,"
     "'title' TEXT"
     ");";
   MojitoCorePrivate *priv = GET_PRIVATE (self);
@@ -140,4 +140,44 @@ void
 mojito_core_run (MojitoCore *core)
 {
   g_list_foreach (core->priv->sources, (GFunc)mojito_source_update, NULL);
+}
+
+static const char sql_add_item[] = "INSERT INTO items(source, uuid, date, link, title) VALUES (:source, :uuid, :date, :link, :title);";
+
+void
+mojito_core_add_item (MojitoCore *core, const char *source_id, const char *item_id, time_t date, const char *link, const char *title)
+{
+  sqlite3_stmt *statement;
+  
+  g_return_if_fail (MOJITO_IS_CORE (core));
+  g_return_if_fail (source_id);
+  g_return_if_fail (item_id);
+  
+  statement = db_generic_prepare_and_bind (core->priv->db, sql_add_item,
+                                           ":source", BIND_TEXT, source_id,
+                                           ":uuid", BIND_TEXT, item_id,
+                                           ":date", BIND_INT, date,
+                                           ":link", BIND_TEXT, link,
+                                           ":title", BIND_TEXT, title,
+                                           NULL);
+  if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
+    g_printerr ("cannot add item\b");
+  }
+}
+
+static const char sql_delete_items[] = "DELETE FROM items WHERE source=:source;";
+
+void
+mojito_core_remove_items (MojitoCore *core, const char *source_id)
+{
+  sqlite3_stmt *statement;
+  
+  g_return_if_fail (MOJITO_IS_CORE (core));
+  g_return_if_fail (source_id);
+
+  statement = db_generic_prepare_and_bind (core->priv->db, sql_delete_items,
+                                           ":source", BIND_TEXT, source_id, NULL);
+  if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
+    g_printerr ("cannot remove items\n");
+  }
 }
