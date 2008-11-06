@@ -6,7 +6,15 @@ ifeq ($(NOCACHE), 1)
 CFLAGS += -DNO_CACHE
 endif
 
-mojito: main.c mojito-core.c mojito-core.h mojito-source.c mojito-source.h mojito-source-blog.c mojito-source-blog.h mojito-utils.c mojito-utils.h generic.c generic.h
+SOURCES = main.c \
+	mojito-core.c mojito-core.h \
+	mojito-source.c mojito-source.h \
+	mojito-source-blog.c mojito-source-blog.h \
+	mojito-web.c mojito-web.h \
+	mojito-utils.c mojito-utils.h \
+	generic.c generic.h
+
+mojito: $(SOURCES)
 	$(LINK.c) -o $@ $(filter %.c, $^)
 
 clean:
