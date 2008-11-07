@@ -29,6 +29,19 @@ mojito_time_t_to_string (time_t t)
   return s;
 }
 
+char *
+mojito_date_to_iso (const char *s)
+{
+  SoupDate *date;
+  char *iso;
+  
+  date = soup_date_new_from_string (s);
+  iso = soup_date_to_string (date, SOUP_DATE_ISO8601);
+  soup_date_free (date);
+  
+  return iso;
+}
+
 gboolean
 mojito_create_tables (sqlite3 *db, const char *sql)
 {
