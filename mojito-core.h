@@ -45,10 +45,6 @@ sqlite3 *mojito_core_get_db (MojitoCore *core);
 
 SoupSession *mojito_core_get_session (MojitoCore *core);
 
-void mojito_core_add_item (MojitoCore *core, const char *source_id, const char *item_id, time_t date, const char *link, const char *title);
-
-void mojito_core_remove_items (MojitoCore *core, const char *source_id);
-
 G_END_DECLS
 
 #endif /* _MOJITO_CORE */
