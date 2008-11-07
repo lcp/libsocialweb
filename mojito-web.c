@@ -17,11 +17,13 @@ mojito_web_cached_send (MojitoCore *core, SoupMessage *msg)
 {
   static gboolean created_tables = FALSE;
   sqlite3 *db = mojito_core_get_db (core);
-  sqlite3_stmt *statement;
   char *url;
-  const char *etag = NULL, *last = NULL;
   guint res;
+#ifndef NO_CACHE
+  sqlite3_stmt *statement;
+  const char *etag = NULL, *last = NULL;
   gboolean update_cache = FALSE;
+#endif
 
   if (G_UNLIKELY (!created_tables)) {
     /* TODO: not thread safe, use GOnce */
