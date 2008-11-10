@@ -61,14 +61,18 @@ static const char sql_get_sources[] = "SELECT rowid, type, url FROM sources;";
 static void
 populate_sources (MojitoCore *core)
 {
+  GType types[] = { MOJITO_TYPE_SOURCE_BLOG };
   MojitoCorePrivate *priv = core->priv;
   MojitoSourceClass *source_class;
-
-  source_class = g_type_class_ref (MOJITO_TYPE_SOURCE_BLOG);
+  int i;
   
-  priv->sources = g_list_concat
-    (priv->sources, mojito_source_initialize (source_class, core));
+  for (i = 0; i < G_N_ELEMENTS (types); i++) {
+    source_class = g_type_class_ref (types[i]);
 
+    priv->sources = g_list_concat
+      (priv->sources, mojito_source_initialize (source_class, core));    
+  }
+  
   g_printerr ("Got %d sources\n", g_list_length (priv->sources));
 }
 
