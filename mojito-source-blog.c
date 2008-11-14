@@ -52,7 +52,7 @@ add_item (MojitoCore *core, const char *source_id, const char *item_id, time_t d
                                            ":title", BIND_TEXT, title,
                                            NULL);
   if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
-    g_printerr ("cannot add item\b");
+    g_printerr ("cannot add item\n");
   }
 }
 
@@ -82,7 +82,7 @@ mojito_source_blog_initialize (MojitoSourceClass *source_class, MojitoCore *core
   
   db = mojito_core_get_db (core);
   if (!mojito_create_tables (db, sql_create)) {
-    g_printerr ("Cannot create tables for blog source: %s", sqlite3_errmsg (db));
+    g_printerr ("Cannot create tables for blog source: %s\n", sqlite3_errmsg (db));
     return NULL;
   }
 
