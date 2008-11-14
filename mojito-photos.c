@@ -48,7 +48,7 @@ mojito_photos_add (MojitoCore *core, const char *source_id, const char *item_id,
                                            ":title", BIND_TEXT, title,
                                            NULL);
   if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
-    g_printerr ("cannot add item\b");
+    g_printerr ("cannot add item\n");
   }
 }
 
