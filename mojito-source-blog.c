@@ -23,6 +23,7 @@ static const char sql_create[] =
   "CREATE TABLE IF NOT EXISTS blogposts ("
   "'source' TEXT NOT NULL," /* source url */
   "'uuid' TEXT NOT NULL," /* item id */
+  /* TODO: time_t or iso8901 string? */
   "'date' INTEGER NOT NULL," /* post date */
   "'link' TEXT NOT NULL," /* post link */
   "'title' TEXT" /* post title */
