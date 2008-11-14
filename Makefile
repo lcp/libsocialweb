@@ -10,6 +10,7 @@ SOURCES = main.c \
 	mojito-core.c mojito-core.h \
 	mojito-source.c mojito-source.h \
 	mojito-source-blog.c mojito-source-blog.h \
+	mojito-photos.c mojito-photos.h \
 	mojito-web.c mojito-web.h \
 	mojito-utils.c mojito-utils.h \
 	generic.c generic.h
