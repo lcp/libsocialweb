@@ -3,6 +3,7 @@
 #include "mojito-utils.h"
 #include <rss-glib/rss-glib.h>
 #include <libsoup/soup.h>
+#include "generic.h"
 
 G_DEFINE_TYPE (MojitoSourceBlog, mojito_source_blog, MOJITO_TYPE_SOURCE)
 
@@ -15,12 +16,73 @@ struct _MojitoSourceBlogPrivate {
   SoupURI *uri;
 };
 
+static const char sql_create[] = 
+  "CREATE TABLE IF NOT EXISTS blogs ("
+  "'source' TEXT NOT NULL," /* source url */
+  "'uuid' TEXT NOT NULL," /* item id */
+  "'date' INTEGER NOT NULL," /* post date */
+  "'link' TEXT NOT NULL," /* post link */
+  "'title' TEXT" /* post title */
+  ");";
+static const char sql_add_item[] = "INSERT INTO "
+  "blogs(source, uuid, date, link, title) "
+  "VALUES (:source, :uuid, :date, :link, :title);";
+static const char sql_delete_items[] = "DELETE FROM blogs WHERE source=:source;";
+
+static void
+add_item (MojitoCore *core, const char *source_id, const char *item_id, time_t date, const char *link, const char *title)
+{
+  sqlite3 *db;
+  sqlite3_stmt *statement;
+  
+  g_return_if_fail (MOJITO_IS_CORE (core));
+  g_return_if_fail (source_id);
+  g_return_if_fail (item_id);
+  
+  db = mojito_core_get_db (core);
+  statement = db_generic_prepare_and_bind (db, sql_add_item,
+                                           ":source", BIND_TEXT, source_id,
+                                           ":uuid", BIND_TEXT, item_id,
+                                           ":date", BIND_INT, date,
+                                           ":link", BIND_TEXT, link,
+                                           ":title", BIND_TEXT, title,
+                                           NULL);
+  if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
+    g_printerr ("cannot add item\b");
+  }
+}
+
+
+static void
+remove_items (MojitoCore *core, const char *source_id)
+{
+  sqlite3_stmt *statement;
+  sqlite3 *db;
+  
+  g_return_if_fail (MOJITO_IS_CORE (core));
+  g_return_if_fail (source_id);
+
+  db = mojito_core_get_db (core);
+  statement = db_generic_prepare_and_bind (db, sql_delete_items,
+                                           ":source", BIND_TEXT, source_id, NULL);
+  if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
+    g_printerr ("cannot remove items\n");
+  }
+}
+
 static GList *
 mojito_source_blog_initialize (MojitoSourceClass *source_class, MojitoCore *core)
 {
-  /* TODO: replace with configuration file */
-  
+  sqlite3 *db;
   MojitoSourceBlog *source;
+  
+  db = mojito_core_get_db (core);
+  if (!mojito_create_tables (db, sql_create)) {
+    g_printerr ("Cannot create tables for blog source: %s", sqlite3_errmsg (db));
+    return NULL;
+  }
+
+  /* TODO: replace with configuration file */
   source = g_object_new (MOJITO_TYPE_SOURCE_BLOG, NULL);
   GET_PRIVATE (source)->core = core;
   GET_PRIVATE (source)->uri = soup_uri_new ("http://planet.gnome.org/atom.xml");
@@ -35,7 +97,8 @@ mojito_source_blog_update (MojitoSource *source)
   MojitoSourceBlogPrivate *priv = blog->priv;
   SoupMessage *msg;
   guint status;
-  
+  char *blog_url;
+
   g_debug ("Updating %s%s", blog->priv->uri->host, blog->priv->uri->path);
 
   msg = soup_message_new_from_uri (SOUP_METHOD_GET, blog->priv->uri);
@@ -55,6 +118,10 @@ mojito_source_blog_update (MojitoSource *source)
       g_error_free (error);
       goto done;
     }
+
+    blog_url = soup_uri_to_string (priv->uri, FALSE);
+
+    remove_items (priv->core, blog_url);
     
     document = rss_parser_get_document (priv->parser);
     items = rss_document_get_items (document);
@@ -71,9 +138,7 @@ mojito_source_blog_update (MojitoSource *source)
                     NULL);
       date = mojito_time_t_from_string (date_s);
 
-      mojito_core_add_item (priv->core,
-                            soup_uri_to_string (priv->uri, FALSE),
-                            guid, date, link, title);
+      add_item (priv->core, blog_url, guid, date, link, title);
 
       g_free (guid);
       g_free (link);
@@ -82,6 +147,7 @@ mojito_source_blog_update (MojitoSource *source)
     }
     g_list_free (items);
     g_object_unref (document);
+    g_free (blog_url);
   }
 
  done:
