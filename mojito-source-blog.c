@@ -16,8 +16,11 @@ struct _MojitoSourceBlogPrivate {
   SoupURI *uri;
 };
 
+/* Need a table of blogs (url, title) which is both the configuration (url) and
+   metadata for display (url->title). Then store the rowid into the blogposts
+   table instead of source url */
 static const char sql_create[] = 
-  "CREATE TABLE IF NOT EXISTS blogs ("
+  "CREATE TABLE IF NOT EXISTS blogposts ("
   "'source' TEXT NOT NULL," /* source url */
   "'uuid' TEXT NOT NULL," /* item id */
   "'date' INTEGER NOT NULL," /* post date */
@@ -25,9 +28,9 @@ static const char sql_create[] =
   "'title' TEXT" /* post title */
   ");";
 static const char sql_add_item[] = "INSERT INTO "
-  "blogs(source, uuid, date, link, title) "
+  "blogposts(source, uuid, date, link, title) "
   "VALUES (:source, :uuid, :date, :link, :title);";
-static const char sql_delete_items[] = "DELETE FROM blogs WHERE source=:source;";
+static const char sql_delete_items[] = "DELETE FROM blogposts WHERE source=:source;";
 
 static void
 add_item (MojitoCore *core, const char *source_id, const char *item_id, time_t date, const char *link, const char *title)
