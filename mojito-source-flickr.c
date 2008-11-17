@@ -1,6 +1,5 @@
 #include "mojito-source-flickr.h"
-#include "mojito-web.h"
-#include "mojito-utils.h"
+#include "mojito-photos.h"
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include "generic.h"
@@ -56,7 +55,10 @@ mojito_source_flickr_update (MojitoSource *source)
   RestXmlNode *root = rest_xml_parser_parse_from_data (parser, payload, len);
   RestXmlNode *node = rest_xml_node_find (root, "rsp");
   /* TODO: check for failure */
-  
+
+  /* TODO: If we ever support multiple Flickr sources, this should be changed */
+  mojito_photos_remove (priv->core, "http://flickr.com");
+
   node = rest_xml_node_find (root, "photos");
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
     g_debug ("title %s", rest_xml_node_get_attr (node, "title"));
