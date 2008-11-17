@@ -1,4 +1,4 @@
-PKG = sqlite3 libsoup-2.4 rss-glib-1.0
+PKG = sqlite3 libsoup-2.4 rss-glib-1.0 rest
 CFLAGS = -g -Wall `pkg-config --cflags $(PKG)`
 LDFLAGS =`pkg-config --libs $(PKG)`
 
@@ -11,6 +11,7 @@ SOURCES = main.c \
 	mojito-source.c mojito-source.h \
 	mojito-source-blog.c mojito-source-blog.h \
 	mojito-photos.c mojito-photos.h \
+	mojito-source-flickr.c mojito-source-flickr.h \
 	mojito-web.c mojito-web.h \
 	mojito-utils.c mojito-utils.h \
 	generic.c generic.h
