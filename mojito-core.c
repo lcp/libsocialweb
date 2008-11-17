@@ -5,6 +5,7 @@
 #include "generic.h"
 
 #include "mojito-source-blog.h"
+#include "mojito-source-flickr.h"
 
 G_DEFINE_TYPE (MojitoCore, mojito_core, G_TYPE_OBJECT)
 
@@ -59,7 +60,10 @@ mojito_core_class_init (MojitoCoreClass *klass)
 static void
 populate_sources (MojitoCore *core)
 {
-  GType types[] = { MOJITO_TYPE_SOURCE_BLOG };
+  GType types[] = {
+    MOJITO_TYPE_SOURCE_BLOG,
+    MOJITO_TYPE_SOURCE_FLICKR
+  };
   MojitoCorePrivate *priv = core->priv;
   MojitoSourceClass *source_class;
   int i;
