@@ -41,6 +41,7 @@ mojito_source_flickr_update (MojitoSource *source)
                              "method", "flickr.photos.getContactsPublicPhotos",
                              /* TODO: this is a temporary key */
                              "api_key", "cf4e02fc57240a9b07346ad26e291080",
+                              /* TODO: get from configuration file */
                              "user_id", "35468147630@N01",
                              "extras", "date_upload,owner_name",
                              NULL)) {
