@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "mojito-source-flickr.h"
 #include "mojito-photos.h"
 #include <rest/rest-proxy.h>
@@ -20,6 +21,8 @@ mojito_source_flickr_initialize (MojitoSourceClass *source_class, MojitoCore *co
 {
   MojitoSourceFlickr *source;
   
+  mojito_photos_initialize (core);
+    
   /* TODO: replace with configuration file */
   source = g_object_new (MOJITO_TYPE_SOURCE_FLICKR, NULL);
   GET_PRIVATE (source)->core = core;
@@ -29,6 +32,16 @@ mojito_source_flickr_initialize (MojitoSourceClass *source_class, MojitoCore *co
   return g_list_prepend (NULL, source);
 }
 
+static char *
+construct_photo_page_url (RestXmlNode *node)
+{
+  g_assert (node != NULL);
+  
+  return g_strdup_printf ("http://www.flickr.com/photos/%s/%s/",
+                          rest_xml_node_get_attr (node, "owner"),
+                          rest_xml_node_get_attr (node, "id"));
+}
+
 static void
 mojito_source_flickr_update (MojitoSource *source)
 {
@@ -36,6 +49,8 @@ mojito_source_flickr_update (MojitoSource *source)
   char *payload;
   goffset len;
   GError *error = NULL;
+  RestXmlParser *parser;
+  RestXmlNode *root, *node;
   
   g_debug ("Updating Flickr");
   
@@ -44,24 +59,36 @@ mojito_source_flickr_update (MojitoSource *source)
                               /* TODO: this is a temporary key */
                               "api_key", "cf4e02fc57240a9b07346ad26e291080",
                               "user_id", priv->user_id,
-                              "extras", "date_upload,owner_name",
+                              "extras", "date_upload",
                               NULL)) {
     g_printerr ("Cannot fetch Flickr photos: %s", error->message);
     g_error_free (error);
     return;
   }
 
-  RestXmlParser *parser = rest_xml_parser_new ();
-  RestXmlNode *root = rest_xml_parser_parse_from_data (parser, payload, len);
-  RestXmlNode *node = rest_xml_node_find (root, "rsp");
+  parser = rest_xml_parser_new ();
+  root = rest_xml_parser_parse_from_data (parser, payload, len);
+  node = rest_xml_node_find (root, "rsp");
   /* TODO: check for failure */
 
   /* TODO: If we ever support multiple Flickr sources, this should be changed */
-  mojito_photos_remove (priv->core, "http://flickr.com");
+  mojito_photos_remove (priv->core, "http://flickr.com/");
 
   node = rest_xml_node_find (root, "photos");
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
-    g_debug ("title %s", rest_xml_node_get_attr (node, "title"));
+    const char *id, *title;
+    char *url;
+    time_t date;
+
+    id = rest_xml_node_get_attr (node, "id");
+    title = rest_xml_node_get_attr (node, "title");
+    date = atoi (rest_xml_node_get_attr (node, "dateupload"));
+    url = construct_photo_page_url (node);
+    
+    mojito_photos_add (priv->core, "http://flickr.com/",
+                       id, date, url, title);
+    
+    g_free (url);
   }
 
   rest_xml_node_free (root);
