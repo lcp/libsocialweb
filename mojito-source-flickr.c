@@ -68,6 +68,8 @@ mojito_source_flickr_update (MojitoSource *source)
 
   parser = rest_xml_parser_new ();
   root = rest_xml_parser_parse_from_data (parser, payload, len);
+  g_free (payload);
+  
   node = rest_xml_node_find (root, "rsp");
   /* TODO: check for failure */
 
