@@ -13,6 +13,7 @@ G_DEFINE_TYPE (MojitoSourceFlickr, mojito_source_flickr, MOJITO_TYPE_SOURCE)
 struct _MojitoSourceFlickrPrivate {
   MojitoCore *core; /* TODO: move to MojitoSource */
   RestProxy *proxy;
+  char *user_id;
 };
 
 static GList *
@@ -23,6 +24,8 @@ mojito_source_flickr_initialize (MojitoSourceClass *source_class, MojitoCore *co
   /* TODO: replace with configuration file */
   source = g_object_new (MOJITO_TYPE_SOURCE_FLICKR, NULL);
   GET_PRIVATE (source)->core = core;
+  /* TODO: get from configuration file */
+  GET_PRIVATE (source)->user_id = g_strdup ("35468147630@N01");
   
   return g_list_prepend (NULL, source);
 }
@@ -38,13 +41,12 @@ mojito_source_flickr_update (MojitoSource *source)
   g_debug ("Updating Flickr");
   
   if (!rest_proxy_simple_run (priv->proxy, &payload, &len, &error,
-                             "method", "flickr.photos.getContactsPublicPhotos",
-                             /* TODO: this is a temporary key */
-                             "api_key", "cf4e02fc57240a9b07346ad26e291080",
-                              /* TODO: get from configuration file */
-                             "user_id", "35468147630@N01",
-                             "extras", "date_upload,owner_name",
-                             NULL)) {
+                              "method", "flickr.photos.getContactsPublicPhotos",
+                              /* TODO: this is a temporary key */
+                              "api_key", "cf4e02fc57240a9b07346ad26e291080",
+                              "user_id", priv->user_id,
+                              "extras", "date_upload,owner_name",
+                              NULL)) {
     g_printerr ("Cannot fetch Flickr photos: %s", error->message);
     g_error_free (error);
     return;
@@ -80,6 +82,16 @@ mojito_source_flickr_dispose (GObject *object)
 }
 
 static void
+mojito_source_flickr_finalize (GObject *object)
+{
+  MojitoSourceFlickrPrivate *priv = MOJITO_SOURCE_FLICKR (object)->priv;
+  
+  g_free (priv->user_id);
+  
+  G_OBJECT_CLASS (mojito_source_flickr_parent_class)->finalize (object);
+}
+
+static void
 mojito_source_flickr_class_init (MojitoSourceFlickrClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -88,6 +100,7 @@ mojito_source_flickr_class_init (MojitoSourceFlickrClass *klass)
   g_type_class_add_private (klass, sizeof (MojitoSourceFlickrPrivate));
   
   object_class->dispose = mojito_source_flickr_dispose;
+  object_class->finalize = mojito_source_flickr_finalize;
   
   source_class->initialize = mojito_source_flickr_initialize;  
   source_class->update = mojito_source_flickr_update;
