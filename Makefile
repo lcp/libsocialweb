@@ -1,4 +1,4 @@
-PKG = sqlite3 libsoup-2.4 rss-glib-1.0 rest
+PKG = dbus-glib-1 sqlite3 libsoup-2.4 rss-glib-1.0 rest
 CFLAGS = -g -Wall `pkg-config --cflags $(PKG)`
 LDFLAGS =`pkg-config --libs $(PKG)`
 
