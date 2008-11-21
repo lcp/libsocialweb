@@ -79,6 +79,7 @@ flickr_callback (RestProxyCall *call,
     hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
     g_hash_table_insert (hash, "id", id);
     g_hash_table_insert (hash, "title", g_strdup (rest_xml_node_get_attr (node, "title")));
+    /* TODO: decide on a format for standard date metadata */
     //date = atoi (rest_xml_node_get_attr (node, "dateupload"));
     g_hash_table_insert (hash, "url", construct_photo_page_url (node));
 
