@@ -33,6 +33,32 @@ static const char sql_add_item[] = "INSERT INTO "
   "VALUES (:source, :uuid, :date, :link, :title);";
 static const char sql_delete_items[] = "DELETE FROM blogposts WHERE source=:source;";
 
+static GList *
+mojito_source_blog_initialize (MojitoSourceClass *source_class, MojitoCore *core)
+{
+  sqlite3 *db;
+  MojitoSourceBlog *source;
+  
+  db = mojito_core_get_db (core);
+  if (!mojito_create_tables (db, sql_create)) {
+    g_printerr ("Cannot create tables for blog source: %s\n", sqlite3_errmsg (db));
+    return NULL;
+  }
+
+  /* TODO: replace with configuration file */
+  source = g_object_new (MOJITO_TYPE_SOURCE_BLOG, NULL);
+  GET_PRIVATE (source)->core = core;
+  GET_PRIVATE (source)->uri = soup_uri_new ("http://planet.gnome.org/atom.xml");
+  
+  return g_list_prepend (NULL, source);
+}
+
+static void
+mojito_source_blog_start (MojitoSource *source)
+{
+}
+
+#if 0
 static void
 add_item (MojitoCore *core, const char *source_id, const char *item_id, time_t date, const char *link, const char *title)
 {
@@ -72,26 +98,6 @@ remove_items (MojitoCore *core, const char *source_id)
   if (db_generic_exec (statement, TRUE) != SQLITE_OK) {
     g_printerr ("cannot remove items\n");
   }
-}
-
-static GList *
-mojito_source_blog_initialize (MojitoSourceClass *source_class, MojitoCore *core)
-{
-  sqlite3 *db;
-  MojitoSourceBlog *source;
-  
-  db = mojito_core_get_db (core);
-  if (!mojito_create_tables (db, sql_create)) {
-    g_printerr ("Cannot create tables for blog source: %s\n", sqlite3_errmsg (db));
-    return NULL;
-  }
-
-  /* TODO: replace with configuration file */
-  source = g_object_new (MOJITO_TYPE_SOURCE_BLOG, NULL);
-  GET_PRIVATE (source)->core = core;
-  GET_PRIVATE (source)->uri = soup_uri_new ("http://planet.gnome.org/atom.xml");
-  
-  return g_list_prepend (NULL, source);
 }
 
 static void
@@ -157,6 +163,7 @@ mojito_source_blog_update (MojitoSource *source)
  done:
   g_object_unref (msg);
 }
+#endif
 
 static void
 mojito_source_blog_dispose (GObject *object)
@@ -184,7 +191,7 @@ mojito_source_blog_class_init (MojitoSourceBlogClass *klass)
   object_class->dispose = mojito_source_blog_dispose;
   
   source_class->initialize = mojito_source_blog_initialize;  
-  source_class->update = mojito_source_blog_update;
+  source_class->start = mojito_source_blog_start;
 }
 
 static void

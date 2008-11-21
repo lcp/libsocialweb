@@ -1,2 +1,4 @@
 mojito
 *~
+marshals.[ch]
+#mojito-*-ginterface.[ch]

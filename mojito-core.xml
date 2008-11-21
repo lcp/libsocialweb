@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE node SYSTEM "dbus.dtd">
+
+<node name="/Core_Iface">
+  <interface name="com.intel.Mojito">
+    <method name="getSources">
+      <arg name="sources" type="as" direction="out"/>
+    </method>
+    <method name="openView">
+      <arg name="sources" type="as" direction="in"/>
+      <arg name="view" type="o" direction="out"/>
+    </method>
+    <!--
+        <method name="getSourceDateRange">
+        <arg name="source" type="s" direction="in"/>
+        <arg name="startdate" type="i" direction="out"/>
+        <arg name="enddate" type="i" direction="out"/>
+        </method>
+        <method name="getSourceRange">
+        <arg name="source" type="s" direction="in"/>
+        <arg name="max_count" type="i" direction="out"/>
+        </method>
+    -->
+  </interface>
+</node>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<node name="/View_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">>
+  <interface name="com.intel.Mojito.View">
+    <method name="start"/>
+    
+    <signal name="ItemAdded">
+      <arg name="item" type="s"/>
+      <arg name="data" type="a{ss}"/>
+    </signal>
+  </interface>
+</node>
