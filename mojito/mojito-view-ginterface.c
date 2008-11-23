@@ -1,6 +1,6 @@
 #include "mojito-view-ginterface.h"
 
-#include "marshals.h"
+#include "mojito-marshals.h"
 
 static const DBusGObjectInfo _mojito_view_iface_object_info;
 

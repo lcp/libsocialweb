@@ -1,5 +1,5 @@
 #include "mojito-source.h"
-#include "marshals.h"
+#include "mojito-marshals.h"
 
 /* TODO: make this an interface? */
 

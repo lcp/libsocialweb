@@ -168,21 +168,16 @@ mojito_core_class_init (MojitoCoreClass *klass)
 static void
 populate_sources (MojitoCore *core)
 {
-  struct {
-    char *name;
-    GType type;
-  } sources[] = {
-    {"blog", MOJITO_TYPE_SOURCE_BLOG},
-    {"flickr", MOJITO_TYPE_SOURCE_FLICKR}
-  };
+  /* FIXME: Get the sources from directory */
   MojitoCorePrivate *priv = core->priv;
   int i;
-  
+  /*
   for (i = 0; i < G_N_ELEMENTS (sources); i++) {
     g_hash_table_insert (priv->source_names,
                          g_strdup (sources[i].name),
                          GINT_TO_POINTER (sources[i].type));
   }
+  */
 }
 
 static void
