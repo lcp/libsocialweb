@@ -6,4 +6,4 @@ libmojito_source_dummy_la_CFLAGS = -I$(top_srcdir)/mojito \
 				   $(GLIB_CFLAGS) \
 				   $(SOUP_CFLAGS)
 libmojito_source_dummy_la_LIBADD = $(top_builddir)/mojito/libmojito.la $(GLIB_LIBS)
-libmojito_source_dummy_la_LDFLAGS = -module
+libmojito_source_dummy_la_LDFLAGS = -module -avoid-version
