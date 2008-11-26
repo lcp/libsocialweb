@@ -61,10 +61,3 @@ mojito_source_dummy_init (MojitoSourceDummy *self)
 {
 }
 
-MojitoSourceDummy*
-mojito_source_dummy_new (void)
-{
-  return g_object_new (MOJITO_TYPE_SOURCE_DUMMY, NULL);
-}
-
-

@@ -34,8 +34,6 @@ typedef struct {
 
 GType mojito_source_dummy_get_type (void);
 
-MojitoSourceDummy *mojito_source_dummy_new (void);
-
 G_END_DECLS
 
 #endif /* _MOJITO_SOURCE_DUMMY */
