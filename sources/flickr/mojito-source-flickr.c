@@ -3,7 +3,6 @@
 #include "mojito-photos.h"
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
-#include "generic.h"
 
 G_DEFINE_TYPE (MojitoSourceFlickr, mojito_source_flickr, MOJITO_TYPE_SOURCE)
 
@@ -11,27 +10,12 @@ G_DEFINE_TYPE (MojitoSourceFlickr, mojito_source_flickr, MOJITO_TYPE_SOURCE)
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SOURCE_FLICKR, MojitoSourceFlickrPrivate))
 
 struct _MojitoSourceFlickrPrivate {
-  MojitoCore *core; /* TODO: move to MojitoSource */
   guint timeout_id;
   RestProxy *proxy;
   char *user_id;
   /* Hash of UUID -> data hash */
   GHashTable *cache;
 };
-
-static GList *
-mojito_source_flickr_initialize (MojitoSourceClass *source_class, MojitoCore *core)
-{
-  MojitoSourceFlickr *source;
-  
-  mojito_photos_initialize (core);
-    
-  /* TODO: replace with configuration file */
-  source = g_object_new (MOJITO_TYPE_SOURCE_FLICKR, NULL);
-  GET_PRIVATE (source)->core = core;
-  
-  return g_list_prepend (NULL, source);
-}
 
 static char *
 construct_photo_page_url (RestXmlNode *node)
@@ -144,8 +128,6 @@ mojito_source_flickr_dispose (GObject *object)
 {
   MojitoSourceFlickrPrivate *priv = MOJITO_SOURCE_FLICKR (object)->priv;
   
-  /* ->core is a weak reference so we don't unref it here */
-  
   if (priv->proxy) {
     g_object_unref (priv->proxy);
     priv->proxy = NULL;
@@ -175,7 +157,6 @@ mojito_source_flickr_class_init (MojitoSourceFlickrClass *klass)
   object_class->dispose = mojito_source_flickr_dispose;
   object_class->finalize = mojito_source_flickr_finalize;
   
-  source_class->initialize = mojito_source_flickr_initialize;  
   source_class->start = mojito_source_flickr_start;
 }
 
@@ -189,12 +170,4 @@ mojito_source_flickr_init (MojitoSourceFlickr *self)
   self->priv->user_id = g_strdup ("35468147630@N01");
   self->priv->cache = g_hash_table_new_full (g_str_hash, g_str_equal,
                                              g_free, (GDestroyNotify)g_hash_table_unref);
-}
-
-MojitoSource *
-mojito_source_flickr_new (MojitoCore *core)
-{
-  MojitoSourceFlickr *source = g_object_new (MOJITO_TYPE_SOURCE_FLICKR, NULL);
-  GET_PRIVATE (source)->core = core;
-  return MOJITO_SOURCE (source);
 }
