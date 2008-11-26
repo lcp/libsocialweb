@@ -36,8 +36,6 @@ typedef struct {
 
 GType mojito_source_flickr_get_type (void);
 
-MojitoSource * mojito_source_flickr_new (MojitoCore *core);
-
 G_END_DECLS
 
 #endif /* _MOJITO_SOURCE_FLICKR */
