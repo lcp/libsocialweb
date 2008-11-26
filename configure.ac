@@ -36,4 +36,5 @@ AC_OUTPUT([
         src/Makefile
         sources/Makefile
         sources/dummy/Makefile
+        sources/flickr/Makefile
 ])
