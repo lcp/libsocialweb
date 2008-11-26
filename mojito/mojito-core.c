@@ -6,10 +6,11 @@
 
 #include "mojito-core-ginterface.h"
 
-
 static void core_iface_init (gpointer g_iface, gpointer iface_data);
+
 G_DEFINE_TYPE_WITH_CODE (MojitoCore, mojito_core, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_CORE_IFACE, core_iface_init));
+                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_CORE_IFACE, 
+                                                core_iface_init));
 
 #define GET_PRIVATE(o)                                                  \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_CORE, MojitoCorePrivate))
@@ -24,6 +25,9 @@ struct _MojitoCorePrivate {
   sqlite3 *db;
   SoupSession *session;
 };
+
+typedef const gchar *(*MojitoModuleGetNameFunc)(void);
+typedef const GType (*MojitoModuleGetTypeFunc)(void);
 
 static void
 get_sources (MojitoCoreIface *self, DBusGMethodInvocation *context)
@@ -166,14 +170,90 @@ populate_sources (MojitoCore *core)
 {
   /* FIXME: Get the sources from directory */
   MojitoCorePrivate *priv = core->priv;
-  int i;
-  /*
-  for (i = 0; i < G_N_ELEMENTS (sources); i++) {
-    g_hash_table_insert (priv->source_names,
-                         g_strdup (sources[i].name),
-                         GINT_TO_POINTER (sources[i].type));
+  GFile *sources_dir_file;
+  GFileEnumerator *enumerator;
+  GError *error = NULL;
+  GFileInfo *fi;
+  gchar *module_path = NULL;
+  GModule *source_module;
+  const gchar *source_name;
+  GType source_type;
+  gpointer sym;
+  MojitoSource *source;
+
+  sources_dir_file = g_file_new_for_path (MOJITO_SOURCES_MODULES_DIR);
+
+  enumerator = g_file_enumerate_children (sources_dir_file, 
+                                          G_FILE_ATTRIBUTE_STANDARD_NAME,
+                                          G_FILE_QUERY_INFO_NONE,
+                                          NULL,
+                                          &error);
+
+  if (!enumerator)
+  {
+    g_critical (G_STRLOC ": error whilst enumerating directory children: %s",
+                error->message);
+    g_clear_error (&error);
+    g_object_unref (sources_dir_file);
+    return;
   }
-  */
+  
+  fi = g_file_enumerator_next_file (enumerator, NULL, &error);
+
+  while (fi)
+  {
+    if (!(g_str_has_suffix (g_file_info_get_name (fi), ".so")))
+    {
+      fi = g_file_enumerator_next_file (enumerator, NULL, &error);
+      continue;
+    }
+
+    module_path = g_build_filename (MOJITO_SOURCES_MODULES_DIR,
+                                    g_file_info_get_name (fi),
+                                    NULL);
+    source_module = g_module_open (module_path, 
+                                   G_MODULE_BIND_LOCAL | G_MODULE_BIND_LAZY);
+    g_module_make_resident (source_module);
+
+    source_name = NULL;
+    if (!g_module_symbol (source_module, "mojito_module_get_name", &sym))
+    {
+      g_critical (G_STRLOC ": error getting symbol: %s",
+                  g_module_error());
+    } else {
+      source_name = (*(MojitoModuleGetNameFunc)sym)();
+    }
+
+    source_type = 0;
+    if (!g_module_symbol (source_module, "mojito_module_get_type", &sym))
+    {
+      g_critical (G_STRLOC ": error getting symbol: %s",
+                  g_module_error());
+    } else {
+      source_type =  (*(MojitoModuleGetTypeFunc)sym)();
+    }
+
+    if (source_name && source_type)
+    {
+      source = g_object_new (source_type,
+                             "core", core,
+                             NULL);
+      g_hash_table_insert (priv->sources, (gchar *)source_name, source);
+      g_debug (G_STRLOC ": Imported module: %s", source_name);
+    }
+
+    fi = g_file_enumerator_next_file (enumerator, NULL, &error);
+  }
+
+  if (error)
+  {
+    g_critical (G_STRLOC ": error whilst enumerating directory children: %s",
+                error->message);
+    g_clear_error (&error);
+  }
+
+  g_object_unref (sources_dir_file);
+  g_object_unref (enumerator);
 }
 
 static void
@@ -187,7 +267,7 @@ mojito_core_init (MojitoCore *self)
   
   /* TODO: check free policy */
   priv->source_names = g_hash_table_new (g_str_hash, g_str_equal);
-  priv->sources = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+  priv->sources = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
 
   /* Make async when we use DBus etc */
   priv->session = soup_session_sync_new ();

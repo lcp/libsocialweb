@@ -18,7 +18,8 @@ TELEPATHY_GLIB ?= ../telepathy-glib/
 
 BUILT_SOURCES = mojito-marshals.c mojito-marshals.h
 
-libmojito_la_CFLAGS = $(DBUS_GLIB_CFLAGS) $(SQLITE_CFLAGS) $(SOUP_CFLAGS)
+libmojito_la_CFLAGS = $(DBUS_GLIB_CFLAGS) $(SQLITE_CFLAGS) $(SOUP_CFLAGS) \
+		     -DMOJITO_SOURCES_MODULES_DIR=\"$(sourcesdir)\"
 libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SQLITE_LIBS) $(SOUP_LIBS)
 libmojito_la_SOURCES = mojito-core.c mojito-core.h \
 		       mojito-view.c mojito-view.h \
