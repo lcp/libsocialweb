@@ -3,10 +3,6 @@
 #include "mojito-core.h"
 #include "mojito-utils.h"
 #include "mojito-view.h"
-#include "generic.h"
-
-#include "mojito-source-blog.h"
-#include "mojito-source-flickr.h"
 
 #include "mojito-core-ginterface.h"
 
