@@ -8,6 +8,7 @@ G_DEFINE_TYPE (MojitoSourceDummy, mojito_source_dummy, MOJITO_TYPE_SOURCE)
 typedef struct _MojitoSourceDummyPrivate MojitoSourceDummyPrivate;
 
 struct _MojitoSourceDummyPrivate {
+  gpointer dummy;
 };
 
 static void
