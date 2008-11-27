@@ -10,9 +10,13 @@ aclocal.m4
 autom4te.cache
 compile
 config.*
+configure
 depcomp
 install-sh
 libtool
 ltmain.sh
 missing
 stamp-h1
+mojito/mojito-marshals.[ch]
+src/mojito.service
+src/mojito-core
