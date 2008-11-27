@@ -99,6 +99,12 @@ invoke_flickr (MojitoSourceFlickr *source)
   return TRUE;
 }
 
+static char *
+mojito_source_flickr_get_name (MojitoSource *source)
+{
+  return "flickr";
+}
+
 static void
 mojito_source_flickr_start (MojitoSource *source)
 {
@@ -155,6 +161,7 @@ mojito_source_flickr_class_init (MojitoSourceFlickrClass *klass)
   object_class->dispose = mojito_source_flickr_dispose;
   object_class->finalize = mojito_source_flickr_finalize;
   
+  source_class->get_name = mojito_source_flickr_get_name;
   source_class->start = mojito_source_flickr_start;
 }
 
