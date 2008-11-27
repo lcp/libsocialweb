@@ -10,5 +10,5 @@ mojito_module_get_name (void)
 const GType
 mojito_module_get_type (void)
 {
-  return mojito_source_flickr_get_type();
+  return MOJITO_TYPE_SOURCE_FLICKR;
 }
