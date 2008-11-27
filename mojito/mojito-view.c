@@ -56,7 +56,9 @@ on_item_added (MojitoSource *source, GHashTable *hash, MojitoView *view)
 {
   g_assert (MOJITO_IS_SOURCE (source));
   g_assert (MOJITO_IS_VIEW (view));
-  g_debug ("got item");
+
+  /* TODO: get name from source */
+  mojito_view_iface_emit_item_added (view, "foo", hash);
 }
 
 void
