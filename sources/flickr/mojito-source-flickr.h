@@ -1,7 +1,6 @@
 #ifndef _MOJITO_SOURCE_FLICKR
 #define _MOJITO_SOURCE_FLICKR
 
-#include "mojito-core.h"
 #include "mojito-source.h"
 
 G_BEGIN_DECLS
