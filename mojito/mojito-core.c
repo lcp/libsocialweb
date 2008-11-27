@@ -235,10 +235,7 @@ populate_sources (MojitoCore *core)
 
     if (source_name && source_type)
     {
-      source = g_object_new (source_type,
-                             "core", core,
-                             NULL);
-      g_hash_table_insert (priv->sources, (gchar *)source_name, source);
+      g_hash_table_insert (priv->source_names, (gchar *)source_name, GINT_TO_POINTER (source_type));
       g_debug (G_STRLOC ": Imported module: %s", source_name);
     }
 
