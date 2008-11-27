@@ -117,6 +117,16 @@ mojito_source_start (MojitoSource *source)
   source_class->start (source);
 }
 
+char *
+mojito_source_get_name (MojitoSource *source)
+{
+  MojitoSourceClass *source_class = MOJITO_SOURCE_GET_CLASS (source);
+
+  g_return_val_if_fail (source_class->get_name, NULL);
+
+  return source_class->get_name (source);
+}
+
 MojitoCore *
 mojito_source_get_core (MojitoSource *source)
 {

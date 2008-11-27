@@ -32,11 +32,15 @@ typedef struct _MojitoSourceClass MojitoSourceClass;
 struct _MojitoSourceClass {
   GObjectClass parent_class;
   void (*start) (MojitoSource *source);
+  char * (*get_name) (MojitoSource *source);
 };
 
 GType mojito_source_get_type (void);
 
+char * mojito_source_get_name (MojitoSource *source);
+
 void mojito_source_start (MojitoSource *source);
+
 MojitoCore *mojito_source_get_core (MojitoSource *source);
 
 G_END_DECLS
