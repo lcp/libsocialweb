@@ -22,7 +22,7 @@ request_name (void)
                                      DBUS_PATH_DBUS,
                                      DBUS_INTERFACE_DBUS);
 
-  if (!org_freedesktop_DBus_request_name (proxy, "com.intel.mojito",
+  if (!org_freedesktop_DBus_request_name (proxy, "com.intel.Mojito",
                                           DBUS_NAME_FLAG_DO_NOT_QUEUE, &request_status,
                                           &error)) {
     g_printerr ("Failed to request name: %s\n", error->message);
