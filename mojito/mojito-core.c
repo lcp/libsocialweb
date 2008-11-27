@@ -260,7 +260,8 @@ static void
 mojito_core_init (MojitoCore *self)
 {
   MojitoCorePrivate *priv = GET_PRIVATE (self);
-  
+  char *db_path;
+
   self->priv = priv;
 
   g_assert (sqlite3_threadsafe ());
@@ -274,10 +275,13 @@ mojito_core_init (MojitoCore *self)
 
   /* TODO: move here onwards into a separate function so we can return errors */
   
-  if (sqlite3_open ("test.db", &priv->db) != SQLITE_OK) {
+  db_path = g_build_filename (g_get_user_cache_dir (), "mojito.db", NULL);
+  if (sqlite3_open (db_path, &priv->db) != SQLITE_OK) {
+    g_free (db_path);
     g_error (sqlite3_errmsg (priv->db));
     return;
   }
+  g_free (db_path);
   
   populate_sources (self);
 }
