@@ -1,1 +1,1 @@
-SUBDIRS = mojito src sources
+SUBDIRS = mojito src sources examples
