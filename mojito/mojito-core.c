@@ -86,7 +86,9 @@ open_view (MojitoCoreIface *self, const char **sources, DBusGMethodInvocation *c
         (g_hash_table_lookup (priv->source_names, name));
       
       if (source_type) {
-        source = g_object_new (source_type, NULL);
+        source = g_object_new (source_type,
+                               "core", core,
+                               NULL);
         
         /* TODO: make this a weak reference so the entry can be removed when the
            last view closes */
