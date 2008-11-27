@@ -1,4 +1,4 @@
-#include "module.h"
+#include "mojito-module.h"
 #include "mojito-source-flickr.h"
 
 const gchar *
