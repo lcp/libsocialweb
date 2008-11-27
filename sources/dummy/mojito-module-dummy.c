@@ -1,4 +1,4 @@
-#include "mojito-module-dummy.h"
+#include "mojito-module.h"
 #include "mojito-source-dummy.h"
 
 const gchar *
