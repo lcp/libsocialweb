@@ -96,14 +96,10 @@ mojito_source_class_init (MojitoSourceClass *klass)
   signals[ITEM_ADDED] =
     g_signal_new ("item-added",
                   G_OBJECT_CLASS_TYPE (klass),
-                  G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
-                  0,
-                  NULL,
-                  NULL,
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL,
                   g_cclosure_marshal_VOID__BOXED,
-                  G_TYPE_NONE,
-                  1,
-                  G_TYPE_HASH_TABLE);
+                  G_TYPE_NONE, 1, G_TYPE_HASH_TABLE);
 }
 
 static void
