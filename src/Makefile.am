@@ -10,3 +10,5 @@ mojito_core_LDADD = ../mojito/libmojito.la $(DBUS_GLIB_LIBS) $(SOUP_LIBS)
 servicedir = $(datadir)/dbus-1/services/
 service_in_files = mojito.service.in
 service_DATA = mojito.service
+
+CLEANFILES = mojito.service
