@@ -15,8 +15,8 @@ path = mojito.openView(mojito.getSources())
 view = bus.get_object("com.intel.Mojito", path)
 view = dbus.Interface(view, "com.intel.Mojito.View")
 
-def added(item, data):
-    print item, data
+def added(source, uuid, date, item):
+    print source, uuid, date, item
 
 view.connect_to_signal("ItemAdded", added)
 view.start()
