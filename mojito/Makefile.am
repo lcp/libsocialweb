@@ -12,7 +12,7 @@ lib_LTLIBRARIES = libmojito.la
 %.h: %.list
 	glib-genmarshal --header --prefix=mojito_marshal $^ > $@
 
-TELEPATHY_GLIB ?= ../telepathy-glib/
+TELEPATHY_GLIB ?= $(top_srcdir)/../telepathy-glib/
 %-ginterface.c: %.xml
 	python $(TELEPATHY_GLIB)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $^ Mojito_
 
