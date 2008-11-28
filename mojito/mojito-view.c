@@ -52,12 +52,20 @@ mojito_view_new (void)
 }
 
 static void
-on_item_added (MojitoSource *source, GHashTable *hash, MojitoView *view)
+on_item_added (MojitoSource *source, 
+               const gchar  *uuid,
+               gint64        date,
+               GHashTable  *props, 
+               MojitoView  *view)
 {
   g_assert (MOJITO_IS_SOURCE (source));
   g_assert (MOJITO_IS_VIEW (view));
 
-  mojito_view_iface_emit_item_added (view, mojito_source_get_name (source), hash);
+  mojito_view_iface_emit_item_added (view,
+                                     mojito_source_get_name (source),
+                                     uuid,
+                                     date,
+                                     props);
 }
 
 void
