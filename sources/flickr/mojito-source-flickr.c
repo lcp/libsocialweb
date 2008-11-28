@@ -55,23 +55,21 @@ flickr_callback (RestProxyCall *call,
   node = rest_xml_node_find (root, "photos");
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
     GHashTable *hash;
-    char *id;
-    GTimeVal time = {0, 0};
+    const char *id;
+    gint64 date;
 
-    id = g_strdup (rest_xml_node_get_attr (node, "id"));
+    id = rest_xml_node_get_attr (node, "id");
     /* TODO: check that the item doesn't exist in the cache */
     
     hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
-    g_hash_table_insert (hash, "id", id);
     g_hash_table_insert (hash, "url", construct_photo_page_url (node));
     g_hash_table_insert (hash, "title", g_strdup (rest_xml_node_get_attr (node, "title")));
-    time.tv_sec = atoi (rest_xml_node_get_attr (node, "dateupload"));
-    g_hash_table_insert (hash, "date", g_time_val_to_iso8601 (&time));
+    date = atoi (rest_xml_node_get_attr (node, "dateupload"));
     
     /* Cache the data */
     g_hash_table_insert (priv->cache, g_strdup (id), hash);
 
-    g_signal_emit_by_name (source, "item-added", id, (gint64)time.tv_sec, hash);
+    g_signal_emit_by_name (source, "item-added", id, date, hash);
   }
 
   rest_xml_node_free (root);
