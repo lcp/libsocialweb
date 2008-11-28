@@ -1,4 +1,5 @@
 #include "mojito-utils.h"
+#include "mojito-sqlite.h"
 #include <libsoup/soup.h>
 #include <sqlite3.h>
 
@@ -40,7 +41,7 @@ mojito_date_to_iso (const char *s)
   
   return iso;
 }
-/*
+
 gboolean
 mojito_create_tables (sqlite3 *db, const char *sql)
 {
@@ -62,4 +63,3 @@ mojito_create_tables (sqlite3 *db, const char *sql)
 
   return TRUE;
 }
-*/
