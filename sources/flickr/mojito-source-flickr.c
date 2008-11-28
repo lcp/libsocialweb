@@ -71,7 +71,7 @@ flickr_callback (RestProxyCall *call,
     /* Cache the data */
     g_hash_table_insert (priv->cache, g_strdup (id), hash);
 
-    g_signal_emit_by_name (source, "item-added", hash);
+    g_signal_emit_by_name (source, "item-added", id, (gint64)time.tv_sec, hash);
   }
 
   rest_xml_node_free (root);
