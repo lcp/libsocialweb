@@ -98,7 +98,7 @@ mojito_source_class_init (MojitoSourceClass *klass)
                   G_OBJECT_CLASS_TYPE (klass),
                   G_SIGNAL_RUN_LAST,
                   0, NULL, NULL,
-                  g_cclosure_marshal_VOID__BOXED,
+                  mojito_marshal_VOID__STRING_INT64_BOXED,
                   G_TYPE_NONE, 3, 
                   G_TYPE_STRING,
                   G_TYPE_INT64,
