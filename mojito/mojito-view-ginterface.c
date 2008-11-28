@@ -11,6 +11,8 @@ struct _MojitoViewIfaceClass {
 
 enum {
     SIGNAL_VIEW_IFACE_ItemAdded,
+    SIGNAL_VIEW_IFACE_ItemRemoved,
+    SIGNAL_VIEW_IFACE_ItemChanged,
     N_VIEW_IFACE_SIGNALS
 };
 static guint view_iface_signals[N_VIEW_IFACE_SIGNALS] = {0};
@@ -90,24 +92,82 @@ mojito_view_iface_implement_start (MojitoViewIfaceClass *klass, mojito_view_ifac
 /**
  * mojito_view_iface_emit_item_added:
  * @instance: The object implementing this interface
- * @arg_item: const gchar * (FIXME, generate documentation)
- * @arg_data: GHashTable * (FIXME, generate documentation)
+ * @arg_source: const gchar * (FIXME, generate documentation)
+ * @arg_uuid: const gchar * (FIXME, generate documentation)
+ * @arg_date: gint64  (FIXME, generate documentation)
+ * @arg_item: GHashTable * (FIXME, generate documentation)
  *
  * Type-safe wrapper around g_signal_emit to emit the
  * ItemAdded signal on interface com.intel.Mojito.View.
  */
 void
 mojito_view_iface_emit_item_added (gpointer instance,
-    const gchar *arg_item,
-    GHashTable *arg_data)
+    const gchar *arg_source,
+    const gchar *arg_uuid,
+    gint64 arg_date,
+    GHashTable *arg_item)
 {
   g_assert (instance != NULL);
   g_assert (G_TYPE_CHECK_INSTANCE_TYPE (instance, MOJITO_TYPE_VIEW_IFACE));
   g_signal_emit (instance,
       view_iface_signals[SIGNAL_VIEW_IFACE_ItemAdded],
       0,
-      arg_item,
-      arg_data);
+      arg_source,
+      arg_uuid,
+      arg_date,
+      arg_item);
+}
+
+/**
+ * mojito_view_iface_emit_item_removed:
+ * @instance: The object implementing this interface
+ * @arg_source: const gchar * (FIXME, generate documentation)
+ * @arg_uuid: const gchar * (FIXME, generate documentation)
+ *
+ * Type-safe wrapper around g_signal_emit to emit the
+ * ItemRemoved signal on interface com.intel.Mojito.View.
+ */
+void
+mojito_view_iface_emit_item_removed (gpointer instance,
+    const gchar *arg_source,
+    const gchar *arg_uuid)
+{
+  g_assert (instance != NULL);
+  g_assert (G_TYPE_CHECK_INSTANCE_TYPE (instance, MOJITO_TYPE_VIEW_IFACE));
+  g_signal_emit (instance,
+      view_iface_signals[SIGNAL_VIEW_IFACE_ItemRemoved],
+      0,
+      arg_source,
+      arg_uuid);
+}
+
+/**
+ * mojito_view_iface_emit_item_changed:
+ * @instance: The object implementing this interface
+ * @arg_source: const gchar * (FIXME, generate documentation)
+ * @arg_uuid: const gchar * (FIXME, generate documentation)
+ * @arg_date: gint64  (FIXME, generate documentation)
+ * @arg_item: GHashTable * (FIXME, generate documentation)
+ *
+ * Type-safe wrapper around g_signal_emit to emit the
+ * ItemChanged signal on interface com.intel.Mojito.View.
+ */
+void
+mojito_view_iface_emit_item_changed (gpointer instance,
+    const gchar *arg_source,
+    const gchar *arg_uuid,
+    gint64 arg_date,
+    GHashTable *arg_item)
+{
+  g_assert (instance != NULL);
+  g_assert (G_TYPE_CHECK_INSTANCE_TYPE (instance, MOJITO_TYPE_VIEW_IFACE));
+  g_signal_emit (instance,
+      view_iface_signals[SIGNAL_VIEW_IFACE_ItemChanged],
+      0,
+      arg_source,
+      arg_uuid,
+      arg_date,
+      arg_item);
 }
 
 static inline void
@@ -115,8 +175,10 @@ mojito_view_iface_base_init_once (gpointer klass G_GNUC_UNUSED)
 {
   /**
    * MojitoViewIface::item-added:
-   * @arg_item: const gchar * (FIXME, generate documentation)
-   * @arg_data: GHashTable * (FIXME, generate documentation)
+   * @arg_source: const gchar * (FIXME, generate documentation)
+   * @arg_uuid: const gchar * (FIXME, generate documentation)
+   * @arg_date: gint64  (FIXME, generate documentation)
+   * @arg_item: GHashTable * (FIXME, generate documentation)
    *
    * The ItemAdded D-Bus signal is emitted whenever this GObject signal is.
    */
@@ -126,10 +188,54 @@ mojito_view_iface_base_init_once (gpointer klass G_GNUC_UNUSED)
       G_SIGNAL_RUN_LAST|G_SIGNAL_DETAILED,
       0,
       NULL, NULL,
-      mojito_marshal_VOID__STRING_BOXED,
+      mojito_marshal_VOID__STRING_STRING_INT64_BOXED,
+      G_TYPE_NONE,
+      4,
+      G_TYPE_STRING,
+      G_TYPE_STRING,
+      G_TYPE_INT64,
+      DBUS_TYPE_G_STRING_STRING_HASHTABLE);
+
+  /**
+   * MojitoViewIface::item-removed:
+   * @arg_source: const gchar * (FIXME, generate documentation)
+   * @arg_uuid: const gchar * (FIXME, generate documentation)
+   *
+   * The ItemRemoved D-Bus signal is emitted whenever this GObject signal is.
+   */
+  view_iface_signals[SIGNAL_VIEW_IFACE_ItemRemoved] =
+  g_signal_new ("item-removed",
+      G_OBJECT_CLASS_TYPE (klass),
+      G_SIGNAL_RUN_LAST|G_SIGNAL_DETAILED,
+      0,
+      NULL, NULL,
+      mojito_marshal_VOID__STRING_STRING,
       G_TYPE_NONE,
       2,
       G_TYPE_STRING,
+      G_TYPE_STRING);
+
+  /**
+   * MojitoViewIface::item-changed:
+   * @arg_source: const gchar * (FIXME, generate documentation)
+   * @arg_uuid: const gchar * (FIXME, generate documentation)
+   * @arg_date: gint64  (FIXME, generate documentation)
+   * @arg_item: GHashTable * (FIXME, generate documentation)
+   *
+   * The ItemChanged D-Bus signal is emitted whenever this GObject signal is.
+   */
+  view_iface_signals[SIGNAL_VIEW_IFACE_ItemChanged] =
+  g_signal_new ("item-changed",
+      G_OBJECT_CLASS_TYPE (klass),
+      G_SIGNAL_RUN_LAST|G_SIGNAL_DETAILED,
+      0,
+      NULL, NULL,
+      mojito_marshal_VOID__STRING_STRING_INT64_BOXED,
+      G_TYPE_NONE,
+      4,
+      G_TYPE_STRING,
+      G_TYPE_STRING,
+      G_TYPE_INT64,
       DBUS_TYPE_G_STRING_STRING_HASHTABLE);
 
   dbus_g_object_type_install_info (mojito_view_iface_get_type (),
@@ -155,7 +261,7 @@ static const DBusGObjectInfo _mojito_view_iface_object_info = {
   _mojito_view_iface_methods,
   1,
 "com.intel.Mojito.View\0start\0A\0\0\0",
-"com.intel.Mojito.View\0ItemAdded\0\0",
+"com.intel.Mojito.View\0ItemAdded\0com.intel.Mojito.View\0ItemRemoved\0com.intel.Mojito.View\0ItemChanged\0\0",
 "\0\0",
 };
 
