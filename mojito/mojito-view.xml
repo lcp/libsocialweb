@@ -4,8 +4,23 @@
     <method name="start"/>
     
     <signal name="ItemAdded">
-      <arg name="item" type="s"/>
-      <arg name="data" type="a{ss}"/>
+      <arg name="source" type="s"/>
+      <arg name="uuid" type="s"/>
+      <arg name="date" type="x"/>
+      <arg name="item" type="a{ss}"/>
     </signal>
+
+    <signal name="ItemRemoved">
+      <arg name="source" type="s"/>
+      <arg name="uuid" type="s"/>
+    </signal>
+
+    <signal name="ItemChanged">
+      <arg name="source" type="s"/>
+      <arg name="uuid" type="s"/>
+      <arg name="date" type="x"/>
+      <arg name="item" type="a{ss}"/>
+    </signal>
+
   </interface>
 </node>
