@@ -60,7 +60,7 @@ flickr_callback (RestProxyCall *call,
 
     id = g_strdup (rest_xml_node_get_attr (node, "id"));
     /* TODO: check that the item doesn't exist in the cache */
-    /* TODO use mojitoitem */
+    
     hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
     g_hash_table_insert (hash, "id", id);
     g_hash_table_insert (hash, "url", construct_photo_page_url (node));
