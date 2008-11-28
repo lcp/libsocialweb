@@ -1,7 +1,7 @@
 #include <libsoup/soup.h>
 #include "mojito-web.h"
 #include "mojito-utils.h"
-#include "generic.h"
+#include "mojito-sqlite.h"
 
 /* TODO: just store the date as the string? */
 static const char sql_create_cache[] = "CREATE TABLE IF NOT EXISTS webcache ("
