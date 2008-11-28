@@ -21,4 +21,6 @@ void db_begin_transaction (sqlite3 *db);
 void db_commit_transaction (sqlite3 *db);
 void db_rollback_transaction (sqlite3 *db);
 
+gboolean mojito_sqlite_create_tables (sqlite3 *db, const char *sql);
+
 #endif /* __GENERIC_H */

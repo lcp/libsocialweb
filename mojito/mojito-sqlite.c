@@ -213,3 +213,25 @@ db_rollback_transaction (sqlite3 *db)
   /* Return error code so caller can abort on failure */
   g_debug ("%s: TODO", __FUNCTION__);
 }
+
+gboolean
+mojito_sqlite_create_tables (sqlite3 *db, const char *sql)
+{
+  sqlite3_stmt *statement = NULL;
+  const char *command = sql;
+  
+  do {
+    if (sqlite3_prepare_v2 (db, command, -1, &statement, &command)) {
+      g_printerr ("Cannot create tables (prepare): %s\n", sqlite3_errmsg (db));
+      sqlite3_finalize (statement);
+      return FALSE;
+    }
+    
+    if (statement && db_generic_exec (statement, TRUE) != SQLITE_OK) {
+      g_printerr ("Cannot create tables (step): %s\n", sqlite3_errmsg (db));
+      return FALSE;
+    }
+  } while (statement);
+
+  return TRUE;
+}

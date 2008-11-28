@@ -1,6 +1,5 @@
 #include <libsoup/soup.h>
 #include "mojito-web.h"
-#include "mojito-utils.h"
 #include "mojito-sqlite.h"
 
 /* TODO: just store the date as the string? */
@@ -27,7 +26,7 @@ mojito_web_cached_send (MojitoCore *core, SoupMessage *msg)
 
   if (G_UNLIKELY (!created_tables)) {
     /* TODO: not thread safe, use GOnce */
-    if (!mojito_create_tables (db, sql_create_cache))
+    if (!mojito_sqlite_create_tables (db, sql_create_cache))
       return SOUP_STATUS_IO_ERROR;
     created_tables = TRUE;
   }
