@@ -113,11 +113,17 @@ mojito_source_flickr_start (MojitoSource *source)
   if (priv->timeout_id) {
     /* Yes, so emit cached items.  We rely on the views to filter out items they've
        already seen */
-    GList *values = g_hash_table_get_keys (priv->cache);
-    while (values) {
-      g_signal_emit_by_name (source, "item-added", "flickr", values->data);
+#if 0
+    GList *keys = g_hash_table_get_keys (priv->cache);
+    while (keys) {
+      const char *id = keys->data;
+      GHashTable *hash;
+      hash = g_hash_table_lookup (priv->cache, id);
+      /* TODO: this is broken as we don't have date */
+      g_signal_emit_by_name (source, "item-added", id, date, hash);
       values = g_list_delete_link (values, values);
     }
+#endif
   } else {
     /* No.  Do the initial call and schedule future runs */
     invoke_flickr (MOJITO_SOURCE_FLICKR (source));
