@@ -42,6 +42,7 @@ AC_OUTPUT([
         services/Makefile
         services/dummy/Makefile
         services/flickr/Makefile
+        services/lastfm/Makefile
         services/twitter/Makefile
         examples/Makefile
         mojito-client.pc
