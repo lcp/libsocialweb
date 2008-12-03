@@ -11,12 +11,86 @@ G_DEFINE_TYPE (MojitoSourceLastfm, mojito_source_lastfm, MOJITO_TYPE_SOURCE)
 
 struct _MojitoSourceLastfmPrivate {
   RestProxy *proxy;
+  guint timeout_id;
 };
+
+static void
+rest_callback (RestProxyCall *call,
+               GError *error,
+               GObject *weak_object,
+               gpointer userdata)
+{
+  MojitoSourceLastfm *source = MOJITO_SOURCE_LASTFM (weak_object);
+  MojitoSourceLastfmPrivate *priv = source->priv;
+  RestXmlParser *parser;
+  RestXmlNode *root, *node;
+
+  if (error) {
+    g_printerr ("Cannot get Last.fm friends: %s\n", error->message);
+    return;
+  }
+
+  parser = rest_xml_parser_new ();
+  root = rest_xml_parser_parse_from_data (parser,
+                                          rest_proxy_call_get_payload (call),
+                                          rest_proxy_call_get_payload_length (call));
+  g_object_unref (call);
+
+  /* TODO: check for failure in lfm root element */
+  //node = rest_xml_node_find (root, "lfm");
+
+  for (node = rest_xml_node_find (root, "user"); node; node = node->next) {
+    GHashTable *hash;
+
+    hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
+
+    g_debug ("lastfm %s", rest_xml_node_find (node, "realname")->content);
+  }
+
+  rest_xml_node_free (root);
+  g_object_unref (parser);
+}
+
+static gboolean
+invoke (gpointer user_data)
+{
+  MojitoSourceLastfm *source = user_data;
+  RestProxyCall *call;
+
+  call = rest_proxy_new_call (source->priv->proxy);
+  rest_proxy_call_add_params (call,
+                              /* TODO: get proper API key */
+                              "api_key", "aa581f6505fd3ea79073ddcc2215cbc7",
+                              "method", "user.getFriends",
+                              /* TODO: parameterize */
+                              "user", "rossburton",
+                              "recenttracks", "1",
+                              "limit", "10",
+                              NULL);
+  /* TODO: GError */
+  rest_proxy_call_async (call, rest_callback, (GObject*)source, NULL, NULL);
+
+  return TRUE;
+}
 
 static char *
 get_name (MojitoSource *source)
 {
   return "lastfm";
+}
+
+static void
+start (MojitoSource *source)
+{
+  MojitoSourceLastfmPrivate *priv = ((MojitoSourceLastfm*)source)->priv;
+
+  if (priv->timeout_id) {
+    /* TODO */
+  } else {
+    /* No.  Do the initial call and schedule future runs */
+    invoke (MOJITO_SOURCE_LASTFM (source));
+    priv->timeout_id = g_timeout_add_seconds (10*60, invoke, source);
+  }
 }
 
 static void
@@ -50,7 +124,7 @@ mojito_source_lastfm_class_init (MojitoSourceLastfmClass *klass)
   object_class->finalize = mojito_source_lastfm_finalize;
 
   source_class->get_name = get_name;
-  //source_class->start = start;
+  source_class->start = start;
 }
 
 static void
