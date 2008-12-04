@@ -25,6 +25,8 @@ gboolean mojito_set_has (MojitoSet *set, gpointer item);
 
 gboolean mojito_set_is_empty (MojitoSet *set);
 
+void mojito_set_empty (MojitoSet *set);
+
 G_END_DECLS
 
 #endif /* _MOJITO_SET */

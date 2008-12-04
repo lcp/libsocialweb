@@ -91,3 +91,11 @@ mojito_set_is_empty (MojitoSet *set)
 
   return g_hash_table_size (set->hash) == 0;
 }
+
+void
+mojito_set_empty (MojitoSet *set)
+{
+  g_return_if_fail (set);
+
+  g_hash_table_remove_all (set->hash);
+}
