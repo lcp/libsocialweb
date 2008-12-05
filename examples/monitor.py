@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import sys
 import dbus, gobject
 from dbus.mainloop.glib import DBusGMainLoop
 
@@ -11,7 +12,11 @@ bus.start_service_by_name("com.intel.Mojito")
 mojito = bus.get_object("com.intel.Mojito", "/com/intel/Mojito")
 mojito = dbus.Interface(mojito, "com.intel.Mojito")
 
-path = mojito.openView(mojito.getSources())
+sources = sys.argv[1:]
+if not sources:
+    sources = mojito.getSources()
+
+path = mojito.openView(sources)
 view = bus.get_object("com.intel.Mojito", path)
 view = dbus.Interface(view, "com.intel.Mojito.View")
 
