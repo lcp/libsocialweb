@@ -28,7 +28,6 @@ mojito_set_new (GHashFunc hash_func, GEqualFunc equal_func, GDestroyNotify destr
 
   set = g_slice_new0 (MojitoSet);
   set->ref_count = 1;
-  /* TODO: work out types and add free */
   set->hash = g_hash_table_new_full (hash_func, equal_func, destroy_func, NULL);
 
   return set;
