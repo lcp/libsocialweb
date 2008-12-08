@@ -56,14 +56,13 @@ mojito_set_unref (MojitoSet *set)
   }
 }
 
-/* steals the reference */
 void
 mojito_set_add (MojitoSet *set, GObject *item)
 {
   g_return_if_fail (set);
   g_return_if_fail (G_IS_OBJECT (item));
 
-  g_hash_table_insert (set->hash, item, (gpointer)&sentinel);
+  g_hash_table_insert (set->hash, g_object_ref (item), (gpointer)&sentinel);
 }
 
 void
