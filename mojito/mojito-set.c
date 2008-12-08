@@ -126,3 +126,12 @@ mojito_set_union (MojitoSet *set_a, MojitoSet *set_b)
 
   return set;
 }
+
+void
+mojito_set_add_from (MojitoSet *set, MojitoSet *from)
+{
+  g_return_if_fail (set);
+  g_return_if_fail (from);
+
+  g_hash_table_foreach (from->hash, add_to_set, set);
+}
