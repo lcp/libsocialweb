@@ -14,12 +14,14 @@ struct _MojitoItemPrivate {
 static void
 mojito_item_dispose (GObject *object)
 {
+  /* TODO */
   G_OBJECT_CLASS (mojito_item_parent_class)->dispose (object);
 }
 
 static void
 mojito_item_finalize (GObject *object)
 {
+  /* TODO */
   G_OBJECT_CLASS (mojito_item_parent_class)->finalize (object);
 }
 
