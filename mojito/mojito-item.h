@@ -43,7 +43,9 @@ void mojito_item_take (MojitoItem *item, const char *key, char *value);
 
 const char * mojito_item_get (MojitoItem *item, const char *key);
 
-int mojito_item_compare_date (MojitoItem *a, MojitoItem *b);
+int mojito_item_compare_date_older (MojitoItem *a, MojitoItem *b);
+
+int mojito_item_compare_date_newer (MojitoItem *a, MojitoItem *b);
 
 G_END_DECLS
 

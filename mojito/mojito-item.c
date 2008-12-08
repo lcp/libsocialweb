@@ -93,7 +93,7 @@ cache_date (MojitoItem *item)
 }
 
 int
-mojito_item_compare_date (MojitoItem *a, MojitoItem *b)
+mojito_item_compare_date_older (MojitoItem *a, MojitoItem *b)
 {
   g_return_val_if_fail (MOJITO_IS_ITEM (a), 0);
   g_return_val_if_fail (MOJITO_IS_ITEM (b), 0);
@@ -102,4 +102,16 @@ mojito_item_compare_date (MojitoItem *a, MojitoItem *b)
   cache_date (b);
 
   return a->priv->cached_date - b->priv->cached_date;
+}
+
+int
+mojito_item_compare_date_newer (MojitoItem *a, MojitoItem *b)
+{
+  g_return_val_if_fail (MOJITO_IS_ITEM (a), 0);
+  g_return_val_if_fail (MOJITO_IS_ITEM (b), 0);
+
+  cache_date (a);
+  cache_date (b);
+
+  return b->priv->cached_date - a->priv->cached_date;
 }
