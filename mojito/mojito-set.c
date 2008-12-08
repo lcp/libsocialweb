@@ -135,3 +135,17 @@ mojito_set_add_from (MojitoSet *set, MojitoSet *from)
 
   g_hash_table_foreach (from->hash, add_to_set, set);
 }
+
+GList *
+mojito_set_as_list (MojitoSet *set)
+{
+  GList *list;
+
+  g_return_val_if_fail (set, NULL);
+
+  list = g_hash_table_get_keys (set->hash);
+  /* The table owns the keys, so reference them for the caller */
+  g_list_foreach (list, (GFunc)g_object_ref, NULL);
+
+  return list;
+}

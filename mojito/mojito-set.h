@@ -31,6 +31,8 @@ MojitoSet * mojito_set_union (MojitoSet *set_a, MojitoSet *set_b);
 
 void mojito_set_add_from (MojitoSet *set, MojitoSet *from);
 
+GList * mojito_set_as_list (MojitoSet *set);
+
 G_END_DECLS
 
 #endif /* _MOJITO_SET */
