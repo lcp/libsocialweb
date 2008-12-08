@@ -27,6 +27,8 @@ gboolean mojito_set_is_empty (MojitoSet *set);
 
 void mojito_set_empty (MojitoSet *set);
 
+MojitoSet * mojito_set_union (MojitoSet *set_a, MojitoSet *set_b);
+
 G_END_DECLS
 
 #endif /* _MOJITO_SET */

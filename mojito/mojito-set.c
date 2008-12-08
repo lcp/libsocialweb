@@ -62,6 +62,7 @@ mojito_set_add (MojitoSet *set, GObject *item)
   g_return_if_fail (set);
   g_return_if_fail (G_IS_OBJECT (item));
 
+  /* Ensure this is in sync with add_to_set */
   g_hash_table_insert (set->hash, g_object_ref (item), (gpointer)&sentinel);
 }
 
@@ -97,4 +98,28 @@ mojito_set_empty (MojitoSet *set)
   g_return_if_fail (set);
 
   g_hash_table_remove_all (set->hash);
+}
+
+
+static void
+add_to_set (gpointer key, gpointer value, gpointer user_data)
+{
+  GObject *object = key;
+  MojitoSet *set = user_data;
+
+  /* Ensure this is in sync with mojito_set_add */
+  g_hash_table_insert (set->hash, g_object_ref (object), (gpointer)&sentinel);
+}
+
+MojitoSet *
+mojito_set_union (MojitoSet *set_a, MojitoSet *set_b)
+{
+  MojitoSet *set;
+
+  set = mojito_set_new ();
+
+  g_hash_table_foreach (set_a->hash, add_to_set, set);
+  g_hash_table_foreach (set_b->hash, add_to_set, set);
+
+  return set;
 }
