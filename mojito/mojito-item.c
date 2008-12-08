@@ -1,3 +1,4 @@
+#include <mojito/mojito-utils.h>
 #include "mojito-item.h"
 
 G_DEFINE_TYPE (MojitoItem, mojito_item, G_TYPE_OBJECT)
@@ -7,6 +8,7 @@ G_DEFINE_TYPE (MojitoItem, mojito_item, G_TYPE_OBJECT)
 
 struct _MojitoItemPrivate {
   GHashTable *hash;
+  time_t cached_date;
 };
 
 static void
@@ -73,4 +75,31 @@ mojito_item_get (MojitoItem *item, const char *key)
   g_return_val_if_fail (key, NULL);
 
   return g_hash_table_lookup (item->priv->hash, g_intern_string (key));
+}
+
+static void
+cache_date (MojitoItem *item)
+{
+  const char *s;
+
+  if (item->priv->cached_date)
+    return;
+
+  s = g_hash_table_lookup (item->priv->hash, g_intern_string ("date"));
+  if (!s)
+    return;
+
+  item->priv->cached_date = mojito_time_t_from_string (s);
+}
+
+int
+mojito_item_compare_date (MojitoItem *a, MojitoItem *b)
+{
+  g_return_val_if_fail (MOJITO_IS_ITEM (a), 0);
+  g_return_val_if_fail (MOJITO_IS_ITEM (b), 0);
+
+  cache_date (a);
+  cache_date (b);
+
+  return a->priv->cached_date - b->priv->cached_date;
 }
