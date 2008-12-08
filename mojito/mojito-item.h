@@ -2,6 +2,7 @@
 #define _MOJITO_ITEM
 
 #include <glib-object.h>
+#include <mojito/mojito-source.h>
 
 G_BEGIN_DECLS
 
@@ -36,6 +37,10 @@ typedef struct {
 GType mojito_item_get_type (void);
 
 MojitoItem* mojito_item_new (void);
+
+void mojito_item_set_source (MojitoItem *item, MojitoSource *source);
+
+MojitoSource * mojito_item_get_source (MojitoItem *item);
 
 void mojito_item_put (MojitoItem *item, const char *key, const char *value);
 

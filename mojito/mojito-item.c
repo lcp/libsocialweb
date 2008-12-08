@@ -7,6 +7,7 @@ G_DEFINE_TYPE (MojitoItem, mojito_item, G_TYPE_OBJECT)
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_ITEM, MojitoItemPrivate))
 
 struct _MojitoItemPrivate {
+  MojitoSource *source;
   GHashTable *hash;
   time_t cached_date;
 };
@@ -48,6 +49,23 @@ MojitoItem*
 mojito_item_new (void)
 {
   return g_object_new (MOJITO_TYPE_ITEM, NULL);
+}
+
+void
+mojito_item_set_source (MojitoItem *item, MojitoSource *source)
+{
+  g_return_if_fail (MOJITO_IS_ITEM (item));
+  g_return_if_fail (MOJITO_IS_SOURCE (source));
+
+  item->priv->source = g_object_ref (source);
+}
+
+MojitoSource *
+mojito_item_get_source (MojitoItem *item)
+{
+  g_return_val_if_fail (MOJITO_IS_ITEM (item), NULL);
+
+  return item->priv->source;
 }
 
 void
