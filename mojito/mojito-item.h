@@ -47,6 +47,8 @@ int mojito_item_compare_date_older (MojitoItem *a, MojitoItem *b);
 
 int mojito_item_compare_date_newer (MojitoItem *a, MojitoItem *b);
 
+void mojito_item_dump (MojitoItem *item);
+
 G_END_DECLS
 
 #endif /* _MOJITO_ITEM */
