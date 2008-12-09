@@ -148,6 +148,5 @@ mojito_item_dump (MojitoItem *item)
   g_hash_table_iter_init (&iter, item->priv->hash);
   while (g_hash_table_iter_next (&iter, (gpointer)&key, (gpointer)&value)) {
     g_printerr (" %s=%s\n", key, value);
-    /* do something with key and value */
   }
 }
