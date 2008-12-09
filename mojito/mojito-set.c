@@ -9,6 +9,12 @@ struct _MojitoSet {
 
 static const int sentinel = 0xDECAFBAD;
 
+static void
+add (MojitoSet *set, GObject *object)
+{
+  g_hash_table_insert (set->hash, g_object_ref (object), (gpointer)&sentinel);
+}
+
 GType
 mojito_set_get_type (void)
 {
@@ -62,8 +68,7 @@ mojito_set_add (MojitoSet *set, GObject *item)
   g_return_if_fail (set);
   g_return_if_fail (G_IS_OBJECT (item));
 
-  /* Ensure this is in sync with add_to_set */
-  g_hash_table_insert (set->hash, g_object_ref (item), (gpointer)&sentinel);
+  add (set, item);
 }
 
 void
@@ -107,8 +112,7 @@ add_to_set (gpointer key, gpointer value, gpointer user_data)
   GObject *object = key;
   MojitoSet *set = user_data;
 
-  /* Ensure this is in sync with mojito_set_add */
-  g_hash_table_insert (set->hash, g_object_ref (object), (gpointer)&sentinel);
+  add (set, object);
 }
 
 MojitoSet *
@@ -143,8 +147,7 @@ mojito_set_difference (MojitoSet *set_a, MojitoSet *set_b)
   g_hash_table_iter_init (&iter, set_a->hash);
   while (g_hash_table_iter_next (&iter, (gpointer)&object, NULL)) {
     if (!g_hash_table_lookup (set_b->hash, object)) {
-      /* Ensure this is in sync with mojito_set_add */
-      g_hash_table_insert (set_a->hash, g_object_ref (object), (gpointer)&sentinel);
+      add (set_a, object);
     }
   }
 
