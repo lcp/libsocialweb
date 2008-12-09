@@ -196,3 +196,18 @@ mojito_set_from_list (GList *list)
 
   return set;
 }
+
+void
+mojito_set_foreach (MojitoSet *set, GFunc func, gpointer user_data)
+{
+  GHashTableIter iter;
+  gpointer key;
+
+  g_return_if_fail (set);
+  g_return_if_fail (func);
+
+  g_hash_table_iter_init (&iter, set->hash);
+  while (g_hash_table_iter_next (&iter, &key, NULL)) {
+    func (key, user_data);
+  }
+}
