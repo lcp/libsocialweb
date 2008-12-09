@@ -182,6 +182,7 @@ mojito_view_init (MojitoView *self)
 
   self->priv->pending_sources = mojito_set_new ();
   self->priv->pending_items = mojito_item_set_new ();
+  self->priv->current = mojito_item_set_new ();
 }
 
 MojitoView*
