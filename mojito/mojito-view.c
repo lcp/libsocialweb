@@ -67,7 +67,7 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
   source_max = ceil ((float)total_max / g_list_length (priv->sources));
 
   count = 0;
-  new = mojito_set_new ();
+  new = mojito_item_set_new ();
 
   /* We manipulate list in place instead of using a temporary GList* because we
      manipulate the list so need to track the new tip */
@@ -181,7 +181,7 @@ mojito_view_init (MojitoView *self)
   self->priv = GET_PRIVATE (self);
 
   self->priv->pending_sources = mojito_set_new ();
-  self->priv->pending_items = mojito_set_new ();
+  self->priv->pending_items = mojito_item_set_new ();
 }
 
 MojitoView*

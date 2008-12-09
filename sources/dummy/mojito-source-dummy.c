@@ -26,7 +26,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   MojitoSet *set;
   MojitoItem *item;
 
-  set = mojito_set_new ();
+  set = mojito_item_set_new ();
 
   item = mojito_item_new ();
   mojito_item_set_source (item, source);

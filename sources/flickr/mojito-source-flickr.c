@@ -59,7 +59,7 @@ flickr_callback (RestProxyCall *call,
   node = rest_xml_node_find (root, "rsp");
   /* TODO: check for failure */
 
-  set = mojito_set_new ();
+  set = mojito_item_set_new ();
 
   node = rest_xml_node_find (root, "photos");
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
