@@ -68,7 +68,7 @@ open_view (MojitoCoreIface *self, const char **sources, guint count, DBusGMethod
   char *path;
   const char **i;
 
-  view = mojito_view_new ();
+  view = mojito_view_new (count);
   path = make_path ();
   dbus_g_connection_register_g_object (priv->connection, path, (GObject*)view);
 
