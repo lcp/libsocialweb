@@ -3,3 +3,5 @@ Add count argument to OpenView
 Return source names in signals
 
 Return timestamps in signals
+
+Parameterize flickr username somehow
