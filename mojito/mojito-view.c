@@ -14,12 +14,18 @@ G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
 
 struct _MojitoViewPrivate {
   GList *sources;
+  guint count;
   guint timeout_id;
   /* The set of pending sources we're waiting for updates from during an update cycle */
   MojitoSet *pending_sources;
   MojitoSet *pending_items;
   /* The items we've sent to the client */
   MojitoSet *current;
+};
+
+enum {
+  PROP_0,
+  PROP_COUNT,
 };
 
 static int
@@ -66,7 +72,7 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
   MojitoView *view = MOJITO_VIEW (user_data);
   MojitoViewPrivate *priv = view->priv;
   GList *list;
-  int count, source_max, total_max;
+  int count, source_max;
   GHashTable *counts;
   MojitoSet *new;
 
@@ -86,15 +92,14 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
   list = g_list_sort (list, (GCompareFunc)mojito_item_compare_date_newer);
 
   counts = g_hash_table_new (NULL, NULL);
-  total_max = 20;
-  source_max = ceil ((float)total_max / g_list_length (priv->sources));
+  source_max = ceil ((float)priv->count / g_list_length (priv->sources));
 
   count = 0;
   new = mojito_item_set_new ();
 
   /* We manipulate list in place instead of using a temporary GList* because we
      manipulate the list so need to track the new tip */
-  while (list && count <= total_max) {
+  while (list && count <= priv->count) {
     MojitoItem *item;
     MojitoSource *source;
 
@@ -117,7 +122,7 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
   list = g_list_first (list);
 
   /* If we still don't have enough items and there are spare, add them. */
-  while (list && count <= total_max) {
+  while (list && count <= priv->count) {
     GObject *item = list->data;
     mojito_set_add (new, item);
     g_object_unref (item);
@@ -182,6 +187,40 @@ view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 }
 
 static void
+mojito_view_get_property (GObject    *object,
+                            guint       property_id,
+                            GValue     *value,
+                            GParamSpec *pspec)
+{
+  MojitoViewPrivate *priv = MOJITO_VIEW (object)->priv;
+
+  switch (property_id) {
+  case PROP_COUNT:
+    g_value_set_uint (value, priv->count);
+    break;
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+  }
+}
+
+static void
+mojito_view_set_property (GObject      *object,
+                            guint         property_id,
+                            const GValue *value,
+                            GParamSpec   *pspec)
+{
+  MojitoViewPrivate *priv = MOJITO_VIEW (object)->priv;
+
+  switch (property_id) {
+  case PROP_COUNT:
+    priv->count = g_value_get_uint (value);
+    break;
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+  }
+}
+
+static void
 mojito_view_dispose (GObject *object)
 {
   MojitoViewPrivate *priv = MOJITO_VIEW (object)->priv;
@@ -205,10 +244,18 @@ static void
 mojito_view_class_init (MojitoViewClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GParamSpec *pspec;
 
   g_type_class_add_private (klass, sizeof (MojitoViewPrivate));
 
+  object_class->get_property = mojito_view_get_property;
+  object_class->set_property = mojito_view_set_property;
   object_class->dispose = mojito_view_dispose;
+
+  pspec = g_param_spec_uint ("count", "count", "The number of items",
+                             1, G_MAXUINT, 10,
+                             G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+  g_object_class_install_property (object_class, PROP_COUNT, pspec);
 }
 
 static void
@@ -222,9 +269,11 @@ mojito_view_init (MojitoView *self)
 }
 
 MojitoView*
-mojito_view_new (void)
+mojito_view_new (guint count)
 {
-  return g_object_new (MOJITO_TYPE_VIEW, NULL);
+  return g_object_new (MOJITO_TYPE_VIEW,
+                       "count", count,
+                       NULL);
 }
 
 static void

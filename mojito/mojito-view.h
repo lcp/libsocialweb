@@ -36,7 +36,7 @@ typedef struct {
 
 GType mojito_view_get_type (void);
 
-MojitoView* mojito_view_new (void);
+MojitoView* mojito_view_new (guint count);
 
 void mojito_view_add_source (MojitoView *view, MojitoSource *source);
 
