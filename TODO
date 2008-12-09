@@ -1,5 +1,5 @@
-Connect to session dbus, for single instance and change notifications
+Add count argument to OpenView
 
-Install sources as modules and load at runtime
+Return source names in signals
 
-Move database to ~/.cache/
+Return timestamps in signals
