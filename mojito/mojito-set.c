@@ -30,11 +30,17 @@ mojito_set_get_type (void)
 MojitoSet *
 mojito_set_new (void)
 {
+  return mojito_set_new_full (NULL, NULL);
+}
+
+MojitoSet *
+mojito_set_new_full (GHashFunc hash_func, GEqualFunc equal_func)
+{
   MojitoSet *set;
 
   set = g_slice_new0 (MojitoSet);
   set->ref_count = 1;
-  set->hash = g_hash_table_new_full (NULL, NULL, g_object_unref, NULL);
+  set->hash = g_hash_table_new_full (hash_func, equal_func, g_object_unref, NULL);
 
   return set;
 }

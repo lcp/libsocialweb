@@ -13,6 +13,8 @@ GType mojito_set_get_type (void);
 
 MojitoSet *mojito_set_new (void);
 
+MojitoSet * mojito_set_new_full (GHashFunc hash_func, GEqualFunc equal_func);
+
 MojitoSet * mojito_set_ref (MojitoSet *set);
 
 void mojito_set_unref (MojitoSet *set);
