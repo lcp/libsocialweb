@@ -48,9 +48,12 @@ send_added (gpointer data, gpointer user_data)
 {
   MojitoItem *item = data;
   MojitoView *view = user_data;
+  MojitoSource *source;
+
+  source = mojito_item_get_source (item);
 
   mojito_view_iface_emit_item_added (view,
-                                     "TODO source",
+                                     mojito_source_get_name (source),
                                      mojito_item_get (item, "id"),
                                      0,
                                      mojito_item_peek_hash (item));
@@ -61,8 +64,13 @@ send_removed (gpointer data, gpointer user_data)
 {
   MojitoItem *item = data;
   MojitoView *view = user_data;
+  MojitoSource *source;
 
-  mojito_view_iface_emit_item_removed (view, "TODO source", mojito_item_get (item, "id"));
+  source = mojito_item_get_source (item);
+
+  mojito_view_iface_emit_item_removed (view,
+                                       mojito_source_get_name (source),
+                                       mojito_item_get (item, "id"));
 }
 
 
