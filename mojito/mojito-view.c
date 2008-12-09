@@ -4,6 +4,7 @@
 
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
+#include <mojito/mojito-utils.h>
 
 static void view_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
@@ -49,13 +50,16 @@ send_added (gpointer data, gpointer user_data)
   MojitoItem *item = data;
   MojitoView *view = user_data;
   MojitoSource *source;
+  time_t time;
 
   source = mojito_item_get_source (item);
+
+  time = mojito_time_t_from_string (mojito_item_get (item, "date"));
 
   mojito_view_iface_emit_item_added (view,
                                      mojito_source_get_name (source),
                                      mojito_item_get (item, "id"),
-                                     0,
+                                     time,
                                      mojito_item_peek_hash (item));
 }
 
