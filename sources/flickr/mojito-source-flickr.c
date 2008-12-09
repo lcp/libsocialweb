@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "mojito-source-flickr.h"
-#include "mojito-photos.h"
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
