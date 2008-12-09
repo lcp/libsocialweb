@@ -35,6 +35,8 @@ void mojito_set_add_from (MojitoSet *set, MojitoSet *from);
 
 GList * mojito_set_as_list (MojitoSet *set);
 
+MojitoSet * mojito_set_from_list (GList *list);
+
 G_END_DECLS
 
 #endif /* _MOJITO_SET */

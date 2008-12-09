@@ -176,3 +176,17 @@ mojito_set_as_list (MojitoSet *set)
 
   return list;
 }
+
+MojitoSet *
+mojito_set_from_list (GList *list)
+{
+  MojitoSet *set;
+
+  set = mojito_set_new ();
+
+  for (; list; list = list->next) {
+    add (set, list->data);
+  }
+
+  return set;
+}
