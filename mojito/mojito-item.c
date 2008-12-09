@@ -173,3 +173,11 @@ mojito_item_set_new (void)
 {
   return mojito_set_new_full (item_hash, item_equal);
 }
+
+GHashTable *
+mojito_item_peek_hash (MojitoItem *item)
+{
+  g_return_val_if_fail (MOJITO_IS_ITEM (item), NULL);
+
+  return item->priv->hash;
+}

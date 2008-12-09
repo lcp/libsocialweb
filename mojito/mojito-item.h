@@ -55,6 +55,8 @@ int mojito_item_compare_date_newer (MojitoItem *a, MojitoItem *b);
 
 void mojito_item_dump (MojitoItem *item);
 
+GHashTable *mojito_item_peek_hash (MojitoItem *item);
+
 /* Convenience function */
 MojitoSet * mojito_item_set_new (void);
 
