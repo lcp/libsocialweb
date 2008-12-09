@@ -60,7 +60,7 @@ make_path (void)
 }
 
 static void
-open_view (MojitoCoreIface *self, const char **sources, DBusGMethodInvocation *context)
+open_view (MojitoCoreIface *self, const char **sources, guint count, DBusGMethodInvocation *context)
 {
   MojitoCore *core = MOJITO_CORE (self);
   MojitoCorePrivate *priv = core->priv;

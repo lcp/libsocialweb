@@ -86,6 +86,7 @@ mojito_core_iface_implement_get_sources (MojitoCoreIfaceClass *klass, mojito_cor
  * mojito_core_iface_open_view_impl:
  * @self: The object implementing this interface
  * @in_sources: const gchar ** (FIXME, generate documentation)
+ * @in_count: guint  (FIXME, generate documentation)
  * @context: Used to return values or throw an error
  *
  * The signature of an implementation of the D-Bus method
@@ -94,6 +95,7 @@ mojito_core_iface_implement_get_sources (MojitoCoreIfaceClass *klass, mojito_cor
 static void
 mojito_core_iface_open_view (MojitoCoreIface *self,
     const gchar **in_sources,
+    guint in_count,
     DBusGMethodInvocation *context)
 {
   mojito_core_iface_open_view_impl impl = (MOJITO_CORE_IFACE_GET_CLASS (self)->open_view);
@@ -102,6 +104,7 @@ mojito_core_iface_open_view (MojitoCoreIface *self,
     {
       (impl) (self,
         in_sources,
+        in_count,
         context);
     }
   else
@@ -148,14 +151,14 @@ mojito_core_iface_base_init (gpointer klass)
 }
 static const DBusGMethodInfo _mojito_core_iface_methods[] = {
   { (GCallback) mojito_core_iface_get_sources, g_cclosure_marshal_VOID__POINTER, 0 },
-  { (GCallback) mojito_core_iface_open_view, mojito_marshal_VOID__BOXED_POINTER, 48 },
+  { (GCallback) mojito_core_iface_open_view, mojito_marshal_VOID__BOXED_UINT_POINTER, 48 },
 };
 
 static const DBusGObjectInfo _mojito_core_iface_object_info = {
   0,
   _mojito_core_iface_methods,
   2,
-"com.intel.Mojito\0getSources\0A\0sources\0O\0F\0N\0as\0\0com.intel.Mojito\0openView\0A\0sources\0I\0as\0view\0O\0F\0N\0o\0\0\0",
+"com.intel.Mojito\0getSources\0A\0sources\0O\0F\0N\0as\0\0com.intel.Mojito\0openView\0A\0sources\0I\0as\0count\0I\0u\0view\0O\0F\0N\0o\0\0\0",
 "\0\0",
 "\0\0",
 };

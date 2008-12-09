@@ -53,6 +53,7 @@ mojito_core_iface_return_from_get_sources (DBusGMethodInvocation *context,
 
 typedef void (*mojito_core_iface_open_view_impl) (MojitoCoreIface *self,
     const gchar **in_sources,
+    guint in_count,
     DBusGMethodInvocation *context);
 void mojito_core_iface_implement_open_view (MojitoCoreIfaceClass *klass, mojito_core_iface_open_view_impl impl);
 /**

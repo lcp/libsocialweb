@@ -8,6 +8,7 @@
     </method>
     <method name="openView">
       <arg name="sources" type="as" direction="in"/>
+      <arg name="count" type="u" direction="in"/>
       <arg name="view" type="o" direction="out"/>
     </method>
     <!--
