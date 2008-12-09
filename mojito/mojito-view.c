@@ -38,6 +38,29 @@ inc_source_count (GHashTable *hash, MojitoSource *source)
 }
 
 static void
+send_added (gpointer data, gpointer user_data)
+{
+  MojitoItem *item = data;
+  MojitoView *view = user_data;
+
+  mojito_view_iface_emit_item_added (view,
+                                     "TODO source",
+                                     mojito_item_get (item, "id"),
+                                     0,
+                                     mojito_item_peek_hash (item));
+}
+
+static void
+send_removed (gpointer data, gpointer user_data)
+{
+  MojitoItem *item = data;
+  MojitoView *view = user_data;
+
+  mojito_view_iface_emit_item_removed (view, "TODO source", mojito_item_get (item, "id"));
+}
+
+
+static void
 source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
 {
   MojitoView *view = MOJITO_VIEW (user_data);
@@ -108,6 +131,19 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
   }
 
   /* update seen uids and emit signals */
+  MojitoSet *old_items, *new_items;
+
+  old_items = mojito_set_difference (priv->current, new);
+  new_items = mojito_set_difference (new, priv->current);
+
+  mojito_set_foreach (old_items, (GFunc)send_removed, view);
+  mojito_set_foreach (new_items, (GFunc)send_added, view);
+
+  mojito_set_unref (old_items);
+  mojito_set_unref (new_items);
+
+  mojito_set_unref (priv->current);
+  priv->current = new;
 }
 
 static gboolean
