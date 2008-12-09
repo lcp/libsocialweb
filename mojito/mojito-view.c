@@ -42,9 +42,10 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
 {
   MojitoView *view = MOJITO_VIEW (user_data);
   MojitoViewPrivate *priv = view->priv;
-  GList *list, *new_list;
+  GList *list;
   int count, source_max, total_max;
   GHashTable *counts;
+  MojitoSet *new;
 
   mojito_set_remove (priv->pending_sources, (GObject*)source);
 
@@ -66,7 +67,7 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
   source_max = ceil ((float)total_max / g_list_length (priv->sources));
 
   count = 0;
-  new_list = NULL;
+  new = mojito_set_new ();
 
   /* We manipulate list in place instead of using a temporary GList* because we
      manipulate the list so need to track the new tip */
@@ -83,7 +84,10 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
     }
 
     /* New list steals the reference */
-    new_list = g_list_append (new_list, item);
+    mojito_set_add (new, (GObject*)item);
+    g_object_unref (item);
+    list = g_list_delete_link (list, list);
+
     inc_source_count (counts, source);
   }
   /* Rewind back to the beginning */
@@ -91,8 +95,9 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
 
   /* If we still don't have enough items and there are spare, add them. */
   while (list && count <= total_max) {
-    MojitoItem *item = list->data;
-    new_list = g_list_append (new_list, item);
+    GObject *item = list->data;
+    mojito_set_add (new, item);
+    g_object_unref (item);
     list = g_list_delete_link (list, list);
   }
 
