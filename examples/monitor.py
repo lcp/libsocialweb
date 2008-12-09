@@ -16,7 +16,7 @@ sources = sys.argv[1:]
 if not sources:
     sources = mojito.getSources()
 
-path = mojito.openView(sources)
+path = mojito.openView(sources, 10)
 view = bus.get_object("com.intel.Mojito", path)
 view = dbus.Interface(view, "com.intel.Mojito.View")
 
