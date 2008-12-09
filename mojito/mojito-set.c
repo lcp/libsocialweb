@@ -127,6 +127,30 @@ mojito_set_union (MojitoSet *set_a, MojitoSet *set_b)
   return set;
 }
 
+/* new set with elements in a but not in b */
+MojitoSet *
+mojito_set_difference (MojitoSet *set_a, MojitoSet *set_b)
+{
+  MojitoSet *set;
+  GHashTableIter iter;
+  GObject *object;
+
+  g_return_val_if_fail (set_a, NULL);
+  g_return_val_if_fail (set_b, NULL);
+
+  set = mojito_set_new ();
+
+  g_hash_table_iter_init (&iter, set_a->hash);
+  while (g_hash_table_iter_next (&iter, (gpointer)&object, NULL)) {
+    if (!g_hash_table_lookup (set_b->hash, object)) {
+      /* Ensure this is in sync with mojito_set_add */
+      g_hash_table_insert (set_a->hash, g_object_ref (object), (gpointer)&sentinel);
+    }
+  }
+
+  return set;
+}
+
 void
 mojito_set_add_from (MojitoSet *set, MojitoSet *from)
 {

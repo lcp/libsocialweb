@@ -29,6 +29,8 @@ void mojito_set_empty (MojitoSet *set);
 
 MojitoSet * mojito_set_union (MojitoSet *set_a, MojitoSet *set_b);
 
+MojitoSet * mojito_set_difference (MojitoSet *set_a, MojitoSet *set_b);
+
 void mojito_set_add_from (MojitoSet *set, MojitoSet *from);
 
 GList * mojito_set_as_list (MojitoSet *set);
