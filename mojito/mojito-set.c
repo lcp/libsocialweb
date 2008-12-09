@@ -153,7 +153,7 @@ mojito_set_difference (MojitoSet *set_a, MojitoSet *set_b)
   g_hash_table_iter_init (&iter, set_a->hash);
   while (g_hash_table_iter_next (&iter, (gpointer)&object, NULL)) {
     if (!g_hash_table_lookup (set_b->hash, object)) {
-      add (set_a, object);
+      add (set, object);
     }
   }
 
