@@ -142,7 +142,7 @@ mojito_item_dump (MojitoItem *item)
   GHashTableIter iter;
   const char *key, *value;
 
-  g_return_if_fail (item);
+  g_return_if_fail (MOJITO_IS_ITEM (item));
 
   g_printerr ("MojitoItem %p\n", item);
   g_hash_table_iter_init (&iter, item->priv->hash);
