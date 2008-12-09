@@ -3,6 +3,7 @@
 
 #include <glib-object.h>
 #include <mojito/mojito-source.h>
+#include <mojito/mojito-set.h>
 
 G_BEGIN_DECLS
 
@@ -53,6 +54,9 @@ int mojito_item_compare_date_older (MojitoItem *a, MojitoItem *b);
 int mojito_item_compare_date_newer (MojitoItem *a, MojitoItem *b);
 
 void mojito_item_dump (MojitoItem *item);
+
+/* Convenience function */
+MojitoSet * mojito_item_set_new (void);
 
 G_END_DECLS
 

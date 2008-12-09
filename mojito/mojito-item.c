@@ -150,3 +150,26 @@ mojito_item_dump (MojitoItem *item)
     g_printerr (" %s=%s\n", key, value);
   }
 }
+
+static guint
+item_hash (gconstpointer key)
+{
+  const MojitoItem *item = key;
+  return g_str_hash (g_hash_table_lookup (item->priv->hash, g_intern_string ("id")));
+}
+
+gboolean
+item_equal (gconstpointer a, gconstpointer b)
+{
+  const MojitoItem *item_a = a;
+  const MojitoItem *item_b = b;
+
+  return g_str_equal (g_hash_table_lookup (item_a->priv->hash, g_intern_string ("id")),
+                      g_hash_table_lookup (item_b->priv->hash, g_intern_string ("id")));
+}
+
+MojitoSet *
+mojito_item_set_new (void)
+{
+  return mojito_set_new_full (item_hash, item_equal);
+}
