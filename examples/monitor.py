@@ -22,8 +22,12 @@ view = dbus.Interface(view, "com.intel.Mojito.View")
 
 def added(source, uuid, date, item):
     print source, uuid, date, item
-
 view.connect_to_signal("ItemAdded", added)
+
+def removed(source, uuid):
+    print source, uuid
+view.connect_to_signal("ItemRemoved", removed)
+
 view.start()
 
 loop = gobject.MainLoop()
