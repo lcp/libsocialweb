@@ -2,7 +2,7 @@
 <node name="/View_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">>
   <interface name="com.intel.Mojito.View">
     <method name="start"/>
-    
+
     <signal name="ItemAdded">
       <arg name="source" type="s"/>
       <arg name="uuid" type="s"/>
