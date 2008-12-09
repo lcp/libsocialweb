@@ -14,16 +14,9 @@ struct _MojitoSourcePrivate {
 };
 
 enum {
-  ITEM_ADDED,
-  LAST_SIGNAL
-};
-
-enum {
   PROP_0,
   PROP_CORE
 };
-
-static guint signals[LAST_SIGNAL];
 
 static void
 mojito_source_set_property (GObject      *object,
@@ -91,33 +84,11 @@ mojito_source_class_init (MojitoSourceClass *klass)
                                MOJITO_TYPE_CORE,
                                G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
   g_object_class_install_property (object_class, PROP_CORE, pspec);
-
-  /* use DBUS_TYPE_G_STRING_STRING_HASHTABLE? */
-  signals[ITEM_ADDED] =
-    g_signal_new ("item-added",
-                  G_OBJECT_CLASS_TYPE (klass),
-                  G_SIGNAL_RUN_LAST,
-                  0, NULL, NULL,
-                  mojito_marshal_VOID__STRING_INT64_BOXED,
-                  G_TYPE_NONE, 3, 
-                  G_TYPE_STRING,
-                  G_TYPE_INT64,
-                  G_TYPE_HASH_TABLE);
 }
 
 static void
 mojito_source_init (MojitoSource *self)
 {
-}
-
-void
-mojito_source_start (MojitoSource *source)
-{
-  MojitoSourceClass *source_class = MOJITO_SOURCE_GET_CLASS (source);
-
-  g_return_if_fail (source_class->start);
-
-  source_class->start (source);
 }
 
 char *
@@ -134,4 +105,14 @@ MojitoCore *
 mojito_source_get_core (MojitoSource *source)
 {
   return GET_PRIVATE(source)->core;
+}
+
+void
+mojito_source_update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
+{
+  MojitoSourceClass *source_class = MOJITO_SOURCE_GET_CLASS (source);
+
+  g_return_if_fail (source_class->update);
+
+  source_class->update (source, callback, user_data);
 }

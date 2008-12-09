@@ -4,6 +4,7 @@
 
 #include <glib-object.h>
 #include "mojito-core.h"
+#include "mojito-set.h"
 
 G_BEGIN_DECLS
 
@@ -28,20 +29,25 @@ typedef struct {
   GObject parent;
 } MojitoSource;
 
+typedef void (*MojitoSourceDataFunc) (MojitoSource *source, MojitoSet *set, gpointer user_data);
+
 typedef struct _MojitoSourceClass MojitoSourceClass;
 struct _MojitoSourceClass {
   GObjectClass parent_class;
-  void (*start) (MojitoSource *source);
   char * (*get_name) (MojitoSource *source);
+  void (*update) (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data);
 };
 
 GType mojito_source_get_type (void);
 
+MojitoCore *mojito_source_get_core (MojitoSource *source);
+
 char * mojito_source_get_name (MojitoSource *source);
 
-void mojito_source_start (MojitoSource *source);
+/* Please update yourself */
+void mojito_source_update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data);
 
-MojitoCore *mojito_source_get_core (MojitoSource *source);
+MojitoSet * mojito_source_get_items (MojitoSource *source);
 
 G_END_DECLS
 

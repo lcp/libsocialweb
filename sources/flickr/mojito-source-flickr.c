@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include "mojito-source-flickr.h"
 #include "mojito-photos.h"
+#include <mojito/mojito-item.h>
+#include <mojito/mojito-set.h>
+#include <mojito/mojito-utils.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 
@@ -10,33 +13,37 @@ G_DEFINE_TYPE (MojitoSourceFlickr, mojito_source_flickr, MOJITO_TYPE_SOURCE)
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SOURCE_FLICKR, MojitoSourceFlickrPrivate))
 
 struct _MojitoSourceFlickrPrivate {
-  guint timeout_id;
   RestProxy *proxy;
   char *user_id;
-  /* Hash of UUID -> data hash */
-  GHashTable *cache;
 };
 
 static char *
 construct_photo_page_url (RestXmlNode *node)
 {
   g_assert (node != NULL);
-  
+
   return g_strdup_printf ("http://www.flickr.com/photos/%s/%s/",
                           rest_xml_node_get_attr (node, "owner"),
                           rest_xml_node_get_attr (node, "id"));
 }
 
+typedef struct {
+  MojitoSourceDataFunc callback;
+  gpointer user_data;
+}UpdateData;
+
 static void
 flickr_callback (RestProxyCall *call,
                  GError *error,
                  GObject *weak_object,
-                 gpointer userdata)
+                 gpointer user_data)
 {
   MojitoSourceFlickr *source = MOJITO_SOURCE_FLICKR (weak_object);
   MojitoSourceFlickrPrivate *priv = source->priv;
+  UpdateData *data = user_data;
   RestXmlParser *parser;
   RestXmlNode *root, *node;
+  MojitoSet *set;
 
   if (error) {
     g_printerr ("Cannot get Flickr photos: %s", error->message);
@@ -48,87 +55,68 @@ flickr_callback (RestProxyCall *call,
                                           rest_proxy_call_get_payload (call),
                                           rest_proxy_call_get_payload_length (call));
   g_object_unref (call);
-  
+
   node = rest_xml_node_find (root, "rsp");
   /* TODO: check for failure */
 
+  set = mojito_set_new ();
+
   node = rest_xml_node_find (root, "photos");
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
-    GHashTable *hash;
-    const char *id;
+    MojitoItem *item;
     gint64 date;
 
-    id = rest_xml_node_get_attr (node, "id");
-    /* TODO: check that the item doesn't exist in the cache */
-    
-    hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
-    g_hash_table_insert (hash, "url", construct_photo_page_url (node));
-    g_hash_table_insert (hash, "title", g_strdup (rest_xml_node_get_attr (node, "title")));
-    date = atoi (rest_xml_node_get_attr (node, "dateupload"));
-    
-    /* Cache the data */
-    g_hash_table_insert (priv->cache, g_strdup (id), hash);
+    item = mojito_item_new ();
+    mojito_item_set_source (item, (MojitoSource*)source);
 
-    g_signal_emit_by_name (source, "item-added", id, date, hash);
+    mojito_item_put (item, "id", rest_xml_node_get_attr (node, "id"));
+    mojito_item_put (item, "title", rest_xml_node_get_attr (node, "title"));
+    mojito_item_take (item, "url", construct_photo_page_url (node));
+
+    date = atoi (rest_xml_node_get_attr (node, "dateupload"));
+    mojito_item_take (item, "date", mojito_time_t_to_string (date));
+
+    mojito_set_add (set, G_OBJECT (item));
+    g_object_unref (item);
   }
 
   rest_xml_node_free (root);
   g_object_unref (parser);
+
+  data->callback ((MojitoSource*)source, set, data->user_data);
+
+  g_slice_free (UpdateData, data);
 }
 
-static gboolean
-invoke_flickr (MojitoSourceFlickr *source)
+static void
+update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
 {
+  MojitoSourceFlickr *flickr = (MojitoSourceFlickr*)source;
+  UpdateData *data;
   RestProxyCall *call;
-  
+
   g_debug ("Updating Flickr");
-  
-  call = rest_proxy_new_call (source->priv->proxy);
+
+  data = g_slice_new (UpdateData);
+  data->callback = callback;
+  data->user_data = user_data;
+
+  call = rest_proxy_new_call (flickr->priv->proxy);
   rest_proxy_call_add_params (call,
                               "method", "flickr.photos.getContactsPublicPhotos",
                               /* TODO: this is a temporary key */
                               "api_key", "cf4e02fc57240a9b07346ad26e291080",
-                              "user_id", source->priv->user_id,
+                              "user_id", flickr->priv->user_id,
                               "extras", "date_upload",
                               NULL);
   /* TODO: GError */
-  rest_proxy_call_async (call, flickr_callback, (GObject*)source, NULL, NULL);
-
-  return TRUE;
+  rest_proxy_call_async (call, flickr_callback, (GObject*)source, data, NULL);
 }
 
 static char *
 mojito_source_flickr_get_name (MojitoSource *source)
 {
   return "flickr";
-}
-
-static void
-mojito_source_flickr_start (MojitoSource *source)
-{
-  MojitoSourceFlickr *flickr = MOJITO_SOURCE_FLICKR (source);
-  MojitoSourceFlickrPrivate *priv = flickr->priv;
-
-  /* Are we already running? */
-  if (priv->timeout_id) {
-    /* Yes, so emit cached items.  We rely on the views to filter out items they've
-       already seen */
-#if 0
-    GList *keys = g_hash_table_get_keys (priv->cache);
-    while (keys) {
-      const char *id = keys->data;
-      GHashTable *hash;
-      hash = g_hash_table_lookup (priv->cache, id);
-      /* TODO: this is broken as we don't have date */
-      g_signal_emit_by_name (source, "item-added", id, date, hash);
-      values = g_list_delete_link (values, values);
-    }
-#endif
-  } else {
-    /* No.  Do the initial call and schedule future runs */
-    invoke_flickr (MOJITO_SOURCE_FLICKR (source));
-    priv->timeout_id = g_timeout_add_seconds (10*60, (GSourceFunc)invoke_flickr, source);
-  }
 }
 
 static void
@@ -166,17 +154,15 @@ mojito_source_flickr_class_init (MojitoSourceFlickrClass *klass)
   object_class->finalize = mojito_source_flickr_finalize;
   
   source_class->get_name = mojito_source_flickr_get_name;
-  source_class->start = mojito_source_flickr_start;
+  source_class->update = update;
 }
 
 static void
 mojito_source_flickr_init (MojitoSourceFlickr *self)
 {
   self->priv = GET_PRIVATE (self);
-  
+
   self->priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
   /* TODO: get from configuration file */
   self->priv->user_id = g_strdup ("35468147630@N01");
-  self->priv->cache = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                             g_free, (GDestroyNotify)g_hash_table_unref);
 }
