@@ -3,6 +3,3 @@ Return source names in signals
 Return timestamps in signals
 
 Parameterize flickr username somehow
-
-Change flickr ID to be the url so its unique
-

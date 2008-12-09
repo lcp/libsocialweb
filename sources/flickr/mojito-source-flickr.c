@@ -63,15 +63,18 @@ flickr_callback (RestProxyCall *call,
 
   node = rest_xml_node_find (root, "photos");
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
+    char *url;
     MojitoItem *item;
     gint64 date;
 
     item = mojito_item_new ();
     mojito_item_set_source (item, (MojitoSource*)source);
 
-    mojito_item_put (item, "id", rest_xml_node_get_attr (node, "id"));
+    url = construct_photo_page_url (node);
+    mojito_item_put (item, "id", url);
     mojito_item_put (item, "title", rest_xml_node_get_attr (node, "title"));
-    mojito_item_take (item, "url", construct_photo_page_url (node));
+    mojito_item_put (item, "url", url);
+    g_free (url);
 
     date = atoi (rest_xml_node_get_attr (node, "dateupload"));
     mojito_item_take (item, "date", mojito_time_t_to_string (date));
