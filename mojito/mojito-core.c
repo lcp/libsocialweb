@@ -1,5 +1,4 @@
 #include <sqlite3.h>
-#include <libsoup/soup.h>
 #include "mojito-core.h"
 #include "mojito-utils.h"
 #include "mojito-view.h"
@@ -21,9 +20,8 @@ struct _MojitoCorePrivate {
   GHashTable *source_names;
   /* Hash of source names to instances */
   GHashTable *sources;
-  
+
   sqlite3 *db;
-  SoupSession *session;
 };
 
 typedef const gchar *(*MojitoModuleGetNameFunc)(void);
@@ -126,11 +124,6 @@ mojito_core_dispose (GObject *object)
 {
   MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
 
-  if (priv->session) {
-    g_object_unref (priv->session);
-    priv->session = NULL;
-  }
-  
   /* TODO: free source_names */
   
   G_OBJECT_CLASS (mojito_core_parent_class)->dispose (object);
@@ -269,9 +262,6 @@ mojito_core_init (MojitoCore *self)
   priv->source_names = g_hash_table_new (g_str_hash, g_str_equal);
   priv->sources = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
 
-  /* Make async when we use DBus etc */
-  priv->session = soup_session_sync_new ();
-
   /* TODO: move here onwards into a separate function so we can return errors */
   
   db_path = g_build_filename (g_get_user_cache_dir (), "mojito.db", NULL);
@@ -297,14 +287,6 @@ mojito_core_get_db (MojitoCore *core)
   g_return_val_if_fail (MOJITO_IS_CORE (core), NULL);
 
   return core->priv->db;
-}
-
-SoupSession *
-mojito_core_get_session (MojitoCore *core)
-{
-  g_return_val_if_fail (MOJITO_IS_CORE (core), NULL);
-
-  return core->priv->session;
 }
 
 void

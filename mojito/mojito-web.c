@@ -12,7 +12,7 @@ static const char sql_insert_cache[] = "INSERT INTO webcache(url, etag, modified
 static const char sql_update_cache[] = "UPDATE webcache SET etag=:etag, modified=:modified WHERE url=:url;";
 
 guint
-mojito_web_cached_send (MojitoCore *core, SoupMessage *msg)
+mojito_web_cached_send (MojitoCore *core, SoupSession *session, SoupMessage *msg)
 {
   static gboolean created_tables = FALSE;
   sqlite3 *db = mojito_core_get_db (core);
@@ -33,7 +33,7 @@ mojito_web_cached_send (MojitoCore *core, SoupMessage *msg)
 
   url = soup_uri_to_string (soup_message_get_uri (msg), FALSE);
 
-#ifndef NO_CACHE  
+#ifndef NO_CACHE
   statement = db_generic_prepare_and_bind (db, sql_get_cache, ":url", BIND_TEXT, url, NULL);
   if (db_generic_fetch (db, statement, FALSE, TRUE,
                         0, BIND_TEXT, &etag,
@@ -50,7 +50,7 @@ mojito_web_cached_send (MojitoCore *core, SoupMessage *msg)
   }
 #endif
 
-  res = soup_session_send_message (mojito_core_get_session (core), msg);
+  res = soup_session_send_message (session, msg);
 #ifndef NO_CACHE
   if (res == SOUP_STATUS_OK) {
     /* update the cache */
