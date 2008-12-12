@@ -37,5 +37,6 @@ AC_OUTPUT([
         sources/Makefile
         sources/dummy/Makefile
         sources/flickr/Makefile
+        sources/twitter/Makefile
         examples/Makefile
 ])

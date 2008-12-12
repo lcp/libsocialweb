@@ -1,1 +1,1 @@
-SUBDIRS = dummy flickr
+SUBDIRS = dummy flickr twitter
