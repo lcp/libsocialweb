@@ -1,4 +1,5 @@
 #include <sqlite3.h>
+#include <gio/gio.h>
 #include "mojito-core.h"
 #include "mojito-utils.h"
 #include "mojito-view.h"
