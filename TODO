@@ -1,3 +1,5 @@
 Parameterize flickr username somehow
 
 Check for leaks
+
+Remove sqlite from core?
