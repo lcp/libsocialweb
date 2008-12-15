@@ -90,8 +90,11 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
 
   mojito_set_remove (priv->pending_sources, (GObject*)source);
 
-  mojito_set_add_from (priv->pending_items, set);
-  mojito_set_unref (set);
+  /* Handle sources returning NULL instead of an empty set */
+  if (set) {
+    mojito_set_add_from (priv->pending_items, set);
+    mojito_set_unref (set);
+  }
 
   /* Are we still waiting for replies? */
   if (!mojito_set_is_empty (priv->pending_sources))
