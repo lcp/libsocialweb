@@ -1,5 +1,5 @@
-Parameterize flickr username somehow
-
 Check for leaks
 
 Remove sqlite from core?
+
+Add sequence-complete signal, or batch all changes into a single signal
