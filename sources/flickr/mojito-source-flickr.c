@@ -12,6 +12,9 @@ G_DEFINE_TYPE (MojitoSourceFlickr, mojito_source_flickr, MOJITO_TYPE_SOURCE)
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SOURCE_FLICKR, MojitoSourceFlickrPrivate))
 
+#define KEY_BASE "/apps/mojito/sources/flickr"
+#define KEY_USER KEY_BASE "/user"
+
 struct _MojitoSourceFlickrPrivate {
   GConfClient *gconf;
   RestProxy *proxy;
@@ -189,12 +192,11 @@ mojito_source_flickr_init (MojitoSourceFlickr *self)
   self->priv = priv = GET_PRIVATE (self);
 
   priv->gconf = gconf_client_get_default ();
-  gconf_client_add_dir (priv->gconf, "/apps/mojito/sources/flickr",
+  gconf_client_add_dir (priv->gconf, KEY_BASE,
                         GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  gconf_client_notify_add (priv->gconf,
-                           "/apps/mojito/sources/flickr/user",
+  gconf_client_notify_add (priv->gconf, KEY_USER,
                            user_changed_cb, self, NULL, NULL);
-  gconf_client_notify (priv->gconf, "/apps/mojito/sources/flickr/user");
+  gconf_client_notify (priv->gconf, KEY_USER);
 
   priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
 }
