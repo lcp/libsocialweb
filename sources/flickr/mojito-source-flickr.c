@@ -136,7 +136,6 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
 
   g_free (priv->user_id);
   priv->user_id = g_strdup (gconf_value_get_string (entry->value));
-  g_debug ("user %s", priv->user_id);
 }
 
 static void
