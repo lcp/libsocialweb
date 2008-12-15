@@ -5,6 +5,7 @@
 #include <mojito/mojito-utils.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
+#include <gconf/gconf-client.h>
 
 G_DEFINE_TYPE (MojitoSourceFlickr, mojito_source_flickr, MOJITO_TYPE_SOURCE)
 
@@ -12,6 +13,7 @@ G_DEFINE_TYPE (MojitoSourceFlickr, mojito_source_flickr, MOJITO_TYPE_SOURCE)
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SOURCE_FLICKR, MojitoSourceFlickrPrivate))
 
 struct _MojitoSourceFlickrPrivate {
+  GConfClient *gconf;
   RestProxy *proxy;
   char *user_id;
 };
@@ -125,12 +127,17 @@ static void
 mojito_source_flickr_dispose (GObject *object)
 {
   MojitoSourceFlickrPrivate *priv = MOJITO_SOURCE_FLICKR (object)->priv;
-  
+
+  if (priv->gconf) {
+    g_object_unref (priv->gconf);
+    priv->gconf = NULL;
+  }
+
   if (priv->proxy) {
     g_object_unref (priv->proxy);
     priv->proxy = NULL;
   }
-  
+
   G_OBJECT_CLASS (mojito_source_flickr_parent_class)->dispose (object);
 }
 
@@ -163,6 +170,8 @@ static void
 mojito_source_flickr_init (MojitoSourceFlickr *self)
 {
   self->priv = GET_PRIVATE (self);
+
+  self->priv->gconf = gconf_client_get_default ();
 
   self->priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
   /* TODO: get from configuration file */
