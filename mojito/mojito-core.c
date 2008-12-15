@@ -210,7 +210,11 @@ populate_sources (MojitoCore *core)
     source_module = g_module_open (module_path, 
                                    G_MODULE_BIND_LOCAL | G_MODULE_BIND_LAZY);
     if (source_module == NULL)
+    {
+      g_critical (G_STRLOC ": error opening module: %s",
+                  g_module_error());
       continue;
+    }
 
     source_name = NULL;
     if (!g_module_symbol (source_module, "mojito_module_get_name", &sym))
