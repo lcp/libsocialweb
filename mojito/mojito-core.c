@@ -212,8 +212,6 @@ populate_sources (MojitoCore *core)
     if (source_module == NULL)
       continue;
 
-    g_module_make_resident (source_module);
-
     source_name = NULL;
     if (!g_module_symbol (source_module, "mojito_module_get_name", &sym))
     {
@@ -237,6 +235,8 @@ populate_sources (MojitoCore *core)
       g_hash_table_insert (priv->source_names, (gchar *)source_name, GINT_TO_POINTER (source_type));
       g_debug (G_STRLOC ": Imported module: %s", source_name);
     }
+
+    g_module_make_resident (source_module);
 
     fi = g_file_enumerator_next_file (enumerator, NULL, &error);
   }
