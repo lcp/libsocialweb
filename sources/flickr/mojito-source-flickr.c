@@ -99,6 +99,11 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   UpdateData *data;
   RestProxyCall *call;
 
+  if (flickr->priv->user_id == NULL) {
+    callback (source, mojito_item_set_new (), user_data);
+    return;
+  }
+
   g_debug ("Updating Flickr");
 
   data = g_slice_new (UpdateData);
@@ -121,6 +126,17 @@ static char *
 mojito_source_flickr_get_name (MojitoSource *source)
 {
   return "flickr";
+}
+
+static void
+user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
+{
+  MojitoSourceFlickr *flickr = MOJITO_SOURCE_FLICKR (user_data);
+  MojitoSourceFlickrPrivate *priv = flickr->priv;
+
+  g_free (priv->user_id);
+  priv->user_id = g_strdup (gconf_value_get_string (entry->value));
+  g_debug ("user %s", priv->user_id);
 }
 
 static void
@@ -169,11 +185,17 @@ mojito_source_flickr_class_init (MojitoSourceFlickrClass *klass)
 static void
 mojito_source_flickr_init (MojitoSourceFlickr *self)
 {
-  self->priv = GET_PRIVATE (self);
+  MojitoSourceFlickrPrivate *priv;
 
-  self->priv->gconf = gconf_client_get_default ();
+  self->priv = priv = GET_PRIVATE (self);
 
-  self->priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
-  /* TODO: get from configuration file */
-  self->priv->user_id = g_strdup ("35468147630@N01");
+  priv->gconf = gconf_client_get_default ();
+  gconf_client_add_dir (priv->gconf, "/apps/mojito/sources/flickr",
+                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
+  gconf_client_notify_add (priv->gconf,
+                           "/apps/mojito/sources/flickr/user",
+                           user_changed_cb, self, NULL, NULL);
+  gconf_client_notify (priv->gconf, "/apps/mojito/sources/flickr/user");
+
+  priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
 }
