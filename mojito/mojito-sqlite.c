@@ -190,30 +190,6 @@ db_generic_reset_and_finalize (sqlite3_stmt *statement)
   return res;
 }
 
-void
-db_begin_transaction (sqlite3 *db)
-{
-  /* TODO: check return val as this can return BUSY */
-  /* Return error code so caller can abort on failure */
-  g_debug ("%s: TODO", __FUNCTION__);
-}
-
-void
-db_commit_transaction (sqlite3 *db)
-{
-  /* TODO: check return val as this can return BUSY */
-  /* Return error code so caller can abort on failure */
-  g_debug ("%s: TODO", __FUNCTION__);
-}
-
-void
-db_rollback_transaction (sqlite3 *db)
-{
-  /* TODO: check return val as this can return BUSY */
-  /* Return error code so caller can abort on failure */
-  g_debug ("%s: TODO", __FUNCTION__);
-}
-
 gboolean
 mojito_sqlite_create_tables (sqlite3 *db, const char *sql)
 {
