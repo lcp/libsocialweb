@@ -9,7 +9,7 @@
 static void core_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (MojitoCore, mojito_core, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_CORE_IFACE, 
+                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_CORE_IFACE,
                                                 core_iface_init));
 
 #define GET_PRIVATE(o)                                                  \
@@ -83,23 +83,23 @@ open_view (MojitoCoreIface *self, const char **sources, guint count, DBusGMethod
     if (source == NULL) {
       source_type = GPOINTER_TO_INT
         (g_hash_table_lookup (priv->source_names, name));
-      
+
       if (source_type) {
         source = g_object_new (source_type,
                                "core", core,
                                NULL);
-        
+
         /* TODO: make this a weak reference so the entry can be removed when the
            last view closes */
         g_hash_table_insert (priv->sources, g_strdup (name), g_object_ref (source));
       }
     }
-    
+
     if (source) {
       mojito_view_add_source (view, source);
     }
   }
-  
+
   mojito_core_iface_return_from_open_view (context, path);
 
   g_free (path);
@@ -108,7 +108,7 @@ open_view (MojitoCoreIface *self, const char **sources, guint count, DBusGMethod
 static void
 mojito_core_constructed (GObject *object)
 {
-  MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;  
+  MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
   GError *error = NULL;
 
   priv->connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
@@ -126,7 +126,7 @@ mojito_core_dispose (GObject *object)
   MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
 
   /* TODO: free source_names */
-  
+
   G_OBJECT_CLASS (mojito_core_parent_class)->dispose (object);
 }
 
@@ -136,7 +136,7 @@ mojito_core_finalize (GObject *object)
   MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
 
   sqlite3_close (priv->db);
-  
+
   G_OBJECT_CLASS (mojito_core_parent_class)->finalize (object);
 }
 
@@ -179,7 +179,7 @@ populate_sources (MojitoCore *core)
 
   sources_dir_file = g_file_new_for_path (MOJITO_SOURCES_MODULES_DIR);
 
-  enumerator = g_file_enumerate_children (sources_dir_file, 
+  enumerator = g_file_enumerate_children (sources_dir_file,
                                           G_FILE_ATTRIBUTE_STANDARD_NAME,
                                           G_FILE_QUERY_INFO_NONE,
                                           NULL,
@@ -193,7 +193,7 @@ populate_sources (MojitoCore *core)
     g_object_unref (sources_dir_file);
     return;
   }
-  
+
   fi = g_file_enumerator_next_file (enumerator, NULL, &error);
 
   while (fi)
@@ -207,7 +207,7 @@ populate_sources (MojitoCore *core)
     module_path = g_build_filename (MOJITO_SOURCES_MODULES_DIR,
                                     g_file_info_get_name (fi),
                                     NULL);
-    source_module = g_module_open (module_path, 
+    source_module = g_module_open (module_path,
                                    G_MODULE_BIND_LOCAL | G_MODULE_BIND_LAZY);
     if (source_module == NULL)
     {
@@ -265,13 +265,13 @@ mojito_core_init (MojitoCore *self)
   self->priv = priv;
 
   g_assert (sqlite3_threadsafe ());
-  
+
   /* TODO: check free policy */
   priv->source_names = g_hash_table_new (g_str_hash, g_str_equal);
   priv->sources = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
 
   /* TODO: move here onwards into a separate function so we can return errors */
-  
+
   db_path = g_build_filename (g_get_user_cache_dir (), "mojito.db", NULL);
   if (sqlite3_open (db_path, &priv->db) != SQLITE_OK) {
     g_free (db_path);
@@ -279,7 +279,7 @@ mojito_core_init (MojitoCore *self)
     return;
   }
   g_free (db_path);
-  
+
   populate_sources (self);
 }
 

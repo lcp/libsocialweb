@@ -43,12 +43,12 @@ main (int argc, char **argv)
 
   if (!request_name ())
     return 0;
-  
+
   core = mojito_core_new ();
 
   mojito_core_run (core);
-  
+
   g_object_unref (core);
-  
+
   return 0;
 }

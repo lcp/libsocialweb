@@ -9,17 +9,17 @@ db_generic_fetch (sqlite3 *db, sqlite3_stmt *statement, gboolean dup, gboolean d
   va_list args;
   int res;
   int column;
-  
+
   if (statement == NULL)
     return FALSE;
-  
+
  retry:
   if ((res = sqlite3_step (statement)) == SQLITE_ROW) {
     va_start (args, destroy);
     column = va_arg (args, int);
     while (column != -1) {
       const BindType type = va_arg (args, BindType);
-      
+
       switch (type) {
       case BIND_TEXT:
         {
@@ -61,7 +61,7 @@ db_generic_fetch (sqlite3 *db, sqlite3_stmt *statement, gboolean dup, gboolean d
     }
     if (destroy)
       db_generic_reset_and_finalize (statement);
-    else 
+    else
       sqlite3_reset (statement);
     return FALSE;
   }
@@ -97,7 +97,7 @@ db_generic_bind_va (sqlite3_stmt *statement, va_list args)
       res = sqlite3_bind_int64 (statement, index, va_arg (args, sqlite3_int64));
       break;
     }
-    
+
     if (res != SQLITE_OK) {
       g_warning ("Problem whilst binding statement: %s", sqlite3_errmsg (sqlite3_db_handle (statement)));
       sqlite3_finalize (statement);
@@ -116,7 +116,7 @@ db_generic_bind (sqlite3_stmt *statement, ...)
   va_start (args, statement);
 
   db_generic_bind_va (statement, args);
-  
+
   va_end (args);
 }
 
@@ -152,9 +152,9 @@ db_generic_exec (sqlite3_stmt *statement, gboolean finalize)
 {
   sqlite3 *db = sqlite3_db_handle (statement);
   int res;
-  
+
  retry:
-  
+
   res = sqlite3_step (statement);
 
   if (res != SQLITE_DONE) {
@@ -162,7 +162,7 @@ db_generic_exec (sqlite3_stmt *statement, gboolean finalize)
       g_usleep (100);
       goto retry;
     }
-    
+
     g_warning ("Cannot executing statement: %s", sqlite3_errmsg (db));
     return db_generic_reset_and_finalize (statement);
   }
@@ -178,9 +178,9 @@ db_generic_reset_and_finalize (sqlite3_stmt *statement)
 {
   sqlite3 *db = sqlite3_db_handle (statement);
   int res;
-  
+
   res = sqlite3_reset (statement);
-  
+
   if (res != SQLITE_OK) {
     g_warning ("Problem resetting statement: %s", sqlite3_errmsg (db));
   }
@@ -195,14 +195,14 @@ mojito_sqlite_create_tables (sqlite3 *db, const char *sql)
 {
   sqlite3_stmt *statement = NULL;
   const char *command = sql;
-  
+
   do {
     if (sqlite3_prepare_v2 (db, command, -1, &statement, &command)) {
       g_printerr ("Cannot create tables (prepare): %s\n", sqlite3_errmsg (db));
       sqlite3_finalize (statement);
       return FALSE;
     }
-    
+
     if (statement && db_generic_exec (statement, TRUE) != SQLITE_OK) {
       g_printerr ("Cannot create tables (step): %s\n", sqlite3_errmsg (db));
       return FALSE;

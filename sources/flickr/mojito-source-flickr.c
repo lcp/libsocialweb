@@ -163,9 +163,9 @@ static void
 mojito_source_flickr_finalize (GObject *object)
 {
   MojitoSourceFlickrPrivate *priv = MOJITO_SOURCE_FLICKR (object)->priv;
-  
+
   g_free (priv->user_id);
-  
+
   G_OBJECT_CLASS (mojito_source_flickr_parent_class)->finalize (object);
 }
 
@@ -174,12 +174,12 @@ mojito_source_flickr_class_init (MojitoSourceFlickrClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   MojitoSourceClass *source_class = MOJITO_SOURCE_CLASS (klass);
-  
+
   g_type_class_add_private (klass, sizeof (MojitoSourceFlickrPrivate));
-  
+
   object_class->dispose = mojito_source_flickr_dispose;
   object_class->finalize = mojito_source_flickr_finalize;
-  
+
   source_class->get_name = mojito_source_flickr_get_name;
   source_class->update = update;
 }

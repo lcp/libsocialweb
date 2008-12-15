@@ -41,10 +41,10 @@ mojito_web_cached_send (MojitoCore *core, SoupSession *session, SoupMessage *msg
                         -1)) {
     if (etag)
       soup_message_headers_append (msg->request_headers, "If-None-Match", etag);
-    
+
     if (last)
       soup_message_headers_append (msg->request_headers, "If-Modified-Since", last);
-    
+
     db_generic_reset_and_finalize (statement);
     update_cache = TRUE;
   }
@@ -68,8 +68,8 @@ mojito_web_cached_send (MojitoCore *core, SoupSession *session, SoupMessage *msg
     }
   }
 #endif
-  
+
   g_free (url);
-  
+
   return res;
 }
