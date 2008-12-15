@@ -100,7 +100,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   RestProxyCall *call;
 
   if (flickr->priv->user_id == NULL) {
-    callback (source, mojito_item_set_new (), user_data);
+    callback (source, NULL, user_data);
     return;
   }
 
