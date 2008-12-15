@@ -209,6 +209,9 @@ populate_sources (MojitoCore *core)
                                     NULL);
     source_module = g_module_open (module_path, 
                                    G_MODULE_BIND_LOCAL | G_MODULE_BIND_LAZY);
+    if (source_module == NULL)
+      continue;
+
     g_module_make_resident (source_module);
 
     source_name = NULL;
