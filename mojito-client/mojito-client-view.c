@@ -94,7 +94,7 @@ _proxy_item_added_cb (DBusGProxy  *proxy,
 
   item = mojito_item_new ();
   item->source = g_strdup (source);
-  item->uuid = g_strdup (source);
+  item->uuid = g_strdup (uuid);
   item->date = (time_t)date;
   item->props = g_hash_table_ref (props);
 
