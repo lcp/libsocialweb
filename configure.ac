@@ -34,6 +34,7 @@ AC_SUBST(sourcesdir)
 AC_OUTPUT([
         Makefile
         mojito/Makefile
+        mojito-client/Makefile
         src/Makefile
         sources/Makefile
         sources/dummy/Makefile
