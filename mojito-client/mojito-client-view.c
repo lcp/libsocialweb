@@ -201,7 +201,7 @@ mojito_client_view_constructed (GObject *object)
                                      G_TYPE_STRING,
                                      G_TYPE_STRING,
                                      G_TYPE_INT64,
-                                     G_TYPE_BOXED,
+                                     DBUS_TYPE_G_STRING_STRING_HASHTABLE,
                                      G_TYPE_INVALID);
   dbus_g_object_register_marshaller (mojito_marshal_VOID__STRING_STRING,
                                      G_TYPE_NONE,
@@ -214,7 +214,7 @@ mojito_client_view_constructed (GObject *object)
                            G_TYPE_STRING,
                            G_TYPE_STRING,
                            G_TYPE_INT64,
-                           G_TYPE_BOXED,
+                           DBUS_TYPE_G_STRING_STRING_HASHTABLE,
                            NULL);
   dbus_g_proxy_connect_signal (priv->proxy,
                                "ItemAdded",
