@@ -6,6 +6,7 @@
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-web.h>
 #include <gconf/gconf-client.h>
+#include <libsoup/soup.h>
 
 G_DEFINE_TYPE (MojitoSourceTwitter, mojito_source_twitter, MOJITO_TYPE_SOURCE)
 
@@ -17,6 +18,7 @@ G_DEFINE_TYPE (MojitoSourceTwitter, mojito_source_twitter, MOJITO_TYPE_SOURCE)
 #define KEY_PASSWORD KEY_DIR "/password"
 
 struct _MojitoSourceTwitterPrivate {
+  SoupSession *soup;
   GConfClient *gconf;
   gboolean user_set, password_set;
 
@@ -86,11 +88,8 @@ status_received_cb (TwitterClient *client,
   /* TODO: need a better name for this */
   mojito_item_put (item, "content", twitter_status_get_text (status));
 
-  /* TODO: share this session */
-  SoupSession *session;
-  session = soup_session_sync_new ();
-  mojito_item_take (item, "buddy", mojito_web_download_image (session, twitter_user_get_profile_image_url (user)));
-  g_object_unref (session);
+  mojito_item_take (item, "buddy", mojito_web_download_image
+                    (source->priv->soup, twitter_user_get_profile_image_url (user)));
 
   mojito_set_add (source->priv->set, (GObject*)item);
   g_object_unref (item);
@@ -148,6 +147,11 @@ mojito_source_twitter_dispose (GObject *object)
 {
   MojitoSourceTwitterPrivate *priv = MOJITO_SOURCE_TWITTER (object)->priv;
 
+  if (priv->soup) {
+    g_object_unref (priv->soup);
+    priv->soup = NULL;
+  }
+
   if (priv->gconf) {
     g_object_unref (priv->gconf);
     priv->gconf = NULL;
@@ -192,6 +196,9 @@ mojito_source_twitter_init (MojitoSourceTwitter *self)
   self->priv = priv = GET_PRIVATE (self);
 
   priv->user_set = priv->password_set = FALSE;
+
+  /* TODO: when the image fetching is async change this to async */
+  priv->soup = soup_session_sync_new ();
 
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_DIR,
