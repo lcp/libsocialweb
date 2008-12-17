@@ -74,15 +74,13 @@ calculate_md5 (const char *s)
   return g_compute_checksum_for_string (G_CHECKSUM_MD5, s, -1);
 }
 
-/* TODO: this should be async blaa blaa */
 static char *
-get_buddy_icon (RestXmlNode *node)
+download_image (const char *url)
 {
-  char *url, *md5, *path, *filename;
+  char *md5, *path, *filename;
 
-  g_assert (node);
+  g_assert (url);
 
-  url = construct_buddy_icon_url (node);
   md5 = calculate_md5 (url);
 
   /* TODO: pull this out into a separate file, twitter will need it too */
@@ -113,6 +111,19 @@ get_buddy_icon (RestXmlNode *node)
     g_object_unref (session);
   }
 
+  return filename;
+}
+
+/* TODO: this should be async blaa blaa */
+static char *
+get_buddy_icon (RestXmlNode *node)
+{
+  char *url, *filename;
+
+  g_assert (node);
+
+  url = construct_buddy_icon_url (node);
+  filename = download_image (url);
   g_free (url);
 
   return filename;
