@@ -98,7 +98,7 @@ _proxy_item_added_cb (DBusGProxy  *proxy,
   item->date = (time_t)date;
   item->props = g_hash_table_ref (props);
 
-  g_hash_table_insert (priv->uuid_to_items, g_strdup (source), item);
+  g_hash_table_insert (priv->uuid_to_items, g_strdup (uuid), item);
 
   g_signal_emit (view, signals[ITEM_ADDED_SIGNAL], 0, item);
 }
