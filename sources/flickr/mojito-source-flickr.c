@@ -44,7 +44,8 @@ check_attrs (RestXmlNode *node, ...)
 static char *
 construct_photo_page_url (RestXmlNode *node)
 {
-  g_assert (node != NULL);
+  if (!check_attrs (node, "owner", "id", NULL))
+    return NULL;
 
   return g_strdup_printf ("http://www.flickr.com/photos/%s/%s/",
                           rest_xml_node_get_attr (node, "owner"),
