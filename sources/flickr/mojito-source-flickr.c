@@ -21,6 +21,26 @@ struct _MojitoSourceFlickrPrivate {
   char *user_id;
 };
 
+static gboolean
+check_attrs (RestXmlNode *node, ...)
+{
+  va_list attrs;
+  const char *name;
+
+  g_assert (node);
+
+  va_start (attrs, node);
+  while ((name = va_arg (attrs, char*)) != NULL) {
+    if (rest_xml_node_get_attr (node, name) == NULL) {
+      g_warning ("XML node doesn't have required attribute %s", name);
+      return FALSE;
+    }
+  }
+  va_end (attrs);
+
+  return TRUE;
+}
+
 static char *
 construct_photo_page_url (RestXmlNode *node)
 {
