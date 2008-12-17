@@ -3,6 +3,7 @@
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
+#include <mojito/mojito-web.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <gconf/gconf-client.h>
@@ -82,59 +83,21 @@ construct_buddy_icon_url (RestXmlNode *node)
                           rest_xml_node_get_attr (node, "owner"));
 }
 
-static char *
-download_image (const char *url)
-{
-  char *md5, *path, *filename;
-
-  g_assert (url);
-
-  md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, url, -1);
-
-  /* TODO: pull this out into a separate file, twitter will need it too */
-  path = g_build_filename (g_get_user_cache_dir (),
-                           "mojito",
-                           "thumbnails",
-                           NULL);
-  g_mkdir_with_parents (path, 0777);
-
-  /* A bit nasty but it works and avoids a little heap thrashing */
-  filename = g_strconcat (path, G_DIR_SEPARATOR_S, md5, ".jpg", NULL);
-  g_free (md5);
-  g_free (path);
-
-  if (!g_file_test (filename, G_FILE_TEST_EXISTS)) {
-    SoupSession *session;
-    SoupMessage *msg;
-
-    /* TODO: share */
-    session = soup_session_sync_new ();
-    msg = soup_message_new (SOUP_METHOD_GET, url);
-    soup_session_send_message (session, msg);
-    if (msg->status_code = SOUP_STATUS_OK) {
-      /* TODO: GError */
-      g_file_set_contents (filename, msg->response_body->data, msg->response_body->length, NULL);
-    } else {
-      g_debug ("Cannot download %s: %s", url, msg->reason_phrase);
-    }
-    g_object_unref (msg);
-    g_object_unref (session);
-  }
-
-  return filename;
-}
-
 /* TODO: this should be async blaa blaa */
 static char *
 get_buddy_icon (RestXmlNode *node)
 {
+  SoupSession *session;
   char *url, *filename;
 
   g_assert (node);
 
+  /* TODO: share */
+  session = soup_session_sync_new ();
   url = construct_buddy_icon_url (node);
-  filename = download_image (url);
+  filename = mojito_web_download_image (session, url);
   g_free (url);
+  g_object_unref (session);
 
   return filename;
 }
@@ -143,13 +106,17 @@ get_buddy_icon (RestXmlNode *node)
 static char *
 get_thumbnail (RestXmlNode *node)
 {
+  SoupSession *session;
   char *url, *filename;
 
   g_assert (node);
 
+  /* TODO: share */
+  session = soup_session_sync_new ();
   url = construct_photo_url (node);
-  filename = download_image (url);
+  filename = mojito_web_download_image (session, url);
   g_free (url);
+  g_object_unref (session);
 
   return filename;
 }
