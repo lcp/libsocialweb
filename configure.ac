@@ -41,4 +41,5 @@ AC_OUTPUT([
         sources/flickr/Makefile
         sources/twitter/Makefile
         examples/Makefile
+        mojito-client-0.0.pc
 ])

@@ -11,10 +11,12 @@ lib_LTLIBRARIES = libmojito-client.la
 
 BUILT_SOURCES = mojito-view-bindings.h mojito-core-bindings.h \
 		mojito-client-marshals.c mojito-client-marshals.h
-
+libmojito_client_ladir = $(includedir)/mojito/mojito-client
 libmojito_client_la_CFLAGS = $(DBUS_GLIB_CFLAGS)
 libmojito_client_la_LIBADD = $(DBUS_GLIB_LIBS)
-libmojito_client_la_SOURCES = mojito-client.h mojito-client.c \
-			      mojito-client-view.h mojito-client-view.c \
-			      mojito-item.h mojito-item.c \
+libmojito_client_la_HEADERS = mojito-client.h mojito-client-view.h \
+			      mojito-item.h
+libmojito_client_la_SOURCES = mojito-client.c mojito-client-view.c \
+			      mojito-item.c \
+			      $(libmojito_client_la_HEADERS) \
 			      $(BUILT_SOURCES) 
