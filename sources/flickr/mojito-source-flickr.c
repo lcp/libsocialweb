@@ -42,6 +42,20 @@ check_attrs (RestXmlNode *node, ...)
   return TRUE;
 }
 
+/* TODO: pass in size enum */
+static char *
+construct_photo_url (RestXmlNode *node)
+{
+  if (!check_attrs (node, "farm", "server", "id", "secret", NULL))
+    return NULL;
+
+  return g_strdup_printf ("http://farm%s.static.flickr.com/%s/%s_%s_m.jpg",
+                          rest_xml_node_get_attr (node, "farm"),
+                          rest_xml_node_get_attr (node, "server"),
+                          rest_xml_node_get_attr (node, "id"),
+                          rest_xml_node_get_attr (node, "secret"));
+}
+
 static char *
 construct_photo_page_url (RestXmlNode *node)
 {
