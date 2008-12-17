@@ -18,5 +18,7 @@ ltmain.sh
 missing
 stamp-h1
 mojito/mojito-marshals.[ch]
+mojito-client/mojito-client-marshals.[ch]
+mojito-client/mojito-*-bindings.h
 src/mojito.service
 src/mojito-core
