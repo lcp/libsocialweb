@@ -5,9 +5,20 @@ client_view_item_added_cb (MojitoClientView *view,
                            MojitoItem       *item,
                            gpointer          userdata)
 {
+  GList *l;
+
   g_debug ("New item: source = %s uuid = %s",
            item->source,
            item->uuid);
+
+  g_debug ("Current list looks like:");
+
+  for (l = mojito_client_view_get_sorted_items (view); l; l = l->next)
+  {
+    g_debug ("%s %s", 
+             ((MojitoItem *)l->data)->source,
+             ((MojitoItem *)l->data)->uuid);
+  }
 }
 
 static void
