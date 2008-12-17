@@ -6,6 +6,7 @@
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <gconf/gconf-client.h>
+#include <libsoup/soup.h>
 
 G_DEFINE_TYPE (MojitoSourceFlickr, mojito_source_flickr, MOJITO_TYPE_SOURCE)
 
@@ -61,10 +62,60 @@ construct_buddy_icon_url (RestXmlNode *node)
   if (atoi (rest_xml_node_get_attr (node, "iconserver")) == 0)
     return g_strdup ("http://www.flickr.com/images/buddyicon.jpg");
 
-  return g_strdup_printf ("http://farm{icon-farm}.static.flickr.com/{icon-server}/buddyicons/{nsid}.jpg",
+  return g_strdup_printf ("http://farm%s.static.flickr.com/%s/buddyicons/%s.jpg",
                           rest_xml_node_get_attr (node, "iconfarm"),
                           rest_xml_node_get_attr (node, "iconserver"),
                           rest_xml_node_get_attr (node, "owner"));
+}
+
+static char *
+calculate_md5 (const char *s)
+{
+  return g_compute_checksum_for_string (G_CHECKSUM_MD5, s, -1);
+}
+
+/* TODO: this should be async blaa blaa */
+static char *
+get_buddy_icon (RestXmlNode *node)
+{
+  char *url, *md5, *path, *filename;
+
+  g_assert (node);
+
+  url = construct_buddy_icon_url (node);
+  md5 = calculate_md5 (url);
+
+  /* TODO: pull this out into a separate file, twitter will need it too */
+  path = g_build_filename (g_get_user_cache_dir (),
+                           "mojito",
+                           "thumbnails",
+                           NULL);
+  g_mkdir_with_parents (path, 0777);
+
+  /* A bit nasty but it works and avoids a little heap thrashing */
+  filename = g_strconcat (path, G_DIR_SEPARATOR_S, md5, ".jpg", NULL);
+  g_free (md5);
+  g_free (path);
+
+  if (!g_file_test (filename, G_FILE_TEST_EXISTS)) {
+    SoupSession *session;
+    SoupMessage *msg;
+
+    /* TODO: share */
+    session = soup_session_sync_new ();
+    msg = soup_message_new (SOUP_METHOD_GET, url);
+    soup_session_send_message (session, msg);
+    if (msg->status_code = SOUP_STATUS_OK) {
+      /* TODO: GError */
+      g_file_set_contents (filename, msg->response_body->data, msg->response_body->length, NULL);
+    }
+    g_object_unref (msg);
+    g_object_unref (session);
+  }
+
+  g_free (url);
+
+  return filename;
 }
 
 typedef struct {
@@ -118,6 +169,8 @@ flickr_callback (RestProxyCall *call,
 
     date = atoi (rest_xml_node_get_attr (node, "dateupload"));
     mojito_item_take (item, "date", mojito_time_t_to_string (date));
+
+    mojito_item_take (item, "buddyicon", get_buddy_icon (node));
 
     mojito_set_add (set, G_OBJECT (item));
     g_object_unref (item);
