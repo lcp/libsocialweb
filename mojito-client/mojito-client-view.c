@@ -345,3 +345,29 @@ mojito_client_view_start (MojitoClientView *view)
                                      NULL);
 }
 
+static gint
+_sort_compare_func (MojitoItem *a,
+                     MojitoItem *b)
+{
+  if (a->date > b->date)
+  {
+    return -1;
+  } else if (a->date == b->date) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
+GList *
+mojito_client_view_get_sorted_items (MojitoClientView *view)
+{
+  MojitoClientViewPrivate *priv = GET_PRIVATE (view);
+  GList *items;
+
+  items = g_hash_table_get_values (priv->uuid_to_items);
+  items = g_list_sort (items, (GCompareFunc)_sort_compare_func);
+
+  return items;
+}
+
