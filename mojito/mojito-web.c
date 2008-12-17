@@ -73,3 +73,44 @@ mojito_web_cached_send (MojitoCore *core, SoupSession *session, SoupMessage *msg
 
   return res;
 }
+
+char *
+mojito_web_download_image (SoupSession *session, const char *url)
+{
+  char *md5, *path, *filename;
+
+  g_return_val_if_fail (SOUP_IS_SESSION (session), NULL);
+  g_return_val_if_fail (url, NULL);
+
+  md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, url, -1);
+
+  /* TODO: pull this out into a separate file, twitter will need it too */
+  path = g_build_filename (g_get_user_cache_dir (),
+                           "mojito",
+                           "thumbnails",
+                           NULL);
+  g_mkdir_with_parents (path, 0777);
+
+  /* TODO: try and guess the extension from @url and use that */
+  filename = g_build_filename (path, md5, NULL);
+  g_free (md5);
+  g_free (path);
+
+  if (!g_file_test (filename, G_FILE_TEST_EXISTS)) {
+    SoupMessage *msg;
+
+    msg = soup_message_new (SOUP_METHOD_GET, url);
+    soup_session_send_message (session, msg);
+    if (msg->status_code = SOUP_STATUS_OK) {
+      /* TODO: GError */
+      g_file_set_contents (filename, msg->response_body->data, msg->response_body->length, NULL);
+    } else {
+      g_debug ("Cannot download %s: %s", url, msg->reason_phrase);
+      g_free (filename);
+      filename = NULL;
+    }
+    g_object_unref (msg);
+  }
+
+  return filename;
+}
