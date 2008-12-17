@@ -119,7 +119,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
                               /* TODO: this is a temporary key */
                               "api_key", "cf4e02fc57240a9b07346ad26e291080",
                               "user_id", flickr->priv->user_id,
-                              "extras", "date_upload",
+                              "extras", "date_upload,icon_server",
                               NULL);
   /* TODO: GError */
   rest_proxy_call_async (call, flickr_callback, (GObject*)source, data, NULL);
