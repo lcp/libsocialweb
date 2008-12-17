@@ -83,19 +83,13 @@ construct_buddy_icon_url (RestXmlNode *node)
 }
 
 static char *
-calculate_md5 (const char *s)
-{
-  return g_compute_checksum_for_string (G_CHECKSUM_MD5, s, -1);
-}
-
-static char *
 download_image (const char *url)
 {
   char *md5, *path, *filename;
 
   g_assert (url);
 
-  md5 = calculate_md5 (url);
+  md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, url, -1);
 
   /* TODO: pull this out into a separate file, twitter will need it too */
   path = g_build_filename (g_get_user_cache_dir (),
@@ -120,6 +114,8 @@ download_image (const char *url)
     if (msg->status_code = SOUP_STATUS_OK) {
       /* TODO: GError */
       g_file_set_contents (filename, msg->response_body->data, msg->response_body->length, NULL);
+    } else {
+      g_debug ("Cannot download %s: %s", url, msg->reason_phrase);
     }
     g_object_unref (msg);
     g_object_unref (session);
@@ -137,6 +133,21 @@ get_buddy_icon (RestXmlNode *node)
   g_assert (node);
 
   url = construct_buddy_icon_url (node);
+  filename = download_image (url);
+  g_free (url);
+
+  return filename;
+}
+
+/* TODO: this should be async blaa blaa */
+static char *
+get_thumbnail (RestXmlNode *node)
+{
+  char *url, *filename;
+
+  g_assert (node);
+
+  url = construct_photo_url (node);
   filename = download_image (url);
   g_free (url);
 
@@ -196,6 +207,7 @@ flickr_callback (RestProxyCall *call,
     mojito_item_take (item, "date", mojito_time_t_to_string (date));
 
     mojito_item_take (item, "buddyicon", get_buddy_icon (node));
+    mojito_item_take (item, "thumbnail", get_thumbnail (node));
 
     mojito_set_add (set, G_OBJECT (item));
     g_object_unref (item);
