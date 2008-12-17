@@ -52,6 +52,18 @@ construct_photo_page_url (RestXmlNode *node)
                           rest_xml_node_get_attr (node, "id"));
 }
 
+static char *
+construct_buddy_icon_url (RestXmlNode *node)
+{
+  if (!check_attrs (node, "iconfarm", "iconserver", "owner", NULL))
+    return g_strdup ("http://www.flickr.com/images/buddyicon.jpg");
+
+  return g_strdup_printf ("http://farm{icon-farm}.static.flickr.com/{icon-server}/buddyicons/{nsid}.jpg",
+                          rest_xml_node_get_attr (node, "iconfarm"),
+                          rest_xml_node_get_attr (node, "iconserver"),
+                          rest_xml_node_get_attr (node, "owner"));
+}
+
 typedef struct {
   MojitoSourceDataFunc callback;
   gpointer user_data;
