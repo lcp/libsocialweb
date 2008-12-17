@@ -4,6 +4,7 @@
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
+#include <mojito/mojito-web.h>
 #include <gconf/gconf-client.h>
 
 G_DEFINE_TYPE (MojitoSourceTwitter, mojito_source_twitter, MOJITO_TYPE_SOURCE)
@@ -62,6 +63,7 @@ status_received_cb (TwitterClient *client,
                     gpointer       user_data)
 {
   MojitoSourceTwitter *source = MOJITO_SOURCE_TWITTER (user_data);
+  TwitterUser *user;
   MojitoItem *item;
   char *url, *date;
   GTimeVal timeval;
@@ -69,8 +71,10 @@ status_received_cb (TwitterClient *client,
   item = mojito_item_new ();
   mojito_item_set_source (item, MOJITO_SOURCE (source));
 
+  user = twitter_status_get_user (status);
+
   url = g_strdup_printf ("http://twitter.com/%s/statuses/%d",
-                         twitter_user_get_screen_name (twitter_status_get_user (status)),
+                         twitter_user_get_screen_name (user),
                          twitter_status_get_id (status));
 
   twitter_date_to_time_val (twitter_status_get_created_at (status), &timeval);
@@ -81,6 +85,12 @@ status_received_cb (TwitterClient *client,
   mojito_item_take (item, "date", date);
   /* TODO: need a better name for this */
   mojito_item_put (item, "content", twitter_status_get_text (status));
+
+  /* TODO: share this session */
+  SoupSession *session;
+  session = soup_session_sync_new ();
+  mojito_item_take (item, "buddy", mojito_web_download_image (session, twitter_user_get_profile_image_url (user)));
+  g_object_unref (session);
 
   mojito_set_add (source->priv->set, (GObject*)item);
   g_object_unref (item);
