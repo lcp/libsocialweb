@@ -88,6 +88,7 @@ status_received_cb (TwitterClient *client,
   /* TODO: need a better name for this */
   mojito_item_put (item, "content", twitter_status_get_text (status));
 
+  mojito_item_put (item, "author", twitter_user_get_name (user));
   mojito_item_take (item, "buddy", mojito_web_download_image
                     (source->priv->soup, twitter_user_get_profile_image_url (user)));
 
