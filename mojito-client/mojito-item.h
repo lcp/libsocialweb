@@ -1,7 +1,7 @@
 #include <glib.h>
 
 typedef struct {
-  gint refcount;
+  volatile gint refcount;
   gchar *source;
   gchar *uuid;
   time_t date;

@@ -3,7 +3,12 @@
 MojitoItem *
 mojito_item_new (void)
 {
-  return g_slice_new0 (MojitoItem);
+  MojitoItem *item;
+  
+  item = g_slice_new0 (MojitoItem);
+  item->refcount = 1;
+
+  return item;
 }
 
 void
