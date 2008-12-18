@@ -160,6 +160,7 @@ flickr_callback (RestProxyCall *call,
     url = construct_photo_page_url (node);
     mojito_item_put (item, "id", url);
     mojito_item_put (item, "title", rest_xml_node_get_attr (node, "title"));
+    mojito_item_put (item, "author", rest_xml_node_get_attr (node, "username"));
     mojito_item_put (item, "url", url);
     g_free (url);
 
