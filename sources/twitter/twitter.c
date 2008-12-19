@@ -89,6 +89,7 @@ status_received_cb (TwitterClient *client,
   mojito_item_put (item, "content", twitter_status_get_text (status));
 
   mojito_item_put (item, "author", twitter_user_get_name (user));
+  mojito_item_take (item, "authorid", g_strdup_printf ("%d", twitter_user_get_id (user)));
   mojito_item_take (item, "authoricon", mojito_web_download_image
                     (source->priv->soup, twitter_user_get_profile_image_url (user)));
 

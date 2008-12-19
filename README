@@ -30,6 +30,10 @@ author
 
 The name of the author of the item.
 
+authorid
+
+The service ID of the author of the item.
+
 authoricon
 
 Path to a local copy of the item's author's avatar.
