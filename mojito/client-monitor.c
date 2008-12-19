@@ -16,7 +16,7 @@ name_owner_changed (DBusGProxy *proxy,
 {
   /* If a client we are tracking has disappeared, then unref all of the objects
      that they are connected to. */
-  if (strcmp (new_owner, "") == 0 && strcmp (name, prev_owner) == 0) {
+  if (new_owner[0] == '\0' && strcmp (name, prev_owner) == 0) {
     GList *list;
 
     list = g_hash_table_lookup (clients, prev_owner);
