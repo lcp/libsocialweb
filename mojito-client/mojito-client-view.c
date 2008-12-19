@@ -71,12 +71,36 @@ mojito_client_view_set_property (GObject *object, guint property_id,
 static void
 mojito_client_view_dispose (GObject *object)
 {
+  MojitoClientViewPrivate *priv = GET_PRIVATE (object);
+
+  if (priv->connection)
+  {
+    dbus_g_connection_unref (priv->connection);
+    priv->connection = NULL;
+  }
+
+  if (priv->proxy)
+  {
+    g_object_unref (priv->proxy);
+    priv->proxy = NULL;
+  }
+
+  if (priv->uuid_to_items)
+  {
+    g_hash_table_unref (priv->uuid_to_items);
+    priv->uuid_to_items = NULL;
+  }
+
   G_OBJECT_CLASS (mojito_client_view_parent_class)->dispose (object);
 }
 
 static void
 mojito_client_view_finalize (GObject *object)
 {
+  MojitoClientViewPrivate *priv = GET_PRIVATE (object);
+
+  g_free (priv->object_path);
+
   G_OBJECT_CLASS (mojito_client_view_parent_class)->finalize (object);
 }
 
