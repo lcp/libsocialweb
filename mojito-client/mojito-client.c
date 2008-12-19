@@ -21,26 +21,6 @@ struct _MojitoClientPrivate {
 #define MOJITO_SERVICE_CORE_INTERFACE "com.intel.Mojito"
 
 static void
-mojito_client_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
-{
-  switch (property_id) {
-  default:
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-  }
-}
-
-static void
-mojito_client_set_property (GObject *object, guint property_id,
-                              const GValue *value, GParamSpec *pspec)
-{
-  switch (property_id) {
-  default:
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-  }
-}
-
-static void
 mojito_client_dispose (GObject *object)
 {
   G_OBJECT_CLASS (mojito_client_parent_class)->dispose (object);
@@ -59,8 +39,6 @@ mojito_client_class_init (MojitoClientClass *klass)
 
   g_type_class_add_private (klass, sizeof (MojitoClientPrivate));
 
-  object_class->get_property = mojito_client_get_property;
-  object_class->set_property = mojito_client_set_property;
   object_class->dispose = mojito_client_dispose;
   object_class->finalize = mojito_client_finalize;
 }
