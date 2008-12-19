@@ -32,7 +32,7 @@ author
 
 The name of the author of the item.
 
-buddyicon [TODO rename authoricon?]
+authoricon
 
 Path to a local copy of the item's author's avatar.
 

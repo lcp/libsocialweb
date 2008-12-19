@@ -167,7 +167,7 @@ flickr_callback (RestProxyCall *call,
     date = atoi (rest_xml_node_get_attr (node, "dateupload"));
     mojito_item_take (item, "date", mojito_time_t_to_string (date));
 
-    mojito_item_take (item, "buddyicon", get_buddy_icon (node, priv->soup));
+    mojito_item_take (item, "authoricon", get_buddy_icon (node, priv->soup));
     mojito_item_take (item, "thumbnail", get_thumbnail (node, priv->soup));
 
     mojito_set_add (set, G_OBJECT (item));
