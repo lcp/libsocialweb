@@ -98,7 +98,7 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
 
   /* Are we still waiting for replies? */
   if (!mojito_set_is_empty (priv->pending_sources))
-    return;
+    goto done;
 
   /* The magic */
   list = mojito_set_as_list (priv->pending_items);
@@ -164,6 +164,10 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
 
   mojito_set_unref (priv->current);
   priv->current = new;
+
+ done:
+  /* A reference was added when the update method was called, so unref it now */
+  g_object_unref (view);
 }
 
 static gboolean
@@ -182,7 +186,7 @@ start_update (MojitoView *view)
 
   for (l = priv->sources; l; l = l->next) {
     MojitoSource *source = l->data;
-    mojito_source_update (source, source_updated, view);
+    mojito_source_update (source, source_updated, g_object_ref (view));
   }
 }
 
@@ -255,9 +259,6 @@ mojito_view_dispose (GObject *object)
     g_object_unref (priv->sources->data);
     priv->sources = g_list_delete_link (priv->sources, priv->sources);
   }
-
-  /* TODO: need to do something magic if this gets called during an update cycle
-     because we'll get a load of callbacks */
 
   G_OBJECT_CLASS (mojito_view_parent_class)->dispose (object);
 }
