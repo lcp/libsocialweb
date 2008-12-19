@@ -90,6 +90,10 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
 
   mojito_set_remove (priv->pending_sources, (GObject*)source);
 
+  /* If the update timeout id is 0 then we're not running any more, so ignore these updates */
+  if (priv->timeout_id == 0)
+    goto done;
+
   /* Handle sources returning NULL instead of an empty set */
   if (set) {
     mojito_set_add_from (priv->pending_items, set);
@@ -206,10 +210,36 @@ view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 }
 
 static void
+stop (MojitoView *view)
+{
+  MojitoViewPrivate *priv = view->priv;
+
+  g_assert (priv);
+
+  if (priv->timeout_id) {
+    g_source_remove (priv->timeout_id);
+    priv->timeout_id = 0;
+  }
+}
+
+static void
+view_stop (MojitoViewIface *iface, DBusGMethodInvocation *context)
+{
+  MojitoView *view = MOJITO_VIEW (iface);
+
+  stop (view);
+
+  mojito_view_iface_return_from_stop (context);
+}
+
+static void
 view_close (MojitoViewIface *iface, DBusGMethodInvocation *context)
 {
   MojitoView *view = MOJITO_VIEW (iface);
   MojitoViewPrivate *priv = view->priv;
+
+  /* Explicitly stop the view in case there are pending updates in progress */
+  stop (view);
 
   g_object_unref (view);
 
@@ -253,7 +283,8 @@ mojito_view_set_property (GObject      *object,
 static void
 mojito_view_dispose (GObject *object)
 {
-  MojitoViewPrivate *priv = MOJITO_VIEW (object)->priv;
+  MojitoView *view = MOJITO_VIEW (object);
+  MojitoViewPrivate *priv = view->priv;
 
   while (priv->sources) {
     g_object_unref (priv->sources->data);
@@ -267,11 +298,9 @@ mojito_view_dispose (GObject *object)
 static void
 mojito_view_finalize (GObject *object)
 {
-  MojitoViewPrivate *priv = MOJITO_VIEW (object)->priv;
+  MojitoView *view = MOJITO_VIEW (object);
 
-  if (priv->timeout_id) {
-    g_source_remove (priv->timeout_id);
-  }
+  stop (view);
 
   G_OBJECT_CLASS (mojito_view_parent_class)->finalize (object);
 }
@@ -281,6 +310,7 @@ view_iface_init (gpointer g_iface, gpointer iface_data)
 {
   MojitoViewIfaceClass *klass = (MojitoViewIfaceClass*)g_iface;
   mojito_view_iface_implement_start (klass, view_start);
+  mojito_view_iface_implement_stop (klass, view_stop);
   mojito_view_iface_implement_close (klass, view_close);
 }
 
