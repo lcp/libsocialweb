@@ -2,6 +2,8 @@
 #include <glib-object.h>
 #include <dbus/dbus-glib.h>
 
+#include "client-monitor.h"
+
 /* Hash of client addresses to GList of GObjects */
 static GHashTable *clients;
 
