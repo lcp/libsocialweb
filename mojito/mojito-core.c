@@ -1,8 +1,10 @@
 #include <sqlite3.h>
 #include <gio/gio.h>
+#include <dbus/dbus-glib-lowlevel.h>
 #include "mojito-core.h"
 #include "mojito-utils.h"
 #include "mojito-view.h"
+#include "client-monitor.h"
 
 #include "mojito-core-ginterface.h"
 
@@ -100,6 +102,8 @@ open_view (MojitoCoreIface *self, const char **sources, guint count, DBusGMethod
     }
   }
 
+  client_monitor_add (dbus_g_method_get_sender (context), (GObject*)view);
+
   mojito_core_iface_return_from_open_view (context, path);
 
   g_free (path);
@@ -118,6 +122,8 @@ mojito_core_constructed (GObject *object)
   }
 
   dbus_g_connection_register_g_object (priv->connection, "/com/intel/Mojito", object);
+
+  client_monitor_init (priv->connection);
 }
 
 static void
