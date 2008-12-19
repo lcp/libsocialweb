@@ -22,6 +22,7 @@ name_owner_changed (DBusGProxy *proxy,
     list = g_hash_table_lookup (clients, prev_owner);
 
     while (list) {
+      g_debug ("MONITOR: %s died, releasing %p", prev_owner, list->data);
       g_object_unref (list->data);
       list = g_list_delete_link (list, list);
     }
@@ -65,6 +66,8 @@ client_monitor_add (char *sender, GObject *object)
   g_return_if_fail (sender);
   g_return_if_fail (G_IS_OBJECT (object));
 
+  g_debug ("MONITOR: %s acquires %p", sender, object);
+
   // TODO? g_object_weak_ref (object, weak_notify, NULL);
 
   list = g_hash_table_lookup (clients, sender);
@@ -77,6 +80,9 @@ void
 client_monitor_remove (char *sender, GObject *object)
 {
   GList *list;
+
+  g_debug ("MONITOR: %s releases %p", sender, object);
+
   list = g_hash_table_lookup (clients, sender);
   list = g_list_remove (list, object);
   /* This will cause sender to be freed */
