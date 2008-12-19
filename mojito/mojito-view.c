@@ -248,6 +248,19 @@ mojito_view_dispose (GObject *object)
   G_OBJECT_CLASS (mojito_view_parent_class)->dispose (object);
 }
 
+
+static void
+mojito_view_finalize (GObject *object)
+{
+  MojitoViewPrivate *priv = MOJITO_VIEW (object)->priv;
+
+  if (priv->timeout_id) {
+    g_source_remove (priv->timeout_id);
+  }
+
+  G_OBJECT_CLASS (mojito_view_parent_class)->finalize (object);
+}
+
 static void
 view_iface_init (gpointer g_iface, gpointer iface_data)
 {
@@ -266,6 +279,7 @@ mojito_view_class_init (MojitoViewClass *klass)
   object_class->get_property = mojito_view_get_property;
   object_class->set_property = mojito_view_set_property;
   object_class->dispose = mojito_view_dispose;
+  object_class->finalize = mojito_view_finalize;
 
   pspec = g_param_spec_uint ("count", "count", "The number of items",
                              1, G_MAXUINT, 10,
