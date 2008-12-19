@@ -3,6 +3,8 @@
   <interface name="com.intel.Mojito.View">
     <method name="start"/>
 
+    <method name="close"/>
+
     <signal name="ItemAdded">
       <arg name="source" type="s"/>
       <arg name="uuid" type="s"/>
