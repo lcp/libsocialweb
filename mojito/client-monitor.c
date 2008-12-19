@@ -20,14 +20,13 @@ name_owner_changed (DBusGProxy *proxy,
     GList *list;
 
     list = g_hash_table_lookup (clients, prev_owner);
+    g_hash_table_remove (clients, prev_owner);
 
     while (list) {
       g_debug ("MONITOR: %s died, releasing %p", prev_owner, list->data);
       g_object_unref (list->data);
       list = g_list_delete_link (list, list);
     }
-
-    g_hash_table_remove (clients, prev_owner);
   }
 }
 
