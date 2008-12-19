@@ -7,6 +7,7 @@ static const DBusGObjectInfo _mojito_view_iface_object_info;
 struct _MojitoViewIfaceClass {
     GTypeInterface parent_class;
     mojito_view_iface_start_impl start;
+    mojito_view_iface_stop_impl stop;
     mojito_view_iface_close_impl close;
 };
 
@@ -88,6 +89,50 @@ void
 mojito_view_iface_implement_start (MojitoViewIfaceClass *klass, mojito_view_iface_start_impl impl)
 {
   klass->start = impl;
+}
+
+/**
+ * mojito_view_iface_stop_impl:
+ * @self: The object implementing this interface
+ * @context: Used to return values or throw an error
+ *
+ * The signature of an implementation of the D-Bus method
+ * stop on interface com.intel.Mojito.View.
+ */
+static void
+mojito_view_iface_stop (MojitoViewIface *self,
+    DBusGMethodInvocation *context)
+{
+  mojito_view_iface_stop_impl impl = (MOJITO_VIEW_IFACE_GET_CLASS (self)->stop);
+
+  if (impl != NULL)
+    {
+      (impl) (self,
+        context);
+    }
+  else
+    {
+      GError e = { DBUS_GERROR, 
+           DBUS_GERROR_UNKNOWN_METHOD,
+           "Method not implemented" };
+
+      dbus_g_method_return_error (context, &e);
+    }
+}
+
+/**
+ * mojito_view_iface_implement_stop:
+ * @klass: A class whose instances implement this interface
+ * @impl: A callback used to implement the stop D-Bus method
+ *
+ * Register an implementation for the stop method in the vtable
+ * of an implementation of this interface. To be called from
+ * the interface init function.
+ */
+void
+mojito_view_iface_implement_stop (MojitoViewIfaceClass *klass, mojito_view_iface_stop_impl impl)
+{
+  klass->stop = impl;
 }
 
 /**
@@ -299,14 +344,15 @@ mojito_view_iface_base_init (gpointer klass)
 }
 static const DBusGMethodInfo _mojito_view_iface_methods[] = {
   { (GCallback) mojito_view_iface_start, g_cclosure_marshal_VOID__POINTER, 0 },
-  { (GCallback) mojito_view_iface_close, g_cclosure_marshal_VOID__POINTER, 31 },
+  { (GCallback) mojito_view_iface_stop, g_cclosure_marshal_VOID__POINTER, 31 },
+  { (GCallback) mojito_view_iface_close, g_cclosure_marshal_VOID__POINTER, 61 },
 };
 
 static const DBusGObjectInfo _mojito_view_iface_object_info = {
   0,
   _mojito_view_iface_methods,
-  2,
-"com.intel.Mojito.View\0start\0A\0\0com.intel.Mojito.View\0close\0A\0\0\0",
+  3,
+"com.intel.Mojito.View\0start\0A\0\0com.intel.Mojito.View\0stop\0A\0\0com.intel.Mojito.View\0close\0A\0\0\0",
 "com.intel.Mojito.View\0ItemAdded\0com.intel.Mojito.View\0ItemRemoved\0com.intel.Mojito.View\0ItemChanged\0\0",
 "\0\0",
 };
