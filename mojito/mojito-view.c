@@ -256,6 +256,9 @@ mojito_view_dispose (GObject *object)
     priv->sources = g_list_delete_link (priv->sources, priv->sources);
   }
 
+  /* TODO: need to do something magic if this gets called during an update cycle
+     because we'll get a load of callbacks */
+
   G_OBJECT_CLASS (mojito_view_parent_class)->dispose (object);
 }
 
