@@ -2,6 +2,7 @@
 *.la
 *.lo
 *.o
+*.pc
 .deps
 .libs
 Makefile
@@ -17,9 +18,9 @@ libtool
 ltmain.sh
 missing
 stamp-h1
+examples/test-client
 mojito/mojito-marshals.[ch]
 mojito-client/mojito-client-marshals.[ch]
 mojito-client/mojito-*-bindings.h
 src/mojito.service
 src/mojito-core
-*.pc
