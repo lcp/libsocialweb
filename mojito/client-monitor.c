@@ -75,7 +75,8 @@ client_monitor_add (char *sender, GObject *object)
   g_hash_table_insert (clients, sender, list);
 }
 
-/* @sender has disconnected from @object.  Takes ownership of sender. */
+/* @sender has disconnected from @object.  Takes ownership of sender. This does
+   not unref object, but simply stops tracking it. */
 void
 client_monitor_remove (char *sender, GObject *object)
 {
