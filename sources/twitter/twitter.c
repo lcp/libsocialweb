@@ -83,7 +83,7 @@ status_received_cb (TwitterClient *client,
   date = mojito_time_t_to_string (timeval.tv_sec);
 
   mojito_item_put (item, "id", url);
-  mojito_item_put (item, "link", url);
+  mojito_item_put (item, "url", url);
   mojito_item_take (item, "date", date);
   /* TODO: need a better name for this */
   mojito_item_put (item, "content", twitter_status_get_text (status));

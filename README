@@ -13,9 +13,7 @@ Globally unique identifier for this item.  If the service provides a ID but it
 isn't globally unique then it should be made so somehow, for example by using
 the item's URL instead of numeric ID.
 
-
-link
-url [TODO consolidate]
+url
 
 The URL of the item for viewing online.
 
