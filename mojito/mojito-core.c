@@ -61,6 +61,16 @@ make_path (void)
 }
 
 static void
+view_weak_notify (gpointer data, GObject *old_view)
+{
+  char *sender = data;
+
+  g_assert (data);
+
+  client_monitor_remove (sender, old_view);
+}
+
+static void
 open_view (MojitoCoreIface *self, const char **sources, guint count, DBusGMethodInvocation *context)
 {
   MojitoCore *core = MOJITO_CORE (self);
@@ -103,6 +113,7 @@ open_view (MojitoCoreIface *self, const char **sources, guint count, DBusGMethod
   }
 
   client_monitor_add (dbus_g_method_get_sender (context), (GObject*)view);
+  g_object_weak_ref ((GObject*)view, view_weak_notify, dbus_g_method_get_sender (context));
 
   mojito_core_iface_return_from_open_view (context, path);
 
