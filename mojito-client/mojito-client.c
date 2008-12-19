@@ -23,6 +23,20 @@ struct _MojitoClientPrivate {
 static void
 mojito_client_dispose (GObject *object)
 {
+  MojitoClientPrivate *priv = GET_PRIVATE (object);
+
+  if (priv->connection)
+  {
+    dbus_g_connection_unref (priv->connection);
+    priv->connection = NULL;
+  }
+
+  if (priv->proxy)
+  {
+    g_object_unref (priv->proxy);
+    priv->proxy = NULL;
+  }
+
   G_OBJECT_CLASS (mojito_client_parent_class)->dispose (object);
 }
 
