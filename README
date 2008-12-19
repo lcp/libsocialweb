@@ -1,0 +1,45 @@
+Mojito
+===
+
+A personal social data server.
+
+
+Defined Keys
+==
+
+id
+
+Globally unique identifier for this item.  If the service provides a ID but it
+isn't globally unique then it should be made so somehow, for example by using
+the item's URL instead of numeric ID.
+
+
+link
+url [TODO consolidate]
+
+The URL of the item for viewing online.
+
+date
+
+The date the item was created.
+
+content
+
+The textual content of the item.  For blog posts this will be a summary, for
+Twitter posts this will be the post, for Flickr this will be the description.
+
+author
+
+The name of the author of the item.
+
+buddyicon [TODO rename authoricon?]
+
+Path to a local copy of the item's author's avatar.
+
+title
+
+The title of the item.
+
+thumbnail
+
+Path to a local copy of the item's graphical representation.
