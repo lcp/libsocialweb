@@ -11,9 +11,9 @@ G_DEFINE_TYPE (MojitoSourceLastfm, mojito_source_lastfm, MOJITO_TYPE_SOURCE)
 
 struct _MojitoSourceLastfmPrivate {
   RestProxy *proxy;
-  guint timeout_id;
 };
 
+#if 0
 static void
 rest_callback (RestProxyCall *call,
                GError *error,
@@ -72,25 +72,18 @@ invoke (gpointer user_data)
 
   return TRUE;
 }
+#endif
+
+static void
+update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
+{
+  callback (source, NULL, user_data);
+}
 
 static char *
 get_name (MojitoSource *source)
 {
   return "lastfm";
-}
-
-static void
-start (MojitoSource *source)
-{
-  MojitoSourceLastfmPrivate *priv = ((MojitoSourceLastfm*)source)->priv;
-
-  if (priv->timeout_id) {
-    /* TODO */
-  } else {
-    /* No.  Do the initial call and schedule future runs */
-    invoke (MOJITO_SOURCE_LASTFM (source));
-    priv->timeout_id = g_timeout_add_seconds (10*60, invoke, source);
-  }
 }
 
 static void
@@ -124,7 +117,7 @@ mojito_source_lastfm_class_init (MojitoSourceLastfmClass *klass)
   object_class->finalize = mojito_source_lastfm_finalize;
 
   source_class->get_name = get_name;
-  source_class->start = start;
+  source_class->update = update;
 }
 
 static void
