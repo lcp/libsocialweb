@@ -2,7 +2,6 @@
 #define _MOJITO_CORE
 
 #include <glib-object.h>
-#include <sqlite3.h>
 
 G_BEGIN_DECLS
 
@@ -39,8 +38,6 @@ GType mojito_core_get_type (void);
 MojitoCore* mojito_core_new (void);
 
 void mojito_core_run (MojitoCore *core);
-
-sqlite3 *mojito_core_get_db (MojitoCore *core);
 
 G_END_DECLS
 

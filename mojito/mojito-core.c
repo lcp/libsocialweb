@@ -1,4 +1,3 @@
-#include <sqlite3.h>
 #include <gio/gio.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include "mojito-core.h"
@@ -23,8 +22,6 @@ struct _MojitoCorePrivate {
   GHashTable *source_names;
   /* Hash of source names to instances */
   GHashTable *sources;
-
-  sqlite3 *db;
 };
 
 typedef const gchar *(*MojitoModuleGetNameFunc)(void);
@@ -152,8 +149,6 @@ mojito_core_finalize (GObject *object)
 {
   MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
 
-  sqlite3_close (priv->db);
-
   G_OBJECT_CLASS (mojito_core_parent_class)->finalize (object);
 }
 
@@ -277,25 +272,12 @@ static void
 mojito_core_init (MojitoCore *self)
 {
   MojitoCorePrivate *priv = GET_PRIVATE (self);
-  char *db_path;
 
   self->priv = priv;
-
-  g_assert (sqlite3_threadsafe ());
 
   /* TODO: check free policy */
   priv->source_names = g_hash_table_new (g_str_hash, g_str_equal);
   priv->sources = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
-
-  /* TODO: move here onwards into a separate function so we can return errors */
-
-  db_path = g_build_filename (g_get_user_cache_dir (), "mojito.db", NULL);
-  if (sqlite3_open (db_path, &priv->db) != SQLITE_OK) {
-    g_free (db_path);
-    g_error (sqlite3_errmsg (priv->db));
-    return;
-  }
-  g_free (db_path);
 
   populate_sources (self);
 }
@@ -304,14 +286,6 @@ MojitoCore*
 mojito_core_new (void)
 {
   return g_object_new (MOJITO_TYPE_CORE, NULL);
-}
-
-sqlite3 *
-mojito_core_get_db (MojitoCore *core)
-{
-  g_return_val_if_fail (MOJITO_IS_CORE (core), NULL);
-
-  return core->priv->db;
 }
 
 void
