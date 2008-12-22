@@ -204,8 +204,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   call = rest_proxy_new_call (flickr->priv->proxy);
   rest_proxy_call_add_params (call,
                               "method", "flickr.photos.getContactsPublicPhotos",
-                              /* TODO: this is a temporary key */
-                              "api_key", "cf4e02fc57240a9b07346ad26e291080",
+                              "api_key", "f7003dda7bbdcc2288fd32e30faca8f5",
                               "user_id", flickr->priv->user_id,
                               "extras", "date_upload,icon_server",
                               NULL);
