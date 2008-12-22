@@ -27,7 +27,7 @@ client_open_view_cb (MojitoClient *client,
                      gpointer      userdata)
 {
   mojito_client_view_start (view);
-  g_signal_connect (view, "item-added", client_view_item_added_cb, NULL);
+  g_signal_connect (view, "item-added", G_CALLBACK (client_view_item_added_cb), NULL);
 }
 
 static void
