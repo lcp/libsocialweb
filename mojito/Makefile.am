@@ -12,15 +12,14 @@ TELEPATHY_GLIB ?= $(top_srcdir)/../telepathy-glib/
 
 BUILT_SOURCES = mojito-marshals.c mojito-marshals.h
 
-libmojito_la_CFLAGS = $(DBUS_GLIB_CFLAGS) $(SQLITE_CFLAGS) $(SOUP_CFLAGS) \
+libmojito_la_CFLAGS = $(DBUS_GLIB_CFLAGS) $(SOUP_CFLAGS) \
 		     -DMOJITO_SOURCES_MODULES_DIR=\"$(sourcesdir)\"
-libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SQLITE_LIBS) $(SOUP_LIBS)
+libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS)
 libmojito_la_SOURCES = mojito-core.c mojito-core.h \
 		       mojito-item.c mojito-item.h \
 		       mojito-view.c mojito-view.h \
 		       mojito-source.c mojito-source.h \
 		       mojito-utils.c mojito-utils.h \
-		       mojito-sqlite.c mojito-sqlite.h \
 		       mojito-web.c mojito-web.h \
 		       mojito-set.c mojito-set.h \
 		       client-monitor.c client-monitor.h \
