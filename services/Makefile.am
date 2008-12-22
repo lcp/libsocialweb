@@ -1,1 +1,1 @@
-SUBDIRS = dummy flickr lastm twitter
+SUBDIRS = dummy flickr lastfm twitter
