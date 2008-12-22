@@ -1,4 +1,6 @@
 #include <mojito/mojito-source.h>
+#include <mojito/mojito-item.h>
+#include <mojito/mojito-utils.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 
@@ -13,20 +15,33 @@ struct _MojitoSourceLastfmPrivate {
   RestProxy *proxy;
 };
 
-#if 0
 static void
-rest_callback (RestProxyCall *call,
-               GError *error,
-               GObject *weak_object,
-               gpointer userdata)
+update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
 {
-  MojitoSourceLastfm *source = MOJITO_SOURCE_LASTFM (weak_object);
-  MojitoSourceLastfmPrivate *priv = source->priv;
+  MojitoSourceLastfm *lastfm = MOJITO_SOURCE_LASTFM (source);
+  RestProxyCall *call;
+  GError *error = NULL;
   RestXmlParser *parser;
   RestXmlNode *root, *node;
+  MojitoSet *set;
 
-  if (error) {
+  call = rest_proxy_new_call (lastfm->priv->proxy);
+  rest_proxy_call_add_params (call,
+                              /* TODO: get proper API key */
+                              "api_key", "aa581f6505fd3ea79073ddcc2215cbc7",
+                              "method", "user.getFriends",
+                              /* TODO: parameterize */
+                              "user", "rossburton",
+                              "recenttracks", "1",
+                              "limit", "10",
+                              NULL);
+  /* TODO: GError */
+  if (!rest_proxy_call_run (call, NULL, &error)) {
     g_printerr ("Cannot get Last.fm friends: %s\n", error->message);
+    g_error_free (error);
+    g_object_unref (call);
+
+    callback (source, NULL, user_data);
     return;
   }
 
@@ -38,46 +53,37 @@ rest_callback (RestProxyCall *call,
 
   /* TODO: check for failure in lfm root element */
   //node = rest_xml_node_find (root, "lfm");
-
+  set = mojito_item_set_new ();
   for (node = rest_xml_node_find (root, "user"); node; node = node->next) {
-    GHashTable *hash;
+    MojitoItem *item;
+    RestXmlNode *recent;
+    const char *s;
 
-    hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_free);
+    recent = rest_xml_node_find (node, "recenttrack");
+    if (!recent)
+      continue;
 
-    g_debug ("lastfm %s", rest_xml_node_find (node, "realname")->content);
+    item = mojito_item_new ();
+    mojito_item_set_source (item, source);
+
+    /* TODO WRONG */
+    mojito_item_put (item, "id", rest_xml_node_find (node, "url")->content);
+
+    mojito_item_put (item, "link", rest_xml_node_find (node, "url")->content);
+    mojito_item_put (item, "authorid", rest_xml_node_find (node, "name")->content);
+    /* TODO: buddyicon from medium image */
+    mojito_item_take (item, "date", mojito_time_t_to_string (time (NULL)));
+
+    s = rest_xml_node_find (node, "realname")->content;
+    if (s) mojito_item_put (item, "author", s);
+
+    mojito_set_add (set, (GObject*)item);
   }
 
-  rest_xml_node_free (root);
+  rest_xml_node_unref (root);
   g_object_unref (parser);
-}
 
-static gboolean
-invoke (gpointer user_data)
-{
-  MojitoSourceLastfm *source = user_data;
-  RestProxyCall *call;
-
-  call = rest_proxy_new_call (source->priv->proxy);
-  rest_proxy_call_add_params (call,
-                              /* TODO: get proper API key */
-                              "api_key", "aa581f6505fd3ea79073ddcc2215cbc7",
-                              "method", "user.getFriends",
-                              /* TODO: parameterize */
-                              "user", "rossburton",
-                              "recenttracks", "1",
-                              "limit", "10",
-                              NULL);
-  /* TODO: GError */
-  rest_proxy_call_async (call, rest_callback, (GObject*)source, NULL, NULL);
-
-  return TRUE;
-}
-#endif
-
-static void
-update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
-{
-  callback (source, NULL, user_data);
+  callback (source, set, user_data);
 }
 
 static char *
