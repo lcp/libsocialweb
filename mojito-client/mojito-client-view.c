@@ -119,7 +119,7 @@ _proxy_item_added_cb (DBusGProxy  *proxy,
   item = mojito_item_new ();
   item->source = g_strdup (source);
   item->uuid = g_strdup (uuid);
-  item->date = (time_t)date;
+  item->date.tv_sec = date;
   item->props = g_hash_table_ref (props);
 
   g_hash_table_insert (priv->uuid_to_items, g_strdup (uuid), item);
@@ -371,12 +371,12 @@ mojito_client_view_start (MojitoClientView *view)
 
 static gint
 _sort_compare_func (MojitoItem *a,
-                     MojitoItem *b)
+                    MojitoItem *b)
 {
-  if (a->date > b->date)
+  if (a->date.tv_sec> b->date.tv_sec)
   {
     return -1;
-  } else if (a->date == b->date) {
+  } else if (a->date.tv_sec == b->date.tv_sec) {
     return 0;
   } else {
     return 1;

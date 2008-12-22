@@ -4,7 +4,7 @@ typedef struct {
   volatile gint refcount;
   gchar *source;
   gchar *uuid;
-  time_t date;
+  GTimeVal date;
   GHashTable *props;
 } MojitoItem;
 
