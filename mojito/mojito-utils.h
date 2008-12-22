@@ -1,6 +1,5 @@
 #include <glib.h>
 #include <time.h>
-#include <sqlite3.h>
 
 /* TODO: these are not used at the moment */
 time_t mojito_time_t_from_string (const char *s);

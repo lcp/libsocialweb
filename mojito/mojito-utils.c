@@ -1,6 +1,5 @@
 #include "mojito-utils.h"
 #include <libsoup/soup.h>
-#include <sqlite3.h>
 
 time_t
 mojito_time_t_from_string (const char *s)
