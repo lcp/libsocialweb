@@ -26,8 +26,6 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   RestXmlNode *root, *node;
   MojitoSet *set;
 
-  g_debug ("Updating last.fm");
-
   call = rest_proxy_new_call (lastfm->priv->proxy);
   rest_proxy_call_add_params (call,
                               /* TODO: get proper API key */
