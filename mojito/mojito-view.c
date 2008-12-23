@@ -77,32 +77,14 @@ send_removed (gpointer data, gpointer user_data)
                                        mojito_item_get (item, "id"));
 }
 
-
 static void
-source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
+munge_items (MojitoView *view)
 {
-  MojitoView *view = MOJITO_VIEW (user_data);
   MojitoViewPrivate *priv = view->priv;
   GList *list;
   int count, source_max;
   GHashTable *counts;
   MojitoSet *new;
-
-  mojito_set_remove (priv->pending_sources, (GObject*)source);
-
-  /* If the update timeout id is 0 then we're not running any more, so ignore these updates */
-  if (priv->timeout_id == 0)
-    goto done;
-
-  /* Handle sources returning NULL instead of an empty set */
-  if (set) {
-    mojito_set_add_from (priv->pending_items, set);
-    mojito_set_unref (set);
-  }
-
-  /* Are we still waiting for replies? */
-  if (!mojito_set_is_empty (priv->pending_sources))
-    goto done;
 
   /* The magic */
   list = mojito_set_as_list (priv->pending_items);
@@ -168,8 +150,30 @@ source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
 
   mojito_set_unref (priv->current);
   priv->current = new;
+}
 
- done:
+static void
+source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
+{
+  MojitoView *view = MOJITO_VIEW (user_data);
+  MojitoViewPrivate *priv = view->priv;
+
+  mojito_set_remove (priv->pending_sources, (GObject*)source);
+
+  /* If the update timeout id is 0 then we're not running any more, so ignore these updates */
+  if (priv->timeout_id) {
+    /* Handle sources returning NULL instead of an empty set */
+    if (set) {
+      mojito_set_add_from (priv->pending_items, set);
+      mojito_set_unref (set);
+    }
+
+    /* Have all of the sources got back to us now? */
+    if (mojito_set_is_empty (priv->pending_sources)) {
+      munge_items (view);
+    }
+  }
+
   /* A reference was added when the update method was called, so unref it now */
   g_object_unref (view);
 }
