@@ -194,6 +194,7 @@ start_update (MojitoView *view)
 
   for (l = priv->sources; l; l = l->next) {
     MojitoSource *source = l->data;
+    g_debug ("Updating %s", mojito_source_get_name (source));
     mojito_source_update (source, source_updated, g_object_ref (view));
   }
 }
