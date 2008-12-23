@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <mojito/mojito-source.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-utils.h>
@@ -25,6 +26,8 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   RestXmlNode *root, *node;
   MojitoSet *set;
 
+  g_debug ("Updating last.fm");
+
   call = rest_proxy_new_call (lastfm->priv->proxy);
   rest_proxy_call_add_params (call,
                               /* TODO: get proper API key */
@@ -32,8 +35,6 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
                               "method", "user.getFriends",
                               /* TODO: parameterize */
                               "user", "rossburton",
-                              "recenttracks", "1",
-                              "limit", "10",
                               NULL);
   /* TODO: GError */
   if (!rest_proxy_call_run (call, NULL, &error)) {
@@ -50,38 +51,71 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
                                           rest_proxy_call_get_payload (call),
                                           rest_proxy_call_get_payload_length (call));
   g_object_unref (call);
+  g_object_unref (parser);
+
+  set = mojito_item_set_new ();
 
   /* TODO: check for failure in lfm root element */
-  //node = rest_xml_node_find (root, "lfm");
-  set = mojito_item_set_new ();
   for (node = rest_xml_node_find (root, "user"); node; node = node->next) {
     MojitoItem *item;
-    RestXmlNode *recent;
+    RestXmlNode *recent, *track, *date;
     const char *s;
 
-    recent = rest_xml_node_find (node, "recenttrack");
-    if (!recent)
+    call = rest_proxy_new_call (lastfm->priv->proxy);
+    rest_proxy_call_add_params (call,
+                                /* TODO: get proper API key */
+                                "api_key", "aa581f6505fd3ea79073ddcc2215cbc7",
+                                "method", "user.getRecentTracks",
+                                "user", rest_xml_node_find (node, "name")->content,
+                                "limit", "1",
+                                NULL);
+    /* TODO: GError */
+    if (!rest_proxy_call_run (call, NULL, &error)) {
+      g_printerr ("Cannot get Last.fm recent tracks: %s\n", error->message);
+      g_error_free (error);
+      g_object_unref (call);
+      /* TODO: proper cleanup */
+      callback (source, NULL, user_data);
+      return;
+    }
+
+    parser = rest_xml_parser_new ();
+    recent = rest_xml_parser_parse_from_data (parser,
+                                                   rest_proxy_call_get_payload (call),
+                                                   rest_proxy_call_get_payload_length (call));
+    g_object_unref (call);
+    g_object_unref (parser);
+
+    track = rest_xml_node_find (recent, "track");
+
+    if (!track) {
+      rest_xml_node_unref (recent);
       continue;
+    }
 
     item = mojito_item_new ();
     mojito_item_set_source (item, source);
 
-    /* TODO WRONG */
-    mojito_item_put (item, "id", rest_xml_node_find (node, "url")->content);
+    /* TODO user+track url? user+timestamp? */
+    mojito_item_put (item, "id", rest_xml_node_find (track, "url")->content);
+    mojito_item_put (item, "link", rest_xml_node_find (track, "url")->content);
+    /* TODO: track by artist from album? */
+    mojito_item_put (item, "title", rest_xml_node_find (track, "name")->content);
 
-    mojito_item_put (item, "link", rest_xml_node_find (node, "url")->content);
-    mojito_item_put (item, "authorid", rest_xml_node_find (node, "name")->content);
-    /* TODO: buddyicon from medium image */
-    mojito_item_take (item, "date", mojito_time_t_to_string (time (NULL)));
+    date = rest_xml_node_find (track, "date");
+    mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
 
     s = rest_xml_node_find (node, "realname")->content;
     if (s) mojito_item_put (item, "author", s);
+    mojito_item_put (item, "authorid", rest_xml_node_find (node, "name")->content);
+    /* TODO: buddyicon from medium image */
+
+    rest_xml_node_unref (recent);
 
     mojito_set_add (set, (GObject*)item);
   }
 
   rest_xml_node_unref (root);
-  g_object_unref (parser);
 
   callback (source, set, user_data);
 }
