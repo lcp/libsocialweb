@@ -126,15 +126,16 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
 
   switch (twitter->priv->auth_state) {
   case TWITTER_AUTH_SUCCESS:
-  case TWITTER_AUTH_RETRY:
     twitter_client_get_friends_timeline (twitter->priv->client, NULL, 0);
     break;
   case TWITTER_AUTH_NEGOTIATING:
     /* Still authenticating, so return an empty set */
-  case TWITTER_AUTH_FAILED:
-    /* Authentication failed, so return an empty set */
     callback (source, NULL, user_data);
     break;
+  case TWITTER_AUTH_RETRY:
+  case TWITTER_AUTH_FAILED:
+    g_debug ("Authentication failed");
+    callback (source, NULL, user_data);
   }
 }
 
