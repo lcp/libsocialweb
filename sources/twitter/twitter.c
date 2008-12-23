@@ -23,7 +23,6 @@ struct _MojitoSourceTwitterPrivate {
   gboolean user_set, password_set;
 
   TwitterClient *client;
-  TwitterAuthState auth_state;
 
   /* This is grim */
   MojitoSet *set;
@@ -51,13 +50,6 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
   }
 }
 
-static gboolean
-authenticate_cb (TwitterClient *client, TwitterAuthState state, gpointer user_data)
-{
-  MojitoSourceTwitter *source = user_data;
-  source->priv->auth_state = state;
-}
-
 static void
 status_received_cb (TwitterClient *client,
                     TwitterStatus *status,
@@ -69,6 +61,12 @@ status_received_cb (TwitterClient *client,
   MojitoItem *item;
   char *url, *date;
   GTimeVal timeval;
+
+  if (error) {
+    g_debug ("Cannot update Twitter: %s", error->message);
+    source->priv->callback ((MojitoSource*)source, NULL, source->priv->user_data);
+    return;
+  }
 
   item = mojito_item_new ();
   mojito_item_set_source (item, MOJITO_SOURCE (source));
@@ -124,19 +122,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   twitter->priv->user_data = user_data;
   mojito_set_empty (twitter->priv->set);
 
-  switch (twitter->priv->auth_state) {
-  case TWITTER_AUTH_SUCCESS:
-    twitter_client_get_friends_timeline (twitter->priv->client, NULL, 0);
-    break;
-  case TWITTER_AUTH_NEGOTIATING:
-    /* Still authenticating, so return an empty set */
-    callback (source, NULL, user_data);
-    break;
-  case TWITTER_AUTH_RETRY:
-  case TWITTER_AUTH_FAILED:
-    g_debug ("Authentication failed");
-    callback (source, NULL, user_data);
-  }
+  twitter_client_get_friends_timeline (twitter->priv->client, NULL, 0);
 }
 
 static char *
@@ -213,16 +199,12 @@ mojito_source_twitter_init (MojitoSourceTwitter *self)
 
   /* TODO: set user agent */
   priv->client = twitter_client_new ();
-  g_signal_connect (priv->client, "authenticate",
-                    G_CALLBACK (authenticate_cb),
-                    self);
   g_signal_connect (priv->client, "status-received",
                     G_CALLBACK (status_received_cb),
                     self);
   g_signal_connect (priv->client, "timeline-complete",
                     G_CALLBACK (timeline_received_cb),
                     self);
-  priv->auth_state = TWITTER_AUTH_RETRY;
 
   priv->set = mojito_item_set_new ();
 
