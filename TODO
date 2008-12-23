@@ -5,3 +5,5 @@ Remove sqlite from core?
 Add sequence-complete signal, or batch all changes into a single signal
 
 Install a timeout to handle sources which never return
+
+Validate items in the view callback (id and date required)
