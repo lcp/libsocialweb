@@ -115,8 +115,6 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
     return;
   }
 
-  g_debug ("Updating Twitter...");
-
   /* TODO grim */
   twitter->priv->callback = callback;
   twitter->priv->user_data = user_data;

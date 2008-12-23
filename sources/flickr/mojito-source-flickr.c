@@ -195,8 +195,6 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
     return;
   }
 
-  g_debug ("Updating Flickr");
-
   data = g_slice_new (UpdateData);
   data->callback = callback;
   data->user_data = user_data;
