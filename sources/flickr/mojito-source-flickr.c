@@ -193,7 +193,7 @@ flickr_callback (RestProxyCall *call,
     g_object_unref (item);
   }
 
-  rest_xml_node_free (root);
+  rest_xml_node_unref (root);
   g_object_unref (parser);
 
   data->callback ((MojitoSource*)source, set, data->user_data);
