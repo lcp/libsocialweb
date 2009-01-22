@@ -23,6 +23,7 @@ libmojito_la_SOURCES = mojito-core.c mojito-core.h \
 		       mojito-utils.c mojito-utils.h \
 		       mojito-web.c mojito-web.h \
 		       mojito-set.c mojito-set.h \
+		       mojito-module.h \
 		       client-monitor.c client-monitor.h \
 		       $(BUILT_SOURCES) \
 		       mojito-core-ginterface.c mojito-core-ginterface.h \
