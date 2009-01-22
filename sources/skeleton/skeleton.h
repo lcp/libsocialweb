@@ -19,7 +19,7 @@
 #ifndef _MOJITO_SOURCE_SKELETON
 #define _MOJITO_SOURCE_SKELETON
 
-#include "mojito-source.h"
+#include <mojito/mojito-source.h>
 
 G_BEGIN_DECLS
 

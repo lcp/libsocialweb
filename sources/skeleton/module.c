@@ -16,7 +16,7 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "mojito-module.h"
+#include <mojito/mojito-module.h>
 #include "skeleton.h"
 
 const gchar *
