@@ -19,7 +19,7 @@
 #ifndef _MOJITO_SOURCE_TWITTER
 #define _MOJITO_SOURCE_TWITTER
 
-#include "mojito-source.h"
+#include <mojito/mojito-source.h>
 
 G_BEGIN_DECLS
 
