@@ -12,3 +12,5 @@ service_in_files = mojito.service.in
 service_DATA = mojito.service
 
 CLEANFILES = mojito.service
+
+EXTRA_DIST = $(service_in_files)
