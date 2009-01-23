@@ -5,3 +5,9 @@ Add sequence-complete signal, or batch all changes into a single signal
 Install a timeout to handle sources which never return
 
 Validate items in the view callback (id and date required)
+
+Make the refresh interval per-source
+
+Add a view cache so we can display content when first starting or offline
+
+Use NM or Connman to detect online/offline state
