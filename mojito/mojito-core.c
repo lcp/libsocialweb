@@ -309,11 +309,10 @@ mojito_core_new (void)
 void
 mojito_core_run (MojitoCore *core)
 {
+  GMainLoop *loop;
+
   g_return_if_fail (MOJITO_IS_CORE (core));
 
-  //g_list_foreach (core->priv->sources, (GFunc)mojito_source_update, NULL);
-
-  GMainLoop *loop;
   loop = g_main_loop_new (NULL, TRUE);
   g_main_loop_run (loop);
   g_main_loop_unref (loop);
