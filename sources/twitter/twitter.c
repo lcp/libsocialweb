@@ -137,7 +137,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   twitter_client_get_friends_timeline (twitter->priv->client, NULL, 0);
 }
 
-static char *
+static const char *
 mojito_source_twitter_get_name (MojitoSource *source)
 {
   return "twitter";

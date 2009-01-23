@@ -32,7 +32,7 @@ struct _MojitoSourceDummyPrivate {
   gpointer dummy;
 };
 
-static char *
+static const char *
 get_name (MojitoSource *source)
 {
   return "dummy";

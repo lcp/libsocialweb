@@ -109,7 +109,7 @@ mojito_source_init (MojitoSource *self)
 {
 }
 
-char *
+const char *
 mojito_source_get_name (MojitoSource *source)
 {
   MojitoSourceClass *source_class = MOJITO_SOURCE_GET_CLASS (source);

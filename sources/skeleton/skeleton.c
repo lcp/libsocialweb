@@ -37,7 +37,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   //MojitoSourceSkeleton *skeleton = (MojitoSourceSkeleton*)source;
 }
 
-static char *
+static const char *
 mojito_source_skeleton_get_name (MojitoSource *source)
 {
   return "skeleton";

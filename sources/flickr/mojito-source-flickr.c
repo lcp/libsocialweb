@@ -228,7 +228,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   rest_proxy_call_async (call, flickr_callback, (GObject*)source, data, NULL);
 }
 
-static char *
+static const char *
 mojito_source_flickr_get_name (MojitoSource *source)
 {
   return "flickr";

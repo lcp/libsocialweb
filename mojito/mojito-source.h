@@ -52,7 +52,7 @@ typedef void (*MojitoSourceDataFunc) (MojitoSource *source, MojitoSet *set, gpoi
 typedef struct _MojitoSourceClass MojitoSourceClass;
 struct _MojitoSourceClass {
   GObjectClass parent_class;
-  char * (*get_name) (MojitoSource *source);
+  const char * (*get_name) (MojitoSource *source);
   void (*update) (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data);
 };
 
@@ -60,7 +60,7 @@ GType mojito_source_get_type (void);
 
 MojitoCore *mojito_source_get_core (MojitoSource *source);
 
-char * mojito_source_get_name (MojitoSource *source);
+const char * mojito_source_get_name (MojitoSource *source);
 
 /* Please update yourself */
 void mojito_source_update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data);
