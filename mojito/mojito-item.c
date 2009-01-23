@@ -50,13 +50,6 @@ mojito_item_dispose (GObject *object)
 }
 
 static void
-mojito_item_finalize (GObject *object)
-{
-  /* TODO */
-  G_OBJECT_CLASS (mojito_item_parent_class)->finalize (object);
-}
-
-static void
 mojito_item_class_init (MojitoItemClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -64,7 +57,6 @@ mojito_item_class_init (MojitoItemClass *klass)
   g_type_class_add_private (klass, sizeof (MojitoItemPrivate));
 
   object_class->dispose = mojito_item_dispose;
-  object_class->finalize = mojito_item_finalize;
 }
 
 static void
