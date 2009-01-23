@@ -31,6 +31,9 @@ G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_VIEW, MojitoViewPrivate))
 
+/* Refresh every 10 minutes */
+#define REFRESH_TIMEOUT (10 * 60)
+
 struct _MojitoViewPrivate {
   GList *sources;
   guint count;
@@ -226,8 +229,7 @@ view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
   mojito_view_iface_return_from_start (context);
 
   if (priv->timeout_id == 0) {
-    /* TODO: 60 seconds for testing, should be 15 minutes or so */
-    priv->timeout_id = g_timeout_add_seconds (60, (GSourceFunc)start_update, iface);
+    priv->timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_update, iface);
     start_update (view);
   }
 }
