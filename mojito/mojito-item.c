@@ -33,7 +33,19 @@ struct _MojitoItemPrivate {
 static void
 mojito_item_dispose (GObject *object)
 {
-  /* TODO */
+  MojitoItem *item = MOJITO_ITEM (object);
+  MojitoItemPrivate *priv = item->priv;
+
+  if (priv->hash) {
+    g_hash_table_unref (priv->hash);
+    priv->hash = NULL;
+  }
+
+  if (priv->source) {
+    g_object_unref (priv->source);
+    priv->source = NULL;
+  }
+
   G_OBJECT_CLASS (mojito_item_parent_class)->dispose (object);
 }
 
@@ -75,6 +87,7 @@ mojito_item_set_source (MojitoItem *item, MojitoSource *source)
   g_return_if_fail (MOJITO_IS_ITEM (item));
   g_return_if_fail (MOJITO_IS_SOURCE (source));
 
+  /* TODO: weak reference? Remember to update dispose() */
   item->priv->source = g_object_ref (source);
 }
 
