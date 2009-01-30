@@ -77,7 +77,7 @@ status_received_cb (TwitterClient *client,
   MojitoSourceTwitter *source = MOJITO_SOURCE_TWITTER (user_data);
   TwitterUser *user;
   MojitoItem *item;
-  char *url, *date;
+  char *date;
   GTimeVal timeval;
 
   if (error) {
@@ -91,15 +91,11 @@ status_received_cb (TwitterClient *client,
 
   user = twitter_status_get_user (status);
 
-  url = g_strdup_printf ("http://twitter.com/%s/statuses/%d",
-                         twitter_user_get_screen_name (user),
-                         twitter_status_get_id (status));
-
   twitter_date_to_time_val (twitter_status_get_created_at (status), &timeval);
   date = mojito_time_t_to_string (timeval.tv_sec);
 
-  mojito_item_put (item, "id", url);
-  mojito_item_put (item, "url", url);
+  mojito_item_put (item, "id", twitter_status_get_url (status));
+  mojito_item_put (item, "url", twitter_status_get_url (status));
   mojito_item_take (item, "date", date);
   /* TODO: need a better name for this */
   mojito_item_put (item, "content", twitter_status_get_text (status));
