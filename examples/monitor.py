@@ -30,9 +30,9 @@ mojito = dbus.Interface(mojito, "com.intel.Mojito")
 
 sources = sys.argv[1:]
 if not sources:
-    sources = mojito.getSources()
+    sources = mojito.GetSources()
 
-path = mojito.openView(sources, 10)
+path = mojito.OpenView(sources, 10)
 view = bus.get_object("com.intel.Mojito", path)
 view = dbus.Interface(view, "com.intel.Mojito.View")
 
@@ -44,7 +44,7 @@ def removed(source, uuid):
     print source, uuid
 view.connect_to_signal("ItemRemoved", removed)
 
-view.start()
+view.Start()
 
 loop = gobject.MainLoop()
 loop.run()
