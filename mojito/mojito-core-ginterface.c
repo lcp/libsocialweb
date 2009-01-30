@@ -44,7 +44,7 @@ mojito_core_iface_get_type (void)
  * @context: Used to return values or throw an error
  *
  * The signature of an implementation of the D-Bus method
- * getSources on interface com.intel.Mojito.
+ * GetSources on interface com.intel.Mojito.
  */
 static void
 mojito_core_iface_get_sources (MojitoCoreIface *self,
@@ -70,9 +70,9 @@ mojito_core_iface_get_sources (MojitoCoreIface *self,
 /**
  * mojito_core_iface_implement_get_sources:
  * @klass: A class whose instances implement this interface
- * @impl: A callback used to implement the getSources D-Bus method
+ * @impl: A callback used to implement the GetSources D-Bus method
  *
- * Register an implementation for the getSources method in the vtable
+ * Register an implementation for the GetSources method in the vtable
  * of an implementation of this interface. To be called from
  * the interface init function.
  */
@@ -90,7 +90,7 @@ mojito_core_iface_implement_get_sources (MojitoCoreIfaceClass *klass, mojito_cor
  * @context: Used to return values or throw an error
  *
  * The signature of an implementation of the D-Bus method
- * openView on interface com.intel.Mojito.
+ * OpenView on interface com.intel.Mojito.
  */
 static void
 mojito_core_iface_open_view (MojitoCoreIface *self,
@@ -120,9 +120,9 @@ mojito_core_iface_open_view (MojitoCoreIface *self,
 /**
  * mojito_core_iface_implement_open_view:
  * @klass: A class whose instances implement this interface
- * @impl: A callback used to implement the openView D-Bus method
+ * @impl: A callback used to implement the OpenView D-Bus method
  *
- * Register an implementation for the openView method in the vtable
+ * Register an implementation for the OpenView method in the vtable
  * of an implementation of this interface. To be called from
  * the interface init function.
  */
@@ -158,7 +158,7 @@ static const DBusGObjectInfo _mojito_core_iface_object_info = {
   0,
   _mojito_core_iface_methods,
   2,
-"com.intel.Mojito\0getSources\0A\0sources\0O\0F\0N\0as\0\0com.intel.Mojito\0openView\0A\0sources\0I\0as\0count\0I\0u\0view\0O\0F\0N\0o\0\0\0",
+"com.intel.Mojito\0GetSources\0A\0sources\0O\0F\0N\0as\0\0com.intel.Mojito\0OpenView\0A\0sources\0I\0as\0count\0I\0u\0view\0O\0F\0N\0o\0\0\0",
 "\0\0",
 "\0\0",
 };

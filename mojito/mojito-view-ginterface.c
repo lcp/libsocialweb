@@ -53,7 +53,7 @@ mojito_view_iface_get_type (void)
  * @context: Used to return values or throw an error
  *
  * The signature of an implementation of the D-Bus method
- * start on interface com.intel.Mojito.View.
+ * Start on interface com.intel.Mojito.View.
  */
 static void
 mojito_view_iface_start (MojitoViewIface *self,
@@ -79,9 +79,9 @@ mojito_view_iface_start (MojitoViewIface *self,
 /**
  * mojito_view_iface_implement_start:
  * @klass: A class whose instances implement this interface
- * @impl: A callback used to implement the start D-Bus method
+ * @impl: A callback used to implement the Start D-Bus method
  *
- * Register an implementation for the start method in the vtable
+ * Register an implementation for the Start method in the vtable
  * of an implementation of this interface. To be called from
  * the interface init function.
  */
@@ -97,7 +97,7 @@ mojito_view_iface_implement_start (MojitoViewIfaceClass *klass, mojito_view_ifac
  * @context: Used to return values or throw an error
  *
  * The signature of an implementation of the D-Bus method
- * stop on interface com.intel.Mojito.View.
+ * Stop on interface com.intel.Mojito.View.
  */
 static void
 mojito_view_iface_stop (MojitoViewIface *self,
@@ -123,9 +123,9 @@ mojito_view_iface_stop (MojitoViewIface *self,
 /**
  * mojito_view_iface_implement_stop:
  * @klass: A class whose instances implement this interface
- * @impl: A callback used to implement the stop D-Bus method
+ * @impl: A callback used to implement the Stop D-Bus method
  *
- * Register an implementation for the stop method in the vtable
+ * Register an implementation for the Stop method in the vtable
  * of an implementation of this interface. To be called from
  * the interface init function.
  */
@@ -141,7 +141,7 @@ mojito_view_iface_implement_stop (MojitoViewIfaceClass *klass, mojito_view_iface
  * @context: Used to return values or throw an error
  *
  * The signature of an implementation of the D-Bus method
- * close on interface com.intel.Mojito.View.
+ * Close on interface com.intel.Mojito.View.
  */
 static void
 mojito_view_iface_close (MojitoViewIface *self,
@@ -167,9 +167,9 @@ mojito_view_iface_close (MojitoViewIface *self,
 /**
  * mojito_view_iface_implement_close:
  * @klass: A class whose instances implement this interface
- * @impl: A callback used to implement the close D-Bus method
+ * @impl: A callback used to implement the Close D-Bus method
  *
- * Register an implementation for the close method in the vtable
+ * Register an implementation for the Close method in the vtable
  * of an implementation of this interface. To be called from
  * the interface init function.
  */
@@ -352,7 +352,7 @@ static const DBusGObjectInfo _mojito_view_iface_object_info = {
   0,
   _mojito_view_iface_methods,
   3,
-"com.intel.Mojito.View\0start\0A\0\0com.intel.Mojito.View\0stop\0A\0\0com.intel.Mojito.View\0close\0A\0\0\0",
+"com.intel.Mojito.View\0Start\0A\0\0com.intel.Mojito.View\0Stop\0A\0\0com.intel.Mojito.View\0Close\0A\0\0\0",
 "com.intel.Mojito.View\0ItemAdded\0com.intel.Mojito.View\0ItemRemoved\0com.intel.Mojito.View\0ItemChanged\0\0",
 "\0\0",
 };
