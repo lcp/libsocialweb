@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <node name="/View_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">>
   <interface name="com.intel.Mojito.View">
-    <method name="start"/>
+    <method name="Start" tp:name-for-bindings="Start"/>
 
-    <method name="stop"/>
+    <method name="Stop"  tp:name-for-bindings="Stop"/>
 
-    <method name="close"/>
+    <method name="Close" tp:name-for-bindings="Close"/>
 
-    <signal name="ItemAdded">
+    <signal name="ItemAdded" tp:name-for-bindings="Item_Added">
       <arg name="source" type="s"/>
       <arg name="uuid" type="s"/>
       <arg name="date" type="x"/>
       <arg name="item" type="a{ss}"/>
     </signal>
 
-    <signal name="ItemRemoved">
+    <signal name="ItemRemoved" tp:name-for-bindings="Item_Removed">
       <arg name="source" type="s"/>
       <arg name="uuid" type="s"/>
     </signal>
 
-    <signal name="ItemChanged">
+    <signal name="ItemChanged"  tp:name-for-bindings="Item_Changed">
       <arg name="source" type="s"/>
       <arg name="uuid" type="s"/>
       <arg name="date" type="x"/>

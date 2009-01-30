@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE node SYSTEM "dbus.dtd">
 
-<node name="/Core_Iface">
+<node name="/Core_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
   <interface name="com.intel.Mojito">
-    <method name="getSources">
+    <method name="GetSources" tp:name-for-bindings="Get_Sources">
       <arg name="sources" type="as" direction="out"/>
     </method>
-    <method name="openView">
+    <method name="OpenView" tp:name-for-bindings="Open_View">
       <arg name="sources" type="as" direction="in"/>
       <arg name="count" type="u" direction="in"/>
       <arg name="view" type="o" direction="out"/>
