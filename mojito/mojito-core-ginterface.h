@@ -28,31 +28,31 @@ GType mojito_core_iface_get_type (void);
   (G_TYPE_INSTANCE_GET_INTERFACE((obj), MOJITO_TYPE_CORE_IFACE, MojitoCoreIfaceClass))
 
 
-typedef void (*mojito_core_iface_get_sources_impl) (MojitoCoreIface *self,
+typedef void (*mojito_core_iface_get_services_impl) (MojitoCoreIface *self,
     DBusGMethodInvocation *context);
-void mojito_core_iface_implement_get_sources (MojitoCoreIfaceClass *klass, mojito_core_iface_get_sources_impl impl);
+void mojito_core_iface_implement_get_services (MojitoCoreIfaceClass *klass, mojito_core_iface_get_services_impl impl);
 /**
- * mojito_core_iface_return_from_get_sources:
+ * mojito_core_iface_return_from_get_services:
  * @context: The D-Bus method invocation context
- * @out_sources: const gchar ** (FIXME, generate documentation)
+ * @out_services: const gchar ** (FIXME, generate documentation)
  *
  * Return successfully by calling dbus_g_method_return().
  * This inline function exists only to provide type-safety.
  */
 static inline
 /* this comment is to stop gtkdoc realising this is static */
-void mojito_core_iface_return_from_get_sources (DBusGMethodInvocation *context,
-    const gchar **out_sources);
+void mojito_core_iface_return_from_get_services (DBusGMethodInvocation *context,
+    const gchar **out_services);
 static inline void
-mojito_core_iface_return_from_get_sources (DBusGMethodInvocation *context,
-    const gchar **out_sources)
+mojito_core_iface_return_from_get_services (DBusGMethodInvocation *context,
+    const gchar **out_services)
 {
   dbus_g_method_return (context,
-      out_sources);
+      out_services);
 }
 
 typedef void (*mojito_core_iface_open_view_impl) (MojitoCoreIface *self,
-    const gchar **in_sources,
+    const gchar **in_services,
     guint in_count,
     DBusGMethodInvocation *context);
 void mojito_core_iface_implement_open_view (MojitoCoreIfaceClass *klass, mojito_core_iface_open_view_impl impl);

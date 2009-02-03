@@ -14,12 +14,12 @@ BUILT_SOURCES = mojito-marshals.c mojito-marshals.h
 
 libmojito_la_CFLAGS = -I$(top_srcdir) \
 		     $(DBUS_GLIB_CFLAGS) $(SOUP_CFLAGS) \
-		     -DMOJITO_SOURCES_MODULES_DIR=\"$(sourcesdir)\"
+		     -DMOJITO_SERVICES_MODULES_DIR=\"$(servicesdir)\"
 libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS)
 libmojito_la_SOURCES = mojito-core.c mojito-core.h \
 		       mojito-item.c mojito-item.h \
 		       mojito-view.c mojito-view.h \
-		       mojito-source.c mojito-source.h \
+		       mojito-service.c mojito-service.h \
 		       mojito-utils.c mojito-utils.h \
 		       mojito-web.c mojito-web.h \
 		       mojito-set.c mojito-set.h \

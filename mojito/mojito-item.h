@@ -20,7 +20,7 @@
 #define _MOJITO_ITEM
 
 #include <glib-object.h>
-#include <mojito/mojito-source.h>
+#include <mojito/mojito-service.h>
 #include <mojito/mojito-set.h>
 
 G_BEGIN_DECLS
@@ -57,9 +57,9 @@ GType mojito_item_get_type (void);
 
 MojitoItem* mojito_item_new (void);
 
-void mojito_item_set_source (MojitoItem *item, MojitoSource *source);
+void mojito_item_set_service (MojitoItem *item, MojitoService *service);
 
-MojitoSource * mojito_item_get_source (MojitoItem *item);
+MojitoService * mojito_item_get_service (MojitoItem *item);
 
 void mojito_item_put (MojitoItem *item, const char *key, const char *value);
 

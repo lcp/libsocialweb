@@ -35,11 +35,11 @@ G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
 #define REFRESH_TIMEOUT (10 * 60)
 
 struct _MojitoViewPrivate {
-  GList *sources;
+  GList *services;
   guint count;
   guint timeout_id;
-  /* The set of pending sources we're waiting for updates from during an update cycle */
-  MojitoSet *pending_sources;
+  /* The set of pending services we're waiting for updates from during an update cycle */
+  MojitoSet *pending_services;
   MojitoSet *pending_items;
   /* The items we've sent to the client */
   MojitoSet *current;
@@ -51,18 +51,18 @@ enum {
 };
 
 static int
-get_source_count (GHashTable *hash, MojitoSource *source)
+get_service_count (GHashTable *hash, MojitoService *service)
 {
-  return GPOINTER_TO_INT (g_hash_table_lookup (hash, source));
+  return GPOINTER_TO_INT (g_hash_table_lookup (hash, service));
 }
 
 static int
-inc_source_count (GHashTable *hash, MojitoSource *source)
+inc_service_count (GHashTable *hash, MojitoService *service)
 {
   int count;
-  count = GPOINTER_TO_INT (g_hash_table_lookup (hash, source));
+  count = GPOINTER_TO_INT (g_hash_table_lookup (hash, service));
   ++count;
-  g_hash_table_insert (hash, source, GINT_TO_POINTER (count));
+  g_hash_table_insert (hash, service, GINT_TO_POINTER (count));
 }
 
 static void
@@ -70,15 +70,15 @@ send_added (gpointer data, gpointer user_data)
 {
   MojitoItem *item = data;
   MojitoView *view = user_data;
-  MojitoSource *source;
+  MojitoService *service;
   time_t time;
 
-  source = mojito_item_get_source (item);
+  service = mojito_item_get_service (item);
 
   time = mojito_time_t_from_string (mojito_item_get (item, "date"));
 
   mojito_view_iface_emit_item_added (view,
-                                     mojito_source_get_name (source),
+                                     mojito_service_get_name (service),
                                      mojito_item_get (item, "id"),
                                      time,
                                      mojito_item_peek_hash (item));
@@ -89,12 +89,12 @@ send_removed (gpointer data, gpointer user_data)
 {
   MojitoItem *item = data;
   MojitoView *view = user_data;
-  MojitoSource *source;
+  MojitoService *service;
 
-  source = mojito_item_get_source (item);
+  service = mojito_item_get_service (item);
 
   mojito_view_iface_emit_item_removed (view,
-                                       mojito_source_get_name (source),
+                                       mojito_service_get_name (service),
                                        mojito_item_get (item, "id"));
 }
 
@@ -103,7 +103,7 @@ munge_items (MojitoView *view)
 {
   MojitoViewPrivate *priv = view->priv;
   GList *list;
-  int count, source_max;
+  int count, service_max;
   GHashTable *counts;
   MojitoSet *new;
 
@@ -114,7 +114,7 @@ munge_items (MojitoView *view)
   list = g_list_sort (list, (GCompareFunc)mojito_item_compare_date_newer);
 
   counts = g_hash_table_new (NULL, NULL);
-  source_max = ceil ((float)priv->count / g_list_length (priv->sources));
+  service_max = ceil ((float)priv->count / g_list_length (priv->services));
 
   count = 0;
   new = mojito_item_set_new ();
@@ -123,12 +123,12 @@ munge_items (MojitoView *view)
      manipulate the list so need to track the new tip */
   while (list && count <= priv->count) {
     MojitoItem *item;
-    MojitoSource *source;
+    MojitoService *service;
 
     item = list->data;
-    source = mojito_item_get_source (item);
+    service = mojito_item_get_service (item);
 
-    if (get_source_count (counts, source) >= source_max) {
+    if (get_service_count (counts, service) >= service_max) {
       list = list->next;
       continue;
     }
@@ -138,7 +138,7 @@ munge_items (MojitoView *view)
     g_object_unref (item);
     list = g_list_delete_link (list, list);
 
-    inc_source_count (counts, source);
+    inc_service_count (counts, service);
   }
   /* Rewind back to the beginning */
   list = g_list_first (list);
@@ -174,23 +174,23 @@ munge_items (MojitoView *view)
 }
 
 static void
-source_updated (MojitoSource *source, MojitoSet *set, gpointer user_data)
+service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
 {
   MojitoView *view = MOJITO_VIEW (user_data);
   MojitoViewPrivate *priv = view->priv;
 
-  mojito_set_remove (priv->pending_sources, (GObject*)source);
+  mojito_set_remove (priv->pending_services, (GObject*)service);
 
   /* If the update timeout id is 0 then we're not running any more, so ignore these updates */
   if (priv->timeout_id) {
-    /* Handle sources returning NULL instead of an empty set */
+    /* Handle services returning NULL instead of an empty set */
     if (set) {
       mojito_set_add_from (priv->pending_items, set);
       mojito_set_unref (set);
     }
 
-    /* Have all of the sources got back to us now? */
-    if (mojito_set_is_empty (priv->pending_sources)) {
+    /* Have all of the services got back to us now? */
+    if (mojito_set_is_empty (priv->pending_services)) {
       munge_items (view);
     }
   }
@@ -205,18 +205,18 @@ start_update (MojitoView *view)
   MojitoViewPrivate *priv = view->priv;
   GList *l;
 
-  mojito_set_empty (priv->pending_sources);
+  mojito_set_empty (priv->pending_services);
   mojito_set_empty (priv->pending_items);
 
-  for (l = priv->sources; l; l = l->next) {
-    MojitoSource *source = l->data;
-    mojito_set_add (priv->pending_sources, g_object_ref (source));
+  for (l = priv->services; l; l = l->next) {
+    MojitoService *service = l->data;
+    mojito_set_add (priv->pending_services, g_object_ref (service));
   }
 
-  for (l = priv->sources; l; l = l->next) {
-    MojitoSource *source = l->data;
-    g_debug ("Updating %s", mojito_source_get_name (source));
-    mojito_source_update (source, source_updated, g_object_ref (view));
+  for (l = priv->services; l; l = l->next) {
+    MojitoService *service = l->data;
+    g_debug ("Updating %s", mojito_service_get_name (service));
+    mojito_service_update (service, service_updated, g_object_ref (view));
   }
 }
 
@@ -311,9 +311,9 @@ mojito_view_dispose (GObject *object)
   MojitoView *view = MOJITO_VIEW (object);
   MojitoViewPrivate *priv = view->priv;
 
-  while (priv->sources) {
-    g_object_unref (priv->sources->data);
-    priv->sources = g_list_delete_link (priv->sources, priv->sources);
+  while (priv->services) {
+    g_object_unref (priv->services->data);
+    priv->services = g_list_delete_link (priv->services, priv->services);
   }
 
   G_OBJECT_CLASS (mojito_view_parent_class)->dispose (object);
@@ -363,7 +363,7 @@ mojito_view_init (MojitoView *self)
 {
   self->priv = GET_PRIVATE (self);
 
-  self->priv->pending_sources = mojito_set_new ();
+  self->priv->pending_services = mojito_set_new ();
   self->priv->pending_items = mojito_item_set_new ();
   self->priv->current = mojito_item_set_new ();
 }
@@ -377,26 +377,26 @@ mojito_view_new (guint count)
 }
 
 static void
-on_item_added (MojitoSource *source,
+on_item_added (MojitoService *service,
                const gchar  *uuid,
                gint64        date,
                GHashTable  *props,
                MojitoView  *view)
 {
-  g_assert (MOJITO_IS_SOURCE (source));
+  g_assert (MOJITO_IS_SERVICE (service));
   g_assert (MOJITO_IS_VIEW (view));
 
   mojito_view_iface_emit_item_added (view,
-                                     mojito_source_get_name (source),
+                                     mojito_service_get_name (service),
                                      uuid,
                                      date,
                                      props);
 }
 
 void
-mojito_view_add_source (MojitoView *view, MojitoSource *source)
+mojito_view_add_service (MojitoView *view, MojitoService *service)
 {
   MojitoViewPrivate *priv = view->priv;
 
-  priv->sources = g_list_append (priv->sources, g_object_ref (source));
+  priv->services = g_list_append (priv->services, g_object_ref (service));
 }

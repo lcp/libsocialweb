@@ -59,17 +59,17 @@ typedef void (*MojitoClientOpenViewCallback) (MojitoClient     *client,
                                               gpointer          userdata);
 
 void mojito_client_open_view (MojitoClient                *client,
-                              GList                       *sources,
+                              GList                       *services,
                               guint                        count,
                               MojitoClientOpenViewCallback cb,
                               gpointer                     userdata);
 
-typedef void (*MojitoClientGetSourcesCallback) (MojitoClient *client,
-                                                GList        *sources,
+typedef void (*MojitoClientGetServicesCallback) (MojitoClient *client,
+                                                GList        *services,
                                                 gpointer      userdata);
 
-void mojito_client_get_sources (MojitoClient                  *client,
-                                MojitoClientGetSourcesCallback cb,
+void mojito_client_get_services (MojitoClient                  *client,
+                                MojitoClientGetServicesCallback cb,
                                 gpointer                       userdata);
 G_END_DECLS
 

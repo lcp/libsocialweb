@@ -26,16 +26,16 @@
 #include <gconf/gconf-client.h>
 #include <libsoup/soup.h>
 
-G_DEFINE_TYPE (MojitoSourceTwitter, mojito_source_twitter, MOJITO_TYPE_SOURCE)
+G_DEFINE_TYPE (MojitoServiceTwitter, mojito_service_twitter, MOJITO_TYPE_SERVICE)
 
 #define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SOURCE_TWITTER, MojitoSourceTwitterPrivate))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitterPrivate))
 
-#define KEY_DIR "/apps/mojito/sources/twitter"
+#define KEY_DIR "/apps/mojito/services/twitter"
 #define KEY_USER KEY_DIR "/user"
 #define KEY_PASSWORD KEY_DIR "/password"
 
-struct _MojitoSourceTwitterPrivate {
+struct _MojitoServiceTwitterPrivate {
   SoupSession *soup;
   GConfClient *gconf;
   gboolean user_set, password_set;
@@ -44,15 +44,15 @@ struct _MojitoSourceTwitterPrivate {
 
   /* This is grim */
   MojitoSet *set;
-  MojitoSourceDataFunc callback;
+  MojitoServiceDataFunc callback;
   gpointer user_data;
 };
 
 static void
 user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
-  MojitoSourceTwitter *twitter = MOJITO_SOURCE_TWITTER (user_data);
-  MojitoSourceTwitterPrivate *priv = twitter->priv;
+  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (user_data);
+  MojitoServiceTwitterPrivate *priv = twitter->priv;
   const char *s = NULL;
 
   if (g_str_equal (entry->key, KEY_USER)) {
@@ -74,7 +74,7 @@ status_received_cb (TwitterClient *client,
                     const GError  *error,
                     gpointer       user_data)
 {
-  MojitoSourceTwitter *source = MOJITO_SOURCE_TWITTER (user_data);
+  MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (user_data);
   TwitterUser *user;
   MojitoItem *item;
   char *date;
@@ -82,12 +82,12 @@ status_received_cb (TwitterClient *client,
 
   if (error) {
     g_debug ("Cannot update Twitter: %s", error->message);
-    source->priv->callback ((MojitoSource*)source, NULL, source->priv->user_data);
+    service->priv->callback ((MojitoService*)service, NULL, service->priv->user_data);
     return;
   }
 
   item = mojito_item_new ();
-  mojito_item_set_source (item, MOJITO_SOURCE (source));
+  mojito_item_set_service (item, MOJITO_SERVICE (service));
 
   user = twitter_status_get_user (status);
 
@@ -103,9 +103,9 @@ status_received_cb (TwitterClient *client,
   mojito_item_put (item, "author", twitter_user_get_name (user));
   mojito_item_take (item, "authorid", g_strdup_printf ("%d", twitter_user_get_id (user)));
   mojito_item_take (item, "authoricon", mojito_web_download_image
-                    (source->priv->soup, twitter_user_get_profile_image_url (user)));
+                    (service->priv->soup, twitter_user_get_profile_image_url (user)));
 
-  mojito_set_add (source->priv->set, (GObject*)item);
+  mojito_set_add (service->priv->set, (GObject*)item);
   g_object_unref (item);
 }
 
@@ -113,19 +113,19 @@ static void
 timeline_received_cb (TwitterClient *client,
                       gpointer       user_data)
 {
-  MojitoSourceTwitter *source = MOJITO_SOURCE_TWITTER (user_data);
+  MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (user_data);
 
-  source->priv->callback ((MojitoSource*)source, mojito_set_ref (source->priv->set), source->priv->user_data);
+  service->priv->callback ((MojitoService*)service, mojito_set_ref (service->priv->set), service->priv->user_data);
 }
 
 static void
-update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
+update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
 {
-  MojitoSourceTwitter *twitter = (MojitoSourceTwitter*)source;
-  MojitoSourceTwitterPrivate *priv = twitter->priv;
+  MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
+  MojitoServiceTwitterPrivate *priv = twitter->priv;
 
   if (!priv->user_set || !priv->password_set) {
-    callback (source, NULL, user_data);
+    callback (service, NULL, user_data);
     return;
   }
 
@@ -138,15 +138,15 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
 }
 
 static const char *
-mojito_source_twitter_get_name (MojitoSource *source)
+mojito_service_twitter_get_name (MojitoService *service)
 {
   return "twitter";
 }
 
 static void
-mojito_source_twitter_dispose (GObject *object)
+mojito_service_twitter_dispose (GObject *object)
 {
-  MojitoSourceTwitterPrivate *priv = MOJITO_SOURCE_TWITTER (object)->priv;
+  MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
 
   if (priv->soup) {
     g_object_unref (priv->soup);
@@ -163,36 +163,36 @@ mojito_source_twitter_dispose (GObject *object)
     priv->client = NULL;
   }
 
-  G_OBJECT_CLASS (mojito_source_twitter_parent_class)->dispose (object);
+  G_OBJECT_CLASS (mojito_service_twitter_parent_class)->dispose (object);
 }
 
 static void
-mojito_source_twitter_finalize (GObject *object)
+mojito_service_twitter_finalize (GObject *object)
 {
-  //MojitoSourceTwitterPrivate *priv = MOJITO_SOURCE_TWITTER (object)->priv;
+  //MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
 
-  G_OBJECT_CLASS (mojito_source_twitter_parent_class)->finalize (object);
+  G_OBJECT_CLASS (mojito_service_twitter_parent_class)->finalize (object);
 }
 
 static void
-mojito_source_twitter_class_init (MojitoSourceTwitterClass *klass)
+mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  MojitoSourceClass *source_class = MOJITO_SOURCE_CLASS (klass);
+  MojitoServiceClass *service_class = MOJITO_SERVICE_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (MojitoSourceTwitterPrivate));
+  g_type_class_add_private (klass, sizeof (MojitoServiceTwitterPrivate));
 
-  object_class->dispose = mojito_source_twitter_dispose;
-  object_class->finalize = mojito_source_twitter_finalize;
+  object_class->dispose = mojito_service_twitter_dispose;
+  object_class->finalize = mojito_service_twitter_finalize;
 
-  source_class->get_name = mojito_source_twitter_get_name;
-  source_class->update = update;
+  service_class->get_name = mojito_service_twitter_get_name;
+  service_class->update = update;
 }
 
 static void
-mojito_source_twitter_init (MojitoSourceTwitter *self)
+mojito_service_twitter_init (MojitoServiceTwitter *self)
 {
-  MojitoSourceTwitterPrivate *priv;
+  MojitoServiceTwitterPrivate *priv;
 
   self->priv = priv = GET_PRIVATE (self);
 

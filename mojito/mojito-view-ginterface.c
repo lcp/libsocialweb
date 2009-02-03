@@ -182,7 +182,7 @@ mojito_view_iface_implement_close (MojitoViewIfaceClass *klass, mojito_view_ifac
 /**
  * mojito_view_iface_emit_item_added:
  * @instance: The object implementing this interface
- * @arg_source: const gchar * (FIXME, generate documentation)
+ * @arg_service: const gchar * (FIXME, generate documentation)
  * @arg_uuid: const gchar * (FIXME, generate documentation)
  * @arg_date: gint64  (FIXME, generate documentation)
  * @arg_item: GHashTable * (FIXME, generate documentation)
@@ -192,7 +192,7 @@ mojito_view_iface_implement_close (MojitoViewIfaceClass *klass, mojito_view_ifac
  */
 void
 mojito_view_iface_emit_item_added (gpointer instance,
-    const gchar *arg_source,
+    const gchar *arg_service,
     const gchar *arg_uuid,
     gint64 arg_date,
     GHashTable *arg_item)
@@ -202,7 +202,7 @@ mojito_view_iface_emit_item_added (gpointer instance,
   g_signal_emit (instance,
       view_iface_signals[SIGNAL_VIEW_IFACE_ItemAdded],
       0,
-      arg_source,
+      arg_service,
       arg_uuid,
       arg_date,
       arg_item);
@@ -211,7 +211,7 @@ mojito_view_iface_emit_item_added (gpointer instance,
 /**
  * mojito_view_iface_emit_item_removed:
  * @instance: The object implementing this interface
- * @arg_source: const gchar * (FIXME, generate documentation)
+ * @arg_service: const gchar * (FIXME, generate documentation)
  * @arg_uuid: const gchar * (FIXME, generate documentation)
  *
  * Type-safe wrapper around g_signal_emit to emit the
@@ -219,7 +219,7 @@ mojito_view_iface_emit_item_added (gpointer instance,
  */
 void
 mojito_view_iface_emit_item_removed (gpointer instance,
-    const gchar *arg_source,
+    const gchar *arg_service,
     const gchar *arg_uuid)
 {
   g_assert (instance != NULL);
@@ -227,14 +227,14 @@ mojito_view_iface_emit_item_removed (gpointer instance,
   g_signal_emit (instance,
       view_iface_signals[SIGNAL_VIEW_IFACE_ItemRemoved],
       0,
-      arg_source,
+      arg_service,
       arg_uuid);
 }
 
 /**
  * mojito_view_iface_emit_item_changed:
  * @instance: The object implementing this interface
- * @arg_source: const gchar * (FIXME, generate documentation)
+ * @arg_service: const gchar * (FIXME, generate documentation)
  * @arg_uuid: const gchar * (FIXME, generate documentation)
  * @arg_date: gint64  (FIXME, generate documentation)
  * @arg_item: GHashTable * (FIXME, generate documentation)
@@ -244,7 +244,7 @@ mojito_view_iface_emit_item_removed (gpointer instance,
  */
 void
 mojito_view_iface_emit_item_changed (gpointer instance,
-    const gchar *arg_source,
+    const gchar *arg_service,
     const gchar *arg_uuid,
     gint64 arg_date,
     GHashTable *arg_item)
@@ -254,7 +254,7 @@ mojito_view_iface_emit_item_changed (gpointer instance,
   g_signal_emit (instance,
       view_iface_signals[SIGNAL_VIEW_IFACE_ItemChanged],
       0,
-      arg_source,
+      arg_service,
       arg_uuid,
       arg_date,
       arg_item);
@@ -265,7 +265,7 @@ mojito_view_iface_base_init_once (gpointer klass G_GNUC_UNUSED)
 {
   /**
    * MojitoViewIface::item-added:
-   * @arg_source: const gchar * (FIXME, generate documentation)
+   * @arg_service: const gchar * (FIXME, generate documentation)
    * @arg_uuid: const gchar * (FIXME, generate documentation)
    * @arg_date: gint64  (FIXME, generate documentation)
    * @arg_item: GHashTable * (FIXME, generate documentation)
@@ -288,7 +288,7 @@ mojito_view_iface_base_init_once (gpointer klass G_GNUC_UNUSED)
 
   /**
    * MojitoViewIface::item-removed:
-   * @arg_source: const gchar * (FIXME, generate documentation)
+   * @arg_service: const gchar * (FIXME, generate documentation)
    * @arg_uuid: const gchar * (FIXME, generate documentation)
    *
    * The ItemRemoved D-Bus signal is emitted whenever this GObject signal is.
@@ -307,7 +307,7 @@ mojito_view_iface_base_init_once (gpointer klass G_GNUC_UNUSED)
 
   /**
    * MojitoViewIface::item-changed:
-   * @arg_source: const gchar * (FIXME, generate documentation)
+   * @arg_service: const gchar * (FIXME, generate documentation)
    * @arg_uuid: const gchar * (FIXME, generate documentation)
    * @arg_date: gint64  (FIXME, generate documentation)
    * @arg_item: GHashTable * (FIXME, generate documentation)

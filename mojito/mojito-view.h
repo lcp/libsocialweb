@@ -20,7 +20,7 @@
 #define _MOJITO_VIEW
 
 #include <glib-object.h>
-#include "mojito-source.h"
+#include "mojito-service.h"
 
 G_BEGIN_DECLS
 
@@ -56,7 +56,7 @@ GType mojito_view_get_type (void);
 
 MojitoView* mojito_view_new (guint count);
 
-void mojito_view_add_source (MojitoView *view, MojitoSource *source);
+void mojito_view_add_service (MojitoView *view, MojitoService *service);
 
 G_END_DECLS
 

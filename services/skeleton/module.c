@@ -28,5 +28,5 @@ mojito_module_get_name (void)
 const GType
 mojito_module_get_type (void)
 {
-  return MOJITO_TYPE_SOURCE_SKELETON;
+  return MOJITO_TYPE_SERVICE_SKELETON;
 }

@@ -158,24 +158,24 @@ _mojito_client_open_view_cb (DBusGProxy *proxy,
 
 void
 mojito_client_open_view (MojitoClient                *client,
-                         GList                       *sources,
+                         GList                       *services,
                          guint                        count,
                          MojitoClientOpenViewCallback cb,
                          gpointer                     userdata)
 {
   MojitoClientPrivate *priv = GET_PRIVATE (client);
-  GPtrArray *sources_array;
+  GPtrArray *services_array;
   GList *l;
   OpenViewClosure *closure;
 
-  sources_array = g_ptr_array_new ();
+  services_array = g_ptr_array_new ();
 
-  for (l = sources; l; l = l->next)
+  for (l = services; l; l = l->next)
   {
-    g_ptr_array_add (sources_array, l->data);
+    g_ptr_array_add (services_array, l->data);
   }
 
-  g_ptr_array_add (sources_array, NULL);
+  g_ptr_array_add (services_array, NULL);
 
   closure = g_new0 (OpenViewClosure, 1);
   closure->client = g_object_ref (client);
@@ -183,59 +183,59 @@ mojito_client_open_view (MojitoClient                *client,
   closure->userdata = userdata;
 
   com_intel_Mojito_open_view_async (priv->proxy,
-                                    (const gchar **)sources_array->pdata,
+                                    (const gchar **)services_array->pdata,
                                     count,
                                     _mojito_client_open_view_cb,
                                     closure);
 
-  g_ptr_array_free (sources_array, TRUE);
+  g_ptr_array_free (services_array, TRUE);
 }
 
 typedef struct
 {
   MojitoClient *client;
-  MojitoClientGetSourcesCallback cb;
+  MojitoClientGetServicesCallback cb;
   gpointer userdata;
-} GetSourcesClosure;
+} GetServicesClosure;
 
 static void
-_mojito_client_get_sources_cb (DBusGProxy *proxy,
-                               gchar     **sources,
+_mojito_client_get_services_cb (DBusGProxy *proxy,
+                               gchar     **services,
                                GError     *error,
                                gpointer    userdata)
 {
-  GetSourcesClosure *closure = (GetSourcesClosure *)userdata;
+  GetServicesClosure *closure = (GetServicesClosure *)userdata;
   MojitoClient *client = closure->client;
 
-  GList *sources_list = NULL;
-  gchar *source;
+  GList *services_list = NULL;
+  gchar *service;
   gint i;
 
-  for (i = 0; (source = sources[i]); i++)
+  for (i = 0; (service = services[i]); i++)
   {
-    sources_list = g_list_append (sources_list, source);
+    services_list = g_list_append (services_list, service);
   }
 
-  closure->cb (client, sources_list, closure->userdata);
+  closure->cb (client, services_list, closure->userdata);
 
-  g_list_free (sources_list);
-  g_strfreev (sources);
+  g_list_free (services_list);
+  g_strfreev (services);
 }
 
 void 
-mojito_client_get_sources (MojitoClient                  *client,
-                           MojitoClientGetSourcesCallback cb,
+mojito_client_get_services (MojitoClient                  *client,
+                           MojitoClientGetServicesCallback cb,
                            gpointer                       userdata)
 {
   MojitoClientPrivate *priv = GET_PRIVATE (client);
-  GetSourcesClosure *closure;
+  GetServicesClosure *closure;
 
-  closure = g_new0 (GetSourcesClosure, 1);
+  closure = g_new0 (GetServicesClosure, 1);
   closure->client = g_object_ref (client);
   closure->cb = cb;
   closure->userdata = userdata;
 
-  com_intel_Mojito_get_sources_async (priv->proxy,
-                                      _mojito_client_get_sources_cb,
+  com_intel_Mojito_get_services_async (priv->proxy,
+                                      _mojito_client_get_services_cb,
                                       closure);
 }

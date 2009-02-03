@@ -16,18 +16,18 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "mojito-source.h"
+#include "mojito-service.h"
 #include "mojito-marshals.h"
 #include "mojito-core.h"
 
-G_DEFINE_ABSTRACT_TYPE (MojitoSource, mojito_source, G_TYPE_OBJECT)
+G_DEFINE_ABSTRACT_TYPE (MojitoService, mojito_service, G_TYPE_OBJECT)
 
 #define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SOURCE, MojitoSourcePrivate))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE, MojitoServicePrivate))
 
-typedef struct _MojitoSourcePrivate MojitoSourcePrivate;
+typedef struct _MojitoServicePrivate MojitoServicePrivate;
 
-struct _MojitoSourcePrivate {
+struct _MojitoServicePrivate {
   MojitoCore *core;
 };
 
@@ -37,12 +37,12 @@ enum {
 };
 
 static void
-mojito_source_set_property (GObject      *object,
+mojito_service_set_property (GObject      *object,
                             guint         property_id,
                             const GValue *value,
                             GParamSpec   *pspec)
 {
-  MojitoSourcePrivate *priv = GET_PRIVATE (object);
+  MojitoServicePrivate *priv = GET_PRIVATE (object);
 
   switch (property_id) {
     case PROP_CORE:
@@ -54,12 +54,12 @@ mojito_source_set_property (GObject      *object,
 }
 
 static void
-mojito_source_get_property (GObject    *object,
+mojito_service_get_property (GObject    *object,
                             guint       property_id,
                             GValue     *value,
                             GParamSpec *pspec)
 {
-  MojitoSourcePrivate *priv = GET_PRIVATE (object);
+  MojitoServicePrivate *priv = GET_PRIVATE (object);
 
   switch (property_id) {
     case PROP_CORE:
@@ -71,9 +71,9 @@ mojito_source_get_property (GObject    *object,
 }
 
 static void
-mojito_source_dispose (GObject *object)
+mojito_service_dispose (GObject *object)
 {
-  MojitoSourcePrivate *priv = GET_PRIVATE (object);
+  MojitoServicePrivate *priv = GET_PRIVATE (object);
 
   if (priv->core)
   {
@@ -81,20 +81,20 @@ mojito_source_dispose (GObject *object)
     priv->core = NULL;
   }
 
-  G_OBJECT_CLASS (mojito_source_parent_class)->dispose (object);
+  G_OBJECT_CLASS (mojito_service_parent_class)->dispose (object);
 }
 
 static void
-mojito_source_class_init (MojitoSourceClass *klass)
+mojito_service_class_init (MojitoServiceClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *pspec;
 
-  g_type_class_add_private (klass, sizeof (MojitoSourcePrivate));
+  g_type_class_add_private (klass, sizeof (MojitoServicePrivate));
 
-  object_class->get_property = mojito_source_get_property;
-  object_class->set_property = mojito_source_set_property;
-  object_class->dispose = mojito_source_dispose;
+  object_class->get_property = mojito_service_get_property;
+  object_class->set_property = mojito_service_set_property;
+  object_class->dispose = mojito_service_dispose;
 
   pspec = g_param_spec_object ("core",
                                "core",
@@ -105,32 +105,32 @@ mojito_source_class_init (MojitoSourceClass *klass)
 }
 
 static void
-mojito_source_init (MojitoSource *self)
+mojito_service_init (MojitoService *self)
 {
 }
 
 const char *
-mojito_source_get_name (MojitoSource *source)
+mojito_service_get_name (MojitoService *service)
 {
-  MojitoSourceClass *source_class = MOJITO_SOURCE_GET_CLASS (source);
+  MojitoServiceClass *service_class = MOJITO_SERVICE_GET_CLASS (service);
 
-  g_return_val_if_fail (source_class->get_name, NULL);
+  g_return_val_if_fail (service_class->get_name, NULL);
 
-  return source_class->get_name (source);
+  return service_class->get_name (service);
 }
 
 MojitoCore *
-mojito_source_get_core (MojitoSource *source)
+mojito_service_get_core (MojitoService *service)
 {
-  return GET_PRIVATE(source)->core;
+  return GET_PRIVATE(service)->core;
 }
 
 void
-mojito_source_update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
+mojito_service_update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
 {
-  MojitoSourceClass *source_class = MOJITO_SOURCE_GET_CLASS (source);
+  MojitoServiceClass *service_class = MOJITO_SERVICE_GET_CLASS (service);
 
-  g_return_if_fail (source_class->update);
+  g_return_if_fail (service_class->update);
 
-  source_class->update (source, callback, user_data);
+  service_class->update (service, callback, user_data);
 }

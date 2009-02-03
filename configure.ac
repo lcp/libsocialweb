@@ -26,8 +26,8 @@ PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0)
 localedir=${datadir}/locale
 AC_SUBST(localedir)
 
-sourcesdir='${libdir}'/mojito/sources
-AC_SUBST(sourcesdir)
+servicesdir='${libdir}'/mojito/services
+AC_SUBST(servicesdir)
 
 
 AC_OUTPUT([
@@ -35,10 +35,10 @@ AC_OUTPUT([
         mojito/Makefile
         mojito-client/Makefile
         src/Makefile
-        sources/Makefile
-        sources/dummy/Makefile
-        sources/flickr/Makefile
-        sources/twitter/Makefile
+        services/Makefile
+        services/dummy/Makefile
+        services/flickr/Makefile
+        services/twitter/Makefile
         examples/Makefile
         mojito-client-0.0.pc
 ])

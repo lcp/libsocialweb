@@ -3,22 +3,22 @@
 
 <node name="/Core_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
   <interface name="com.intel.Mojito">
-    <method name="GetSources" tp:name-for-bindings="Get_Sources">
-      <arg name="sources" type="as" direction="out"/>
+    <method name="GetServices" tp:name-for-bindings="Get_Services">
+      <arg name="services" type="as" direction="out"/>
     </method>
     <method name="OpenView" tp:name-for-bindings="Open_View">
-      <arg name="sources" type="as" direction="in"/>
+      <arg name="services" type="as" direction="in"/>
       <arg name="count" type="u" direction="in"/>
       <arg name="view" type="o" direction="out"/>
     </method>
     <!--
-        <method name="getSourceDateRange">
-        <arg name="source" type="s" direction="in"/>
+        <method name="getServiceDateRange">
+        <arg name="service" type="s" direction="in"/>
         <arg name="startdate" type="i" direction="out"/>
         <arg name="enddate" type="i" direction="out"/>
         </method>
-        <method name="getSourceRange">
-        <arg name="source" type="s" direction="in"/>
+        <method name="getServiceRange">
+        <arg name="service" type="s" direction="in"/>
         <arg name="max_count" type="i" direction="out"/>
         </method>
     -->

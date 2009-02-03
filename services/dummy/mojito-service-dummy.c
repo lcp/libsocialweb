@@ -16,30 +16,30 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "mojito-source-dummy.h"
+#include "mojito-service-dummy.h"
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
 
-G_DEFINE_TYPE (MojitoSourceDummy, mojito_source_dummy, MOJITO_TYPE_SOURCE)
+G_DEFINE_TYPE (MojitoServiceDummy, mojito_service_dummy, MOJITO_TYPE_SERVICE)
 
 #define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SOURCE_DUMMY, MojitoSourceDummyPrivate))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_DUMMY, MojitoServiceDummyPrivate))
 
-typedef struct _MojitoSourceDummyPrivate MojitoSourceDummyPrivate;
+typedef struct _MojitoServiceDummyPrivate MojitoServiceDummyPrivate;
 
-struct _MojitoSourceDummyPrivate {
+struct _MojitoServiceDummyPrivate {
   gpointer dummy;
 };
 
 static const char *
-get_name (MojitoSource *source)
+get_name (MojitoService *service)
 {
   return "dummy";
 }
 
 static void
-update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
+update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
 {
   MojitoSet *set;
   MojitoItem *item;
@@ -47,7 +47,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   set = mojito_item_set_new ();
 
   item = mojito_item_new ();
-  mojito_item_set_source (item, source);
+  mojito_item_set_service (item, service);
   mojito_item_put (item, "id", "dummy-1");
   mojito_item_put (item, "title", "Dummy 1");
   mojito_item_put (item, "url", "http://burtonini.com/");
@@ -56,7 +56,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   g_object_unref (item);
 
   item = mojito_item_new ();
-  mojito_item_set_source (item, source);
+  mojito_item_set_service (item, service);
   mojito_item_put (item, "id", "dummy-2");
   mojito_item_put (item, "title", "Dummy 2");
   mojito_item_put (item, "url", "http://burtonini.com/");
@@ -64,11 +64,11 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
   mojito_set_add (set, G_OBJECT (item));
   g_object_unref (item);
 
-  callback (source, set, user_data);
+  callback (service, set, user_data);
 }
 
 static void
-mojito_source_dummy_get_property (GObject *object, guint property_id,
+mojito_service_dummy_get_property (GObject *object, guint property_id,
                               GValue *value, GParamSpec *pspec)
 {
   switch (property_id) {
@@ -78,7 +78,7 @@ mojito_source_dummy_get_property (GObject *object, guint property_id,
 }
 
 static void
-mojito_source_dummy_set_property (GObject *object, guint property_id,
+mojito_service_dummy_set_property (GObject *object, guint property_id,
                               const GValue *value, GParamSpec *pspec)
 {
   switch (property_id) {
@@ -88,35 +88,35 @@ mojito_source_dummy_set_property (GObject *object, guint property_id,
 }
 
 static void
-mojito_source_dummy_dispose (GObject *object)
+mojito_service_dummy_dispose (GObject *object)
 {
-  G_OBJECT_CLASS (mojito_source_dummy_parent_class)->dispose (object);
+  G_OBJECT_CLASS (mojito_service_dummy_parent_class)->dispose (object);
 }
 
 static void
-mojito_source_dummy_finalize (GObject *object)
+mojito_service_dummy_finalize (GObject *object)
 {
-  G_OBJECT_CLASS (mojito_source_dummy_parent_class)->finalize (object);
+  G_OBJECT_CLASS (mojito_service_dummy_parent_class)->finalize (object);
 }
 
 static void
-mojito_source_dummy_class_init (MojitoSourceDummyClass *klass)
+mojito_service_dummy_class_init (MojitoServiceDummyClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  MojitoSourceClass *source_class = MOJITO_SOURCE_CLASS (klass);
+  MojitoServiceClass *service_class = MOJITO_SERVICE_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (MojitoSourceDummyPrivate));
+  g_type_class_add_private (klass, sizeof (MojitoServiceDummyPrivate));
 
-  object_class->get_property = mojito_source_dummy_get_property;
-  object_class->set_property = mojito_source_dummy_set_property;
-  object_class->dispose = mojito_source_dummy_dispose;
-  object_class->finalize = mojito_source_dummy_finalize;
+  object_class->get_property = mojito_service_dummy_get_property;
+  object_class->set_property = mojito_service_dummy_set_property;
+  object_class->dispose = mojito_service_dummy_dispose;
+  object_class->finalize = mojito_service_dummy_finalize;
 
-  source_class->get_name = get_name;
-  source_class->update = update;
+  service_class->get_name = get_name;
+  service_class->update = update;
 }
 
 static void
-mojito_source_dummy_init (MojitoSourceDummy *self)
+mojito_service_dummy_init (MojitoServiceDummy *self)
 {
 }

@@ -17,7 +17,7 @@
  */
 
 #include <stdlib.h>
-#include "mojito-source-flickr.h"
+#include "mojito-service-flickr.h"
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
@@ -27,15 +27,15 @@
 #include <gconf/gconf-client.h>
 #include <libsoup/soup.h>
 
-G_DEFINE_TYPE (MojitoSourceFlickr, mojito_source_flickr, MOJITO_TYPE_SOURCE)
+G_DEFINE_TYPE (MojitoServiceFlickr, mojito_service_flickr, MOJITO_TYPE_SERVICE)
 
 #define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SOURCE_FLICKR, MojitoSourceFlickrPrivate))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_FLICKR, MojitoServiceFlickrPrivate))
 
-#define KEY_BASE "/apps/mojito/sources/flickr"
+#define KEY_BASE "/apps/mojito/services/flickr"
 #define KEY_USER KEY_BASE "/user"
 
-struct _MojitoSourceFlickrPrivate {
+struct _MojitoServiceFlickrPrivate {
   SoupSession *soup;
   GConfClient *gconf;
   RestProxy *proxy;
@@ -133,7 +133,7 @@ get_thumbnail (RestXmlNode *node, SoupSession *session)
 }
 
 typedef struct {
-  MojitoSourceDataFunc callback;
+  MojitoServiceDataFunc callback;
   gpointer user_data;
 }UpdateData;
 
@@ -143,8 +143,8 @@ flickr_callback (RestProxyCall *call,
                  GObject *weak_object,
                  gpointer user_data)
 {
-  MojitoSourceFlickr *source = MOJITO_SOURCE_FLICKR (weak_object);
-  MojitoSourceFlickrPrivate *priv = source->priv;
+  MojitoServiceFlickr *service = MOJITO_SERVICE_FLICKR (weak_object);
+  MojitoServiceFlickrPrivate *priv = service->priv;
   UpdateData *data = user_data;
   RestXmlParser *parser;
   RestXmlNode *root, *node;
@@ -173,7 +173,7 @@ flickr_callback (RestProxyCall *call,
     gint64 date;
 
     item = mojito_item_new ();
-    mojito_item_set_source (item, (MojitoSource*)source);
+    mojito_item_set_service (item, (MojitoService*)service);
 
     url = construct_photo_page_url (node);
     mojito_item_put (item, "id", url);
@@ -196,20 +196,20 @@ flickr_callback (RestProxyCall *call,
   rest_xml_node_unref (root);
   g_object_unref (parser);
 
-  data->callback ((MojitoSource*)source, set, data->user_data);
+  data->callback ((MojitoService*)service, set, data->user_data);
 
   g_slice_free (UpdateData, data);
 }
 
 static void
-update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
+update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
 {
-  MojitoSourceFlickr *flickr = (MojitoSourceFlickr*)source;
+  MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
   UpdateData *data;
   RestProxyCall *call;
 
   if (flickr->priv->user_id == NULL) {
-    callback (source, NULL, user_data);
+    callback (service, NULL, user_data);
     return;
   }
 
@@ -225,11 +225,11 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
                               "extras", "date_upload,icon_server",
                               NULL);
   /* TODO: GError */
-  rest_proxy_call_async (call, flickr_callback, (GObject*)source, data, NULL);
+  rest_proxy_call_async (call, flickr_callback, (GObject*)service, data, NULL);
 }
 
 static const char *
-mojito_source_flickr_get_name (MojitoSource *source)
+mojito_service_flickr_get_name (MojitoService *service)
 {
   return "flickr";
 }
@@ -237,17 +237,17 @@ mojito_source_flickr_get_name (MojitoSource *source)
 static void
 user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
-  MojitoSourceFlickr *flickr = MOJITO_SOURCE_FLICKR (user_data);
-  MojitoSourceFlickrPrivate *priv = flickr->priv;
+  MojitoServiceFlickr *flickr = MOJITO_SERVICE_FLICKR (user_data);
+  MojitoServiceFlickrPrivate *priv = flickr->priv;
 
   g_free (priv->user_id);
   priv->user_id = g_strdup (gconf_value_get_string (entry->value));
 }
 
 static void
-mojito_source_flickr_dispose (GObject *object)
+mojito_service_flickr_dispose (GObject *object)
 {
-  MojitoSourceFlickrPrivate *priv = MOJITO_SOURCE_FLICKR (object)->priv;
+  MojitoServiceFlickrPrivate *priv = MOJITO_SERVICE_FLICKR (object)->priv;
 
   if (priv->soup) {
     g_object_unref (priv->soup);
@@ -264,38 +264,38 @@ mojito_source_flickr_dispose (GObject *object)
     priv->proxy = NULL;
   }
 
-  G_OBJECT_CLASS (mojito_source_flickr_parent_class)->dispose (object);
+  G_OBJECT_CLASS (mojito_service_flickr_parent_class)->dispose (object);
 }
 
 static void
-mojito_source_flickr_finalize (GObject *object)
+mojito_service_flickr_finalize (GObject *object)
 {
-  MojitoSourceFlickrPrivate *priv = MOJITO_SOURCE_FLICKR (object)->priv;
+  MojitoServiceFlickrPrivate *priv = MOJITO_SERVICE_FLICKR (object)->priv;
 
   g_free (priv->user_id);
 
-  G_OBJECT_CLASS (mojito_source_flickr_parent_class)->finalize (object);
+  G_OBJECT_CLASS (mojito_service_flickr_parent_class)->finalize (object);
 }
 
 static void
-mojito_source_flickr_class_init (MojitoSourceFlickrClass *klass)
+mojito_service_flickr_class_init (MojitoServiceFlickrClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  MojitoSourceClass *source_class = MOJITO_SOURCE_CLASS (klass);
+  MojitoServiceClass *service_class = MOJITO_SERVICE_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (MojitoSourceFlickrPrivate));
+  g_type_class_add_private (klass, sizeof (MojitoServiceFlickrPrivate));
 
-  object_class->dispose = mojito_source_flickr_dispose;
-  object_class->finalize = mojito_source_flickr_finalize;
+  object_class->dispose = mojito_service_flickr_dispose;
+  object_class->finalize = mojito_service_flickr_finalize;
 
-  source_class->get_name = mojito_source_flickr_get_name;
-  source_class->update = update;
+  service_class->get_name = mojito_service_flickr_get_name;
+  service_class->update = update;
 }
 
 static void
-mojito_source_flickr_init (MojitoSourceFlickr *self)
+mojito_service_flickr_init (MojitoServiceFlickr *self)
 {
-  MojitoSourceFlickrPrivate *priv;
+  MojitoServiceFlickrPrivate *priv;
 
   self->priv = priv = GET_PRIVATE (self);
 

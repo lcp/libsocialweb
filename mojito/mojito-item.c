@@ -25,7 +25,7 @@ G_DEFINE_TYPE (MojitoItem, mojito_item, G_TYPE_OBJECT)
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_ITEM, MojitoItemPrivate))
 
 struct _MojitoItemPrivate {
-  MojitoSource *source;
+  MojitoService *service;
   GHashTable *hash;
   time_t cached_date;
 };
@@ -41,9 +41,9 @@ mojito_item_dispose (GObject *object)
     priv->hash = NULL;
   }
 
-  if (priv->source) {
-    g_object_unref (priv->source);
-    priv->source = NULL;
+  if (priv->service) {
+    g_object_unref (priv->service);
+    priv->service = NULL;
   }
 
   G_OBJECT_CLASS (mojito_item_parent_class)->dispose (object);
@@ -74,21 +74,21 @@ mojito_item_new (void)
 }
 
 void
-mojito_item_set_source (MojitoItem *item, MojitoSource *source)
+mojito_item_set_service (MojitoItem *item, MojitoService *service)
 {
   g_return_if_fail (MOJITO_IS_ITEM (item));
-  g_return_if_fail (MOJITO_IS_SOURCE (source));
+  g_return_if_fail (MOJITO_IS_SERVICE (service));
 
   /* TODO: weak reference? Remember to update dispose() */
-  item->priv->source = g_object_ref (source);
+  item->priv->service = g_object_ref (service);
 }
 
-MojitoSource *
-mojito_item_get_source (MojitoItem *item)
+MojitoService *
+mojito_item_get_service (MojitoItem *item)
 {
   g_return_val_if_fail (MOJITO_IS_ITEM (item), NULL);
 
-  return item->priv->source;
+  return item->priv->service;
 }
 
 void

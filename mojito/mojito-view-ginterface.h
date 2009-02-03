@@ -86,15 +86,15 @@ mojito_view_iface_return_from_close (DBusGMethodInvocation *context)
 }
 
 void mojito_view_iface_emit_item_added (gpointer instance,
-    const gchar *arg_source,
+    const gchar *arg_service,
     const gchar *arg_uuid,
     gint64 arg_date,
     GHashTable *arg_item);
 void mojito_view_iface_emit_item_removed (gpointer instance,
-    const gchar *arg_source,
+    const gchar *arg_service,
     const gchar *arg_uuid);
 void mojito_view_iface_emit_item_changed (gpointer instance,
-    const gchar *arg_source,
+    const gchar *arg_service,
     const gchar *arg_uuid,
     gint64 arg_date,
     GHashTable *arg_item);

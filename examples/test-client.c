@@ -25,8 +25,8 @@ client_view_item_added_cb (MojitoClientView *view,
 {
   GList *l;
 
-  g_debug ("New item: source = %s uuid = %s",
-           item->source,
+  g_debug ("New item: service = %s uuid = %s",
+           item->service,
            item->uuid);
 
   g_debug ("Current list looks like:");
@@ -34,7 +34,7 @@ client_view_item_added_cb (MojitoClientView *view,
   for (l = mojito_client_view_get_sorted_items (view); l; l = l->next)
   {
     g_debug ("%s %s", 
-             ((MojitoItem *)l->data)->source,
+             ((MojitoItem *)l->data)->service,
              ((MojitoItem *)l->data)->uuid);
   }
 }
@@ -49,18 +49,18 @@ client_open_view_cb (MojitoClient *client,
 }
 
 static void
-client_get_sources_cb (MojitoClient *client,
-                       GList        *sources,
+client_get_services_cb (MojitoClient *client,
+                       GList        *services,
                        gpointer      userdata)
 {
   GList *l;
 
-  for (l = sources; l; l = l->next)
+  for (l = services; l; l = l->next)
   {
-    g_debug ("Told about source: %s", l->data);
+    g_debug ("Told about service: %s", l->data);
   }
 
-  mojito_client_open_view (client, sources, 10, client_open_view_cb, NULL);
+  mojito_client_open_view (client, services, 10, client_open_view_cb, NULL);
 }
 
 int
@@ -73,7 +73,7 @@ main (int    argc,
   g_type_init ();
 
   client = mojito_client_new ();
-  mojito_client_get_sources (client, client_get_sources_cb, NULL);
+  mojito_client_get_services (client, client_get_services_cb, NULL);
 
   loop = g_main_loop_new (NULL, FALSE);
 

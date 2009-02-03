@@ -32,7 +32,7 @@ mojito_item_new (void)
 void
 mojito_item_free (MojitoItem *item)
 {
-  g_free (item->source);
+  g_free (item->service);
   g_free (item->uuid);
 
   if (item->props)

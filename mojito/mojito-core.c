@@ -36,17 +36,17 @@ G_DEFINE_TYPE_WITH_CODE (MojitoCore, mojito_core, G_TYPE_OBJECT,
 
 struct _MojitoCorePrivate {
   DBusGConnection *connection;
-  /* Hash of source name to GTypes */
-  GHashTable *source_names;
-  /* Hash of source names to instances */
-  GHashTable *sources;
+  /* Hash of service name to GTypes */
+  GHashTable *service_names;
+  /* Hash of service names to instances */
+  GHashTable *services;
 };
 
 typedef const gchar *(*MojitoModuleGetNameFunc)(void);
 typedef const GType (*MojitoModuleGetTypeFunc)(void);
 
 static void
-get_sources (MojitoCoreIface *self, DBusGMethodInvocation *context)
+get_services (MojitoCoreIface *self, DBusGMethodInvocation *context)
 {
   MojitoCore *core = MOJITO_CORE (self);
   MojitoCorePrivate *priv = core->priv;
@@ -55,14 +55,14 @@ get_sources (MojitoCoreIface *self, DBusGMethodInvocation *context)
 
   array = g_ptr_array_new ();
 
-  l = g_hash_table_get_keys (priv->source_names);
+  l = g_hash_table_get_keys (priv->service_names);
   while (l) {
     g_ptr_array_add (array, l->data);
     l = g_list_delete_link (l, l);
   }
   g_ptr_array_add (array, NULL);
 
-  mojito_core_iface_return_from_get_sources (context, (const gpointer)array->pdata);
+  mojito_core_iface_return_from_get_services (context, (const gpointer)array->pdata);
 
   g_ptr_array_free (array, TRUE);
 }
@@ -86,7 +86,7 @@ view_weak_notify (gpointer data, GObject *old_view)
 }
 
 static void
-open_view (MojitoCoreIface *self, const char **sources, guint count, DBusGMethodInvocation *context)
+open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMethodInvocation *context)
 {
   MojitoCore *core = MOJITO_CORE (self);
   MojitoCorePrivate *priv = core->priv;
@@ -98,32 +98,32 @@ open_view (MojitoCoreIface *self, const char **sources, guint count, DBusGMethod
   path = make_path ();
   dbus_g_connection_register_g_object (priv->connection, path, (GObject*)view);
 
-  for (i = sources; *i; i++) {
+  for (i = services; *i; i++) {
     const char *name = *i;
-    MojitoSource *source;
-    GType source_type;
+    MojitoService *service;
+    GType service_type;
 
-    g_debug ("%s: source name %s", __FUNCTION__, name);
+    g_debug ("%s: service name %s", __FUNCTION__, name);
 
-    source = g_hash_table_lookup (priv->sources, name);
+    service = g_hash_table_lookup (priv->services, name);
 
-    if (source == NULL) {
-      source_type = GPOINTER_TO_INT
-        (g_hash_table_lookup (priv->source_names, name));
+    if (service == NULL) {
+      service_type = GPOINTER_TO_INT
+        (g_hash_table_lookup (priv->service_names, name));
 
-      if (source_type) {
-        source = g_object_new (source_type,
+      if (service_type) {
+        service = g_object_new (service_type,
                                "core", core,
                                NULL);
 
         /* TODO: make this a weak reference so the entry can be removed when the
            last view closes */
-        g_hash_table_insert (priv->sources, g_strdup (name), g_object_ref (source));
+        g_hash_table_insert (priv->services, g_strdup (name), g_object_ref (service));
       }
     }
 
-    if (source) {
-      mojito_view_add_source (view, source);
+    if (service) {
+      mojito_view_add_service (view, service);
     }
   }
 
@@ -157,7 +157,7 @@ mojito_core_dispose (GObject *object)
 {
   MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
 
-  /* TODO: free source_names */
+  /* TODO: free service_names */
 
   G_OBJECT_CLASS (mojito_core_parent_class)->dispose (object);
 }
@@ -175,7 +175,7 @@ core_iface_init (gpointer g_iface, gpointer iface_data)
 {
   MojitoCoreIfaceClass *klass = (MojitoCoreIfaceClass*)g_iface;
 
-  mojito_core_iface_implement_get_sources (klass, get_sources);
+  mojito_core_iface_implement_get_services (klass, get_services);
   mojito_core_iface_implement_open_view (klass, open_view);
 }
 
@@ -192,24 +192,24 @@ mojito_core_class_init (MojitoCoreClass *klass)
 }
 
 static void
-populate_sources (MojitoCore *core)
+populate_services (MojitoCore *core)
 {
-  /* FIXME: Get the sources from directory */
+  /* FIXME: Get the services from directory */
   MojitoCorePrivate *priv = core->priv;
-  GFile *sources_dir_file;
+  GFile *services_dir_file;
   GFileEnumerator *enumerator;
   GError *error = NULL;
   GFileInfo *fi;
   gchar *module_path = NULL;
-  GModule *source_module;
-  const gchar *source_name;
-  GType source_type;
+  GModule *service_module;
+  const gchar *service_name;
+  GType service_type;
   gpointer sym;
-  MojitoSource *source;
+  MojitoService *service;
 
-  sources_dir_file = g_file_new_for_path (MOJITO_SOURCES_MODULES_DIR);
+  services_dir_file = g_file_new_for_path (MOJITO_SERVICES_MODULES_DIR);
 
-  enumerator = g_file_enumerate_children (sources_dir_file,
+  enumerator = g_file_enumerate_children (services_dir_file,
                                           G_FILE_ATTRIBUTE_STANDARD_NAME,
                                           G_FILE_QUERY_INFO_NONE,
                                           NULL,
@@ -220,7 +220,7 @@ populate_sources (MojitoCore *core)
     g_critical (G_STRLOC ": error whilst enumerating directory children: %s",
                 error->message);
     g_clear_error (&error);
-    g_object_unref (sources_dir_file);
+    g_object_unref (services_dir_file);
     return;
   }
 
@@ -234,43 +234,43 @@ populate_sources (MojitoCore *core)
       continue;
     }
 
-    module_path = g_build_filename (MOJITO_SOURCES_MODULES_DIR,
+    module_path = g_build_filename (MOJITO_SERVICES_MODULES_DIR,
                                     g_file_info_get_name (fi),
                                     NULL);
-    source_module = g_module_open (module_path,
+    service_module = g_module_open (module_path,
                                    G_MODULE_BIND_LOCAL | G_MODULE_BIND_LAZY);
-    if (source_module == NULL)
+    if (service_module == NULL)
     {
       g_critical (G_STRLOC ": error opening module: %s",
                   g_module_error());
       continue;
     }
 
-    source_name = NULL;
-    if (!g_module_symbol (source_module, "mojito_module_get_name", &sym))
+    service_name = NULL;
+    if (!g_module_symbol (service_module, "mojito_module_get_name", &sym))
     {
       g_critical (G_STRLOC ": error getting symbol: %s",
                   g_module_error());
     } else {
-      source_name = (*(MojitoModuleGetNameFunc)sym)();
+      service_name = (*(MojitoModuleGetNameFunc)sym)();
     }
 
-    source_type = 0;
-    if (!g_module_symbol (source_module, "mojito_module_get_type", &sym))
+    service_type = 0;
+    if (!g_module_symbol (service_module, "mojito_module_get_type", &sym))
     {
       g_critical (G_STRLOC ": error getting symbol: %s",
                   g_module_error());
     } else {
-      source_type =  (*(MojitoModuleGetTypeFunc)sym)();
+      service_type =  (*(MojitoModuleGetTypeFunc)sym)();
     }
 
-    if (source_name && source_type)
+    if (service_name && service_type)
     {
-      g_hash_table_insert (priv->source_names, (gchar *)source_name, GINT_TO_POINTER (source_type));
-      g_debug (G_STRLOC ": Imported module: %s", source_name);
+      g_hash_table_insert (priv->service_names, (gchar *)service_name, GINT_TO_POINTER (service_type));
+      g_debug (G_STRLOC ": Imported module: %s", service_name);
     }
 
-    g_module_make_resident (source_module);
+    g_module_make_resident (service_module);
 
     fi = g_file_enumerator_next_file (enumerator, NULL, &error);
   }
@@ -282,7 +282,7 @@ populate_sources (MojitoCore *core)
     g_clear_error (&error);
   }
 
-  g_object_unref (sources_dir_file);
+  g_object_unref (services_dir_file);
   g_object_unref (enumerator);
 }
 
@@ -294,10 +294,10 @@ mojito_core_init (MojitoCore *self)
   self->priv = priv;
 
   /* TODO: check free policy */
-  priv->source_names = g_hash_table_new (g_str_hash, g_str_equal);
-  priv->sources = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
+  priv->service_names = g_hash_table_new (g_str_hash, g_str_equal);
+  priv->services = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
 
-  populate_sources (self);
+  populate_services (self);
 }
 
 MojitoCore*

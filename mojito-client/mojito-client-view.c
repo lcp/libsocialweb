@@ -124,7 +124,7 @@ mojito_client_view_finalize (GObject *object)
 
 static void
 _proxy_item_added_cb (DBusGProxy  *proxy,
-                      const gchar *source,
+                      const gchar *service,
                       const gchar *uuid,
                       gint64       date,
                       GHashTable  *props,
@@ -135,7 +135,7 @@ _proxy_item_added_cb (DBusGProxy  *proxy,
   MojitoItem *item;
 
   item = mojito_item_new ();
-  item->source = g_strdup (source);
+  item->service = g_strdup (service);
   item->uuid = g_strdup (uuid);
   item->date.tv_sec = date;
   item->props = g_hash_table_ref (props);
@@ -147,7 +147,7 @@ _proxy_item_added_cb (DBusGProxy  *proxy,
 
 static void
 _proxy_item_changed_cb (DBusGProxy  *proxy,
-                        const gchar *source,
+                        const gchar *service,
                         const gchar *uuid,
                         gint64       date,
                         GHashTable  *props,
@@ -172,7 +172,7 @@ _proxy_item_changed_cb (DBusGProxy  *proxy,
 
 static void
 _proxy_item_removed_cb (DBusGProxy  *proxy,
-                        const gchar *source,
+                        const gchar *service,
                         const gchar *uuid,
                         gpointer     userdata)
 {

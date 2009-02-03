@@ -20,7 +20,7 @@
 
 typedef struct {
   volatile gint refcount;
-  gchar *source;
+  gchar *service;
   gchar *uuid;
   GTimeVal date;
   GHashTable *props;
