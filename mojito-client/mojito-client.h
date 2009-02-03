@@ -69,8 +69,8 @@ typedef void (*MojitoClientGetServicesCallback) (MojitoClient *client,
                                                 gpointer      userdata);
 
 void mojito_client_get_services (MojitoClient                  *client,
-                                MojitoClientGetServicesCallback cb,
-                                gpointer                       userdata);
+                                 MojitoClientGetServicesCallback cb,
+                                 gpointer                       userdata);
 G_END_DECLS
 
 #endif /* _MOJITO_CLIENT */

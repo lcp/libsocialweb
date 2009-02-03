@@ -38,9 +38,9 @@ enum {
 
 static void
 mojito_service_set_property (GObject      *object,
-                            guint         property_id,
-                            const GValue *value,
-                            GParamSpec   *pspec)
+                             guint         property_id,
+                             const GValue *value,
+                             GParamSpec   *pspec)
 {
   MojitoServicePrivate *priv = GET_PRIVATE (object);
 
@@ -55,9 +55,9 @@ mojito_service_set_property (GObject      *object,
 
 static void
 mojito_service_get_property (GObject    *object,
-                            guint       property_id,
-                            GValue     *value,
-                            GParamSpec *pspec)
+                             guint       property_id,
+                             GValue     *value,
+                             GParamSpec *pspec)
 {
   MojitoServicePrivate *priv = GET_PRIVATE (object);
 

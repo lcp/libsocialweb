@@ -200,9 +200,9 @@ typedef struct
 
 static void
 _mojito_client_get_services_cb (DBusGProxy *proxy,
-                               gchar     **services,
-                               GError     *error,
-                               gpointer    userdata)
+                                gchar     **services,
+                                GError     *error,
+                                gpointer    userdata)
 {
   GetServicesClosure *closure = (GetServicesClosure *)userdata;
   MojitoClient *client = closure->client;
@@ -223,9 +223,9 @@ _mojito_client_get_services_cb (DBusGProxy *proxy,
 }
 
 void 
-mojito_client_get_services (MojitoClient                  *client,
-                           MojitoClientGetServicesCallback cb,
-                           gpointer                       userdata)
+mojito_client_get_services (MojitoClient                   *client,
+                            MojitoClientGetServicesCallback cb,
+                            gpointer                        userdata)
 {
   MojitoClientPrivate *priv = GET_PRIVATE (client);
   GetServicesClosure *closure;
@@ -236,6 +236,6 @@ mojito_client_get_services (MojitoClient                  *client,
   closure->userdata = userdata;
 
   com_intel_Mojito_get_services_async (priv->proxy,
-                                      _mojito_client_get_services_cb,
-                                      closure);
-}
+                                       _mojito_client_get_services_cb,
+                                       closure);
+} 
