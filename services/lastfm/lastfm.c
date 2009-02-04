@@ -118,7 +118,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
   callback (service, set, user_data);
 }
 
-static char *
+static const char *
 get_name (MojitoService *service)
 {
   return "lastfm";
