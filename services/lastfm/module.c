@@ -1,4 +1,4 @@
-#include "mojito-module.h"
+#include <mojito/mojito-module.h>
 #include "lastfm.h"
 
 const gchar *
@@ -10,5 +10,5 @@ mojito_module_get_name (void)
 const GType
 mojito_module_get_type (void)
 {
-  return MOJITO_TYPE_SOURCE_LASTFM;
+  return MOJITO_TYPE_SERVICE_LASTFM;
 }

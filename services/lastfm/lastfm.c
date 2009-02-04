@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <mojito/mojito-source.h>
+#include <mojito/mojito-service.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-utils.h>
 #include <rest/rest-proxy.h>
@@ -7,19 +7,19 @@
 
 #include "lastfm.h"
 
-G_DEFINE_TYPE (MojitoSourceLastfm, mojito_source_lastfm, MOJITO_TYPE_SOURCE)
+G_DEFINE_TYPE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE)
 
 #define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SOURCE_LASTFM, MojitoSourceLastfmPrivate))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_LASTFM, MojitoServiceLastfmPrivate))
 
-struct _MojitoSourceLastfmPrivate {
+struct _MojitoServiceLastfmPrivate {
   RestProxy *proxy;
 };
 
 static void
-update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
+update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
 {
-  MojitoSourceLastfm *lastfm = MOJITO_SOURCE_LASTFM (source);
+  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
   RestProxyCall *call;
   GError *error = NULL;
   RestXmlParser *parser;
@@ -40,7 +40,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
     g_error_free (error);
     g_object_unref (call);
 
-    callback (source, NULL, user_data);
+    callback (service, NULL, user_data);
     return;
   }
 
@@ -73,7 +73,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
       g_error_free (error);
       g_object_unref (call);
       /* TODO: proper cleanup */
-      callback (source, NULL, user_data);
+      callback (service, NULL, user_data);
       return;
     }
 
@@ -92,7 +92,7 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
     }
 
     item = mojito_item_new ();
-    mojito_item_set_source (item, source);
+    mojito_item_set_service (item, service);
 
     /* TODO user+track url? user+timestamp? */
     mojito_item_put (item, "id", rest_xml_node_find (track, "url")->content);
@@ -115,51 +115,51 @@ update (MojitoSource *source, MojitoSourceDataFunc callback, gpointer user_data)
 
   rest_xml_node_unref (root);
 
-  callback (source, set, user_data);
+  callback (service, set, user_data);
 }
 
 static char *
-get_name (MojitoSource *source)
+get_name (MojitoService *service)
 {
   return "lastfm";
 }
 
 static void
-mojito_source_lastfm_dispose (GObject *object)
+mojito_service_lastfm_dispose (GObject *object)
 {
-  MojitoSourceLastfmPrivate *priv = ((MojitoSourceLastfm*)object)->priv;
+  MojitoServiceLastfmPrivate *priv = ((MojitoServiceLastfm*)object)->priv;
 
   if (priv->proxy) {
     g_object_unref (priv->proxy);
     priv->proxy = NULL;
   }
 
-  G_OBJECT_CLASS (mojito_source_lastfm_parent_class)->dispose (object);
+  G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->dispose (object);
 }
 
 static void
-mojito_source_lastfm_finalize (GObject *object)
+mojito_service_lastfm_finalize (GObject *object)
 {
-  G_OBJECT_CLASS (mojito_source_lastfm_parent_class)->finalize (object);
+  G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->finalize (object);
 }
 
 static void
-mojito_source_lastfm_class_init (MojitoSourceLastfmClass *klass)
+mojito_service_lastfm_class_init (MojitoServiceLastfmClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  MojitoSourceClass *source_class = MOJITO_SOURCE_CLASS (klass);
+  MojitoServiceClass *service_class = MOJITO_SERVICE_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (MojitoSourceLastfmPrivate));
+  g_type_class_add_private (klass, sizeof (MojitoServiceLastfmPrivate));
 
-  object_class->dispose = mojito_source_lastfm_dispose;
-  object_class->finalize = mojito_source_lastfm_finalize;
+  object_class->dispose = mojito_service_lastfm_dispose;
+  object_class->finalize = mojito_service_lastfm_finalize;
 
-  source_class->get_name = get_name;
-  source_class->update = update;
+  service_class->get_name = get_name;
+  service_class->update = update;
 }
 
 static void
-mojito_source_lastfm_init (MojitoSourceLastfm *self)
+mojito_service_lastfm_init (MojitoServiceLastfm *self)
 {
   self->priv = GET_PRIVATE (self);
 
