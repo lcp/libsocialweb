@@ -223,6 +223,28 @@ start_update (MojitoView *view)
 }
 
 static void
+load_cache (MojitoView *view)
+{
+  MojitoViewPrivate *priv = view->priv;
+  GList *l;
+
+  mojito_set_empty (priv->pending_services);
+  mojito_set_empty (priv->pending_items);
+
+  for (l = priv->services; l; l = l->next) {
+    MojitoService *service = l->data;
+    mojito_set_add (priv->pending_services, g_object_ref (service));
+  }
+
+  for (l = priv->services; l; l = l->next) {
+    MojitoService *service = l->data;
+    MojitoSet *set;
+    g_debug ("Loading cache for %s", mojito_service_get_name (service));
+    service_updated (service, mojito_service_load_cache (service), g_object_ref (view));
+  }
+}
+
+static void
 view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 {
   MojitoView *view = MOJITO_VIEW (iface);
@@ -232,6 +254,7 @@ view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 
   if (priv->timeout_id == 0) {
     priv->timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_update, iface);
+    load_cache (view);
     start_update (view);
   }
 }
