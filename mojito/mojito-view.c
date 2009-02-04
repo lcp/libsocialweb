@@ -179,6 +179,8 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
   MojitoView *view = MOJITO_VIEW (user_data);
   MojitoViewPrivate *priv = view->priv;
 
+  g_debug ("Updated %s", mojito_service_get_name (service));
+
   mojito_set_remove (priv->pending_services, (GObject*)service);
 
   /* If the update timeout id is 0 then we're not running any more, so ignore these updates */
