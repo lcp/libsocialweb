@@ -3,7 +3,7 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@/mojito
 
-Name: mojito-client-0.0
+Name: mojito-client
 Description: Client side library for Mojito
 Version: @VERSION@
 Libs: -L${libdir} -lmojito-client
