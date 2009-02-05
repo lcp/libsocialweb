@@ -23,6 +23,7 @@
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
+#include <mojito/mojito-cache.h>
 
 static void view_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
@@ -181,7 +182,7 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
 
   g_debug ("Updated %s", mojito_service_get_name (service));
 
-  mojito_service_cache_items (service, set);
+  mojito_cache_save (service, set);
 
   mojito_set_remove (priv->pending_services, (GObject*)service);
 
@@ -242,7 +243,7 @@ load_cache (MojitoView *view)
     MojitoService *service = l->data;
     MojitoSet *set;
     g_debug ("Loading cache for %s", mojito_service_get_name (service));
-    service_updated (service, mojito_service_load_cache (service), g_object_ref (view));
+    service_updated (service, mojito_cache_load (service), g_object_ref (view));
   }
 }
 

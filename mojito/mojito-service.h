@@ -67,10 +67,6 @@ void mojito_service_update (MojitoService *service, MojitoServiceDataFunc callba
 
 MojitoSet * mojito_service_get_items (MojitoService *service);
 
-void mojito_service_cache_items (MojitoService *service, MojitoSet *set);
-
-MojitoSet * mojito_service_load_cache (MojitoService *service);
-
 G_END_DECLS
 
 #endif /* _MOJITO_SERVICE */
