@@ -91,6 +91,7 @@ AC_OUTPUT([
         services/flickr/Makefile
         services/lastfm/Makefile
         services/twitter/Makefile
+        tests/Makefile
         examples/Makefile
         mojito-client.pc
 ])

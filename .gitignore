@@ -26,3 +26,4 @@ mojito-client/mojito-*-bindings.h
 mojito/test-runner
 src/mojito.service
 src/mojito-core
+tests/test-online
