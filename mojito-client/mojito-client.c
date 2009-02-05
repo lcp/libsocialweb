@@ -220,6 +220,8 @@ _mojito_client_get_services_cb (DBusGProxy *proxy,
 
   g_list_free (services_list);
   g_strfreev (services);
+
+  g_free (closure);
 }
 
 void 
