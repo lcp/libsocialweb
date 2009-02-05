@@ -8,6 +8,4 @@ Validate items in the view callback (id and date required)
 
 Make the refresh interval per-source
 
-Add a view cache so we can display content when first starting or offline
-
 Use NM or Connman to detect online/offline state
