@@ -22,8 +22,12 @@
 #include "mojito-cache.h"
 #include "mojito-item.h"
 
+/*
+ * Get the file name of the cache file for this service.  As a side-effect it
+ * creates the parent directory if required.
+ */
 static char *
-get_cache_name (MojitoService *service)
+get_cache_filename (MojitoService *service)
 {
   char *path, *filename;
 
@@ -50,8 +54,11 @@ get_cache_name (MojitoService *service)
   return filename;
 }
 
+/*
+ * Create a new group in the keyfile based on the MojitoItem.
+ */
 static void
-cache_set (gpointer data, gpointer user_data)
+set_keyfile_from_item (gpointer data, gpointer user_data)
 {
   MojitoItem *item = data;
   GKeyFile *keys = user_data;
@@ -68,6 +75,13 @@ cache_set (gpointer data, gpointer user_data)
   }
 }
 
+/**
+ * mojito_cache_save:
+ * @service: The service the item set is for
+ * @set: The set of items to cache
+ *
+ * Cache the items in @set to disk.
+ */
 void
 mojito_cache_save (MojitoService *service, MojitoSet *set)
 {
@@ -75,7 +89,7 @@ mojito_cache_save (MojitoService *service, MojitoSet *set)
 
   g_return_if_fail (MOJITO_IS_SERVICE (service));
 
-  filename = get_cache_name (service);
+  filename = get_cache_filename (service);
 
   if (set == NULL || mojito_set_is_empty (set)) {
     g_remove (filename);
@@ -85,7 +99,7 @@ mojito_cache_save (MojitoService *service, MojitoSet *set)
     GError *error = NULL;
 
     keys = g_key_file_new ();
-    mojito_set_foreach (set, cache_set, keys);
+    mojito_set_foreach (set, set_keyfile_from_item, keys);
 
     data = g_key_file_to_data (keys, NULL, NULL);
     if (!g_file_set_contents (filename, data, -1, &error)) {
@@ -98,8 +112,12 @@ mojito_cache_save (MojitoService *service, MojitoSet *set)
   g_free (filename);
 }
 
+/*
+ * From @keyfile load the items in @group and create a new #Mojitoitem for
+ * @service.
+ */
 static MojitoItem *
-cache_load (MojitoService *service, GKeyFile *keyfile, const char *group)
+load_item_from_keyfile (MojitoService *service, GKeyFile *keyfile, const char *group)
 {
   MojitoItem *item = NULL;
   char **keys;
@@ -117,6 +135,13 @@ cache_load (MojitoService *service, GKeyFile *keyfile, const char *group)
   return item;
 }
 
+/**
+ * mojito_cache_load:
+ * @service: The service to read the cache for
+ *
+ * Load the cache for @service from disk, returning a #MojitoSet if there was a
+ * cache, or %NULL.
+ */
 MojitoSet *
 mojito_cache_load (MojitoService *service)
 {
@@ -128,7 +153,7 @@ mojito_cache_load (MojitoService *service)
 
   keys = g_key_file_new ();
 
-  filename = get_cache_name (service);
+  filename = get_cache_filename (service);
 
   if (g_key_file_load_from_file (keys, filename, G_KEY_FILE_NONE, NULL)) {
     char **groups;
@@ -138,7 +163,7 @@ mojito_cache_load (MojitoService *service)
     if (count) {
       set = mojito_item_set_new ();
       for (i = 0; i < count; i++) {
-        mojito_set_add (set, (GObject*)cache_load (service, keys, groups[i]));
+        mojito_set_add (set, (GObject*)load_item_from_keyfile (service, keys, groups[i]));
       }
     }
 
