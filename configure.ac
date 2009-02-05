@@ -34,6 +34,28 @@ PKG_CHECK_MODULES(REST, rest)
 PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0 >= 0.9.6)
 PKG_CHECK_MODULES(NM, NetworkManager)
 
+AC_MSG_CHECKING([how to detect we are online])
+AC_ARG_WITH([online],
+        [AS_HELP_STRING([--with-online],
+                [how to check if we are online (always, networkmanager)])],
+        [], [with_online=always])
+AS_IF(
+        [test "$with_online" = always],
+        [
+        AC_MSG_RESULT([always])
+        AC_DEFINE([WITH_ONLINE_ALWAYS], 1, [No online detection])
+        ],
+
+        [test "$with_online" = networkmanager],
+        [
+        AC_MSG_RESULT([Network Manager])
+        PKG_CHECK_MODULES(NM, NetworkManager)
+        AC_DEFINE([WITH_ONLINE_NM], 1, [NM online detection])
+        ],
+
+        [AC_MSG_ERROR([Unknown argument to --with-online])]
+)
+
 AC_MSG_CHECKING([whether to use the GNOME environment])
 AC_ARG_WITH([gnome],[AS_HELP_STRING([--without-gnome], [disable support for GNOME environment])],
             [], [with_gnome=yes])
