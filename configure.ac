@@ -30,9 +30,6 @@ PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1)
 PKG_CHECK_MODULES(REST, rest)
 PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0)
 
-localedir=${datadir}/locale
-AC_SUBST(localedir)
-
 servicesdir='${libdir}'/mojito/services
 AC_SUBST(servicesdir)
 
