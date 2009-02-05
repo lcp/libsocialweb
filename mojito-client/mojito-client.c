@@ -221,6 +221,7 @@ _mojito_client_get_services_cb (DBusGProxy *proxy,
   g_list_free (services_list);
   g_strfreev (services);
 
+  g_object_unref (closure->client);
   g_free (closure);
 }
 
