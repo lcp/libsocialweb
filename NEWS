@@ -1,3 +1,11 @@
+Mojito 0.2
+===
+
+* Add an item cache
+* Rename "source" to "service" (breaks API)
+* Update every 10 minutes instead of every minute
+
+
 Mojito 0.1
 ===
 
