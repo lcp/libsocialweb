@@ -30,9 +30,6 @@ PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1)
 PKG_CHECK_MODULES(REST, rest)
 PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0)
 
-# Not yet!
-#GTK_DOC_CHECK(1.9)
-
 localedir=${datadir}/locale
 AC_SUBST(localedir)
 
