@@ -16,8 +16,20 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <config.h>
+
 #include <glib.h>
 #include "mojito-online.h"
+
+#if WITH_ONLINE_ALWAYS
+gboolean
+mojito_is_online (void)
+{
+  return TRUE;
+}
+#endif
+
+#if WITH_ONLINE_NM
 #include <NetworkManager.h>
 #include <dbus/dbus-glib.h>
 
@@ -48,3 +60,4 @@ mojito_is_online (void)
 
   return state == NM_STATE_CONNECTED;
 }
+#endif
