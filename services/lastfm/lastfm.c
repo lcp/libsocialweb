@@ -37,7 +37,7 @@ make_title (RestXmlNode *node)
 }
 
 static char *
-get_albumart (RestXmlNode *node, SoupSession *session)
+get_image (RestXmlNode *node, SoupSession *session)
 {
   char *filename;
 
@@ -135,7 +135,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
     mojito_item_take (item, "title", make_title (track));
     mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
 
-    mojito_item_take (item, "thumbnail", get_albumart (track, lastfm->priv->soup));
+    mojito_item_take (item, "thumbnail", get_image (track, lastfm->priv->soup));
 
     date = rest_xml_node_find (track, "date");
     mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
