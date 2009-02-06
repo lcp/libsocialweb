@@ -2,6 +2,7 @@
 #include <mojito/mojito-service.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-utils.h>
+#include <mojito/mojito-web.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <libsoup/soup.h>
@@ -32,6 +33,21 @@ make_title (RestXmlNode *node)
     return g_strdup (track);
   } else {
     return g_strdup ("Unknown");
+  }
+}
+
+static char *
+get_albumart (RestXmlNode *node, SoupSession *session)
+{
+  char *filename;
+
+  /* TODO: prefer medium then large then small? */
+  node = rest_xml_node_find (node, "image");
+  if (node && node->content) {
+    filename = mojito_web_download_image (session, node->content);
+    return filename;
+  } else {
+    return NULL;
   }
 }
 
@@ -119,13 +135,14 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
     mojito_item_take (item, "title", make_title (track));
     mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
 
+    mojito_item_take (item, "thumbnail", get_albumart (track, lastfm->priv->soup));
+
     date = rest_xml_node_find (track, "date");
     mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
 
     s = rest_xml_node_find (node, "realname")->content;
     if (s) mojito_item_put (item, "author", s);
     mojito_item_put (item, "authorid", rest_xml_node_find (node, "name")->content);
-    /* TODO: buddyicon from medium image */
 
     rest_xml_node_unref (recent);
 
