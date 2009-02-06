@@ -39,13 +39,10 @@ make_title (RestXmlNode *node)
 static char *
 get_image (RestXmlNode *node, SoupSession *session)
 {
-  char *filename;
-
   /* TODO: prefer medium then large then small? */
   node = rest_xml_node_find (node, "image");
   if (node && node->content) {
-    filename = mojito_web_download_image (session, node->content);
-    return filename;
+    return mojito_web_download_image (session, node->content);
   } else {
     return NULL;
   }
