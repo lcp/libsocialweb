@@ -143,6 +143,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
     s = rest_xml_node_find (node, "realname")->content;
     if (s) mojito_item_put (item, "author", s);
     mojito_item_put (item, "authorid", rest_xml_node_find (node, "name")->content);
+    mojito_item_take (item, "authoricon", get_image (node, lastfm->priv->soup));
 
     rest_xml_node_unref (recent);
 
