@@ -96,9 +96,11 @@ mojito_item_put (MojitoItem *item, const char *key, const char *value)
 {
   g_return_if_fail (MOJITO_IS_ITEM (item));
   g_return_if_fail (key);
-  g_return_if_fail (value);
 
-  g_hash_table_insert (item->priv->hash, (gpointer)g_intern_string (key), g_strdup (value));
+  if (value)
+    g_hash_table_insert (item->priv->hash, (gpointer)g_intern_string (key), g_strdup (value));
+  else
+    g_hash_table_remove (item->priv->hash, (gpointer)g_intern_string (key));
 }
 
 void
@@ -106,9 +108,11 @@ mojito_item_take (MojitoItem *item, const char *key, char *value)
 {
   g_return_if_fail (MOJITO_IS_ITEM (item));
   g_return_if_fail (key);
-  g_return_if_fail (value);
 
-  g_hash_table_insert (item->priv->hash, (gpointer)g_intern_string (key), value);
+  if (value)
+    g_hash_table_insert (item->priv->hash, (gpointer)g_intern_string (key), value);
+  else
+    g_hash_table_remove (item->priv->hash, (gpointer)g_intern_string (key));
 }
 
 const char *
