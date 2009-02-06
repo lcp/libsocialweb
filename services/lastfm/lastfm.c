@@ -16,6 +16,23 @@ struct _MojitoServiceLastfmPrivate {
   RestProxy *proxy;
 };
 
+static char *
+make_title (RestXmlNode *node)
+{
+  const char *track, *artist;
+
+  track = rest_xml_node_find (node, "name")->content;
+  artist = rest_xml_node_find (node, "artist")->content;
+
+  if (track && artist) {
+    return g_strdup_printf ("%s by %s", track, artist);
+  } else if (track) {
+    return g_strdup (track);
+  } else {
+    return g_strdup ("Unknown");
+  }
+}
+
 static void
 update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
 {
@@ -97,8 +114,8 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
     /* TODO user+track url? user+timestamp? */
     mojito_item_put (item, "id", rest_xml_node_find (track, "url")->content);
     mojito_item_put (item, "link", rest_xml_node_find (track, "url")->content);
-    /* TODO: track by artist from album? */
-    mojito_item_put (item, "title", rest_xml_node_find (track, "name")->content);
+    mojito_item_take (item, "title", make_title (track));
+    mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
 
     date = rest_xml_node_find (track, "date");
     mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
