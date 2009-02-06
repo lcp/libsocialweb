@@ -4,6 +4,7 @@
 #include <mojito/mojito-utils.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
+#include <libsoup/soup.h>
 
 #include "lastfm.h"
 
@@ -14,6 +15,7 @@ G_DEFINE_TYPE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE)
 
 struct _MojitoServiceLastfmPrivate {
   RestProxy *proxy;
+  SoupSession *soup;
 };
 
 static char *
@@ -151,6 +153,11 @@ mojito_service_lastfm_dispose (GObject *object)
     priv->proxy = NULL;
   }
 
+  if (priv->soup) {
+    g_object_unref (priv->soup);
+    priv->soup = NULL;
+  }
+
   G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->dispose (object);
 }
 
@@ -181,4 +188,7 @@ mojito_service_lastfm_init (MojitoServiceLastfm *self)
   self->priv = GET_PRIVATE (self);
 
   self->priv->proxy = rest_proxy_new ("http://ws.audioscrobbler.com/2.0/", FALSE);
+
+  /* TODO: when the image fetching is async change this to async */
+  self->priv->soup = soup_session_sync_new ();
 }
