@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
 
-import sys
+import sys, time
 import dbus, gobject
 from dbus.mainloop.glib import DBusGMainLoop
 
@@ -37,11 +37,16 @@ view = bus.get_object("com.intel.Mojito", path)
 view = dbus.Interface(view, "com.intel.Mojito.View")
 
 def added(service, uuid, date, item):
-    print service, uuid, date, item
+    print "Item %s added from %s" % (uuid, service)
+    print "Timestamp: %s" % time.strftime("%c", time.gmtime(date))
+    for key in item:
+        print "  %s: %s" % (key, item[key])
+    print
 view.connect_to_signal("ItemAdded", added)
 
 def removed(service, uuid):
-    print service, uuid
+    print "Item %s removed from %s" % (uuid, service)
+    print
 view.connect_to_signal("ItemRemoved", removed)
 
 view.Start()
