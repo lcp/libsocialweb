@@ -85,17 +85,44 @@ get_image (RestXmlNode *node, SoupSession *session)
 }
 
 /*
- * Return true if the lfm reply node was successful, false otherwise
+ * Run the call, displaying any errors as appropriate, and return the parsed
+ * document if it succeeded.
  */
-static gboolean
-reply_is_ok (RestXmlNode *node)
+static RestXmlNode *
+lastfm_call (RestProxyCall *call)
 {
-  const char *status;
+  GError *error = NULL;
+  RestXmlParser *parser;
+  RestXmlNode *node;
 
-  g_return_val_if_fail (node, FALSE);
-  g_return_val_if_fail (node->name == g_intern_string ("lfm"), FALSE);
+  g_assert (call);
 
-  return strcmp (rest_xml_node_get_attr (node, "status"), "ok") == 0;
+  rest_proxy_call_run (call, NULL, &error);
+  parser = rest_xml_parser_new ();
+  node = rest_xml_parser_parse_from_data (parser,
+                                          rest_proxy_call_get_payload (call),
+                                          rest_proxy_call_get_payload_length (call));
+
+  /* No content, or wrong content */
+  if (node == NULL || strcmp (node->name, "lfm") != 0) {
+    g_printerr ("Cannot make Last.fm call: %s\n",
+                error ? error->message : "unknown reason");
+    if (error) g_error_free (error);
+    if (node) rest_xml_node_unref (node);
+    return NULL;
+  }
+
+  if (strcmp (rest_xml_node_get_attr (node, "status"), "ok") != 0) {
+    RestXmlNode *node2;
+    node2 = rest_xml_node_find (node, "error");
+    g_printerr ("Cannot make Last.fm call: %s (code %s)\n",
+                node2->content,
+                rest_xml_node_get_attr (node2, "code"));
+    rest_xml_node_unref (node);
+    return NULL;
+  }
+
+  return node;
 }
 
 static void
@@ -120,25 +147,8 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
                               "method", "user.getFriends",
                               "user", lastfm->priv->user_id,
                               NULL);
-  if (!rest_proxy_call_run (call, NULL, &error)) {
-    g_printerr ("Cannot get Last.fm friends: %s\n", error->message);
-    g_error_free (error);
-    g_object_unref (call);
 
-    callback (service, NULL, user_data);
-    return;
-  }
-
-  parser = rest_xml_parser_new ();
-  root = rest_xml_parser_parse_from_data (parser,
-                                          rest_proxy_call_get_payload (call),
-                                          rest_proxy_call_get_payload_length (call));
-  g_object_unref (call);
-  g_object_unref (parser);
-
-  /* Check that the method call was successful */
-  if (!reply_is_ok (root)) {
-    rest_xml_node_unref (root);
+  if ((root = lastfm_call (call)) == NULL) {
     callback (service, NULL, user_data);
     return;
   }
@@ -158,22 +168,10 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
                                 "user", rest_xml_node_find (node, "name")->content,
                                 "limit", "1",
                                 NULL);
-    /* TODO: GError */
-    if (!rest_proxy_call_run (call, NULL, &error)) {
-      g_printerr ("Cannot get Last.fm recent tracks: %s\n", error->message);
-      g_error_free (error);
-      g_object_unref (call);
-      /* TODO: proper cleanup */
-      callback (service, NULL, user_data);
-      return;
-    }
 
-    parser = rest_xml_parser_new ();
-    recent = rest_xml_parser_parse_from_data (parser,
-                                                   rest_proxy_call_get_payload (call),
-                                                   rest_proxy_call_get_payload_length (call));
-    g_object_unref (call);
-    g_object_unref (parser);
+    if ((recent = lastfm_call (call)) == NULL) {
+      continue;
+    }
 
     track = rest_xml_node_find (recent, "track");
 
