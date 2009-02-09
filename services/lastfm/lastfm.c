@@ -105,7 +105,6 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
                               "method", "user.getFriends",
                               "user", lastfm->priv->user_id,
                               NULL);
-  /* TODO: GError */
   if (!rest_proxy_call_run (call, NULL, &error)) {
     g_printerr ("Cannot get Last.fm friends: %s\n", error->message);
     g_error_free (error);
