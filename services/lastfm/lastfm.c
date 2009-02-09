@@ -35,6 +35,9 @@ G_DEFINE_TYPE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE)
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_LASTFM, MojitoServiceLastfmPrivate))
 
+/* TODO: get proper API key */
+#define API_KEY "aa581f6505fd3ea79073ddcc2215cbc7"
+
 #define KEY_BASE "/apps/mojito/services/lastfm"
 #define KEY_USER KEY_BASE "/user"
 
@@ -142,8 +145,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
 
   call = rest_proxy_new_call (lastfm->priv->proxy);
   rest_proxy_call_add_params (call,
-                              /* TODO: get proper API key */
-                              "api_key", "aa581f6505fd3ea79073ddcc2215cbc7",
+                              "api_key", API_KEY,
                               "method", "user.getFriends",
                               "user", lastfm->priv->user_id,
                               NULL);
@@ -162,8 +164,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
 
     call = rest_proxy_new_call (lastfm->priv->proxy);
     rest_proxy_call_add_params (call,
-                                /* TODO: get proper API key */
-                                "api_key", "aa581f6505fd3ea79073ddcc2215cbc7",
+                                "api_key", API_KEY,
                                 "method", "user.getRecentTracks",
                                 "user", rest_xml_node_find (node, "name")->content,
                                 "limit", "1",
