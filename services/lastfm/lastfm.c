@@ -24,6 +24,7 @@
 #include <mojito/mojito-web.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
+#include <gconf/gconf-client.h>
 #include <libsoup/soup.h>
 
 #include "lastfm.h"
@@ -33,10 +34,25 @@ G_DEFINE_TYPE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE)
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_LASTFM, MojitoServiceLastfmPrivate))
 
+#define KEY_BASE "/apps/mojito/services/lastfm"
+#define KEY_USER KEY_BASE "/user"
+
 struct _MojitoServiceLastfmPrivate {
   RestProxy *proxy;
   SoupSession *soup;
+  GConfClient *gconf;
+  char *user_id;
 };
+
+static void
+user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
+{
+  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (user_data);
+  MojitoServiceLastfmPrivate *priv = lastfm->priv;
+
+  g_free (priv->user_id);
+  priv->user_id = g_strdup (gconf_value_get_string (entry->value));
+}
 
 static char *
 make_title (RestXmlNode *node)
@@ -77,13 +93,17 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
   RestXmlNode *root, *node;
   MojitoSet *set;
 
+  if (lastfm->priv->user_id == NULL) {
+    callback (service, NULL, user_data);
+    return;
+  }
+
   call = rest_proxy_new_call (lastfm->priv->proxy);
   rest_proxy_call_add_params (call,
                               /* TODO: get proper API key */
                               "api_key", "aa581f6505fd3ea79073ddcc2215cbc7",
                               "method", "user.getFriends",
-                              /* TODO: parameterize */
-                              "user", "rossburton",
+                              "user", lastfm->priv->user_id,
                               NULL);
   /* TODO: GError */
   if (!rest_proxy_call_run (call, NULL, &error)) {
@@ -192,6 +212,11 @@ mojito_service_lastfm_dispose (GObject *object)
     priv->soup = NULL;
   }
 
+  if (priv->gconf) {
+    g_object_unref (priv->gconf);
+    priv->gconf = NULL;
+  }
+
   G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->dispose (object);
 }
 
@@ -219,10 +244,19 @@ mojito_service_lastfm_class_init (MojitoServiceLastfmClass *klass)
 static void
 mojito_service_lastfm_init (MojitoServiceLastfm *self)
 {
-  self->priv = GET_PRIVATE (self);
+  MojitoServiceLastfmPrivate *priv;
 
-  self->priv->proxy = rest_proxy_new ("http://ws.audioscrobbler.com/2.0/", FALSE);
+  priv = self->priv = GET_PRIVATE (self);
+
+  priv->proxy = rest_proxy_new ("http://ws.audioscrobbler.com/2.0/", FALSE);
 
   /* TODO: when the image fetching is async change this to async */
-  self->priv->soup = soup_session_sync_new ();
+  priv->soup = soup_session_sync_new ();
+
+  priv->gconf = gconf_client_get_default ();
+  gconf_client_add_dir (priv->gconf, KEY_BASE,
+                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
+  gconf_client_notify_add (priv->gconf, KEY_USER,
+                           user_changed_cb, self, NULL, NULL);
+  gconf_client_notify (priv->gconf, KEY_USER);
 }
