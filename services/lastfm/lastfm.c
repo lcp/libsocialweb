@@ -18,6 +18,7 @@
 
 #include <config.h>
 #include <stdlib.h>
+#include <string.h>
 #include <mojito/mojito-service.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-utils.h>
@@ -83,6 +84,20 @@ get_image (RestXmlNode *node, SoupSession *session)
   }
 }
 
+/*
+ * Return true if the lfm reply node was successful, false otherwise
+ */
+static gboolean
+reply_is_ok (RestXmlNode *node)
+{
+  const char *status;
+
+  g_return_val_if_fail (node, FALSE);
+  g_return_val_if_fail (node->name == g_intern_string ("lfm"), FALSE);
+
+  return strcmp (rest_xml_node_get_attr (node, "status"), "ok") == 0;
+}
+
 static void
 update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
 {
@@ -121,9 +136,15 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
   g_object_unref (call);
   g_object_unref (parser);
 
+  /* Check that the method call was successful */
+  if (!reply_is_ok (root)) {
+    rest_xml_node_unref (root);
+    callback (service, NULL, user_data);
+    return;
+  }
+
   set = mojito_item_set_new ();
 
-  /* TODO: check for failure in lfm root element */
   for (node = rest_xml_node_find (root, "user"); node; node = node->next) {
     MojitoItem *item;
     RestXmlNode *recent, *track, *date;
