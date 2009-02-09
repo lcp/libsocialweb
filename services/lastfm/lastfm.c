@@ -78,12 +78,16 @@ make_title (RestXmlNode *node)
 static char *
 get_image (RestXmlNode *node, SoupSession *session)
 {
-  /* TODO: prefer medium then large then small? */
-  node = rest_xml_node_find (node, "image");
-  if (node && node->content) {
-    return mojito_web_download_image (session, node->content);
-  } else {
-    return NULL;
+  for (node = rest_xml_node_find (node, "image"); node; node = node->next) {
+    /* Skip over images which are not medium sized */
+    if (!g_str_equal (rest_xml_node_get_attr (node, "size"), "medium"))
+      continue;
+
+    if (node->content) {
+      return mojito_web_download_image (session, node->content);
+    } else {
+      return NULL;
+    }
   }
 }
 
