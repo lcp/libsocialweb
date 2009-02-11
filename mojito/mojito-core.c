@@ -237,8 +237,7 @@ populate_services (MojitoCore *core)
     module_path = g_build_filename (MOJITO_SERVICES_MODULES_DIR,
                                     g_file_info_get_name (fi),
                                     NULL);
-    service_module = g_module_open (module_path,
-                                   G_MODULE_BIND_LOCAL | G_MODULE_BIND_LAZY);
+    service_module = g_module_open (module_path, G_MODULE_BIND_LOCAL);
     if (service_module == NULL)
     {
       g_critical (G_STRLOC ": error opening module: %s",
