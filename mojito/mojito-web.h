@@ -19,4 +19,6 @@
 #include "mojito-core.h"
 #include <libsoup/soup.h>
 
+SoupSession * mojito_web_make_sync_session (void);
+
 char * mojito_web_download_image (SoupSession *session, const char *url);

@@ -16,8 +16,24 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <config.h>
 #include <libsoup/soup.h>
+#if WITH_GNOME
+#include <libsoup/soup-gnome.h>
+#endif
+
 #include "mojito-web.h"
+
+SoupSession *
+mojito_web_make_sync_session (void)
+{
+  SoupSession *session;
+
+  session = soup_session_sync_new ();
+#if WITH_GNOME
+  soup_session_add_feature_by_type (session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
+#endif
+}
 
 char *
 mojito_web_download_image (SoupSession *session, const char *url)
