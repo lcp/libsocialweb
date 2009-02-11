@@ -30,6 +30,20 @@ PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1)
 PKG_CHECK_MODULES(REST, rest)
 PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0)
 
+AC_MSG_CHECKING([whether to use the GNOME environment])
+AC_ARG_WITH([gnome],[AS_HELP_STRING([--without-gnome], [disable support for GNOME environment])],
+            [], [with_gnome=yes])
+
+AS_IF(
+        [test "$with_gnome" = yes],
+        [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([WITH_GNOME], 1, [Use GNOME])
+        PKG_CHECK_MODULES(SOUP_GNOME, libsoup-gnome-2.4 >= 2.25.1)
+        ],
+        AC_MSG_RESULT([no])
+)
+
 servicesdir='${libdir}'/mojito/services
 AC_SUBST(servicesdir)
 
