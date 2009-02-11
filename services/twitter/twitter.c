@@ -199,7 +199,7 @@ mojito_service_twitter_init (MojitoServiceTwitter *self)
   priv->user_set = priv->password_set = FALSE;
 
   /* TODO: when the image fetching is async change this to async */
-  priv->soup = soup_session_sync_new ();
+  priv->soup = mojito_web_make_sync_session ();
 
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_DIR,

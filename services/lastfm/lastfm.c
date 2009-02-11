@@ -274,7 +274,7 @@ mojito_service_lastfm_init (MojitoServiceLastfm *self)
   priv->proxy = rest_proxy_new ("http://ws.audioscrobbler.com/2.0/", FALSE);
 
   /* TODO: when the image fetching is async change this to async */
-  priv->soup = soup_session_sync_new ();
+  priv->soup = mojito_web_make_sync_session ();
 
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_BASE,
