@@ -74,11 +74,14 @@ make_title (RestXmlNode *node)
 }
 
 static char *
-get_image (RestXmlNode *node)
+get_image (RestXmlNode *node, const char *size)
 {
+  g_assert (node);
+  g_assert (size);
+
   for (node = rest_xml_node_find (node, "image"); node; node = node->next) {
     /* Skip over images which are not medium sized */
-    if (!g_str_equal (rest_xml_node_get_attr (node, "size"), "medium"))
+    if (!g_str_equal (rest_xml_node_get_attr (node, "size"), size))
       continue;
 
     if (node->content) {
@@ -192,7 +195,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
     mojito_item_take (item, "title", make_title (track));
     mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
 
-    mojito_item_take (item, "thumbnail", get_image (track));
+    mojito_item_take (item, "thumbnail", get_image (track, "large"));
 
     date = rest_xml_node_find (track, "date");
     mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
@@ -200,7 +203,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
     s = rest_xml_node_find (node, "realname")->content;
     if (s) mojito_item_put (item, "author", s);
     mojito_item_put (item, "authorid", rest_xml_node_find (node, "name")->content);
-    mojito_item_take (item, "authoricon", get_image (node));
+    mojito_item_take (item, "authoricon", get_image (node, "medium"));
 
     rest_xml_node_unref (recent);
 
