@@ -25,7 +25,6 @@
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <gconf/gconf-client.h>
-#include <libsoup/soup.h>
 
 G_DEFINE_TYPE (MojitoServiceFlickr, mojito_service_flickr, MOJITO_TYPE_SERVICE)
 
@@ -36,7 +35,6 @@ G_DEFINE_TYPE (MojitoServiceFlickr, mojito_service_flickr, MOJITO_TYPE_SERVICE)
 #define KEY_USER KEY_BASE "/user"
 
 struct _MojitoServiceFlickrPrivate {
-  SoupSession *soup;
   GConfClient *gconf;
   RestProxy *proxy;
   char *user_id;
@@ -104,14 +102,14 @@ construct_buddy_icon_url (RestXmlNode *node)
 
 /* TODO: this should be async blaa blaa */
 static char *
-get_buddy_icon (RestXmlNode *node, SoupSession *session)
+get_buddy_icon (RestXmlNode *node)
 {
   char *url, *filename;
 
   g_assert (node);
 
   url = construct_buddy_icon_url (node);
-  filename = mojito_web_download_image (session, url);
+  filename = mojito_web_download_image (url);
   g_free (url);
 
   return filename;
@@ -119,14 +117,14 @@ get_buddy_icon (RestXmlNode *node, SoupSession *session)
 
 /* TODO: this should be async blaa blaa */
 static char *
-get_thumbnail (RestXmlNode *node, SoupSession *session)
+get_thumbnail (RestXmlNode *node)
 {
   char *url, *filename;
 
   g_assert (node);
 
   url = construct_photo_url (node);
-  filename = mojito_web_download_image (session, url);
+  filename = mojito_web_download_image (url);
   g_free (url);
 
   return filename;
@@ -186,8 +184,8 @@ flickr_callback (RestProxyCall *call,
     date = atoi (rest_xml_node_get_attr (node, "dateupload"));
     mojito_item_take (item, "date", mojito_time_t_to_string (date));
 
-    mojito_item_take (item, "authoricon", get_buddy_icon (node, priv->soup));
-    mojito_item_take (item, "thumbnail", get_thumbnail (node, priv->soup));
+    mojito_item_take (item, "authoricon", get_buddy_icon (node));
+    mojito_item_take (item, "thumbnail", get_thumbnail (node));
 
     mojito_set_add (set, G_OBJECT (item));
     g_object_unref (item);
@@ -249,11 +247,6 @@ mojito_service_flickr_dispose (GObject *object)
 {
   MojitoServiceFlickrPrivate *priv = MOJITO_SERVICE_FLICKR (object)->priv;
 
-  if (priv->soup) {
-    g_object_unref (priv->soup);
-    priv->soup = NULL;
-  }
-
   if (priv->gconf) {
     g_object_unref (priv->gconf);
     priv->gconf = NULL;
@@ -298,9 +291,6 @@ mojito_service_flickr_init (MojitoServiceFlickr *self)
   MojitoServiceFlickrPrivate *priv;
 
   self->priv = priv = GET_PRIVATE (self);
-
-  /* TODO: when the image fetching is async change this to async */
-  priv->soup = mojito_web_make_sync_session ();
 
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_BASE,

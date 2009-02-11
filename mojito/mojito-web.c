@@ -40,12 +40,15 @@ mojito_web_make_sync_session (void)
 }
 
 char *
-mojito_web_download_image (SoupSession *session, const char *url)
+mojito_web_download_image (const char *url)
 {
+  static SoupSession *session = NULL;
   char *md5, *path, *filename;
 
-  g_return_val_if_fail (SOUP_IS_SESSION (session), NULL);
   g_return_val_if_fail (url, NULL);
+
+  if (session == NULL)
+    session = mojito_web_make_sync_session ();
 
   md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, url, -1);
 

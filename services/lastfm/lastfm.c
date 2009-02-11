@@ -26,7 +26,6 @@
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <gconf/gconf-client.h>
-#include <libsoup/soup.h>
 
 #include "lastfm.h"
 
@@ -43,7 +42,6 @@ G_DEFINE_TYPE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE)
 
 struct _MojitoServiceLastfmPrivate {
   RestProxy *proxy;
-  SoupSession *soup;
   GConfClient *gconf;
   char *user_id;
 };
@@ -76,7 +74,7 @@ make_title (RestXmlNode *node)
 }
 
 static char *
-get_image (RestXmlNode *node, SoupSession *session)
+get_image (RestXmlNode *node)
 {
   for (node = rest_xml_node_find (node, "image"); node; node = node->next) {
     /* Skip over images which are not medium sized */
@@ -84,7 +82,7 @@ get_image (RestXmlNode *node, SoupSession *session)
       continue;
 
     if (node->content) {
-      return mojito_web_download_image (session, node->content);
+      return mojito_web_download_image (node->content);
     } else {
       return NULL;
     }
@@ -194,7 +192,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
     mojito_item_take (item, "title", make_title (track));
     mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
 
-    mojito_item_take (item, "thumbnail", get_image (track, lastfm->priv->soup));
+    mojito_item_take (item, "thumbnail", get_image (track));
 
     date = rest_xml_node_find (track, "date");
     mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
@@ -202,7 +200,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
     s = rest_xml_node_find (node, "realname")->content;
     if (s) mojito_item_put (item, "author", s);
     mojito_item_put (item, "authorid", rest_xml_node_find (node, "name")->content);
-    mojito_item_take (item, "authoricon", get_image (node, lastfm->priv->soup));
+    mojito_item_take (item, "authoricon", get_image (node));
 
     rest_xml_node_unref (recent);
 
@@ -228,11 +226,6 @@ mojito_service_lastfm_dispose (GObject *object)
   if (priv->proxy) {
     g_object_unref (priv->proxy);
     priv->proxy = NULL;
-  }
-
-  if (priv->soup) {
-    g_object_unref (priv->soup);
-    priv->soup = NULL;
   }
 
   if (priv->gconf) {
@@ -272,9 +265,6 @@ mojito_service_lastfm_init (MojitoServiceLastfm *self)
   priv = self->priv = GET_PRIVATE (self);
 
   priv->proxy = rest_proxy_new ("http://ws.audioscrobbler.com/2.0/", FALSE);
-
-  /* TODO: when the image fetching is async change this to async */
-  priv->soup = mojito_web_make_sync_session ();
 
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_BASE,
