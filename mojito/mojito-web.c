@@ -24,6 +24,10 @@
 
 #include "mojito-web.h"
 
+/*
+ * Helper to make a known sync SoupSession with environment support.
+ * TODO: should this return a ref on a singleton session?
+ */
 SoupSession *
 mojito_web_make_sync_session (void)
 {
