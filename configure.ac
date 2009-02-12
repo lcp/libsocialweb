@@ -13,6 +13,9 @@ AC_ISC_POSIX
 AC_HEADER_STDC
 AM_PROG_CC_C_O
 
+# TODO: bit nasty, should we use gnome-common?
+CFLAGS="$CFLAGS -Wall"
+
 # Libtool versioning
 # See for details: http://bit.ly/Y5oX
 LIBMOJITO_CLIENT_CURRENT=1
