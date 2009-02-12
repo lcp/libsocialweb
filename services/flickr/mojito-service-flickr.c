@@ -142,7 +142,6 @@ flickr_callback (RestProxyCall *call,
                  gpointer user_data)
 {
   MojitoServiceFlickr *service = MOJITO_SERVICE_FLICKR (weak_object);
-  MojitoServiceFlickrPrivate *priv = service->priv;
   UpdateData *data = user_data;
   RestXmlParser *parser;
   RestXmlNode *root, *node;

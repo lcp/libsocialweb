@@ -87,9 +87,12 @@ get_image (RestXmlNode *node, const char *size)
     if (node->content) {
       return mojito_web_download_image (node->content);
     } else {
+      /* TODO: should fetch another size instead */
       return NULL;
     }
   }
+
+  return NULL;
 }
 
 /*
@@ -138,8 +141,6 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
 {
   MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
   RestProxyCall *call;
-  GError *error = NULL;
-  RestXmlParser *parser;
   RestXmlNode *root, *node;
   MojitoSet *set;
 

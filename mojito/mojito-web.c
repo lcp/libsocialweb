@@ -37,6 +37,8 @@ mojito_web_make_sync_session (void)
 #if WITH_GNOME
   soup_session_add_feature_by_type (session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
 #endif
+
+  return session;
 }
 
 char *
@@ -69,7 +71,7 @@ mojito_web_download_image (const char *url)
 
     msg = soup_message_new (SOUP_METHOD_GET, url);
     soup_session_send_message (session, msg);
-    if (msg->status_code = SOUP_STATUS_OK) {
+    if (msg->status_code == SOUP_STATUS_OK) {
       /* TODO: GError */
       g_file_set_contents (filename, msg->response_body->data, msg->response_body->length, NULL);
     } else {

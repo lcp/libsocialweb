@@ -143,7 +143,6 @@ _mojito_client_open_view_cb (DBusGProxy *proxy,
 {
   OpenViewClosure *closure = (OpenViewClosure *)userdata;
   MojitoClient *client = closure->client;
-  MojitoClientPrivate *priv = GET_PRIVATE (client);
   MojitoClientView *view;
 
   view = _mojito_client_view_new_for_path (view_path);

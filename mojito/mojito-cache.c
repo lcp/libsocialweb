@@ -121,7 +121,7 @@ load_item_from_keyfile (MojitoService *service, GKeyFile *keyfile, const char *g
 {
   MojitoItem *item = NULL;
   char **keys;
-  int i, count;
+  gsize i, count;
 
   keys = g_key_file_get_keys (keyfile, group, &count, NULL);
   if (keys) {
@@ -157,7 +157,7 @@ mojito_cache_load (MojitoService *service)
 
   if (g_key_file_load_from_file (keys, filename, G_KEY_FILE_NONE, NULL)) {
     char **groups;
-    int i, count;
+    gsize i, count;
 
     groups = g_key_file_get_groups (keys, &count);
     if (count) {

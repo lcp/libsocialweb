@@ -57,7 +57,7 @@ get_service_count (GHashTable *hash, MojitoService *service)
   return GPOINTER_TO_INT (g_hash_table_lookup (hash, service));
 }
 
-static int
+static void
 inc_service_count (GHashTable *hash, MojitoService *service)
 {
   int count;
@@ -223,6 +223,8 @@ start_update (MojitoView *view)
     g_debug ("Updating %s", mojito_service_get_name (service));
     mojito_service_update (service, service_updated, g_object_ref (view));
   }
+
+  return TRUE;
 }
 
 static void
@@ -241,7 +243,6 @@ load_cache (MojitoView *view)
 
   for (l = priv->services; l; l = l->next) {
     MojitoService *service = l->data;
-    MojitoSet *set;
     g_debug ("Loading cache for %s", mojito_service_get_name (service));
     service_updated (service, mojito_cache_load (service), g_object_ref (view));
   }
@@ -289,7 +290,6 @@ static void
 view_close (MojitoViewIface *iface, DBusGMethodInvocation *context)
 {
   MojitoView *view = MOJITO_VIEW (iface);
-  MojitoViewPrivate *priv = view->priv;
 
   /* Explicitly stop the view in case there are pending updates in progress */
   stop (view);
@@ -402,23 +402,6 @@ mojito_view_new (guint count)
   return g_object_new (MOJITO_TYPE_VIEW,
                        "count", count,
                        NULL);
-}
-
-static void
-on_item_added (MojitoService *service,
-               const gchar  *uuid,
-               gint64        date,
-               GHashTable  *props,
-               MojitoView  *view)
-{
-  g_assert (MOJITO_IS_SERVICE (service));
-  g_assert (MOJITO_IS_VIEW (view));
-
-  mojito_view_iface_emit_item_added (view,
-                                     mojito_service_get_name (service),
-                                     uuid,
-                                     date,
-                                     props);
 }
 
 void

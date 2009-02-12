@@ -155,8 +155,6 @@ mojito_core_constructed (GObject *object)
 static void
 mojito_core_dispose (GObject *object)
 {
-  MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
-
   /* TODO: free service_names */
 
   G_OBJECT_CLASS (mojito_core_parent_class)->dispose (object);
@@ -165,8 +163,6 @@ mojito_core_dispose (GObject *object)
 static void
 mojito_core_finalize (GObject *object)
 {
-  MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
-
   G_OBJECT_CLASS (mojito_core_parent_class)->finalize (object);
 }
 
@@ -205,7 +201,6 @@ populate_services (MojitoCore *core)
   const gchar *service_name;
   GType service_type;
   gpointer sym;
-  MojitoService *service;
 
   services_dir_file = g_file_new_for_path (MOJITO_SERVICES_MODULES_DIR);
 

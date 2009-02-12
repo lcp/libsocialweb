@@ -57,7 +57,7 @@ client_get_services_cb (MojitoClient *client,
 
   for (l = services; l; l = l->next)
   {
-    g_debug ("Told about service: %s", l->data);
+    g_debug ("Told about service: %s", (char*)l->data);
   }
 
   mojito_client_open_view (client, services, 10, client_open_view_cb, NULL);
