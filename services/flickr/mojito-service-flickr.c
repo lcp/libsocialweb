@@ -16,6 +16,8 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <config.h>
+
 #include <stdlib.h>
 #include "mojito-service-flickr.h"
 #include <mojito/mojito-item.h>
@@ -217,7 +219,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
   call = rest_proxy_new_call (flickr->priv->proxy);
   rest_proxy_call_add_params (call,
                               "method", "flickr.photos.getContactsPublicPhotos",
-                              "api_key", "f7003dda7bbdcc2288fd32e30faca8f5",
+                              "api_key", FLICKR_APIKEY,
                               "user_id", flickr->priv->user_id,
                               "extras", "date_upload,icon_server",
                               NULL);

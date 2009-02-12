@@ -44,6 +44,35 @@ AS_IF(
         AC_MSG_RESULT([no])
 )
 
+# TODO: make this a m4 function in acinclude
+AC_MSG_CHECKING([for Flickr key to use])
+AC_ARG_ENABLE([flickr-key], [AS_HELP_STRING([--enable-flickr-key], [API key for Flickr])],
+                            [], [enable_flickr_key=no])
+AS_IF(
+        [test "x$enable_flickr_key" != xno],
+        [
+        AC_MSG_RESULT([$enable_flickr_key])
+        AC_DEFINE_UNQUOTED([FLICKR_APIKEY], ["$enable_flickr_key"], [Flickr API key])
+        ],
+        AC_MSG_RESULT([not enabling Flickr support])
+)
+AM_CONDITIONAL([WITH_FLICKR], [test x$enable_flickr_key != xno])
+
+
+AC_MSG_CHECKING([for Lastfm key to use])
+AC_ARG_ENABLE([lastfm-key], [AS_HELP_STRING([--enable-lastfm-key], [API key for Lastfm])],
+                            [], [enable_lastfm_key=no])
+AS_IF(
+        [test "x$enable_lastfm_key" != xno],
+        [
+        AC_MSG_RESULT([$enable_lastfm_key])
+        AC_DEFINE_UNQUOTED([LASTFM_APIKEY], ["$enable_lastfm_key"], [Lastfm API key])
+        ],
+        AC_MSG_RESULT([not enabling Lastfm support])
+)
+AM_CONDITIONAL([WITH_LASTFM], [test x$enable_lastfm_key != xno])
+
+
 servicesdir='${libdir}'/mojito/services
 AC_SUBST(servicesdir)
 
