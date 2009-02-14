@@ -24,6 +24,7 @@ libmojito_la_SOURCES = mojito-core.c mojito-core.h \
 		       mojito-web.c mojito-web.h \
 		       mojito-set.c mojito-set.h \
 		       mojito-cache.c mojito-cache.h \
+		       mojito-service-proxy.c mojito-service-proxy.h \
 		       mojito-module.h \
 		       client-monitor.c client-monitor.h \
 		       $(BUILT_SOURCES) \
