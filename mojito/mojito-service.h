@@ -60,12 +60,10 @@ GType mojito_service_get_type (void);
 
 MojitoCore *mojito_service_get_core (MojitoService *service);
 
-const char * mojito_service_get_name (MojitoService *service);
+const char *mojito_service_get_name (MojitoService *service);
 
 /* Please update yourself */
 void mojito_service_update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data);
-
-MojitoSet * mojito_service_get_items (MojitoService *service);
 
 G_END_DECLS
 
