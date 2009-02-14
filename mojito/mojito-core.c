@@ -22,8 +22,10 @@
 #include "mojito-utils.h"
 #include "mojito-view.h"
 #include "client-monitor.h"
+#include "mojito-service-proxy.h"
 
 #include "mojito-core-ginterface.h"
+
 
 static void core_iface_init (gpointer g_iface, gpointer iface_data);
 
@@ -36,10 +38,9 @@ G_DEFINE_TYPE_WITH_CODE (MojitoCore, mojito_core, G_TYPE_OBJECT,
 
 struct _MojitoCorePrivate {
   DBusGConnection *connection;
-  /* Hash of service name to GTypes */
-  GHashTable *service_names;
-  /* Hash of service names to instances */
-  GHashTable *services;
+  /* Hash of service name to MojitoServiceProxy (but we can just pretend they
+   * are services. */
+  GHashTable *available_services;
 };
 
 typedef const gchar *(*MojitoModuleGetNameFunc)(void);
@@ -55,7 +56,7 @@ get_services (MojitoCoreIface *self, DBusGMethodInvocation *context)
 
   array = g_ptr_array_new ();
 
-  l = g_hash_table_get_keys (priv->service_names);
+  l = g_hash_table_get_keys (priv->available_services);
   while (l) {
     g_ptr_array_add (array, l->data);
     l = g_list_delete_link (l, l);
@@ -101,29 +102,16 @@ open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMetho
   for (i = services; *i; i++) {
     const char *name = *i;
     MojitoService *service;
-    GType service_type;
 
     g_debug ("%s: service name %s", __FUNCTION__, name);
 
-    service = g_hash_table_lookup (priv->services, name);
-
-    if (service == NULL) {
-      service_type = GPOINTER_TO_INT
-        (g_hash_table_lookup (priv->service_names, name));
-
-      if (service_type) {
-        service = g_object_new (service_type,
-                               "core", core,
-                               NULL);
-
-        /* TODO: make this a weak reference so the entry can be removed when the
-           last view closes */
-        g_hash_table_insert (priv->services, g_strdup (name), g_object_ref (service));
-      }
-    }
+    service = g_hash_table_lookup (priv->available_services, name);
 
     if (service) {
       mojito_view_add_service (view, service);
+    } else {
+      g_warning (G_STRLOC ": Request for unknown service: %s",
+                 name);
     }
   }
 
@@ -155,8 +143,6 @@ mojito_core_constructed (GObject *object)
 static void
 mojito_core_dispose (GObject *object)
 {
-  /* TODO: free service_names */
-
   G_OBJECT_CLASS (mojito_core_parent_class)->dispose (object);
 }
 
@@ -201,6 +187,7 @@ populate_services (MojitoCore *core)
   const gchar *service_name;
   GType service_type;
   gpointer sym;
+  MojitoServiceProxy *proxy;
 
   services_dir_file = g_file_new_for_path (MOJITO_SERVICES_MODULES_DIR);
 
@@ -260,7 +247,10 @@ populate_services (MojitoCore *core)
 
     if (service_name && service_type)
     {
-      g_hash_table_insert (priv->service_names, (gchar *)service_name, GINT_TO_POINTER (service_type));
+      proxy = mojito_service_proxy_new (core, service_type);
+      g_hash_table_insert (priv->available_services, 
+                           (gchar *)service_name, 
+                           proxy);
       g_debug (G_STRLOC ": Imported module: %s", service_name);
     }
 
@@ -288,8 +278,7 @@ mojito_core_init (MojitoCore *self)
   self->priv = priv;
 
   /* TODO: check free policy */
-  priv->service_names = g_hash_table_new (g_str_hash, g_str_equal);
-  priv->services = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, g_object_unref);
+  priv->available_services = g_hash_table_new (g_str_hash, g_str_equal);
 
   populate_services (self);
 }
