@@ -60,6 +60,13 @@ struct _MojitoServiceClass {
   guint32 (*get_capabilities) (MojitoService *service);
 };
 
+typedef enum
+{
+  SERVICE_CAN_GET_LAST_STATUS = 1,
+  SERVICE_CAN_GET_PERSONA_ICON = 1 << 2,
+  SERVICE_CAN_UPDATE_STATUS = 1 << 3
+} MojitoServiceCapabilityFlags;
+
 GType mojito_service_get_type (void);
 
 MojitoCore *mojito_service_get_core (MojitoService *service);
