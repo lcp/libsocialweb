@@ -138,6 +138,7 @@ populate_services (MojitoCore *core)
   GType service_type;
   gpointer sym;
   MojitoServiceProxy *proxy;
+  gchar *path;
 
   services_dir_file = g_file_new_for_path (MOJITO_SERVICES_MODULES_DIR);
 
@@ -198,9 +199,14 @@ populate_services (MojitoCore *core)
     if (service_name && service_type)
     {
       proxy = mojito_service_proxy_new (core, service_type);
-      g_hash_table_insert (priv->available_services, 
-                           (gchar *)service_name, 
+      g_hash_table_insert (priv->available_services,
+                           (gchar *)service_name,
                            proxy);
+      path = g_strdup_printf ("/com/intel/Mojito/Service/%s", service_name);
+      dbus_g_connection_register_g_object (priv->connection,
+                                           path,
+                                           (GObject*)proxy);
+      g_free (path);
       g_debug (G_STRLOC ": Imported module: %s", service_name);
     }
 
