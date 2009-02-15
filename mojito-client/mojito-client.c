@@ -19,7 +19,7 @@
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include "mojito-client.h"
-
+#include "mojito-client-service-private.h"
 #include "mojito-core-bindings.h"
 
 G_DEFINE_TYPE (MojitoClient, mojito_client, G_TYPE_OBJECT)
@@ -240,4 +240,25 @@ mojito_client_get_services (MojitoClient                   *client,
   com_intel_Mojito_get_services_async (priv->proxy,
                                        _mojito_client_get_services_cb,
                                        closure);
-} 
+}
+
+MojitoClientService *
+mojito_client_get_service (MojitoClient *client,
+                           const gchar  *service_name)
+{
+  MojitoClientService *service;
+  GError *error = NULL;
+  service = g_object_new (MOJITO_CLIENT_TYPE_SERVICE,
+                          NULL);
+  if (!_mojito_client_service_setup_proxy (service, service_name, &error))
+  {
+    g_warning (G_STRLOC ": Error setting up proxy: %s",
+               error->message);
+    g_clear_error (&error);
+    g_object_unref (service);
+    return NULL;
+  }
+
+  return service;
+}
+

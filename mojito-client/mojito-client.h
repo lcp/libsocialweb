@@ -22,6 +22,7 @@
 #include <glib-object.h>
 
 #include <mojito-client/mojito-client-view.h>
+#include <mojito-client/mojito-client-service.h>
 
 G_BEGIN_DECLS
 
@@ -71,6 +72,9 @@ typedef void (*MojitoClientGetServicesCallback) (MojitoClient *client,
 void mojito_client_get_services (MojitoClient                  *client,
                                  MojitoClientGetServicesCallback cb,
                                  gpointer                       userdata);
+
+MojitoClientService *mojito_client_get_service (MojitoClient *client,
+                                                const gchar  *service_name);
 G_END_DECLS
 
 #endif /* _MOJITO_CLIENT */
