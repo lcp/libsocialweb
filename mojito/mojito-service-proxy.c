@@ -17,8 +17,11 @@
  */
 
 #include "mojito-service-proxy.h"
+#include "mojito-service-ginterface.h"
+static void service_iface_init (gpointer g_iface, gpointer iface_data);
+G_DEFINE_TYPE_WITH_CODE (MojitoServiceProxy, mojito_service_proxy, MOJITO_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_SERVICE_IFACE, service_iface_init));
 
-G_DEFINE_TYPE (MojitoServiceProxy, mojito_service_proxy, MOJITO_TYPE_SERVICE)
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_PROXY, MojitoServiceProxyPrivate))
@@ -154,3 +157,119 @@ mojito_service_proxy_new (MojitoCore *core,
                                              NULL);
 }
 
+
+static void
+service_get_last_status (MojitoServiceIface    *self,
+                         DBusGMethodInvocation *context)
+{
+  MojitoServiceProxyPrivate *priv = GET_PRIVATE (self);
+  MojitoServiceClass *service_class;
+  gchar *last_status = NULL;
+
+  if (!priv->instance)
+    priv->instance = g_object_new (priv->type, NULL);
+
+  service_class = MOJITO_SERVICE_GET_CLASS (priv->instance);
+  if (service_class->get_last_status)
+  {
+    last_status = service_class->get_last_status (priv->instance);
+  }
+
+  mojito_service_iface_return_from_get_last_status (context, last_status);
+
+  g_free (last_status);
+}
+
+static void
+service_get_persona_icon (MojitoServiceIface    *self,
+                          DBusGMethodInvocation *context)
+{
+  MojitoServiceProxyPrivate *priv = GET_PRIVATE (self);
+  MojitoServiceClass *service_class;
+  gchar *persona_icon = NULL;
+
+  if (!priv->instance)
+    priv->instance = g_object_new (priv->type, NULL);
+
+  service_class = MOJITO_SERVICE_GET_CLASS (priv->instance);
+
+  if (service_class->get_persona_icon)
+  {
+    persona_icon = service_class->get_persona_icon (priv->instance);
+  }
+
+  mojito_service_iface_return_from_get_persona_icon (context, persona_icon);
+
+  g_free (persona_icon);
+}
+
+static void
+service_update_status (MojitoServiceIface    *self,
+                       const gchar           *status_message,
+                       DBusGMethodInvocation *context)
+{
+  MojitoServiceProxyPrivate *priv = GET_PRIVATE (self);
+  MojitoServiceClass *service_class;
+  gboolean res = TRUE;
+
+  if (!priv->instance)
+    priv->instance = g_object_new (priv->type, NULL);
+
+  service_class = MOJITO_SERVICE_GET_CLASS (priv->instance);
+
+  if (service_class->update_status)
+  {
+    res = service_class->update_status (priv->instance, status_message);
+    if (res == FALSE)
+    {
+      g_warning (G_STRLOC ": Error updating status message");
+    }
+  }
+
+  mojito_service_iface_return_from_update_status (context, res);
+}
+
+static void
+service_get_capabilities (MojitoServiceIface    *self,
+                          DBusGMethodInvocation *context)
+{
+  MojitoServiceProxyPrivate *priv = GET_PRIVATE (self);
+  MojitoServiceClass *service_class;
+  guint32 caps = 0;
+  gboolean can_get_last_status;
+  gboolean can_get_persona_icon;
+  gboolean can_update_status;
+
+  if (!priv->instance)
+    priv->instance = g_object_new (priv->type, NULL);
+
+  service_class = MOJITO_SERVICE_GET_CLASS (priv->instance);
+
+  if (service_class->get_capabilities)
+    caps = service_class->get_capabilities (priv->instance);
+
+  can_get_last_status = caps & SERVICE_CAN_GET_LAST_STATUS;
+  can_get_persona_icon = caps & SERVICE_CAN_GET_PERSONA_ICON;
+  can_update_status = caps & SERVICE_CAN_UPDATE_STATUS;
+
+  mojito_service_iface_return_from_get_capabilities (context,
+                                                     can_get_last_status,
+                                                     can_get_persona_icon,
+                                                     can_update_status);
+}
+
+static void
+service_iface_init (gpointer g_iface,
+                    gpointer iface_data)
+{
+  MojitoServiceIfaceClass *klass = (MojitoServiceIfaceClass *)g_iface;
+
+  mojito_service_iface_implement_get_last_status (klass,
+                                                  service_get_last_status);
+  mojito_service_iface_implement_get_persona_icon (klass,
+                                                   service_get_persona_icon);
+  mojito_service_iface_implement_update_status (klass,
+                                                service_update_status);
+  mojito_service_iface_implement_get_capabilities (klass,
+                                                   service_get_capabilities);
+}
