@@ -124,56 +124,6 @@ open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMetho
 }
 
 static void
-mojito_core_constructed (GObject *object)
-{
-  MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
-  GError *error = NULL;
-
-  priv->connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
-  if (error) {
-    g_warning ("Failed to open connection to DBus: %s\n", error->message);
-    g_error_free (error);
-  }
-
-  dbus_g_connection_register_g_object (priv->connection, "/com/intel/Mojito", object);
-
-  client_monitor_init (priv->connection);
-}
-
-static void
-mojito_core_dispose (GObject *object)
-{
-  G_OBJECT_CLASS (mojito_core_parent_class)->dispose (object);
-}
-
-static void
-mojito_core_finalize (GObject *object)
-{
-  G_OBJECT_CLASS (mojito_core_parent_class)->finalize (object);
-}
-
-static void
-core_iface_init (gpointer g_iface, gpointer iface_data)
-{
-  MojitoCoreIfaceClass *klass = (MojitoCoreIfaceClass*)g_iface;
-
-  mojito_core_iface_implement_get_services (klass, get_services);
-  mojito_core_iface_implement_open_view (klass, open_view);
-}
-
-static void
-mojito_core_class_init (MojitoCoreClass *klass)
-{
-  GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-  g_type_class_add_private (klass, sizeof (MojitoCorePrivate));
-
-  object_class->constructed = mojito_core_constructed;
-  object_class->dispose = mojito_core_dispose;
-  object_class->finalize = mojito_core_finalize;
-}
-
-static void
 populate_services (MojitoCore *core)
 {
   /* FIXME: Get the services from directory */
@@ -271,6 +221,58 @@ populate_services (MojitoCore *core)
 }
 
 static void
+mojito_core_constructed (GObject *object)
+{
+  MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
+  GError *error = NULL;
+
+  priv->connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+  if (error) {
+    g_warning ("Failed to open connection to DBus: %s\n", error->message);
+    g_error_free (error);
+  }
+
+  dbus_g_connection_register_g_object (priv->connection, "/com/intel/Mojito", object);
+
+  client_monitor_init (priv->connection);
+
+  populate_services ((MojitoCore *)object);
+}
+
+static void
+mojito_core_dispose (GObject *object)
+{
+  G_OBJECT_CLASS (mojito_core_parent_class)->dispose (object);
+}
+
+static void
+mojito_core_finalize (GObject *object)
+{
+  G_OBJECT_CLASS (mojito_core_parent_class)->finalize (object);
+}
+
+static void
+core_iface_init (gpointer g_iface, gpointer iface_data)
+{
+  MojitoCoreIfaceClass *klass = (MojitoCoreIfaceClass*)g_iface;
+
+  mojito_core_iface_implement_get_services (klass, get_services);
+  mojito_core_iface_implement_open_view (klass, open_view);
+}
+
+static void
+mojito_core_class_init (MojitoCoreClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  g_type_class_add_private (klass, sizeof (MojitoCorePrivate));
+
+  object_class->constructed = mojito_core_constructed;
+  object_class->dispose = mojito_core_dispose;
+  object_class->finalize = mojito_core_finalize;
+}
+
+static void
 mojito_core_init (MojitoCore *self)
 {
   MojitoCorePrivate *priv = GET_PRIVATE (self);
@@ -279,8 +281,6 @@ mojito_core_init (MojitoCore *self)
 
   /* TODO: check free policy */
   priv->available_services = g_hash_table_new (g_str_hash, g_str_equal);
-
-  populate_services (self);
 }
 
 MojitoCore*
