@@ -52,8 +52,12 @@ typedef void (*MojitoServiceDataFunc) (MojitoService *service, MojitoSet *set, g
 typedef struct _MojitoServiceClass MojitoServiceClass;
 struct _MojitoServiceClass {
   GObjectClass parent_class;
-  const char * (*get_name) (MojitoService *service);
+  const char *(*get_name) (MojitoService *service);
   void (*update) (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data);
+  gchar *(*get_last_status) (MojitoService *service);
+  gchar *(*get_persona_icon) (MojitoService *service);
+  gboolean (*update_status) (MojitoService *service, const gchar *status_message);
+  guint32 (*get_capabilities) (MojitoService *service);
 };
 
 GType mojito_service_get_type (void);
