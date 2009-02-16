@@ -201,6 +201,59 @@ mojito_service_twitter_finalize (GObject *object)
   G_OBJECT_CLASS (mojito_service_twitter_parent_class)->finalize (object);
 }
 
+static gboolean
+update_status (MojitoService *service,
+               const gchar   *status_msg)
+{
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+
+  twitter_client_add_status (priv->client,
+                             status_msg);
+
+  return TRUE;
+}
+
+static guint32
+get_capabilities (MojitoService *service)
+{
+  return SERVICE_CAN_UPDATE_STATUS |
+         SERVICE_CAN_GET_PERSONA_ICON |
+         SERVICE_CAN_GET_LAST_STATUS;
+}
+
+static gchar *
+get_persona_icon (MojitoService *service)
+{
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+  const gchar *url;
+
+  if (priv->user)
+  {
+    url = twitter_user_get_profile_image_url (priv->user);
+    return mojito_web_download_image (url);
+  } else {
+    return NULL;
+  }
+}
+
+static gchar *
+get_last_status (MojitoService *service)
+{
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+  TwitterStatus *status;
+  gchar *message;
+
+  if (priv->user)
+  {
+    status = twitter_user_get_status (priv->user);
+    message = g_strdup (twitter_status_get_text (status));
+    g_object_unref (status);
+    return message;
+  } else {
+    return NULL;
+  }
+}
+
 static void
 mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
 {
@@ -214,6 +267,10 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
 
   service_class->get_name = mojito_service_twitter_get_name;
   service_class->update = update;
+  service_class->get_capabilities = get_capabilities;
+  service_class->update_status = update_status;
+  service_class->get_persona_icon = get_persona_icon;
+  service_class->get_last_status = get_last_status;
 }
 
 static void
