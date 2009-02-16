@@ -37,8 +37,10 @@ G_DEFINE_TYPE (MojitoServiceTwitter, mojito_service_twitter, MOJITO_TYPE_SERVICE
 struct _MojitoServiceTwitterPrivate {
   GConfClient *gconf;
   gboolean user_set, password_set;
+  gchar *username;
 
   TwitterClient *client;
+  TwitterUser *user;
 
   /* This is grim */
   MojitoSet *set;
@@ -51,18 +53,26 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
 {
   MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (user_data);
   MojitoServiceTwitterPrivate *priv = twitter->priv;
-  const char *s = NULL;
+  const char *username = NULL, *password = NULL;
 
   if (g_str_equal (entry->key, KEY_USER)) {
     if (entry->value)
-      s = gconf_value_get_string (entry->value);
-    g_object_set (priv->client, "email", s, NULL);
-    priv->user_set = (s && s[0] != '\0');
+      username = gconf_value_get_string (entry->value);
+    g_object_set (priv->client, "email", username, NULL);
+    priv->user_set = (username && username[0] != '\0');
+    priv->username = g_strdup (username);
   } else if (g_str_equal (entry->key, KEY_PASSWORD)) {
     if (entry->value)
-      s = gconf_value_get_string (entry->value);
-    g_object_set (priv->client, "password", s, NULL);
-    priv->password_set = (s && s[0] != '\0');
+      password = gconf_value_get_string (entry->value);
+    g_object_set (priv->client, "password", password, NULL);
+    priv->password_set = (password && password[0] != '\0');
+  }
+
+  /* Get our details. This will cause the user_received signal to be fired */
+  if (priv->user_set && priv->password_set)
+  {
+    /* Despite claiming to take an email it also takes a username */
+    twitter_client_show_user_from_email (priv->client, priv->username);
   }
 }
 
@@ -117,6 +127,23 @@ timeline_received_cb (TwitterClient *client,
 }
 
 static void
+user_received_cb (TwitterClient *client,
+                  TwitterUser   *user,
+                  const GError  *error,
+                  gpointer       userdata)
+{
+  MojitoServiceTwitter *service = (MojitoServiceTwitter *)userdata;
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+
+  /* Check that this is us. Not somebody else */
+  if (g_str_equal (twitter_user_get_screen_name (user),
+                   priv->username))
+  {
+    priv->user = g_object_ref (user);
+  }
+}
+
+static void
 update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
 {
   MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
@@ -151,6 +178,12 @@ mojito_service_twitter_dispose (GObject *object)
     priv->gconf = NULL;
   }
 
+  if (priv->user)
+  {
+    g_object_unref (priv->user);
+    priv->user = NULL;
+  }
+
   if (priv->client) {
     g_object_unref (priv->client);
     priv->client = NULL;
@@ -162,8 +195,9 @@ mojito_service_twitter_dispose (GObject *object)
 static void
 mojito_service_twitter_finalize (GObject *object)
 {
-  //MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
+  MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
 
+  g_free (priv->username);
   G_OBJECT_CLASS (mojito_service_twitter_parent_class)->finalize (object);
 }
 
@@ -206,6 +240,9 @@ mojito_service_twitter_init (MojitoServiceTwitter *self)
                     self);
   g_signal_connect (priv->client, "timeline-complete",
                     G_CALLBACK (timeline_received_cb),
+                    self);
+  g_signal_connect (priv->client, "user-received",
+                    G_CALLBACK (user_received_cb),
                     self);
 
   priv->set = mojito_item_set_new ();
