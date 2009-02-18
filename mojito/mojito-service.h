@@ -23,6 +23,7 @@
 #include <glib-object.h>
 #include <mojito/mojito-types.h>
 #include "mojito-core.h"
+#include "mojito-item.h"
 #include "mojito-set.h"
 
 G_BEGIN_DECLS
@@ -55,7 +56,7 @@ struct _MojitoServiceClass {
   GObjectClass parent_class;
   const char *(*get_name) (MojitoService *service);
   void (*update) (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data);
-  gchar *(*get_last_status) (MojitoService *service);
+  MojitoItem *(*get_last_item) (MojitoService *service);
   gchar *(*get_persona_icon) (MojitoService *service);
   gboolean (*update_status) (MojitoService *service, const gchar *status_message);
   guint32 (*get_capabilities) (MojitoService *service);
@@ -63,7 +64,7 @@ struct _MojitoServiceClass {
 
 typedef enum
 {
-  SERVICE_CAN_GET_LAST_STATUS = 1,
+  SERVICE_CAN_GET_LAST_ITEM = 1,
   SERVICE_CAN_GET_PERSONA_ICON = 1 << 2,
   SERVICE_CAN_UPDATE_STATUS = 1 << 3
 } MojitoServiceCapabilityFlags;
