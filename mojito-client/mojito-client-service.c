@@ -150,7 +150,7 @@ typedef struct
 
 static void
 _get_capabilities_cb (DBusGProxy *proxy,
-                      gboolean    can_get_last_status,
+                      gboolean    can_get_last_item,
                       gboolean    can_get_persona_icon,
                       gboolean    can_update_status,
                       GError     *error,
@@ -160,8 +160,8 @@ _get_capabilities_cb (DBusGProxy *proxy,
   guint32 caps = 0;
   MojitoClientServiceGetCapabilitiesCallback cb;
 
-  if (can_get_last_status)
-    caps |= SERVICE_CAN_GET_LAST_STATUS;
+  if (can_get_last_item)
+    caps |= SERVICE_CAN_GET_LAST_ITEM;
   if (can_get_persona_icon)
     caps |= SERVICE_CAN_GET_PERSONA_ICON;
   if (can_update_status)
@@ -196,28 +196,37 @@ mojito_client_service_get_capabilities (MojitoClientService                     
 }
 
 static void
-_get_last_status_cb (DBusGProxy *proxy,
-                     gchar      *status_message,
-                     GError     *error,
-                     gpointer    userdata)
+_get_last_item_cb (DBusGProxy *proxy,
+                   GHashTable *hash,
+                   GError     *error,
+                   gpointer    userdata)
 {
   MojitoClientServiceCallClosure *closure = (MojitoClientServiceCallClosure *)userdata;
-  MojitoClientServiceGetLastStatusCallback cb;
+  MojitoClientServiceGetLastItemCallback cb;
+  MojitoItem *item;
 
-  cb = (MojitoClientServiceGetLastStatusCallback)closure->cb;
+  item = mojito_item_new ();
+  /* TODO
+     item->service = g_strdup (service);
+     item->uuid = g_strdup (uuid);
+     item->date.tv_sec = date;
+  */
+  item->props = g_hash_table_ref (hash);
+
+  cb = (MojitoClientServiceGetLastItemCallback)closure->cb;
   cb (closure->service,
-      status_message,
+      item,
       error,
       closure->userdata);
 
-  g_free (status_message);
+  mojito_item_unref (item);
   g_object_unref (closure->service);
   g_slice_free (MojitoClientServiceCallClosure, closure);
 }
 
 void
-mojito_client_service_get_last_status (MojitoClientService                     *service,
-                                       MojitoClientServiceGetLastStatusCallback cb,
+mojito_client_service_get_last_item (MojitoClientService                     *service,
+                                       MojitoClientServiceGetLastItemCallback cb,
                                        gpointer                                 userdata)
 {
   MojitoClientServicePrivate *priv = GET_PRIVATE (service);
@@ -228,9 +237,9 @@ mojito_client_service_get_last_status (MojitoClientService                     *
   closure->cb = (GCallback)cb;
   closure->userdata = userdata;
 
-  com_intel_Mojito_Service_get_last_status_async (priv->proxy,
-                                                  _get_last_status_cb,
-                                                  closure);
+  com_intel_Mojito_Service_get_last_item_async (priv->proxy,
+                                                _get_last_item_cb,
+                                                closure);
 }
 
 static void

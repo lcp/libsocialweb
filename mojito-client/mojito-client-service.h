@@ -20,6 +20,7 @@
 #define _MOJITO_CLIENT_SERVICE
 
 #include <glib-object.h>
+#include <mojito-client/mojito-item.h>
 
 G_BEGIN_DECLS
 
@@ -52,7 +53,7 @@ GType mojito_client_service_get_type (void);
 
 typedef enum
 {
-  SERVICE_CAN_GET_LAST_STATUS = 1,
+  SERVICE_CAN_GET_LAST_ITEM = 1,
   SERVICE_CAN_GET_PERSONA_ICON = 1 << 2,
   SERVICE_CAN_UPDATE_STATUS = 1 << 3
 } MojitoClientServiceCapabilityFlags;
@@ -69,14 +70,14 @@ mojito_client_service_get_capabilities (MojitoClientService                     
                                         gpointer                                   userdata);
 
 typedef void 
-(*MojitoClientServiceGetLastStatusCallback) (MojitoClientService *service,
-                                             const gchar          *status_message,
-                                             GError               *error,
-                                             gpointer              userdata);
+(*MojitoClientServiceGetLastItemCallback) (MojitoClientService *service,
+                                           MojitoItem          *item,
+                                           GError              *error,
+                                           gpointer             userdata);
 
 void 
-mojito_client_service_get_last_status (MojitoClientService                     *service,
-                                       MojitoClientServiceGetLastStatusCallback cb,
+mojito_client_service_get_last_item (MojitoClientService                     *service,
+                                       MojitoClientServiceGetLastItemCallback cb,
                                        gpointer                                 userdata);
 
 typedef void 
