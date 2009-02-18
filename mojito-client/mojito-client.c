@@ -190,6 +190,35 @@ mojito_client_open_view (MojitoClient                *client,
   g_ptr_array_free (services_array, TRUE);
 }
 
+void
+mojito_client_open_view_for_service (MojitoClient                 *client,
+                                     const gchar                  *service_name,
+                                     MojitoClientOpenViewCallback  cb,
+                                     gpointer                      userdata)
+{
+  MojitoClientPrivate *priv = GET_PRIVATE (client);
+  GPtrArray *services_array;
+  OpenViewClosure *closure;
+
+  services_array = g_ptr_array_new ();
+
+  g_ptr_array_add (services_array, (gchar *)service_name);
+  g_ptr_array_add (services_array, NULL);
+
+  closure = g_new0 (OpenViewClosure, 1);
+  closure->client = g_object_ref (client);
+  closure->cb = cb;
+  closure->userdata = userdata;
+
+  com_intel_Mojito_open_view_async (priv->proxy,
+                                    (const gchar **)services_array->pdata,
+                                    1,
+                                    _mojito_client_open_view_cb,
+                                    closure);
+
+  g_ptr_array_free (services_array, TRUE);
+}
+
 typedef struct
 {
   MojitoClient *client;

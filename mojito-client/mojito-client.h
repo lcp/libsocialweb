@@ -65,6 +65,11 @@ void mojito_client_open_view (MojitoClient                *client,
                               MojitoClientOpenViewCallback cb,
                               gpointer                     userdata);
 
+void mojito_client_open_view_for_service (MojitoClient                 *client,
+                                          const gchar                  *service_name,
+                                          MojitoClientOpenViewCallback  cb,
+                                          gpointer                      userdata);
+
 typedef void (*MojitoClientGetServicesCallback) (MojitoClient *client,
                                                 GList        *services,
                                                 gpointer      userdata);
