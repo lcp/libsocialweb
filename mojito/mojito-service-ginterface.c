@@ -6,7 +6,7 @@ static const DBusGObjectInfo _mojito_service_iface_object_info;
 
 struct _MojitoServiceIfaceClass {
     GTypeInterface parent_class;
-    mojito_service_iface_get_last_status_impl get_last_status;
+    mojito_service_iface_get_last_item_impl get_last_item;
     mojito_service_iface_get_persona_icon_impl get_persona_icon;
     mojito_service_iface_update_status_impl update_status;
     mojito_service_iface_get_capabilities_impl get_capabilities;
@@ -41,18 +41,18 @@ mojito_service_iface_get_type (void)
 }
 
 /**
- * mojito_service_iface_get_last_status_impl:
+ * mojito_service_iface_get_last_item_impl:
  * @self: The object implementing this interface
  * @context: Used to return values or throw an error
  *
  * The signature of an implementation of the D-Bus method
- * GetLastStatus on interface com.intel.Mojito.Service.
+ * GetLastItem on interface com.intel.Mojito.Service.
  */
 static void
-mojito_service_iface_get_last_status (MojitoServiceIface *self,
+mojito_service_iface_get_last_item (MojitoServiceIface *self,
     DBusGMethodInvocation *context)
 {
-  mojito_service_iface_get_last_status_impl impl = (MOJITO_SERVICE_IFACE_GET_CLASS (self)->get_last_status);
+  mojito_service_iface_get_last_item_impl impl = (MOJITO_SERVICE_IFACE_GET_CLASS (self)->get_last_item);
 
   if (impl != NULL)
     {
@@ -70,18 +70,18 @@ mojito_service_iface_get_last_status (MojitoServiceIface *self,
 }
 
 /**
- * mojito_service_iface_implement_get_last_status:
+ * mojito_service_iface_implement_get_last_item:
  * @klass: A class whose instances implement this interface
- * @impl: A callback used to implement the GetLastStatus D-Bus method
+ * @impl: A callback used to implement the GetLastItem D-Bus method
  *
- * Register an implementation for the GetLastStatus method in the vtable
+ * Register an implementation for the GetLastItem method in the vtable
  * of an implementation of this interface. To be called from
  * the interface init function.
  */
 void
-mojito_service_iface_implement_get_last_status (MojitoServiceIfaceClass *klass, mojito_service_iface_get_last_status_impl impl)
+mojito_service_iface_implement_get_last_item (MojitoServiceIfaceClass *klass, mojito_service_iface_get_last_item_impl impl)
 {
-  klass->get_last_status = impl;
+  klass->get_last_item = impl;
 }
 
 /**
@@ -237,7 +237,7 @@ mojito_service_iface_base_init (gpointer klass)
     }
 }
 static const DBusGMethodInfo _mojito_service_iface_methods[] = {
-  { (GCallback) mojito_service_iface_get_last_status, g_cclosure_marshal_VOID__POINTER, 0 },
+  { (GCallback) mojito_service_iface_get_last_item, g_cclosure_marshal_VOID__POINTER, 0 },
   { (GCallback) mojito_service_iface_get_persona_icon, g_cclosure_marshal_VOID__POINTER, 57 },
   { (GCallback) mojito_service_iface_update_status, mojito_marshal_VOID__STRING_POINTER, 112 },
   { (GCallback) mojito_service_iface_get_capabilities, g_cclosure_marshal_VOID__POINTER, 188 },
@@ -247,7 +247,7 @@ static const DBusGObjectInfo _mojito_service_iface_object_info = {
   0,
   _mojito_service_iface_methods,
   4,
-"com.intel.Mojito.Service\0GetLastStatus\0A\0status\0O\0F\0N\0s\0\0com.intel.Mojito.Service\0GetPersonaIcon\0A\0uri\0O\0F\0N\0s\0\0com.intel.Mojito.Service\0UpdateStatus\0A\0status_message\0I\0s\0success\0O\0F\0N\0b\0\0com.intel.Mojito.Service\0GetCapabilities\0A\0can_get_last_status\0O\0F\0N\0b\0can_get_persona_icon\0O\0F\0N\0b\0can_update_status\0O\0F\0N\0b\0\0\0",
+"com.intel.Mojito.Service\0GetLastItem\0A\0item\0O\0F\0N\0a{ss}\0\0com.intel.Mojito.Service\0GetPersonaIcon\0A\0uri\0O\0F\0N\0s\0\0com.intel.Mojito.Service\0UpdateStatus\0A\0status_message\0I\0s\0success\0O\0F\0N\0b\0\0com.intel.Mojito.Service\0GetCapabilities\0A\0can_get_last_status\0O\0F\0N\0b\0can_get_persona_icon\0O\0F\0N\0b\0can_update_status\0O\0F\0N\0b\0\0\0",
 "\0\0",
 "\0\0",
 };

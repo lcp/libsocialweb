@@ -28,27 +28,27 @@ GType mojito_service_iface_get_type (void);
   (G_TYPE_INSTANCE_GET_INTERFACE((obj), MOJITO_TYPE_SERVICE_IFACE, MojitoServiceIfaceClass))
 
 
-typedef void (*mojito_service_iface_get_last_status_impl) (MojitoServiceIface *self,
+typedef void (*mojito_service_iface_get_last_item_impl) (MojitoServiceIface *self,
     DBusGMethodInvocation *context);
-void mojito_service_iface_implement_get_last_status (MojitoServiceIfaceClass *klass, mojito_service_iface_get_last_status_impl impl);
+void mojito_service_iface_implement_get_last_item (MojitoServiceIfaceClass *klass, mojito_service_iface_get_last_item_impl impl);
 /**
- * mojito_service_iface_return_from_get_last_status:
+ * mojito_service_iface_return_from_get_last_item:
  * @context: The D-Bus method invocation context
- * @out_status: const gchar * (FIXME, generate documentation)
+ * @out_item: GHashTable * (FIXME, generate documentation)
  *
  * Return successfully by calling dbus_g_method_return().
  * This inline function exists only to provide type-safety.
  */
 static inline
 /* this comment is to stop gtkdoc realising this is static */
-void mojito_service_iface_return_from_get_last_status (DBusGMethodInvocation *context,
-    const gchar *out_status);
+void mojito_service_iface_return_from_get_last_item (DBusGMethodInvocation *context,
+    GHashTable *out_item);
 static inline void
-mojito_service_iface_return_from_get_last_status (DBusGMethodInvocation *context,
-    const gchar *out_status)
+mojito_service_iface_return_from_get_last_item (DBusGMethodInvocation *context,
+    GHashTable *out_item)
 {
   dbus_g_method_return (context,
-      out_status);
+      out_item);
 }
 
 typedef void (*mojito_service_iface_get_persona_icon_impl) (MojitoServiceIface *self,
