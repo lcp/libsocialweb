@@ -218,7 +218,7 @@ get_capabilities (MojitoService *service)
 {
   return SERVICE_CAN_UPDATE_STATUS |
          SERVICE_CAN_GET_PERSONA_ICON |
-         SERVICE_CAN_GET_LAST_STATUS;
+         SERVICE_CAN_GET_LAST_ITEM;
 }
 
 static gchar *
@@ -236,19 +236,22 @@ get_persona_icon (MojitoService *service)
   }
 }
 
-static gchar *
-get_last_status (MojitoService *service)
+static MojitoItem *
+get_last_item (MojitoService *service)
 {
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
   TwitterStatus *status;
-  gchar *message;
+  MojitoItem *item;
 
   if (priv->user)
   {
+    item = mojito_item_new ();
+    mojito_item_set_service (item, service);
+    /* TODO: use same code as in update handling above */
     status = twitter_user_get_status (priv->user);
-    message = g_strdup (twitter_status_get_text (status));
+    mojito_item_put (item, "content", twitter_status_get_text (status));
     g_object_unref (status);
-    return message;
+    return item;
   } else {
     return NULL;
   }
@@ -270,7 +273,7 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
   service_class->get_capabilities = get_capabilities;
   service_class->update_status = update_status;
   service_class->get_persona_icon = get_persona_icon;
-  service_class->get_last_status = get_last_status;
+  service_class->get_last_item = get_last_item;
 }
 
 static void
