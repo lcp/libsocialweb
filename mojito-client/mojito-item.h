@@ -16,6 +16,9 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _MOJITO_ITEM
+#define _MOJITO_ITEM
+
 #include <glib.h>
 
 typedef struct {
@@ -31,3 +34,4 @@ void mojito_item_ref (MojitoItem *item);
 void mojito_item_free (MojitoItem *item);
 MojitoItem *mojito_item_new (void);
 
+#endif
