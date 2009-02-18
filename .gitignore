@@ -1,6 +1,7 @@
 *~
 *.la
 *.lo
+*.loT
 *.o
 *.pc
 .deps
