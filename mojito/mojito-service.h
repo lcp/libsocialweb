@@ -21,6 +21,7 @@
 #define _MOJITO_SERVICE
 
 #include <glib-object.h>
+#include <mojito/mojito-types.h>
 #include "mojito-core.h"
 #include "mojito-set.h"
 
@@ -43,9 +44,9 @@ G_BEGIN_DECLS
 #define MOJITO_SERVICE_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), MOJITO_TYPE_SERVICE, MojitoServiceClass))
 
-typedef struct {
+struct _MojitoService {
   GObject parent;
-} MojitoService;
+};
 
 typedef void (*MojitoServiceDataFunc) (MojitoService *service, MojitoSet *set, gpointer user_data);
 

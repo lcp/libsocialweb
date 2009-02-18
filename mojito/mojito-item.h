@@ -20,6 +20,7 @@
 #define _MOJITO_ITEM
 
 #include <glib-object.h>
+#include <mojito/mojito-types.h>
 #include <mojito/mojito-service.h>
 #include <mojito/mojito-set.h>
 
@@ -44,10 +45,10 @@ G_BEGIN_DECLS
 
 typedef struct _MojitoItemPrivate MojitoItemPrivate;
 
-typedef struct {
+struct _MojitoItem {
   GObject parent;
   MojitoItemPrivate *priv;
-} MojitoItem;
+};
 
 typedef struct {
   GObjectClass parent_class;

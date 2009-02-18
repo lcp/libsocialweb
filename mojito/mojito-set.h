@@ -20,10 +20,9 @@
 #define _MOJITO_SET
 
 #include <glib-object.h>
+#include <mojito/mojito-types.h>
 
 G_BEGIN_DECLS
-
-typedef struct _MojitoSet MojitoSet;
 
 #define MOJITO_TYPE_SET mojito_set_get_type ()
 

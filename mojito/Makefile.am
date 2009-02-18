@@ -16,7 +16,8 @@ libmojito_la_CFLAGS = -I$(top_srcdir) \
 		     $(DBUS_GLIB_CFLAGS) $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) \
 		     -DMOJITO_SERVICES_MODULES_DIR=\"$(servicesdir)\"
 libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS) $(SOUP_GNOME_LIBS)
-libmojito_la_SOURCES = mojito-core.c mojito-core.h \
+libmojito_la_SOURCES = mojito-types.h \
+		       mojito-core.c mojito-core.h \
 		       mojito-item.c mojito-item.h \
 		       mojito-view.c mojito-view.h \
 		       mojito-service.c mojito-service.h \

@@ -21,6 +21,7 @@
 #define _MOJITO_SERVICE_PROXY
 
 #include <glib-object.h>
+#include <mojito/mojito-types.h>
 #include "mojito-service.h"
 #include "mojito-core.h"
 #include "mojito-set.h"
@@ -44,9 +45,9 @@ G_BEGIN_DECLS
 #define MOJITO_SERVICE_PROXY_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), MOJITO_TYPE_SERVICE_PROXY, MojitoServiceProxyClass))
 
-typedef struct {
+struct _MojitoServiceProxy {
   MojitoService parent;
-} MojitoServiceProxy;
+};
 
 typedef struct _MojitoServiceProxyClass MojitoServiceProxyClass;
 struct _MojitoServiceProxyClass {

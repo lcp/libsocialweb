@@ -20,6 +20,7 @@
 #define _MOJITO_VIEW
 
 #include <glib-object.h>
+#include <mojito/mojito-types.h>
 #include "mojito-service.h"
 
 G_BEGIN_DECLS
@@ -43,10 +44,10 @@ G_BEGIN_DECLS
 
 typedef struct _MojitoViewPrivate MojitoViewPrivate;
 
-typedef struct {
+struct _MojitoView {
   GObject parent;
   MojitoViewPrivate *priv;
-} MojitoView;
+};
 
 typedef struct {
   GObjectClass parent_class;

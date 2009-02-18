@@ -20,6 +20,7 @@
 #define _MOJITO_CORE
 
 #include <glib-object.h>
+#include <mojito/mojito-types.h>
 
 G_BEGIN_DECLS
 
@@ -42,10 +43,10 @@ G_BEGIN_DECLS
 
 typedef struct _MojitoCorePrivate MojitoCorePrivate;
 
-typedef struct {
+struct _MojitoCore {
   GObject parent;
   MojitoCorePrivate *priv;
-} MojitoCore;
+};
 
 typedef struct {
   GObjectClass parent_class;
