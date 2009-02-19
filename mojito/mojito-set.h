@@ -58,6 +58,8 @@ MojitoSet * mojito_set_from_list (GList *list);
 
 void mojito_set_foreach (MojitoSet *set, GFunc func, gpointer user_data);
 
+int mojito_set_size (MojitoSet *set);
+
 G_END_DECLS
 
 #endif /* _MOJITO_SET */

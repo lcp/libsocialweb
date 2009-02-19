@@ -229,3 +229,11 @@ mojito_set_foreach (MojitoSet *set, GFunc func, gpointer user_data)
     func (key, user_data);
   }
 }
+
+int
+mojito_set_size (MojitoSet *set)
+{
+  g_return_val_if_fail (set, 0);
+
+  return g_hash_table_size (set->hash);
+}
