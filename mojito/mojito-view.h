@@ -21,7 +21,7 @@
 
 #include <glib-object.h>
 #include <mojito/mojito-types.h>
-#include "mojito-service.h"
+#include <mojito/mojito-service.h>
 
 G_BEGIN_DECLS
 

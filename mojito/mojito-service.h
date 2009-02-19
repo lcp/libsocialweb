@@ -22,9 +22,9 @@
 
 #include <glib-object.h>
 #include <mojito/mojito-types.h>
-#include "mojito-core.h"
-#include "mojito-item.h"
-#include "mojito-set.h"
+#include <mojito/mojito-core.h>
+#include <mojito/mojito-item.h>
+#include <mojito/mojito-set.h>
 
 G_BEGIN_DECLS
 

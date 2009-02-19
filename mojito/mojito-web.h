@@ -16,7 +16,7 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "mojito-core.h"
+#include <mojito/mojito-core.h>
 #include <libsoup/soup.h>
 
 SoupSession * mojito_web_make_sync_session (void);
