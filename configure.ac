@@ -31,7 +31,7 @@ PKG_CHECK_MODULES(GCONF, gconf-2.0)
 PKG_CHECK_MODULES(SOUP, libsoup-2.4 gthread-2.0)
 PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1)
 PKG_CHECK_MODULES(REST, rest)
-PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0 >= 0.9.2)
+PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0 >= 0.9.4)
 
 AC_MSG_CHECKING([whether to use the GNOME environment])
 AC_ARG_WITH([gnome],[AS_HELP_STRING([--without-gnome], [disable support for GNOME environment])],
