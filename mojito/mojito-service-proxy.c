@@ -99,6 +99,26 @@ mojito_service_proxy_get_name (MojitoService *service)
   return class->get_name (priv->instance);
 }
 
+typedef struct
+{
+  MojitoServiceProxy *proxy;
+  MojitoServiceDataFunc cb;
+  gpointer userdata;
+} UpdateClosure;
+
+static void
+_service_update_cb (MojitoService *service,
+                    MojitoSet     *set,
+                    gpointer       userdata)
+{
+  UpdateClosure *closure = (UpdateClosure *)userdata;
+
+  closure->cb ((MojitoService *)closure->proxy, set, closure->userdata);
+
+  g_object_unref (closure->proxy);
+  g_slice_free (UpdateClosure, closure);
+}
+
 static void
 mojito_service_proxy_update (MojitoService         *service,
                              MojitoServiceDataFunc  callback,
@@ -106,14 +126,20 @@ mojito_service_proxy_update (MojitoService         *service,
 {
   MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
   MojitoServiceClass *class;
+  UpdateClosure *closure;
 
   if (!priv->instance)
     priv->instance = g_object_new (priv->type, NULL);
 
   class = MOJITO_SERVICE_GET_CLASS (priv->instance);
+
+  closure = g_slice_new0 (UpdateClosure);
+  closure->cb = callback;
+  closure->proxy = g_object_ref (service);
+  closure->userdata = userdata;
   return class->update (priv->instance,
-                        callback,
-                        userdata);
+                        _service_update_cb,
+                        closure);
 }
 
 static void
