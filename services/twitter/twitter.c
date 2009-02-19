@@ -76,23 +76,16 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
   }
 }
 
-static void
-status_received_cb (TwitterClient *client,
-                    TwitterStatus *status,
-                    const GError  *error,
-                    gpointer       user_data)
+static MojitoItem *
+make_item_from_status (MojitoService *service, TwitterStatus *status)
 {
-  MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (user_data);
-  TwitterUser *user;
   MojitoItem *item;
-  char *date;
+  TwitterUser *user;
   GTimeVal timeval;
+  char *date;
 
-  if (error) {
-    g_debug ("Cannot update Twitter: %s", error->message);
-    service->priv->callback ((MojitoService*)service, NULL, service->priv->user_data);
-    return;
-  }
+  g_assert (MOJITO_IS_SERVICE (service));
+  g_assert (TWITTER_IS_STATUS (status));
 
   item = mojito_item_new ();
   mojito_item_set_service (item, MOJITO_SERVICE (service));
@@ -113,6 +106,25 @@ status_received_cb (TwitterClient *client,
   mojito_item_take (item, "authoricon", mojito_web_download_image
                     (twitter_user_get_profile_image_url (user)));
 
+  return item;
+}
+
+static void
+status_received_cb (TwitterClient *client,
+                    TwitterStatus *status,
+                    const GError  *error,
+                    gpointer       user_data)
+{
+  MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (user_data);
+  MojitoItem *item;
+
+  if (error) {
+    g_debug ("Cannot update Twitter: %s", error->message);
+    service->priv->callback ((MojitoService*)service, NULL, service->priv->user_data);
+    return;
+  }
+
+  item = make_item_from_status ((MojitoService*)service, status);
   mojito_set_add (service->priv->set, (GObject*)item);
   g_object_unref (item);
 }
