@@ -1,3 +1,11 @@
+Mojito 0.3
+===
+
+* Add Last.fm source
+* Add GNOME support to use GNOME proxies
+* Don't hardcode API keys
+
+
 Mojito 0.2
 ===
 
