@@ -1,3 +1,10 @@
+Mojito 0.4
+===
+
+* Add a status update API to the Services
+* Implement status fetching/updating in Twitter
+
+
 Mojito 0.3
 ===
 
