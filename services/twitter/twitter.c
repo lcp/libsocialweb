@@ -257,13 +257,14 @@ get_last_item (MojitoService *service)
 
   if (priv->user)
   {
-    item = mojito_item_new ();
-    mojito_item_set_service (item, service);
-    /* TODO: use same code as in update handling above */
     status = twitter_user_get_status (priv->user);
-    mojito_item_put (item, "content", twitter_status_get_text (status));
-    g_object_unref (status);
-    return item;
+    if (status) {
+      item = make_item_from_status (service, status);
+      g_object_unref (status);
+      return item;
+    } else {
+      return NULL;
+    }
   } else {
     return NULL;
   }
