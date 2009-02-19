@@ -18,7 +18,7 @@
 
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-bindings.h>
-#include "mojito-core.h"
+#include <mojito/mojito-core.h>
 
 static gboolean
 request_name (void)
