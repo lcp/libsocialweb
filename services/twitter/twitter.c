@@ -90,8 +90,6 @@ make_item_from_status (MojitoService *service, TwitterStatus *status)
   item = mojito_item_new ();
   mojito_item_set_service (item, MOJITO_SERVICE (service));
 
-  user = twitter_status_get_user (status);
-
   twitter_date_to_time_val (twitter_status_get_created_at (status), &timeval);
   date = mojito_time_t_to_string (timeval.tv_sec);
 
@@ -101,6 +99,7 @@ make_item_from_status (MojitoService *service, TwitterStatus *status)
   /* TODO: need a better name for this */
   mojito_item_put (item, "content", twitter_status_get_text (status));
 
+  user = twitter_status_get_user (status);
   mojito_item_put (item, "author", twitter_user_get_name (user));
   mojito_item_take (item, "authorid", g_strdup_printf ("%d", twitter_user_get_id (user)));
   mojito_item_take (item, "authoricon", mojito_web_download_image
@@ -253,15 +252,12 @@ get_last_item (MojitoService *service)
 {
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
   TwitterStatus *status;
-  MojitoItem *item;
 
   if (priv->user)
   {
     status = twitter_user_get_status (priv->user);
     if (status) {
-      item = make_item_from_status (service, status);
-      g_object_unref (status);
-      return item;
+      return make_item_from_status (service, status);
     } else {
       return NULL;
     }
