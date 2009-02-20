@@ -146,6 +146,13 @@ user_received_cb (TwitterClient *client,
   MojitoServiceTwitter *service = (MojitoServiceTwitter *)userdata;
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
 
+  if (!user)
+  {
+    g_warning (G_STRLOC ": Error when getting user information: %s",
+               error->message);
+    return;
+  }
+
   /* Check that this is us. Not somebody else */
   if (g_str_equal (twitter_user_get_screen_name (user),
                    priv->username))
