@@ -193,6 +193,7 @@ mojito_client_open_view (MojitoClient                *client,
 void
 mojito_client_open_view_for_service (MojitoClient                 *client,
                                      const gchar                  *service_name,
+                                     guint                         count,
                                      MojitoClientOpenViewCallback  cb,
                                      gpointer                      userdata)
 {
@@ -212,7 +213,7 @@ mojito_client_open_view_for_service (MojitoClient                 *client,
 
   com_intel_Mojito_open_view_async (priv->proxy,
                                     (const gchar **)services_array->pdata,
-                                    1,
+                                    count,
                                     _mojito_client_open_view_cb,
                                     closure);
 
