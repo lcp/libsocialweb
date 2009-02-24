@@ -247,7 +247,7 @@ static const DBusGObjectInfo _mojito_service_iface_object_info = {
   0,
   _mojito_service_iface_methods,
   4,
-"com.intel.Mojito.Service\0GetLastItem\0A\0item\0O\0F\0N\0a{ss}\0\0com.intel.Mojito.Service\0GetPersonaIcon\0A\0uri\0O\0F\0N\0s\0\0com.intel.Mojito.Service\0UpdateStatus\0A\0status_message\0I\0s\0success\0O\0F\0N\0b\0\0com.intel.Mojito.Service\0GetCapabilities\0A\0can_get_last_status\0O\0F\0N\0b\0can_get_persona_icon\0O\0F\0N\0b\0can_update_status\0O\0F\0N\0b\0\0\0",
+"com.intel.Mojito.Service\0GetLastItem\0A\0item\0O\0F\0N\0a{ss}\0\0com.intel.Mojito.Service\0GetPersonaIcon\0A\0uri\0O\0F\0N\0s\0\0com.intel.Mojito.Service\0UpdateStatus\0A\0status_message\0I\0s\0success\0O\0F\0N\0b\0\0com.intel.Mojito.Service\0GetCapabilities\0A\0can_get_last_item\0O\0F\0N\0b\0can_get_persona_icon\0O\0F\0N\0b\0can_update_status\0O\0F\0N\0b\0\0\0",
 "\0\0",
 "\0\0",
 };

@@ -104,7 +104,7 @@ void mojito_service_iface_implement_get_capabilities (MojitoServiceIfaceClass *k
 /**
  * mojito_service_iface_return_from_get_capabilities:
  * @context: The D-Bus method invocation context
- * @out_can_get_last_status: gboolean  (FIXME, generate documentation)
+ * @out_can_get_last_item: gboolean  (FIXME, generate documentation)
  * @out_can_get_persona_icon: gboolean  (FIXME, generate documentation)
  * @out_can_update_status: gboolean  (FIXME, generate documentation)
  *
@@ -114,17 +114,17 @@ void mojito_service_iface_implement_get_capabilities (MojitoServiceIfaceClass *k
 static inline
 /* this comment is to stop gtkdoc realising this is static */
 void mojito_service_iface_return_from_get_capabilities (DBusGMethodInvocation *context,
-    gboolean out_can_get_last_status,
+    gboolean out_can_get_last_item,
     gboolean out_can_get_persona_icon,
     gboolean out_can_update_status);
 static inline void
 mojito_service_iface_return_from_get_capabilities (DBusGMethodInvocation *context,
-    gboolean out_can_get_last_status,
+    gboolean out_can_get_last_item,
     gboolean out_can_get_persona_icon,
     gboolean out_can_update_status)
 {
   dbus_g_method_return (context,
-      out_can_get_last_status,
+      out_can_get_last_item,
       out_can_get_persona_icon,
       out_can_update_status);
 }
