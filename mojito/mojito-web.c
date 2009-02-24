@@ -54,7 +54,6 @@ mojito_web_download_image (const char *url)
 
   md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, url, -1);
 
-  /* TODO: pull this out into a separate file, twitter will need it too */
   path = g_build_filename (g_get_user_cache_dir (),
                            "mojito",
                            "thumbnails",
