@@ -43,6 +43,8 @@ struct _MojitoServiceTwitterPrivate {
   TwitterClient *client;
   TwitterUser *user;
 
+  gulong self_handle;
+
   /* This is grim */
   MojitoSet *set;
   MojitoServiceDataFunc callback;
@@ -73,7 +75,8 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
   if (priv->user_set && priv->password_set)
   {
     /* Despite claiming to take an email it also takes a username */
-    twitter_client_show_user_from_email (priv->client, priv->username);
+    priv->self_handle =
+      twitter_client_show_user_from_email (priv->client, priv->username);
   }
 }
 
@@ -111,6 +114,7 @@ make_item_from_status (MojitoService *service, TwitterStatus *status)
 
 static void
 status_received_cb (TwitterClient *client,
+                    gulong         handle,
                     TwitterStatus *status,
                     const GError  *error,
                     gpointer       user_data)
@@ -140,6 +144,7 @@ timeline_received_cb (TwitterClient *client,
 
 static void
 user_received_cb (TwitterClient *client,
+                  gulong         handle,
                   TwitterUser   *user,
                   const GError  *error,
                   gpointer       userdata)
@@ -155,8 +160,8 @@ user_received_cb (TwitterClient *client,
   }
 
   /* Check that this is us. Not somebody else */
-  if (g_str_equal (twitter_user_get_screen_name (user),
-                   priv->username))
+  if (priv->self_handle == handle ||
+      g_str_equal (twitter_user_get_screen_name (user), priv->username))
   {
     priv->user = g_object_ref (user);
   }
