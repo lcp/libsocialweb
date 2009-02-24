@@ -16,6 +16,7 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <config.h>
 #include <stdlib.h>
 #include "twitter.h"
 #include <twitter-glib/twitter-glib.h>
@@ -309,8 +310,9 @@ mojito_service_twitter_init (MojitoServiceTwitter *self)
   gconf_client_notify_add (priv->gconf, KEY_PASSWORD,
                            user_changed_cb, self, NULL, NULL);
 
-  /* TODO: set user agent */
-  priv->client = twitter_client_new ();
+  priv->client = g_object_new (TWITTER_TYPE_CLIENT,
+                               "user-agent", "Mojito/" VERSION,
+                               NULL);
   g_signal_connect (priv->client, "status-received",
                     G_CALLBACK (status_received_cb),
                     self);
