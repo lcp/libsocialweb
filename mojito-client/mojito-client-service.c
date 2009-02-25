@@ -169,11 +169,11 @@ _get_capabilities_cb (DBusGProxy *proxy,
       closure->userdata);
   } else {
     if (can_get_last_item)
-      caps |= SERVICE_CAN_GET_LAST_ITEM;
+      caps |= MOJITO_CLIENT_SERVICE_CAN_GET_LAST_ITEM;
     if (can_get_persona_icon)
-      caps |= SERVICE_CAN_GET_PERSONA_ICON;
+      caps |= MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON;
     if (can_update_status)
-      caps |= SERVICE_CAN_UPDATE_STATUS;
+      caps |= MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS;
     cb (closure->service,
       caps,
       error,
