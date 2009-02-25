@@ -160,18 +160,25 @@ _get_capabilities_cb (DBusGProxy *proxy,
   guint32 caps = 0;
   MojitoClientServiceGetCapabilitiesCallback cb;
 
-  if (can_get_last_item)
-    caps |= SERVICE_CAN_GET_LAST_ITEM;
-  if (can_get_persona_icon)
-    caps |= SERVICE_CAN_GET_PERSONA_ICON;
-  if (can_update_status)
-    caps |= SERVICE_CAN_UPDATE_STATUS;
-
   cb = (MojitoClientServiceGetCapabilitiesCallback)closure->cb;
-  cb (closure->service,
+  if (error)
+  {
+    cb (closure->service,
+      0,
+      error,
+      closure->userdata);
+  } else {
+    if (can_get_last_item)
+      caps |= SERVICE_CAN_GET_LAST_ITEM;
+    if (can_get_persona_icon)
+      caps |= SERVICE_CAN_GET_PERSONA_ICON;
+    if (can_update_status)
+      caps |= SERVICE_CAN_UPDATE_STATUS;
+    cb (closure->service,
       caps,
       error,
       closure->userdata);
+  }
 
   g_object_unref (closure->service);
   g_slice_free (MojitoClientServiceCallClosure, closure);
@@ -205,8 +212,14 @@ _get_last_item_cb (DBusGProxy *proxy,
   MojitoClientServiceGetLastItemCallback cb;
   MojitoItem *item = NULL;
 
-  if (hash)
+  cb = (MojitoClientServiceGetLastItemCallback)closure->cb;
+  if (error)
   {
+    cb (closure->service,
+        NULL,
+        error,
+        closure->userdata);
+  } else {
     item = mojito_item_new ();
     /* TODO
        item->service = g_strdup (service);
@@ -214,16 +227,14 @@ _get_last_item_cb (DBusGProxy *proxy,
        item->date.tv_sec = date;
     */
     item->props = g_hash_table_ref (hash);
-  }
 
-  cb = (MojitoClientServiceGetLastItemCallback)closure->cb;
-  cb (closure->service,
-      item,
-      error,
-      closure->userdata);
+    cb (closure->service,
+        item,
+        error,
+        closure->userdata);
 
-  if (item)
     mojito_item_unref (item);
+  }
 
   g_object_unref (closure->service);
   g_slice_free (MojitoClientServiceCallClosure, closure);
@@ -257,12 +268,21 @@ _get_persona_icon_cb (DBusGProxy *proxy,
   MojitoClientServiceGetPersonaIconCallback cb;
 
   cb = (MojitoClientServiceGetPersonaIconCallback)closure->cb;
-  cb (closure->service,
-      persona_icon,
-      error,
-      closure->userdata);
 
-  g_free (persona_icon);
+  if (error)
+  {
+    cb (closure->service,
+        NULL,
+        error,
+        closure->userdata);
+  } else {
+    cb (closure->service,
+        persona_icon,
+        error,
+        closure->userdata);
+    g_free (persona_icon);
+  }
+
   g_object_unref (closure->service);
   g_slice_free (MojitoClientServiceCallClosure, closure);
 }
