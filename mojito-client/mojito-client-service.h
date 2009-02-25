@@ -53,9 +53,9 @@ GType mojito_client_service_get_type (void);
 
 typedef enum
 {
-  SERVICE_CAN_GET_LAST_ITEM = 1,
-  SERVICE_CAN_GET_PERSONA_ICON = 1 << 2,
-  SERVICE_CAN_UPDATE_STATUS = 1 << 3
+  MOJITO_CLIENT_SERVICE_CAN_GET_LAST_ITEM = 1,
+  MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON = 1 << 1,
+  MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS = 1 << 2
 } MojitoClientServiceCapabilityFlags;
 
 typedef void
