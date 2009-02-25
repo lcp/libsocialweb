@@ -203,15 +203,18 @@ _get_last_item_cb (DBusGProxy *proxy,
 {
   MojitoClientServiceCallClosure *closure = (MojitoClientServiceCallClosure *)userdata;
   MojitoClientServiceGetLastItemCallback cb;
-  MojitoItem *item;
+  MojitoItem *item = NULL;
 
-  item = mojito_item_new ();
-  /* TODO
-     item->service = g_strdup (service);
-     item->uuid = g_strdup (uuid);
-     item->date.tv_sec = date;
-  */
-  item->props = g_hash_table_ref (hash);
+  if (hash)
+  {
+    item = mojito_item_new ();
+    /* TODO
+       item->service = g_strdup (service);
+       item->uuid = g_strdup (uuid);
+       item->date.tv_sec = date;
+    */
+    item->props = g_hash_table_ref (hash);
+  }
 
   cb = (MojitoClientServiceGetLastItemCallback)closure->cb;
   cb (closure->service,
@@ -219,7 +222,9 @@ _get_last_item_cb (DBusGProxy *proxy,
       error,
       closure->userdata);
 
-  mojito_item_unref (item);
+  if (item)
+    mojito_item_unref (item);
+
   g_object_unref (closure->service);
   g_slice_free (MojitoClientServiceCallClosure, closure);
 }
