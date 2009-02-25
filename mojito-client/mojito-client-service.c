@@ -35,7 +35,7 @@ struct _MojitoClientServicePrivate {
 };
 
 #define MOJITO_CLIENT_SERVICE_NAME "com.intel.Mojito"
-#define MOJITO_CLIENT_SERVICE_OBJECT "/com/intel/Mojito/%s"
+#define MOJITO_CLIENT_SERVICE_OBJECT "/com/intel/Mojito/Service/%s"
 #define MOJITO_CLIENT_SERVICE_INTERFACE "com.intel.Mojito.Service"
 
 static void
