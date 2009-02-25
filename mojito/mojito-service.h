@@ -65,8 +65,8 @@ struct _MojitoServiceClass {
 typedef enum
 {
   SERVICE_CAN_GET_LAST_ITEM = 1,
-  SERVICE_CAN_GET_PERSONA_ICON = 1 << 2,
-  SERVICE_CAN_UPDATE_STATUS = 1 << 3
+  SERVICE_CAN_GET_PERSONA_ICON = 1 << 1,
+  SERVICE_CAN_UPDATE_STATUS = 1 << 2
 } MojitoServiceCapabilityFlags;
 
 GType mojito_service_get_type (void);
