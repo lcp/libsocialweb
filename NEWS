@@ -1,7 +1,15 @@
+Mojito 0.6
+===
+
+* Fix serious bugs in the new MojitoClientService code.
+* Require newer twitter-glib for proxy / handles support.
+
+
 Mojito 0.5
 ===
 
 * Set the user agent for Twitter
+
 
 Mojito 0.4
 ===
