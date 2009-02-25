@@ -60,9 +60,9 @@ typedef enum
 
 typedef void
 (*MojitoClientServiceGetCapabilitiesCallback) (MojitoClientService *service,
-                                               guint32        caps,
-                                               GError        *error,
-                                               gpointer       userdata);
+                                               guint32              caps,
+                                               const GError        *error,
+                                               gpointer             userdata);
 
 void
 mojito_client_service_get_capabilities (MojitoClientService                       *service,
@@ -72,18 +72,18 @@ mojito_client_service_get_capabilities (MojitoClientService                     
 typedef void 
 (*MojitoClientServiceGetLastItemCallback) (MojitoClientService *service,
                                            MojitoItem          *item,
-                                           GError              *error,
+                                           const GError        *error,
                                            gpointer             userdata);
 
 void 
 mojito_client_service_get_last_item (MojitoClientService                     *service,
                                        MojitoClientServiceGetLastItemCallback cb,
-                                       gpointer                                 userdata);
+                                       gpointer                               userdata);
 
 typedef void 
 (*MojitoClientServiceGetPersonaIconCallback) (MojitoClientService *service,
                                               const gchar         *persona_icon,
-                                              GError              *error,
+                                              const GError        *error,
                                               gpointer             userdata);
 
 void
@@ -94,7 +94,7 @@ mojito_client_service_get_persona_icon (MojitoClientService                     
 typedef void 
 (*MojitoClientServiceUpdateStatusCallback) (MojitoClientService *service,
                                             gboolean             success,
-                                            GError              *error,
+                                            const GError        *error,
                                             gpointer             userdata);
 
 void
