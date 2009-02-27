@@ -57,3 +57,17 @@ mojito_item_unref (MojitoItem *item)
   }
 }
 
+GType
+mojito_item_get_type (void)
+{
+  static GType type = 0;
+
+  if (G_UNLIKELY (type == 0))
+  {
+    type = g_boxed_type_register_static ("MojitoItem",
+                                         (GBoxedCopyFunc)mojito_item_ref,
+                                         (GBoxedFreeFunc)mojito_item_unref);
+  }
+
+  return type;
+}

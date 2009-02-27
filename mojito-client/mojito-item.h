@@ -19,7 +19,9 @@
 #ifndef _MOJITO_ITEM
 #define _MOJITO_ITEM
 
-#include <glib.h>
+#define MOJITO_TYPE_ITEM (mojito_item_get_type())
+
+#include <glib-object.h>
 
 typedef struct {
   volatile gint refcount;
@@ -33,5 +35,7 @@ void mojito_item_unref (MojitoItem *item);
 MojitoItem *mojito_item_ref (MojitoItem *item);
 void mojito_item_free (MojitoItem *item);
 MojitoItem *mojito_item_new (void);
+
+GType mojito_item_get_type (void);
 
 #endif
