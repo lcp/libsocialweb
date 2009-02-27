@@ -30,7 +30,7 @@ typedef struct {
 } MojitoItem;
 
 void mojito_item_unref (MojitoItem *item);
-void mojito_item_ref (MojitoItem *item);
+MojitoItem *mojito_item_ref (MojitoItem *item);
 void mojito_item_free (MojitoItem *item);
 MojitoItem *mojito_item_new (void);
 

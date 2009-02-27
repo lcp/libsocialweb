@@ -41,10 +41,11 @@ mojito_item_free (MojitoItem *item)
   g_slice_free (MojitoItem, item);
 }
 
-void
+MojitoItem *
 mojito_item_ref (MojitoItem *item)
 {
   g_atomic_int_inc (&(item->refcount));
+  return item;
 }
 
 void
