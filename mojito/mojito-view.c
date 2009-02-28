@@ -182,13 +182,17 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
 
   g_debug ("Updated %s", mojito_service_get_name (service));
 
-  mojito_cache_save (service, set);
+  if (set == NULL)
+  {
+    g_debug ("Service returned NULL (not empty set). Not caching this.");
+  } else {
+    mojito_cache_save (service, set);
+  }
 
   mojito_set_remove (priv->pending_services, (GObject*)service);
 
   /* If the update timeout id is 0 then we're not running any more, so ignore these updates */
   if (priv->timeout_id) {
-    /* Handle services returning NULL instead of an empty set */
     if (set) {
       mojito_set_add_from (priv->pending_items, set);
       mojito_set_unref (set);
