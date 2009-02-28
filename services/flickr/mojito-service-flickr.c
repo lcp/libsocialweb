@@ -150,7 +150,8 @@ flickr_callback (RestProxyCall *call,
   MojitoSet *set;
 
   if (error) {
-    g_printerr ("Cannot get Flickr photos: %s", error->message);
+    g_warning ("Cannot get Flickr photos: %s", error->message);
+    data->callback ((MojitoService*)service, NULL, data->user_data);
     return;
   }
 
