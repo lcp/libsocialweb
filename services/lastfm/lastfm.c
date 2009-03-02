@@ -189,7 +189,7 @@ update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_da
 
     /* TODO user+track url? user+timestamp? */
     mojito_item_put (item, "id", rest_xml_node_find (track, "url")->content);
-    mojito_item_put (item, "link", rest_xml_node_find (track, "url")->content);
+    mojito_item_put (item, "url", rest_xml_node_find (track, "url")->content);
     mojito_item_take (item, "title", make_title (track));
     mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
 
