@@ -285,8 +285,8 @@ mojito_core_init (MojitoCore *self)
 
   self->priv = priv;
 
-  /* TODO: check free policy */
-  priv->available_services = g_hash_table_new (g_str_hash, g_str_equal);
+  priv->available_services = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                                    NULL, g_object_unref);
 }
 
 MojitoCore*
