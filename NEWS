@@ -1,3 +1,11 @@
+Mojito 0.7
+===
+
+* MojitoItem is now a boxed type in the client.
+* When the backend returns NULL due to failure fall back to the cached
+  content.
+
+
 Mojito 0.6
 ===
 
