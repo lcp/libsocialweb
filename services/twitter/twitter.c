@@ -124,7 +124,12 @@ status_received_cb (TwitterClient *client,
 
   if (error) {
     g_debug ("Cannot update Twitter: %s", error->message);
-    service->priv->callback ((MojitoService*)service, NULL, service->priv->user_data);
+    if (service->priv->callback) {
+      service->priv->callback ((MojitoService*)service,
+                               NULL,
+                               service->priv->user_data);
+      service->priv->callback = NULL;
+    }
     return;
   }
 
@@ -139,7 +144,12 @@ timeline_received_cb (TwitterClient *client,
 {
   MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (user_data);
 
-  service->priv->callback ((MojitoService*)service, mojito_set_ref (service->priv->set), service->priv->user_data);
+  if (service->priv->callback) {
+    service->priv->callback ((MojitoService*)service, 
+                             mojito_set_ref (service->priv->set), 
+                             service->priv->user_data);
+    service->priv->callback = NULL;
+  }
 }
 
 static void
