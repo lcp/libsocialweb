@@ -196,8 +196,7 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
 
   g_debug ("Updated %s", mojito_service_get_name (service));
 
-  if (set == NULL)
-  {
+  if (set == NULL) {
     g_debug ("Service returned NULL (not empty set). Not caching this.");
   } else {
     mojito_cache_save (service, set);
@@ -208,8 +207,7 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
   /* If the update timeout id is 0 then we're not running any more, so ignore these updates */
   if (priv->timeout_id) {
 
-    if (!set)
-    {
+    if (!set) {
       g_debug ("Service returned NULL. Using cached material.");
       set = mojito_cache_load (service);
     }
