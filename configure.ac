@@ -121,4 +121,5 @@ AC_OUTPUT([
         tests/Makefile
         examples/Makefile
         mojito-client.pc
+        mojito-module.pc
 ])
