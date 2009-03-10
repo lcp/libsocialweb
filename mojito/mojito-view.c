@@ -120,9 +120,14 @@ munge_items (MojitoView *view)
   count = 0;
   new = mojito_item_set_new ();
 
-  /* We manipulate list in place instead of using a temporary GList* because we
-     manipulate the list so need to track the new tip */
-  while (list && count <= priv->count) {
+  /* We manipulate list in place instead of using a temporary GList* because
+   * need to keep track of the new head.  This loop exits if we have ran out of
+   * items from the sources (list == NULL), we have filled up the result list
+   * (count >= priv->count), or if we have reached the end of the list but have
+   * not yet filled up the result list.
+  */
+  /* TODO: use gsequence instead for clarity? */
+  while (list && count < priv->count) {
     MojitoItem *item;
     MojitoService *service;
 
@@ -130,23 +135,32 @@ munge_items (MojitoView *view)
     service = mojito_item_get_service (item);
 
     if (get_service_count (counts, service) >= service_max) {
-      list = list->next;
-      continue;
+      if (list->next) {
+        list = list->next;
+        continue;
+      } else {
+        /* Here we have got to the end of the source list but haven't yet filled
+           up the target list */
+        /* TODO: put the fill-in logic here? */
+        break;
+      }
     }
 
     /* New list steals the reference */
+    count++;
     mojito_set_add (new, (GObject*)item);
     g_object_unref (item);
     list = g_list_delete_link (list, list);
 
     inc_service_count (counts, service);
   }
-  /* Rewind back to the beginning */
-  list = g_list_first (list);
 
-  /* If we still don't have enough items and there are spare, add them. */
-  while (list && count <= priv->count) {
+  /* If we still have items left in the pending list, rewind back to the
+     beginning and add more */
+  list = g_list_first (list);
+  while (list && count < priv->count) {
     GObject *item = list->data;
+    count++;
     mojito_set_add (new, item);
     g_object_unref (item);
     list = g_list_delete_link (list, list);
