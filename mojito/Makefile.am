@@ -12,10 +12,14 @@ TELEPATHY_GLIB ?= $(top_srcdir)/../telepathy-glib/
 
 BUILT_SOURCES = mojito-marshals.c mojito-marshals.h
 
+libmojito_ladir = $(pkgincludedir)/mojito
+
 libmojito_la_CFLAGS = -I$(top_srcdir) \
 		     $(DBUS_GLIB_CFLAGS) $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) $(NM_CFLAGS) \
 		     -DMOJITO_SERVICES_MODULES_DIR=\"$(servicesdir)\"
+
 libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(NM_LIBS)
+
 libmojito_la_SOURCES = mojito-types.h \
 		       mojito-core.c mojito-core.h \
 		       mojito-item.c mojito-item.h \
@@ -33,6 +37,15 @@ libmojito_la_SOURCES = mojito-types.h \
 		       mojito-core-ginterface.c mojito-core-ginterface.h \
 		       mojito-view-ginterface.c mojito-view-ginterface.h \
 		       mojito-service-ginterface.c mojito-service-ginterface.h
+
+libmojito_la_HEADERS = \
+	mojito-types.h \
+	mojito-service.h \
+	mojito-web.h \
+	mojito-set.h \
+	mojito-item.h \
+	mojito-module.h \
+	mojito-utils.h
 
 # Test suite
 TESTS = test-runner
