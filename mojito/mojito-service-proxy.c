@@ -99,50 +99,18 @@ mojito_service_proxy_get_name (MojitoService *service)
   return class->get_name (priv->instance);
 }
 
-typedef struct
-{
-  MojitoServiceProxy *proxy;
-  MojitoServiceDataFunc cb;
-  gpointer userdata;
-} UpdateClosure;
-
 static void
-_service_update_cb (MojitoService *service,
-                    GHashTable    *params,
-                    MojitoSet     *set,
-                    gpointer       userdata)
-{
-  UpdateClosure *closure = (UpdateClosure *)userdata;
-
-  closure->cb ((MojitoService *)closure->proxy, params, set, closure->userdata);
-
-  g_object_unref (closure->proxy);
-  g_slice_free (UpdateClosure, closure);
-}
-
-static void
-mojito_service_proxy_update (MojitoService         *service,
-                             GHashTable            *params,
-                             MojitoServiceDataFunc  callback,
-                             gpointer               userdata)
+mojito_service_proxy_refresh (MojitoService *service, GHashTable *params)
 {
   MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
   MojitoServiceClass *class;
-  UpdateClosure *closure;
 
   if (!priv->instance)
     priv->instance = g_object_new (priv->type, NULL);
 
   class = MOJITO_SERVICE_GET_CLASS (priv->instance);
 
-  closure = g_slice_new0 (UpdateClosure);
-  closure->cb = callback;
-  closure->proxy = g_object_ref (service);
-  closure->userdata = userdata;
-  return class->update (priv->instance,
-                        params,
-                        _service_update_cb,
-                        closure);
+  class->refresh (priv->instance, params);
 }
 
 static void
@@ -159,7 +127,7 @@ mojito_service_proxy_class_init (MojitoServiceProxyClass *klass)
   object_class->dispose = mojito_service_proxy_dispose;
 
   service_class->get_name = mojito_service_proxy_get_name;
-  service_class->update = mojito_service_proxy_update;
+  service_class->refresh = mojito_service_proxy_refresh;
 
   pspec = g_param_spec_gtype ("type",
                               "type",

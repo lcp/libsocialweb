@@ -37,6 +37,13 @@ enum {
   PROP_CORE
 };
 
+enum {
+  SIGNAL_REFRESHED,
+  N_SIGNALS
+};
+
+static guint signals[N_SIGNALS] = {0};
+
 static void
 mojito_service_set_property (GObject      *object,
                              guint         property_id,
@@ -103,6 +110,15 @@ mojito_service_class_init (MojitoServiceClass *klass)
                                MOJITO_TYPE_CORE,
                                G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
   g_object_class_install_property (object_class, PROP_CORE, pspec);
+
+  signals[SIGNAL_REFRESHED] =
+    g_signal_new ("refreshed",
+                  G_OBJECT_CLASS_TYPE (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL,
+                  mojito_marshal_VOID__BOXED_BOXED,
+                  G_TYPE_NONE, 2, MOJITO_TYPE_SET, G_TYPE_HASH_TABLE);
 }
 
 static void
@@ -121,11 +137,11 @@ mojito_service_get_name (MojitoService *service)
 }
 
 void
-mojito_service_update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data)
+mojito_service_refresh (MojitoService *service, GHashTable *params)
 {
   MojitoServiceClass *service_class = MOJITO_SERVICE_GET_CLASS (service);
 
-  g_return_if_fail (service_class->update);
+  g_return_if_fail (service_class->refresh);
 
-  service_class->update (service, params, callback, user_data);
+  service_class->refresh (service, params);
 }
