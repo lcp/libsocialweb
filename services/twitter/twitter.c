@@ -72,8 +72,7 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
   }
 
   /* Get our details. This will cause the user_received signal to be fired */
-  if (priv->user_set && priv->password_set)
-  {
+  if (priv->user_set && priv->password_set) {
     /* Despite claiming to take an email it also takes a username */
     priv->self_handle =
       twitter_client_show_user_from_email (priv->client, priv->username);
@@ -145,8 +144,8 @@ timeline_received_cb (TwitterClient *client,
   MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (user_data);
 
   if (service->priv->callback) {
-    service->priv->callback ((MojitoService*)service, 
-                             mojito_set_ref (service->priv->set), 
+    service->priv->callback ((MojitoService*)service,
+                             mojito_set_ref (service->priv->set),
                              service->priv->user_data);
     service->priv->callback = NULL;
   }
@@ -162,8 +161,7 @@ user_received_cb (TwitterClient *client,
   MojitoServiceTwitter *service = (MojitoServiceTwitter *)userdata;
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
 
-  if (!user)
-  {
+  if (!user) {
     g_warning (G_STRLOC ": Error when getting user information: %s",
                error->message);
     return;
@@ -171,8 +169,7 @@ user_received_cb (TwitterClient *client,
 
   /* Check that this is us. Not somebody else */
   if (priv->self_handle == handle ||
-      g_str_equal (twitter_user_get_screen_name (user), priv->username))
-  {
+      g_str_equal (twitter_user_get_screen_name (user), priv->username)) {
     priv->user = g_object_ref (user);
   }
 }
@@ -212,8 +209,7 @@ mojito_service_twitter_dispose (GObject *object)
     priv->gconf = NULL;
   }
 
-  if (priv->user)
-  {
+  if (priv->user) {
     g_object_unref (priv->user);
     priv->user = NULL;
   }
@@ -241,8 +237,7 @@ update_status (MojitoService *service,
 {
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
 
-  twitter_client_add_status (priv->client,
-                             status_msg);
+  twitter_client_add_status (priv->client, status_msg);
 
   return TRUE;
 }
@@ -261,8 +256,7 @@ get_persona_icon (MojitoService *service)
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
   const gchar *url;
 
-  if (priv->user)
-  {
+  if (priv->user) {
     url = twitter_user_get_profile_image_url (priv->user);
     return mojito_web_download_image (url);
   } else {
@@ -276,8 +270,7 @@ get_last_item (MojitoService *service)
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
   TwitterStatus *status;
 
-  if (priv->user)
-  {
+  if (priv->user) {
     status = twitter_user_get_status (priv->user);
     if (status) {
       return make_item_from_status (service, status);
