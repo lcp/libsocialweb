@@ -38,7 +38,7 @@ G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
 struct _MojitoViewPrivate {
   GList *services;
   guint count;
-  guint timeout_id;
+  guint refresh_timeout_id;
   /* The set of pending services we're waiting for updates from during an update cycle */
   MojitoSet *pending_services;
   MojitoSet *pending_items;
@@ -205,7 +205,7 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
   mojito_set_remove (priv->pending_services, (GObject*)service);
 
   /* If the update timeout id is 0 then we're not running any more, so ignore these updates */
-  if (priv->timeout_id) {
+  if (priv->refresh_timeout_id) {
 
     if (!set) {
       g_debug ("Service returned NULL. Using cached material.");
@@ -279,8 +279,8 @@ view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 
   mojito_view_iface_return_from_start (context);
 
-  if (priv->timeout_id == 0) {
-    priv->timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_update, iface);
+  if (priv->refresh_timeout_id == 0) {
+    priv->refresh_timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_update, iface);
     load_cache (view);
     start_update (view);
   }
@@ -293,9 +293,9 @@ stop (MojitoView *view)
 
   g_assert (priv);
 
-  if (priv->timeout_id) {
-    g_source_remove (priv->timeout_id);
-    priv->timeout_id = 0;
+  if (priv->refresh_timeout_id) {
+    g_source_remove (priv->refresh_timeout_id);
+    priv->refresh_timeout_id = 0;
   }
 }
 
