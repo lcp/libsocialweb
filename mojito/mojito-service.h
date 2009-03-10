@@ -22,7 +22,6 @@
 
 #include <glib-object.h>
 #include <mojito/mojito-types.h>
-#include <mojito/mojito-core.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 
@@ -70,8 +69,6 @@ typedef enum
 } MojitoServiceCapabilityFlags;
 
 GType mojito_service_get_type (void);
-
-MojitoCore *mojito_service_get_core (MojitoService *service);
 
 const char *mojito_service_get_name (MojitoService *service);
 

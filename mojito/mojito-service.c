@@ -120,12 +120,6 @@ mojito_service_get_name (MojitoService *service)
   return service_class->get_name (service);
 }
 
-MojitoCore *
-mojito_service_get_core (MojitoService *service)
-{
-  return GET_PRIVATE(service)->core;
-}
-
 void
 mojito_service_update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
 {
