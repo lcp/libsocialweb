@@ -48,6 +48,7 @@ main (int argc, char *argv[])
   g_test_init (&argc, &argv, NULL);
 
   test_add ("/set/is_empty", test_set_is_empty);
+  test_add ("/view/new", test_view_new);
 
   return g_test_run ();
 }

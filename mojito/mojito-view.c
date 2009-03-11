@@ -437,3 +437,16 @@ mojito_view_add_service (MojitoView *view, MojitoService *service)
 
   priv->services = g_list_append (priv->services, g_object_ref (service));
 }
+
+
+#if BUILD_TESTS
+
+void
+test_view_new (void)
+{
+  MojitoView *view;
+  view = mojito_view_new (5);
+  g_object_unref (view);
+}
+
+#endif
