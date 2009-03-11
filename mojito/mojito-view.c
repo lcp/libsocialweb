@@ -589,4 +589,45 @@ test_view_munge_3 (void)
   g_object_unref (view);
 }
 
+/*
+ * Create a view of 3 items on a two services, add 3 items from one and none
+ * from the other, and check that all of the items were included.
+ */
+void
+test_view_munge_4 (void)
+{
+  MojitoView *view;
+  MojitoViewPrivate *priv;
+  MojitoService *service_1, *service_2;
+  GList *items = NULL;
+  MojitoSet *set;
+  int i;
+
+  view = mojito_view_new (3);
+  priv = view->priv;
+
+  service_1 = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
+  mojito_view_add_service (view, service_1);
+  service_2 = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
+  mojito_view_add_service (view, service_2);
+
+  for (i = 0; i < 3; i++) {
+    MojitoItem *item;
+    item = make_item (service_1);
+    items = g_list_prepend (items, item);
+    mojito_set_add (priv->pending_items, G_OBJECT (item));
+  }
+
+  set = munge_items (view);
+
+  g_assert (mojito_set_size (set) == 3);
+
+  while (items) {
+    g_assert (mojito_set_has (set, items->data));
+    items = items->next;
+  }
+
+  g_object_unref (view);
+}
+
 #endif
