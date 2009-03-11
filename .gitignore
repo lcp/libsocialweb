@@ -23,5 +23,6 @@ examples/test-client
 mojito/mojito-marshals.[ch]
 mojito-client/mojito-client-marshals.[ch]
 mojito-client/mojito-*-bindings.h
+mojito/test-runner
 src/mojito.service
 src/mojito-core
