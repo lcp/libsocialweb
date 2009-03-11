@@ -52,6 +52,7 @@ main (int argc, char *argv[])
   test_add ("/view/new", test_view_new);
   test_add ("/view/munge-1", test_view_munge_1);
   test_add ("/view/munge-2", test_view_munge_2);
+  test_add ("/view/munge-3", test_view_munge_3);
 
   return g_test_run ();
 }

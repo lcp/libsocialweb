@@ -550,4 +550,43 @@ test_view_munge_2 (void)
   g_object_unref (view);
 }
 
+/*
+ * Create a view of 2 items on a two services, add 2 items from each to the pending
+ * list, and check that the latest item from each source was selected.
+ */
+void
+test_view_munge_3 (void)
+{
+  MojitoView *view;
+  MojitoViewPrivate *priv;
+  MojitoService *service_1, *service_2;
+  MojitoItem *item_1, *item_2;
+  MojitoSet *set;
+
+  view = mojito_view_new (2);
+  priv = view->priv;
+
+  service_1 = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
+  mojito_view_add_service (view, service_1);
+  service_2 = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
+  mojito_view_add_service (view, service_2);
+
+  mojito_set_add (priv->pending_items, G_OBJECT (make_item_dated (service_1, 1)));
+  item_1 = make_item_dated (service_1, 1000);
+  mojito_set_add (priv->pending_items, G_OBJECT (item_1));
+
+  mojito_set_add (priv->pending_items, G_OBJECT (make_item_dated (service_2, 1)));
+  item_2 = make_item_dated (service_2, 1000);
+  mojito_set_add (priv->pending_items, G_OBJECT (item_2));
+
+  set = munge_items (view);
+
+  /* TODO: make and use mojito_set_equal () */
+  g_assert (mojito_set_size (set) == 2);
+  g_assert (mojito_set_has (set, G_OBJECT (item_1)));
+  g_assert (mojito_set_has (set, G_OBJECT (item_2)));
+
+  g_object_unref (view);
+}
+
 #endif
