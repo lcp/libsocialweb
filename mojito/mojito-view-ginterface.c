@@ -263,6 +263,8 @@ mojito_view_iface_emit_item_changed (gpointer instance,
 static inline void
 mojito_view_iface_base_init_once (gpointer klass G_GNUC_UNUSED)
 {
+  dbus_g_object_type_install_info (mojito_view_iface_get_type (),
+      &_mojito_view_iface_object_info);
   /**
    * MojitoViewIface::item-added:
    * @arg_service: const gchar * (FIXME, generate documentation)
@@ -328,8 +330,6 @@ mojito_view_iface_base_init_once (gpointer klass G_GNUC_UNUSED)
       G_TYPE_INT64,
       DBUS_TYPE_G_STRING_STRING_HASHTABLE);
 
-  dbus_g_object_type_install_info (mojito_view_iface_get_type (),
-      &_mojito_view_iface_object_info);
 }
 static void
 mojito_view_iface_base_init (gpointer klass)
