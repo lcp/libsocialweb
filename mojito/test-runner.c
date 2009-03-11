@@ -18,11 +18,28 @@
 
 #include <config.h>
 #include <glib-object.h>
+#include "test-runner.h"
 
 #define test_add(unit_name, func) G_STMT_START {                        \
     extern void func (void);                                            \
     g_test_add_func (unit_name, func); } G_STMT_END
 
+struct _DummyObject {
+  GObject parent;
+};
+
+struct _DummyObjectClass {
+  GObjectClass parent_class;
+};
+
+G_DEFINE_TYPE (DummyObject, dummy_object, G_TYPE_OBJECT);
+static void dummy_object_class_init (DummyObjectClass *class) {}
+static void dummy_object_init (DummyObject *dummy) {}
+DummyObject *
+dummy_object_new (void)
+{
+  return g_object_new (TYPE_DUMMY_OBJECT, NULL);
+}
 
 int
 main (int argc, char *argv[])

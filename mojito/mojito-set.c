@@ -240,17 +240,7 @@ mojito_set_size (MojitoSet *set)
 
 #if BUILD_TESTS
 
-typedef struct {
-  GObject parent;
-} DummyObject;
-
-typedef struct {
-  GObjectClass parent_class;
-} DummyObjectClass;
-
-G_DEFINE_TYPE (DummyObject, dummy_object, G_TYPE_OBJECT);
-static void dummy_object_class_init (DummyObjectClass *class) {}
-static void dummy_object_init (DummyObject *dummy) {}
+#include "test-runner.h"
 
 void
 test_set_is_empty (void)
@@ -259,7 +249,7 @@ test_set_is_empty (void)
   DummyObject *obj;
 
   set = mojito_set_new ();
-  obj = g_object_new (dummy_object_get_type (), NULL);
+  obj = dummy_object_new ();
 
   g_assert (mojito_set_is_empty (set));
 
