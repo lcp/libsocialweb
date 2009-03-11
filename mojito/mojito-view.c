@@ -452,7 +452,7 @@ test_view_new (void)
 }
 
 static MojitoItem *
-make_item (MojitoService *service)
+make_item_dated (MojitoService *service, time_t date)
 {
   MojitoItem *item;
   char *id;
@@ -465,9 +465,15 @@ make_item (MojitoService *service)
   mojito_item_set_service (item, service);
   mojito_item_put (item, "id", id);
   mojito_item_take (item, "title", id);
-  mojito_item_put (item, "date", mojito_time_t_to_string (time (NULL)));
+  mojito_item_put (item, "date", mojito_time_t_to_string (date));
 
   return item;
+}
+
+static MojitoItem *
+make_item (MojitoService *service)
+{
+  return make_item_dated (service, time (NULL));
 }
 
 /*
