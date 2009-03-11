@@ -32,3 +32,13 @@ libmojito_la_SOURCES = mojito-types.h \
 		       mojito-core-ginterface.c mojito-core-ginterface.h \
 		       mojito-view-ginterface.c mojito-view-ginterface.h \
 		       mojito-service-ginterface.c mojito-service-ginterface.h
+
+# Test suite
+TESTS = test-runner
+check_PROGRAMS = test-runner
+
+test_runner_SOURCES = test-runner.c mojito-set.c
+test_runner_CPPFLAGS = $(GOBJECT_CFLAGS) -DBUILD_TESTS
+test_runner_LDFLAGS = $(GOBJECT_LIBS)
+
+# TODO: use gtester
