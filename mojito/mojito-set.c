@@ -237,3 +237,41 @@ mojito_set_size (MojitoSet *set)
 
   return g_hash_table_size (set->hash);
 }
+
+#if BUILD_TESTS
+
+typedef struct {
+  GObject parent;
+} DummyObject;
+
+typedef struct {
+  GObjectClass parent_class;
+} DummyObjectClass;
+
+G_DEFINE_TYPE (DummyObject, dummy_object, G_TYPE_OBJECT);
+static void dummy_object_class_init (DummyObjectClass *class) {}
+static void dummy_object_init (DummyObject *dummy) {}
+
+void
+test_set_is_empty (void)
+{
+  MojitoSet *set;
+  DummyObject *obj;
+
+  set = mojito_set_new ();
+  obj = g_object_new (dummy_object_get_type (), NULL);
+
+  g_assert (mojito_set_is_empty (set));
+
+  mojito_set_add (set, G_OBJECT (obj));
+
+  g_assert (!mojito_set_is_empty (set));
+
+  mojito_set_remove (set, G_OBJECT (obj));
+
+  g_assert (mojito_set_is_empty (set));
+
+  g_object_unref (obj);
+  mojito_set_unref (set);
+}
+#endif
