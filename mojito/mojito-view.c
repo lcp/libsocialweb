@@ -441,11 +441,71 @@ mojito_view_add_service (MojitoView *view, MojitoService *service)
 
 #if BUILD_TESTS
 
+#include <services/dummy/mojito-service-dummy.h>
+
 void
 test_view_new (void)
 {
   MojitoView *view;
   view = mojito_view_new (5);
+  g_object_unref (view);
+}
+
+static MojitoItem *
+make_item (MojitoService *service)
+{
+  MojitoItem *item;
+  char *id;
+
+  g_assert (service);
+
+  id = g_strdup_printf ("random-item-%d", g_test_rand_int_range (0, G_MAXINT));
+
+  item = mojito_item_new ();
+  mojito_item_set_service (item, service);
+  mojito_item_put (item, "id", id);
+  mojito_item_take (item, "title", id);
+  mojito_item_put (item, "date", mojito_time_t_to_string (time (NULL)));
+
+  return item;
+}
+
+/*
+ * Create a view of 5 items on a single service, add 5 items to the pending
+ * list, and check that they are all members of the result.
+ */
+void
+test_view_munge_1 (void)
+{
+  MojitoView *view;
+  MojitoViewPrivate *priv;
+  MojitoService *service;
+  GList *items = NULL;
+  MojitoSet *set;
+  int i;
+
+  view = mojito_view_new (5);
+  priv = view->priv;
+
+  service = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
+  mojito_view_add_service (view, service);
+
+  for (i = 0; i < 5; i++) {
+    MojitoItem *item;
+    item = make_item (service);
+    items = g_list_prepend (items, item);
+    mojito_set_add (priv->pending_items, G_OBJECT (item));
+  }
+
+  set = munge_items (view);
+
+  g_assert (mojito_set_size (set) == 5);
+
+  while (items) {
+    g_assert (mojito_set_has (set, items->data));
+    items = items->next;
+  }
+
   g_object_unref (view);
 }
 

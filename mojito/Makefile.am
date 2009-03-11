@@ -37,7 +37,7 @@ libmojito_la_SOURCES = mojito-types.h \
 TESTS = test-runner
 check_PROGRAMS = test-runner
 
-test_runner_SOURCES = test-runner.c test-runner.h $(libmojito_la_SOURCES)
+test_runner_SOURCES = test-runner.c test-runner.h $(libmojito_la_SOURCES) $(top_srcdir)/services/dummy/mojito-service-dummy.c
 test_runner_CFLAGS = -DBUILD_TESTS $(libmojito_la_CFLAGS)
 test_runner_LDFLAGS = $(libmojito_la_LIBADD)
 
