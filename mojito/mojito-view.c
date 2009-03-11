@@ -99,7 +99,7 @@ send_removed (gpointer data, gpointer user_data)
                                        mojito_item_get (item, "id"));
 }
 
-static void
+static MojitoSet *
 munge_items (MojitoView *view)
 {
   MojitoViewPrivate *priv = view->priv;
@@ -172,20 +172,7 @@ munge_items (MojitoView *view)
     list = g_list_delete_link (list, list);
   }
 
-  /* update seen uids and emit signals */
-  MojitoSet *old_items, *new_items;
-
-  old_items = mojito_set_difference (priv->current, new);
-  new_items = mojito_set_difference (new, priv->current);
-
-  mojito_set_foreach (old_items, (GFunc)send_removed, view);
-  mojito_set_foreach (new_items, (GFunc)send_added, view);
-
-  mojito_set_unref (old_items);
-  mojito_set_unref (new_items);
-
-  mojito_set_unref (priv->current);
-  priv->current = new;
+  return new;
 }
 
 static void
@@ -219,7 +206,23 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
 
     /* Have all of the services got back to us now? */
     if (mojito_set_is_empty (priv->pending_services)) {
-      munge_items (view);
+      MojitoSet *old_items, *new_items;
+      MojitoSet *removed_items, *added_items;
+
+      old_items = priv->current;
+      new_items = munge_items (view);
+
+      removed_items = mojito_set_difference (old_items, new_items);
+      added_items = mojito_set_difference (new_items, old_items);
+
+      mojito_set_foreach (removed_items, (GFunc)send_removed, view);
+      mojito_set_foreach (added_items, (GFunc)send_added, view);
+
+      mojito_set_unref (removed_items);
+      mojito_set_unref (added_items);
+
+      mojito_set_unref (priv->current);
+      priv->current = new_items;
     }
   }
 
