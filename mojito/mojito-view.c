@@ -35,7 +35,13 @@ G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
 /* Refresh every 10 minutes */
 #define REFRESH_TIMEOUT (10 * 60)
 
+typedef struct {
+  MojitoService *service;
+  GHashTable *params;
+} ServiceParamData;
+
 struct _MojitoViewPrivate {
+  /* List of ServiceParamData objects */
   GList *services;
   guint count;
   guint refresh_timeout_id;
@@ -240,14 +246,14 @@ start_update (MojitoView *view)
   mojito_set_empty (priv->pending_items);
 
   for (l = priv->services; l; l = l->next) {
-    MojitoService *service = l->data;
-    mojito_set_add (priv->pending_services, g_object_ref (service));
+    ServiceParamData *data = l->data;
+    mojito_set_add (priv->pending_services, g_object_ref (data->service));
   }
 
   for (l = priv->services; l; l = l->next) {
-    MojitoService *service = l->data;
-    g_debug ("Updating %s", mojito_service_get_name (service));
-    mojito_service_update (service, service_updated, g_object_ref (view));
+    ServiceParamData *data = l->data;
+    g_debug ("Updating %s", mojito_service_get_name (data->service));
+    mojito_service_update (data->service, service_updated, g_object_ref (view));
   }
 
   return TRUE;
@@ -263,14 +269,14 @@ load_cache (MojitoView *view)
   mojito_set_empty (priv->pending_items);
 
   for (l = priv->services; l; l = l->next) {
-    MojitoService *service = l->data;
-    mojito_set_add (priv->pending_services, g_object_ref (service));
+    ServiceParamData *data = l->data;
+    mojito_set_add (priv->pending_services, g_object_ref (data->service));
   }
 
   for (l = priv->services; l; l = l->next) {
-    MojitoService *service = l->data;
-    g_debug ("Loading cache for %s", mojito_service_get_name (service));
-    service_updated (service, mojito_cache_load (service), g_object_ref (view));
+    ServiceParamData *data = l->data;
+    g_debug ("Loading cache for %s", mojito_service_get_name (data->service));
+    service_updated (data->service, mojito_cache_load (data->service), g_object_ref (view));
   }
 }
 
@@ -366,7 +372,11 @@ mojito_view_dispose (GObject *object)
   MojitoViewPrivate *priv = view->priv;
 
   while (priv->services) {
-    g_object_unref (priv->services->data);
+    ServiceParamData *data = priv->services->data;
+    g_object_unref (data->service);
+    g_hash_table_unref (data->params);
+    g_slice_free (ServiceParamData, data);
+
     priv->services = g_list_delete_link (priv->services, priv->services);
   }
 
@@ -431,11 +441,16 @@ mojito_view_new (guint count)
 }
 
 void
-mojito_view_add_service (MojitoView *view, MojitoService *service)
+mojito_view_add_service (MojitoView *view, MojitoService *service, GHashTable *params)
 {
   MojitoViewPrivate *priv = view->priv;
+  ServiceParamData *data;
 
-  priv->services = g_list_append (priv->services, g_object_ref (service));
+  data = g_slice_new (ServiceParamData);
+  data->service = g_object_ref (service);
+  data->params = params;
+
+  priv->services = g_list_append (priv->services, data);
 }
 
 

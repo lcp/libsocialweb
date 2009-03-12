@@ -86,6 +86,34 @@ view_weak_notify (gpointer data, GObject *old_view)
   client_monitor_remove (sender, old_view);
 }
 
+static GHashTable *
+make_param_hash (const char *s)
+{
+  char **tokens, **i;
+  GHashTable *hash;
+
+  hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+
+  if (s) {
+    tokens = g_strsplit (s, ",", 0);
+    for (i = tokens; *i; i++) {
+      char **nv;
+      nv = g_strsplit (*i, "=", 2);
+      if (nv[0] && nv[1]) {
+        /* Hash takes ownership of the strings */
+        g_hash_table_insert (hash, nv[0], nv[1]);
+        /* Just free the array */
+        g_free (nv);
+      } else {
+        g_strfreev (nv);
+      }
+    }
+    g_strfreev (tokens);
+  }
+
+  return hash;
+}
+
 static void
 open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMethodInvocation *context)
 {
@@ -100,18 +128,26 @@ open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMetho
   dbus_g_connection_register_g_object (priv->connection, path, (GObject*)view);
 
   for (i = services; *i; i++) {
-    const char *name = *i;
+    char **tokens;
+    const char *name;
+    GHashTable *params;
     MojitoService *service;
+
+    tokens = g_strsplit (*i, ":", 2);
+    name = tokens[0];
+    params = make_param_hash (tokens[1]);
 
     g_debug ("%s: service name %s", __FUNCTION__, name);
 
     service = g_hash_table_lookup (priv->available_services, name);
 
     if (service) {
-      mojito_view_add_service (view, service);
+      mojito_view_add_service (view, service, params);
     } else {
       g_warning (G_STRLOC ": Request for unknown service: %s",
                  name);
+
+      g_strfreev (tokens);
     }
   }
 
