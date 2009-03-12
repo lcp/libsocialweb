@@ -54,7 +54,7 @@ typedef struct _MojitoServiceClass MojitoServiceClass;
 struct _MojitoServiceClass {
   GObjectClass parent_class;
   const char *(*get_name) (MojitoService *service);
-  void (*update) (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data);
+  void (*update) (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data);
   MojitoItem *(*get_last_item) (MojitoService *service);
   gchar *(*get_persona_icon) (MojitoService *service);
   gboolean (*update_status) (MojitoService *service, const gchar *status_message);
@@ -73,7 +73,7 @@ GType mojito_service_get_type (void);
 const char *mojito_service_get_name (MojitoService *service);
 
 /* Please update yourself */
-void mojito_service_update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data);
+void mojito_service_update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data);
 
 G_END_DECLS
 

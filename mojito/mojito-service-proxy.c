@@ -121,6 +121,7 @@ _service_update_cb (MojitoService *service,
 
 static void
 mojito_service_proxy_update (MojitoService         *service,
+                             GHashTable            *params,
                              MojitoServiceDataFunc  callback,
                              gpointer               userdata)
 {
@@ -138,6 +139,7 @@ mojito_service_proxy_update (MojitoService         *service,
   closure->proxy = g_object_ref (service);
   closure->userdata = userdata;
   return class->update (priv->instance,
+                        params,
                         _service_update_cb,
                         closure);
 }

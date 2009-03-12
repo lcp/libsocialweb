@@ -121,11 +121,11 @@ mojito_service_get_name (MojitoService *service)
 }
 
 void
-mojito_service_update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
+mojito_service_update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data)
 {
   MojitoServiceClass *service_class = MOJITO_SERVICE_GET_CLASS (service);
 
   g_return_if_fail (service_class->update);
 
-  service_class->update (service, callback, user_data);
+  service_class->update (service, params, callback, user_data);
 }

@@ -253,7 +253,7 @@ start_update (MojitoView *view)
   for (l = priv->services; l; l = l->next) {
     ServiceParamData *data = l->data;
     g_debug ("Updating %s", mojito_service_get_name (data->service));
-    mojito_service_update (data->service, service_updated, g_object_ref (view));
+    mojito_service_update (data->service, data->params, service_updated, g_object_ref (view));
   }
 
   return TRUE;
