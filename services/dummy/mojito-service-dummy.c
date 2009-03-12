@@ -64,7 +64,7 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
   mojito_set_add (set, G_OBJECT (item));
   g_object_unref (item);
 
-  callback (service, set, user_data);
+  callback (service, params, set, user_data);
 }
 
 static void

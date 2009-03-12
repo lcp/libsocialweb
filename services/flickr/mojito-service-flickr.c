@@ -133,6 +133,7 @@ get_thumbnail (RestXmlNode *node)
 }
 
 typedef struct {
+  GHashTable *params;
   MojitoServiceDataFunc callback;
   gpointer user_data;
 }UpdateData;
@@ -151,7 +152,8 @@ flickr_callback (RestProxyCall *call,
 
   if (error) {
     g_warning ("Cannot get Flickr photos: %s", error->message);
-    data->callback ((MojitoService*)service, NULL, data->user_data);
+    data->callback ((MojitoService*)service, data->params, NULL, data->user_data);
+    g_slice_free (UpdateData, data);
     return;
   }
 
@@ -196,7 +198,7 @@ flickr_callback (RestProxyCall *call,
   rest_xml_node_unref (root);
   g_object_unref (parser);
 
-  data->callback ((MojitoService*)service, set, data->user_data);
+  data->callback ((MojitoService*)service, data->params, set, data->user_data);
 
   g_slice_free (UpdateData, data);
 }
@@ -209,7 +211,7 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
   RestProxyCall *call;
 
   if (flickr->priv->user_id == NULL) {
-    callback (service, NULL, user_data);
+    callback (service, params, NULL, user_data);
     return;
   }
 

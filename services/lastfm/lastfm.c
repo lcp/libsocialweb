@@ -142,7 +142,7 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
   MojitoSet *set;
 
   if (lastfm->priv->user_id == NULL) {
-    callback (service, NULL, user_data);
+    callback (service, params, NULL, user_data);
     return;
   }
 
@@ -154,7 +154,7 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
                               NULL);
 
   if ((root = lastfm_call (call)) == NULL) {
-    callback (service, NULL, user_data);
+    callback (service, params, NULL, user_data);
     return;
   }
 
@@ -210,7 +210,7 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
 
   rest_xml_node_unref (root);
 
-  callback (service, set, user_data);
+  callback (service, params, set, user_data);
 }
 
 static const char *

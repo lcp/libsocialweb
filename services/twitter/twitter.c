@@ -45,8 +45,10 @@ struct _MojitoServiceTwitterPrivate {
 
   gulong self_handle;
 
-  /* This is grim */
+  /* This is grim and need to be replaced with a hash of handle to data
+     structures. */
   MojitoSet *set;
+  GHashTable *params;
   MojitoServiceDataFunc callback;
   gpointer user_data;
 };
@@ -125,6 +127,7 @@ status_received_cb (TwitterClient *client,
     g_debug ("Cannot update Twitter: %s", error->message);
     if (service->priv->callback) {
       service->priv->callback ((MojitoService*)service,
+                               service->priv->params,
                                NULL,
                                service->priv->user_data);
       service->priv->callback = NULL;
@@ -145,6 +148,7 @@ timeline_received_cb (TwitterClient *client,
 
   if (service->priv->callback) {
     service->priv->callback ((MojitoService*)service,
+                             service->priv->params,
                              mojito_set_ref (service->priv->set),
                              service->priv->user_data);
     service->priv->callback = NULL;
@@ -181,11 +185,12 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
   MojitoServiceTwitterPrivate *priv = twitter->priv;
 
   if (!priv->user_set || !priv->password_set) {
-    callback (service, NULL, user_data);
+    callback (service, params, NULL, user_data);
     return;
   }
 
   /* TODO grim */
+  twitter->priv->params = params;
   twitter->priv->callback = callback;
   twitter->priv->user_data = user_data;
   mojito_set_empty (twitter->priv->set);
