@@ -182,7 +182,7 @@ munge_items (MojitoView *view)
 }
 
 static void
-service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
+service_updated (MojitoService *service, GHashTable *params, MojitoSet *set, gpointer user_data)
 {
   MojitoView *view = MOJITO_VIEW (user_data);
   MojitoViewPrivate *priv = view->priv;
@@ -276,7 +276,7 @@ load_cache (MojitoView *view)
   for (l = priv->services; l; l = l->next) {
     ServiceParamData *data = l->data;
     g_debug ("Loading cache for %s", mojito_service_get_name (data->service));
-    service_updated (data->service, mojito_cache_load (data->service), g_object_ref (view));
+    service_updated (data->service, data->params, mojito_cache_load (data->service), g_object_ref (view));
   }
 }
 

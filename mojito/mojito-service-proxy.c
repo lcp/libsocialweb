@@ -108,12 +108,13 @@ typedef struct
 
 static void
 _service_update_cb (MojitoService *service,
+                    GHashTable    *params,
                     MojitoSet     *set,
                     gpointer       userdata)
 {
   UpdateClosure *closure = (UpdateClosure *)userdata;
 
-  closure->cb ((MojitoService *)closure->proxy, set, closure->userdata);
+  closure->cb ((MojitoService *)closure->proxy, params, set, closure->userdata);
 
   g_object_unref (closure->proxy);
   g_slice_free (UpdateClosure, closure);

@@ -48,7 +48,7 @@ struct _MojitoService {
   GObject parent;
 };
 
-typedef void (*MojitoServiceDataFunc) (MojitoService *service, MojitoSet *set, gpointer user_data);
+typedef void (*MojitoServiceDataFunc) (MojitoService *service, GHashTable *params, MojitoSet *set, gpointer user_data);
 
 typedef struct _MojitoServiceClass MojitoServiceClass;
 struct _MojitoServiceClass {
