@@ -39,7 +39,7 @@ get_name (MojitoService *service)
 }
 
 static void
-update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
+update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data)
 {
   MojitoSet *set;
   MojitoItem *item;

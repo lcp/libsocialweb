@@ -175,7 +175,7 @@ user_received_cb (TwitterClient *client,
 }
 
 static void
-update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
+update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data)
 {
   MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
   MojitoServiceTwitterPrivate *priv = twitter->priv;

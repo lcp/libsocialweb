@@ -202,7 +202,7 @@ flickr_callback (RestProxyCall *call,
 }
 
 static void
-update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
+update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data)
 {
   MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
   UpdateData *data;

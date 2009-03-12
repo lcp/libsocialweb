@@ -134,7 +134,7 @@ lastfm_call (RestProxyCall *call)
 }
 
 static void
-update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
+update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data)
 {
   MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
   RestProxyCall *call;
