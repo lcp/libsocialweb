@@ -192,7 +192,7 @@ service_updated (MojitoService *service, GHashTable *params, MojitoSet *set, gpo
   if (set == NULL) {
     g_debug ("Service returned NULL (not empty set). Not caching this.");
   } else {
-    mojito_cache_save (service, set);
+    mojito_cache_save (service, params, set);
   }
 
   mojito_set_remove (priv->pending_services, (GObject*)service);
@@ -202,7 +202,7 @@ service_updated (MojitoService *service, GHashTable *params, MojitoSet *set, gpo
 
     if (!set) {
       g_debug ("Service returned NULL. Using cached material.");
-      set = mojito_cache_load (service);
+      set = mojito_cache_load (service, params);
     }
 
     if (set) {
@@ -276,7 +276,7 @@ load_cache (MojitoView *view)
   for (l = priv->services; l; l = l->next) {
     ServiceParamData *data = l->data;
     g_debug ("Loading cache for %s", mojito_service_get_name (data->service));
-    service_updated (data->service, data->params, mojito_cache_load (data->service), g_object_ref (view));
+    service_updated (data->service, data->params, mojito_cache_load (data->service, data->params), g_object_ref (view));
   }
 }
 

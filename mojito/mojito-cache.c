@@ -83,7 +83,7 @@ set_keyfile_from_item (gpointer data, gpointer user_data)
  * Cache the items in @set to disk.
  */
 void
-mojito_cache_save (MojitoService *service, MojitoSet *set)
+mojito_cache_save (MojitoService *service, GHashTable *params, MojitoSet *set)
 {
   char *filename;
 
@@ -143,7 +143,7 @@ load_item_from_keyfile (MojitoService *service, GKeyFile *keyfile, const char *g
  * cache, or %NULL.
  */
 MojitoSet *
-mojito_cache_load (MojitoService *service)
+mojito_cache_load (MojitoService *service, GHashTable *params)
 {
   char *filename;
   GKeyFile *keys;

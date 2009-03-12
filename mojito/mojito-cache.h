@@ -24,9 +24,9 @@
 
 G_BEGIN_DECLS
 
-void mojito_cache_save (MojitoService *service, MojitoSet *set);
+void mojito_cache_save (MojitoService *service, GHashTable *params, MojitoSet *set);
 
-MojitoSet * mojito_cache_load (MojitoService *service);
+MojitoSet * mojito_cache_load (MojitoService *service, GHashTable *params);
 
 G_END_DECLS
 
