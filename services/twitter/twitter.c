@@ -190,7 +190,11 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
   twitter->priv->user_data = user_data;
   mojito_set_empty (twitter->priv->set);
 
-  twitter_client_get_friends_timeline (twitter->priv->client, NULL, 0);
+  if (g_hash_table_lookup (params, "own")) {
+    twitter_client_get_user_timeline (priv->client, priv->username, 0, 0);
+  } else {
+    twitter_client_get_friends_timeline (priv->client, NULL, 0);
+  }
 }
 
 static const char *
