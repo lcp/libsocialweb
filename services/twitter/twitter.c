@@ -255,8 +255,7 @@ static guint32
 get_capabilities (MojitoService *service)
 {
   return SERVICE_CAN_UPDATE_STATUS |
-         SERVICE_CAN_GET_PERSONA_ICON |
-         SERVICE_CAN_GET_LAST_ITEM;
+    SERVICE_CAN_GET_PERSONA_ICON;
 }
 
 static gchar *
@@ -268,24 +267,6 @@ get_persona_icon (MojitoService *service)
   if (priv->user) {
     url = twitter_user_get_profile_image_url (priv->user);
     return mojito_web_download_image (url);
-  } else {
-    return NULL;
-  }
-}
-
-static MojitoItem *
-get_last_item (MojitoService *service)
-{
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
-  TwitterStatus *status;
-
-  if (priv->user) {
-    status = twitter_user_get_status (priv->user);
-    if (status) {
-      return make_item_from_status (service, status);
-    } else {
-      return NULL;
-    }
   } else {
     return NULL;
   }
@@ -307,7 +288,6 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
   service_class->get_capabilities = get_capabilities;
   service_class->update_status = update_status;
   service_class->get_persona_icon = get_persona_icon;
-  service_class->get_last_item = get_last_item;
 }
 
 static void
