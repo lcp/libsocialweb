@@ -1,3 +1,15 @@
+Mojito 0.9
+===
+
+* Allow services in views to take parameters. The syntax is
+  service:name=value,name=value
+* Add a "own" parameter to the Twitter service, so you can get a view of your
+  status updates
+* Remove GetLastItem as it is now deprecated
+* Identify cached items
+* Allow views to be explicitly refreshed by the client
+
+
 Mojito 0.8
 ===
 
