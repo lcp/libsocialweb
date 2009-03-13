@@ -36,6 +36,8 @@ MojitoItem *mojito_item_ref (MojitoItem *item);
 void mojito_item_free (MojitoItem *item);
 MojitoItem *mojito_item_new (void);
 
+gboolean mojito_item_is_from_cache (MojitoItem *item);
+
 GType mojito_item_get_type (void);
 
 #endif

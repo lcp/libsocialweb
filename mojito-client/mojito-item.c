@@ -22,7 +22,7 @@ MojitoItem *
 mojito_item_new (void)
 {
   MojitoItem *item;
-  
+
   item = g_slice_new0 (MojitoItem);
   item->refcount = 1;
 
@@ -71,3 +71,10 @@ mojito_item_get_type (void)
 
   return type;
 }
+
+gboolean
+mojito_item_is_from_cache (MojitoItem *item)
+{
+  return g_hash_table_lookup (item->props, "cached") != NULL;
+}
+
