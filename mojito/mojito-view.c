@@ -298,8 +298,18 @@ view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 static void
 view_refresh (MojitoViewIface *iface, DBusGMethodInvocation *context)
 {
-  /* TODO */
+  MojitoView *view = MOJITO_VIEW (iface);
+  MojitoViewPrivate *priv = view->priv;
+
+  /* Reinstall the timeout */
+  if (priv->refresh_timeout_id) {
+    g_source_remove (priv->refresh_timeout_id);
+    priv->refresh_timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_update, iface);
+  }
+
   mojito_view_iface_return_from_refresh (context);
+
+  start_update (view);
 }
 
 static void
