@@ -17,19 +17,45 @@
  */
 
 #include <config.h>
+#include <string.h>
 #include <glib/gstdio.h>
 
 #include "mojito-cache.h"
 #include "mojito-item.h"
+
+/* Make a hash of the parameters for quick and easy checks */
+static char *
+make_hash_from_params (GHashTable *params)
+{
+  GList *keys;
+  GChecksum *sum;
+  char *md5;
+
+  sum = g_checksum_new (G_CHECKSUM_MD5);
+
+  keys = g_hash_table_get_keys (params);
+  keys = g_list_sort (keys, (GCompareFunc)strcmp);
+
+  while (keys) {
+    g_checksum_update (sum, keys->data, -1);
+    g_checksum_update (sum, g_hash_table_lookup (params, keys->data), -1);
+    keys = g_list_delete_link (keys, keys);
+  }
+
+  md5 = g_strdup (g_checksum_get_string (sum));
+  g_checksum_free (sum);
+
+  return md5;
+}
 
 /*
  * Get the file name of the cache file for this service.  As a side-effect it
  * creates the parent directory if required.
  */
 static char *
-get_cache_filename (MojitoService *service)
+get_cache_filename (MojitoService *service, GHashTable *params)
 {
-  char *path, *filename;
+  char *path, *param_hash, *filename, *full_filename;
 
   g_assert (service);
 
@@ -46,12 +72,17 @@ get_cache_filename (MojitoService *service)
       g_message ("Cannot create cache directory: %s", g_strerror (err));
   }
 
-  filename = g_build_filename (path,
-                               mojito_service_get_name (service),
-                               NULL);
-  g_free (path);
+  param_hash = make_hash_from_params (params);
+  filename = g_strconcat (mojito_service_get_name (service),
+                          "-", param_hash, NULL);
+  g_free (param_hash);
 
-  return filename;
+  full_filename = g_build_filename (path, filename, NULL);
+
+  g_free (path);
+  g_free (filename);
+
+  return full_filename;
 }
 
 /*
@@ -89,7 +120,7 @@ mojito_cache_save (MojitoService *service, GHashTable *params, MojitoSet *set)
 
   g_return_if_fail (MOJITO_IS_SERVICE (service));
 
-  filename = get_cache_filename (service);
+  filename = get_cache_filename (service, params);
 
   if (set == NULL || mojito_set_is_empty (set)) {
     g_remove (filename);
@@ -153,7 +184,7 @@ mojito_cache_load (MojitoService *service, GHashTable *params)
 
   keys = g_key_file_new ();
 
-  filename = get_cache_filename (service);
+  filename = get_cache_filename (service, params);
 
   if (g_key_file_load_from_file (keys, filename, G_KEY_FILE_NONE, NULL)) {
     char **groups;
