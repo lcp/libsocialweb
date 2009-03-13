@@ -1,5 +1,5 @@
-AM_CFLAGS = -I$(top_srcdir) $(GLIB_CFLAGS)
-AM_LDFLAGS = $(GLIB_CFLAGS)
+AM_CFLAGS = -I$(top_srcdir) $(GOBJECT_CFLAGS)
+AM_LDFLAGS = $(GOBJECT_CFLAGS)
 
 noinst_PROGRAMS = test-online
 
