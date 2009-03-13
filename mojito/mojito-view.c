@@ -528,7 +528,7 @@ test_view_munge_1 (void)
   priv = view->priv;
 
   service = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
-  mojito_view_add_service (view, service);
+  mojito_view_add_service (view, service, NULL);
 
   for (i = 0; i < 5; i++) {
     MojitoItem *item;
@@ -566,7 +566,7 @@ test_view_munge_2 (void)
   priv = view->priv;
 
   service = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
-  mojito_view_add_service (view, service);
+  mojito_view_add_service (view, service, NULL);
 
   old_item = make_item_dated (service, 1);
   mojito_set_add (priv->pending_items, G_OBJECT (old_item));
@@ -601,9 +601,9 @@ test_view_munge_3 (void)
   priv = view->priv;
 
   service_1 = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
-  mojito_view_add_service (view, service_1);
+  mojito_view_add_service (view, service_1, NULL);
   service_2 = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
-  mojito_view_add_service (view, service_2);
+  mojito_view_add_service (view, service_2, NULL);
 
   mojito_set_add (priv->pending_items, G_OBJECT (make_item_dated (service_1, 1)));
   item_1 = make_item_dated (service_1, 1000);
@@ -641,9 +641,9 @@ test_view_munge_4 (void)
   priv = view->priv;
 
   service_1 = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
-  mojito_view_add_service (view, service_1);
+  mojito_view_add_service (view, service_1, NULL);
   service_2 = g_object_new (MOJITO_TYPE_SERVICE_DUMMY, NULL);
-  mojito_view_add_service (view, service_2);
+  mojito_view_add_service (view, service_2, NULL);
 
   for (i = 0; i < 3; i++) {
     MojitoItem *item;
