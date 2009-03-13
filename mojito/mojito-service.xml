@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <node name="/Service_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">>
   <interface name="com.intel.Mojito.Service">
-    <method name="GetLastItem" tp:name-for-bindings="Get_Last_Item">
-      <arg name="item" type="a{ss}" direction="out"/>
-    </method>
-
     <method name="GetPersonaIcon" tp:name-for-bindings="Get_Persona_Icon">
       <arg name="uri" type="s" direction="out"/>
     </method>
@@ -15,7 +11,6 @@
     </method>
 
     <method name="GetCapabilities" tp:name-for-bindings="Get_Capabilities">
-      <arg name="can_get_last_item" type="b" direction="out"/>
       <arg name="can_get_persona_icon" type="b" direction="out"/>
       <arg name="can_update_status" type="b" direction="out"/>
     </method>

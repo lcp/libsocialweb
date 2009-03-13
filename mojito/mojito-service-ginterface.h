@@ -28,29 +28,6 @@ GType mojito_service_iface_get_type (void);
   (G_TYPE_INSTANCE_GET_INTERFACE((obj), MOJITO_TYPE_SERVICE_IFACE, MojitoServiceIfaceClass))
 
 
-typedef void (*mojito_service_iface_get_last_item_impl) (MojitoServiceIface *self,
-    DBusGMethodInvocation *context);
-void mojito_service_iface_implement_get_last_item (MojitoServiceIfaceClass *klass, mojito_service_iface_get_last_item_impl impl);
-/**
- * mojito_service_iface_return_from_get_last_item:
- * @context: The D-Bus method invocation context
- * @out_item: GHashTable * (FIXME, generate documentation)
- *
- * Return successfully by calling dbus_g_method_return().
- * This inline function exists only to provide type-safety.
- */
-static inline
-/* this comment is to stop gtkdoc realising this is static */
-void mojito_service_iface_return_from_get_last_item (DBusGMethodInvocation *context,
-    GHashTable *out_item);
-static inline void
-mojito_service_iface_return_from_get_last_item (DBusGMethodInvocation *context,
-    GHashTable *out_item)
-{
-  dbus_g_method_return (context,
-      out_item);
-}
-
 typedef void (*mojito_service_iface_get_persona_icon_impl) (MojitoServiceIface *self,
     DBusGMethodInvocation *context);
 void mojito_service_iface_implement_get_persona_icon (MojitoServiceIfaceClass *klass, mojito_service_iface_get_persona_icon_impl impl);
@@ -104,7 +81,6 @@ void mojito_service_iface_implement_get_capabilities (MojitoServiceIfaceClass *k
 /**
  * mojito_service_iface_return_from_get_capabilities:
  * @context: The D-Bus method invocation context
- * @out_can_get_last_item: gboolean  (FIXME, generate documentation)
  * @out_can_get_persona_icon: gboolean  (FIXME, generate documentation)
  * @out_can_update_status: gboolean  (FIXME, generate documentation)
  *
@@ -114,17 +90,14 @@ void mojito_service_iface_implement_get_capabilities (MojitoServiceIfaceClass *k
 static inline
 /* this comment is to stop gtkdoc realising this is static */
 void mojito_service_iface_return_from_get_capabilities (DBusGMethodInvocation *context,
-    gboolean out_can_get_last_item,
     gboolean out_can_get_persona_icon,
     gboolean out_can_update_status);
 static inline void
 mojito_service_iface_return_from_get_capabilities (DBusGMethodInvocation *context,
-    gboolean out_can_get_last_item,
     gboolean out_can_get_persona_icon,
     gboolean out_can_update_status)
 {
   dbus_g_method_return (context,
-      out_can_get_last_item,
       out_can_get_persona_icon,
       out_can_update_status);
 }

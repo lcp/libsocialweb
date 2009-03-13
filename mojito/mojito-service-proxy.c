@@ -188,29 +188,6 @@ mojito_service_proxy_new (MojitoCore *core,
 
 
 static void
-service_get_last_item (MojitoServiceIface    *self,
-                         DBusGMethodInvocation *context)
-{
-  MojitoServiceProxyPrivate *priv = GET_PRIVATE (self);
-  MojitoServiceClass *service_class;
-  MojitoItem *last_item = NULL;
-
-  if (!priv->instance)
-    priv->instance = g_object_new (priv->type, NULL);
-
-  service_class = MOJITO_SERVICE_GET_CLASS (priv->instance);
-  if (service_class->get_last_item)
-  {
-    last_item = service_class->get_last_item (priv->instance);
-  }
-
-  mojito_service_iface_return_from_get_last_item (context,
-                                                  mojito_item_peek_hash (last_item));
-
-  g_object_unref (last_item);
-}
-
-static void
 service_get_persona_icon (MojitoServiceIface    *self,
                           DBusGMethodInvocation *context)
 {
@@ -266,7 +243,6 @@ service_get_capabilities (MojitoServiceIface    *self,
   MojitoServiceProxyPrivate *priv = GET_PRIVATE (self);
   MojitoServiceClass *service_class;
   guint32 caps = 0;
-  gboolean can_get_last_item;
   gboolean can_get_persona_icon;
   gboolean can_update_status;
 
@@ -278,12 +254,10 @@ service_get_capabilities (MojitoServiceIface    *self,
   if (service_class->get_capabilities)
     caps = service_class->get_capabilities (priv->instance);
 
-  can_get_last_item = caps & SERVICE_CAN_GET_LAST_ITEM;
   can_get_persona_icon = caps & SERVICE_CAN_GET_PERSONA_ICON;
   can_update_status = caps & SERVICE_CAN_UPDATE_STATUS;
 
   mojito_service_iface_return_from_get_capabilities (context,
-                                                     can_get_last_item,
                                                      can_get_persona_icon,
                                                      can_update_status);
 }
@@ -294,8 +268,6 @@ service_iface_init (gpointer g_iface,
 {
   MojitoServiceIfaceClass *klass = (MojitoServiceIfaceClass *)g_iface;
 
-  mojito_service_iface_implement_get_last_item (klass,
-                                                  service_get_last_item);
   mojito_service_iface_implement_get_persona_icon (klass,
                                                    service_get_persona_icon);
   mojito_service_iface_implement_update_status (klass,
