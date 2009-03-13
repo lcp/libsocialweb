@@ -27,37 +27,94 @@ mojito_is_online (void)
 {
   return TRUE;
 }
+
+void
+mojito_online_add_notify (MojitoOnlineNotify callback, gpointer user_data)
+{
+  /* This does nothing because we're always online */
+}
+
 #endif
 
 #if WITH_ONLINE_NM
 #include <NetworkManager.h>
 #include <dbus/dbus-glib.h>
 
-/* TODO: this should create a persistant proxy and watch for signals instead of
-   making a method call every time, to save traffic. */
+static DBusGProxy *proxy = NULL;
+
+typedef struct {
+  MojitoOnlineNotify callback;
+  gpointer user_data;
+} ListenerData;
+
+static GList *listeners = NULL;
+
+static void
+state_changed (DBusGProxy *proxy, NMState state, gpointer user_data)
+{
+  gboolean online = (state == NM_STATE_CONNECTED);
+  GList *l = listeners;
+
+  for (l = listeners; l; l = l->next) {
+    ListenerData *data = l->data;
+    data->callback (online, data->user_data);
+  }
+}
+
+static gboolean
+nm_init (void)
+{
+  DBusGConnection *conn;
+
+  if (proxy)
+    return TRUE;
+
+  conn = dbus_g_bus_get (DBUS_BUS_SYSTEM, NULL);
+  if (!conn) {
+    g_warning ("Cannot get connection to system message bus");
+    return FALSE;
+  }
+
+  proxy = dbus_g_proxy_new_for_name (conn,
+                                     NM_DBUS_SERVICE,
+                                     NM_DBUS_PATH,
+                                     NM_DBUS_INTERFACE);
+
+  dbus_g_proxy_add_signal (proxy, "StateChanged", G_TYPE_UINT, NULL);
+  dbus_g_proxy_connect_signal (proxy, "StateChanged",
+                               (GCallback)state_changed, NULL, NULL);
+  return TRUE;
+}
+
 gboolean
 mojito_is_online (void)
 {
   /* On error, assume we are online */
-  GError *error = NULL;
-  DBusGConnection *conn;
-  DBusGProxy *proxy;
-  NMState state = 0;
+  NMState state = NM_STATE_CONNECTED;
 
-  conn = dbus_g_bus_get (DBUS_BUS_SYSTEM, NULL);
-  if (!conn)
+  if (!nm_init ())
     return TRUE;
 
-  proxy = dbus_g_proxy_new_for_name (conn, NM_DBUS_SERVICE,
-                                     NM_DBUS_PATH,
-                                     NM_DBUS_INTERFACE);
-
-  dbus_g_proxy_call (proxy, "state", &error,
+  dbus_g_proxy_call (proxy, "state", NULL,
                      G_TYPE_INVALID,
                      G_TYPE_UINT, &state, G_TYPE_INVALID);
 
-  g_object_unref (proxy);
-
   return state == NM_STATE_CONNECTED;
 }
+
+void
+mojito_online_add_notify (MojitoOnlineNotify callback, gpointer user_data)
+{
+  ListenerData *data;
+
+  if (!nm_init ())
+    return;
+
+  data = g_slice_new (ListenerData);
+  data->callback = callback;
+  data->user_data = user_data;
+
+  listeners = g_list_prepend (listeners, data);
+}
+
 #endif

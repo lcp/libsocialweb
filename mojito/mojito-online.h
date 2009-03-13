@@ -25,6 +25,10 @@ G_BEGIN_DECLS
 
 gboolean mojito_is_online (void);
 
+typedef void (*MojitoOnlineNotify) (gboolean online, gpointer user_data);
+
+void mojito_online_add_notify (MojitoOnlineNotify callback, gpointer user_data);
+
 G_END_DECLS
 
 #endif /* _MOJITO_ONLINE */
