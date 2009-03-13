@@ -53,9 +53,8 @@ GType mojito_client_service_get_type (void);
 
 typedef enum
 {
-  MOJITO_CLIENT_SERVICE_CAN_GET_LAST_ITEM = 1,
-  MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON = 1 << 1,
-  MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS = 1 << 2
+  MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON = 1,
+  MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS = 1 << 1
 } MojitoClientServiceCapabilityFlags;
 
 typedef void
@@ -68,17 +67,6 @@ void
 mojito_client_service_get_capabilities (MojitoClientService                       *service,
                                         MojitoClientServiceGetCapabilitiesCallback cb,
                                         gpointer                                   userdata);
-
-typedef void 
-(*MojitoClientServiceGetLastItemCallback) (MojitoClientService *service,
-                                           MojitoItem          *item,
-                                           const GError        *error,
-                                           gpointer             userdata);
-
-void 
-mojito_client_service_get_last_item (MojitoClientService                     *service,
-                                       MojitoClientServiceGetLastItemCallback cb,
-                                       gpointer                               userdata);
 
 typedef void 
 (*MojitoClientServiceGetPersonaIconCallback) (MojitoClientService *service,
