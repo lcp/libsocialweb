@@ -3,6 +3,8 @@
   <interface name="com.intel.Mojito.View">
     <method name="Start" tp:name-for-bindings="Start"/>
 
+    <method name="Refresh"  tp:name-for-bindings="Refresh"/>
+
     <method name="Stop"  tp:name-for-bindings="Stop"/>
 
     <method name="Close" tp:name-for-bindings="Close"/>

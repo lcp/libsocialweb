@@ -47,6 +47,25 @@ mojito_view_iface_return_from_start (DBusGMethodInvocation *context)
   dbus_g_method_return (context);
 }
 
+typedef void (*mojito_view_iface_refresh_impl) (MojitoViewIface *self,
+    DBusGMethodInvocation *context);
+void mojito_view_iface_implement_refresh (MojitoViewIfaceClass *klass, mojito_view_iface_refresh_impl impl);
+/**
+ * mojito_view_iface_return_from_refresh:
+ * @context: The D-Bus method invocation context
+ *
+ * Return successfully by calling dbus_g_method_return().
+ * This inline function exists only to provide type-safety.
+ */
+static inline
+/* this comment is to stop gtkdoc realising this is static */
+void mojito_view_iface_return_from_refresh (DBusGMethodInvocation *context);
+static inline void
+mojito_view_iface_return_from_refresh (DBusGMethodInvocation *context)
+{
+  dbus_g_method_return (context);
+}
+
 typedef void (*mojito_view_iface_stop_impl) (MojitoViewIface *self,
     DBusGMethodInvocation *context);
 void mojito_view_iface_implement_stop (MojitoViewIfaceClass *klass, mojito_view_iface_stop_impl impl);
