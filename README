@@ -45,3 +45,7 @@ The title of the item.
 thumbnail
 
 Path to a local copy of the item's graphical representation.
+
+cached
+
+Set if the item was retrieved from the local cache.

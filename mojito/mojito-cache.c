@@ -100,6 +100,9 @@ set_keyfile_from_item (gpointer data, gpointer user_data)
   if (group == NULL)
     return;
 
+  /* Set a magic field saying that this item is cached */
+  g_key_file_set_string (keys, group, "cached", "1");
+
   g_hash_table_iter_init (&iter, mojito_item_peek_hash (item));
   while (g_hash_table_iter_next (&iter, (gpointer)&key, (gpointer)&value)) {
     g_key_file_set_string (keys, group, key, value);
