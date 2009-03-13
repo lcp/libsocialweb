@@ -57,6 +57,7 @@ GType mojito_client_view_get_type (void);
 
 MojitoClientView *_mojito_client_view_new_for_path (const gchar *view_path);
 void mojito_client_view_start (MojitoClientView *view);
+void mojito_client_view_refresh (MojitoClientView *view);
 GList *mojito_client_view_get_sorted_items (MojitoClientView *view);
 
 G_END_DECLS
