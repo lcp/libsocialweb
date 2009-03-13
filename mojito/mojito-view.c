@@ -466,7 +466,8 @@ mojito_view_add_service (MojitoView *view, MojitoService *service, GHashTable *p
 
   data = g_slice_new (ServiceParamData);
   data->service = g_object_ref (service);
-  data->params = params;
+  /* Handle a NULL params hash by constructing a new hash table */
+  data->params = params ? params : g_hash_table_new (g_str_hash, g_str_equal);
 
   priv->services = g_list_append (priv->services, data);
 }
