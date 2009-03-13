@@ -296,6 +296,13 @@ view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 }
 
 static void
+view_refresh (MojitoViewIface *iface, DBusGMethodInvocation *context)
+{
+  /* TODO */
+  mojito_view_iface_return_from_refresh (context);
+}
+
+static void
 stop (MojitoView *view)
 {
   MojitoViewPrivate *priv = view->priv;
@@ -399,6 +406,7 @@ view_iface_init (gpointer g_iface, gpointer iface_data)
 {
   MojitoViewIfaceClass *klass = (MojitoViewIfaceClass*)g_iface;
   mojito_view_iface_implement_start (klass, view_start);
+  mojito_view_iface_implement_refresh (klass, view_refresh);
   mojito_view_iface_implement_stop (klass, view_stop);
   mojito_view_iface_implement_close (klass, view_close);
 }
