@@ -345,8 +345,6 @@ view_refresh (MojitoViewIface *iface, DBusGMethodInvocation *context)
 static void
 stop (MojitoView *view)
 {
-  MojitoViewPrivate *priv = view->priv;
-
   view->priv->running = FALSE;
 
   remove_refresh_timeout (view);
