@@ -21,17 +21,61 @@
 #include <glib.h>
 #include "mojito-online.h"
 
-#if WITH_ONLINE_ALWAYS
-gboolean
-mojito_is_online (void)
-{
-  return TRUE;
-}
+/* This is the common infrastructure */
+typedef struct {
+  MojitoOnlineNotify callback;
+  gpointer user_data;
+} ListenerData;
+
+static GList *listeners = NULL;
+
+static gboolean online_init (void);
 
 void
 mojito_online_add_notify (MojitoOnlineNotify callback, gpointer user_data)
 {
-  /* This does nothing because we're always online */
+  ListenerData *data;
+
+  if (!online_init ())
+    return;
+
+  data = g_slice_new (ListenerData);
+  data->callback = callback;
+  data->user_data = user_data;
+
+  listeners = g_list_prepend (listeners, data);
+}
+
+void
+mojito_online_remove_notify (MojitoOnlineNotify callback, gpointer user_data)
+{
+  GList *l = listeners;
+
+  while (l) {
+    ListenerData *data = l->data;
+    if (data->callback == callback && data->user_data == user_data) {
+      GList *next = l->next;
+      listeners = g_list_delete_link (listeners, l);
+      l = next;
+    } else {
+      l = l->next;
+    }
+  }
+}
+
+
+#if WITH_ONLINE_ALWAYS
+
+static gboolean
+online_init (void)
+{
+  return FALSE;
+}
+
+gboolean
+mojito_is_online (void)
+{
+  return TRUE;
 }
 
 #endif
@@ -41,13 +85,6 @@ mojito_online_add_notify (MojitoOnlineNotify callback, gpointer user_data)
 #include <dbus/dbus-glib.h>
 
 static DBusGProxy *proxy = NULL;
-
-typedef struct {
-  MojitoOnlineNotify callback;
-  gpointer user_data;
-} ListenerData;
-
-static GList *listeners = NULL;
 
 static void
 state_changed (DBusGProxy *proxy, NMState state, gpointer user_data)
@@ -62,7 +99,7 @@ state_changed (DBusGProxy *proxy, NMState state, gpointer user_data)
 }
 
 static gboolean
-nm_init (void)
+online_init (void)
 {
   DBusGConnection *conn;
 
@@ -92,7 +129,7 @@ mojito_is_online (void)
   /* On error, assume we are online */
   NMState state = NM_STATE_CONNECTED;
 
-  if (!nm_init ())
+  if (!online_init ())
     return TRUE;
 
   dbus_g_proxy_call (proxy, "state", NULL,
@@ -100,38 +137,6 @@ mojito_is_online (void)
                      G_TYPE_UINT, &state, G_TYPE_INVALID);
 
   return state == NM_STATE_CONNECTED;
-}
-
-void
-mojito_online_add_notify (MojitoOnlineNotify callback, gpointer user_data)
-{
-  ListenerData *data;
-
-  if (!nm_init ())
-    return;
-
-  data = g_slice_new (ListenerData);
-  data->callback = callback;
-  data->user_data = user_data;
-
-  listeners = g_list_prepend (listeners, data);
-}
-
-void
-mojito_online_remove_notify (MojitoOnlineNotify callback, gpointer user_data)
-{
-  GList *l = listeners;
-
-  while (l) {
-    ListenerData *data = l->data;
-    if (data->callback == callback && data->user_data == user_data) {
-      GList *next = l->next;
-      listeners = g_list_delete_link (listeners, l);
-      l = next;
-    } else {
-      l = l->next;
-    }
-  }
 }
 
 #endif
