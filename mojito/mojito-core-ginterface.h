@@ -76,6 +76,31 @@ mojito_core_iface_return_from_open_view (DBusGMethodInvocation *context,
       out_view);
 }
 
+typedef void (*mojito_core_iface_is_online_impl) (MojitoCoreIface *self,
+    DBusGMethodInvocation *context);
+void mojito_core_iface_implement_is_online (MojitoCoreIfaceClass *klass, mojito_core_iface_is_online_impl impl);
+/**
+ * mojito_core_iface_return_from_is_online:
+ * @context: The D-Bus method invocation context
+ * @out_online: gboolean  (FIXME, generate documentation)
+ *
+ * Return successfully by calling dbus_g_method_return().
+ * This inline function exists only to provide type-safety.
+ */
+static inline
+/* this comment is to stop gtkdoc realising this is static */
+void mojito_core_iface_return_from_is_online (DBusGMethodInvocation *context,
+    gboolean out_online);
+static inline void
+mojito_core_iface_return_from_is_online (DBusGMethodInvocation *context,
+    gboolean out_online)
+{
+  dbus_g_method_return (context,
+      out_online);
+}
+
+void mojito_core_iface_emit_online_changed (gpointer instance,
+    gboolean arg_online);
 
 
 G_END_DECLS
