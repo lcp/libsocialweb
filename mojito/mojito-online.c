@@ -140,3 +140,83 @@ mojito_is_online (void)
 }
 
 #endif
+
+
+#if WITH_ONLINE_CONNMAN
+#include <string.h>
+#include <dbus/dbus-glib.h>
+
+static DBusGProxy *proxy = NULL;
+
+#define STRING_VARIANT_HASHTABLE (dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_VALUE))
+
+static void
+props_changed (DBusGProxy *proxy, GHashTable *hash, gpointer user_data)
+{
+  GValue *v;
+  const char *s;
+  gboolean online;
+
+  v = g_hash_table_lookup (hash, "State");
+  if (v) {
+    GList *l;
+    s = g_value_get_string (v);
+    online = (strcmp (s, "online") == 0);
+
+    for (l = listeners; l; l = l->next) {
+      ListenerData *data = l->data;
+      data->callback (online, data->user_data);
+    }
+  }
+}
+
+static gboolean
+online_init (void)
+{
+  DBusGConnection *conn;
+
+  if (proxy)
+    return TRUE;
+
+  conn = dbus_g_bus_get (DBUS_BUS_SYSTEM, NULL);
+  if (!conn) {
+    g_warning ("Cannot get connection to system message bus");
+    return FALSE;
+  }
+
+  proxy = dbus_g_proxy_new_for_name (conn, "org.moblin.connman",
+                                     "/", "org.moblin.connman.Manager");
+
+  dbus_g_proxy_add_signal (proxy, "PropertyChanged", STRING_VARIANT_HASHTABLE, NULL);
+  dbus_g_proxy_connect_signal (proxy, "PropertyChanged",
+                               (GCallback)props_changed, NULL, NULL);
+  return TRUE;
+}
+
+
+gboolean
+mojito_is_online (void)
+{
+  GHashTable *hash;
+  GValue *v;
+  const char *s;
+  /* On error, assume we are online */
+  gboolean ret = TRUE;
+
+  if (!online_init ())
+    return TRUE;
+
+  dbus_g_proxy_call (proxy, "state", NULL,
+                     G_TYPE_INVALID,
+                     STRING_VARIANT_HASHTABLE, &hash, G_TYPE_INVALID);
+
+  v = g_hash_table_lookup (hash, "State");
+  s = g_value_get_string (v);
+
+  ret = (strcmp (s, "online") == 0);
+
+  g_hash_table_unref (hash);
+
+  return ret;
+}
+#endif
