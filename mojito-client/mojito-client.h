@@ -59,6 +59,10 @@ typedef void (*MojitoClientOpenViewCallback) (MojitoClient     *client,
                                               MojitoClientView *view,
                                               gpointer          userdata);
 
+typedef void (*MojitoClientIsOnlineCallback) (MojitoClient *client,
+                                              gboolean      online,
+                                              gpointer      userdata);
+
 void mojito_client_open_view (MojitoClient                *client,
                               GList                       *services,
                               guint                        count,
@@ -81,6 +85,11 @@ void mojito_client_get_services (MojitoClient                  *client,
 
 MojitoClientService *mojito_client_get_service (MojitoClient *client,
                                                 const gchar  *service_name);
+
+void mojito_client_is_online (MojitoClient *client,
+                              MojitoClientIsOnlineCallback cb,
+                              gpointer userdata);
+
 G_END_DECLS
 
 #endif /* _MOJITO_CLIENT */

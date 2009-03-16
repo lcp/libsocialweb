@@ -254,7 +254,7 @@ _mojito_client_get_services_cb (DBusGProxy *proxy,
   g_free (closure);
 }
 
-void 
+void
 mojito_client_get_services (MojitoClient                   *client,
                             MojitoClientGetServicesCallback cb,
                             gpointer                        userdata)
@@ -292,3 +292,49 @@ mojito_client_get_service (MojitoClient *client,
   return service;
 }
 
+/* IsOnline */
+
+typedef struct
+{
+  MojitoClient *client;
+  MojitoClientIsOnlineCallback cb;
+  gpointer userdata;
+} IsOnlineClosure;
+
+static void
+_mojito_client_is_online_cb (DBusGProxy *proxy,
+                             gboolean online,
+                             GError *error,
+                             gpointer userdata)
+{
+  IsOnlineClosure *closure = userdata;
+  MojitoClient *client = closure->client;
+
+  /* If we had an error, assume we're online */
+  if (error)
+    online = TRUE;
+
+  closure->cb (client, online, closure->userdata);
+
+  g_object_unref (closure->client);
+  g_free (closure);
+}
+
+
+void
+mojito_client_is_online (MojitoClient *client,
+                              MojitoClientIsOnlineCallback cb,
+                              gpointer userdata)
+{
+  MojitoClientPrivate *priv = GET_PRIVATE (client);
+  IsOnlineClosure *closure;
+
+  closure = g_new0 (IsOnlineClosure, 1);
+  closure->client = g_object_ref (client);
+  closure->cb = cb;
+  closure->userdata = userdata;
+
+  com_intel_Mojito_is_online_async (priv->proxy,
+                                    _mojito_client_is_online_cb,
+                                    closure);
+}
