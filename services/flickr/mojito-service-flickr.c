@@ -216,6 +216,7 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
   }
 
   data = g_slice_new (UpdateData);
+  data->params = params;
   data->callback = callback;
   data->user_data = user_data;
 
