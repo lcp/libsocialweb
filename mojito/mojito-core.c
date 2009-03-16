@@ -20,6 +20,7 @@
 #include <dbus/dbus-glib-lowlevel.h>
 #include "mojito-core.h"
 #include "mojito-utils.h"
+#include "mojito-online.h"
 #include "mojito-view.h"
 #include "client-monitor.h"
 #include "mojito-service-proxy.h"
@@ -157,6 +158,12 @@ open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMetho
   mojito_core_iface_return_from_open_view (context, path);
 
   g_free (path);
+}
+
+static void
+is_online (MojitoCoreIface *self, DBusGMethodInvocation *context)
+{
+  dbus_g_method_return (context, mojito_is_online ());
 }
 
 static void
@@ -300,6 +307,7 @@ core_iface_init (gpointer g_iface, gpointer iface_data)
 
   mojito_core_iface_implement_get_services (klass, get_services);
   mojito_core_iface_implement_open_view (klass, open_view);
+  mojito_core_iface_implement_is_online (klass, is_online);
 }
 
 static void
