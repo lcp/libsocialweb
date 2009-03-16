@@ -27,3 +27,4 @@ mojito/test-runner
 src/mojito.service
 src/mojito-core
 tests/test-online
+tests/test-client-online
