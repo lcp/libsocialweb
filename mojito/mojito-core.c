@@ -160,10 +160,19 @@ open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMetho
   g_free (path);
 }
 
+/* Online notifications */
 static void
 is_online (MojitoCoreIface *self, DBusGMethodInvocation *context)
 {
   dbus_g_method_return (context, mojito_is_online ());
+}
+
+static void
+online_changed (gboolean online, gpointer user_data)
+{
+  MojitoCore *core = MOJITO_CORE (user_data);
+
+  mojito_core_iface_emit_online_changed (core, online);
 }
 
 static void
@@ -286,6 +295,8 @@ mojito_core_constructed (GObject *object)
   client_monitor_init (priv->connection);
 
   populate_services ((MojitoCore *)object);
+
+  mojito_online_add_notify (online_changed, object);
 }
 
 static void
@@ -297,6 +308,8 @@ mojito_core_dispose (GObject *object)
 static void
 mojito_core_finalize (GObject *object)
 {
+  mojito_online_remove_notify (online_changed, object);
+
   G_OBJECT_CLASS (mojito_core_parent_class)->finalize (object);
 }
 
