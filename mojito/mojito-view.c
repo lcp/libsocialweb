@@ -51,6 +51,8 @@ struct _MojitoViewPrivate {
   MojitoSet *pending_items;
   /* The items we've sent to the client */
   MojitoSet *current;
+  /* Whether we're currently running */
+  gboolean running;
 };
 
 enum {
@@ -198,8 +200,7 @@ service_updated (MojitoService *service, GHashTable *params, MojitoSet *set, gpo
 
   mojito_set_remove (priv->pending_services, (GObject*)service);
 
-  /* If the update timeout id is 0 then we're not running any more, so ignore these updates */
-  if (priv->refresh_timeout_id) {
+  if (priv->running) {
 
     if (!set) {
       g_debug ("Service returned NULL. Using cached material.");
@@ -305,8 +306,10 @@ online_notify (gboolean online, gpointer user_data)
   if (online) {
     g_debug ("Detected online");
     install_refresh_timeout (view);
-    load_cache (view);
-    start_update (view);
+    if (view->priv->running) {
+      load_cache (view);
+      start_update (view);
+    }
   } else {
     g_debug ("Detected offline");
     remove_refresh_timeout (view);
@@ -317,6 +320,8 @@ static void
 view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 {
   MojitoView *view = MOJITO_VIEW (iface);
+
+  view->priv->running = TRUE;
 
   mojito_view_iface_return_from_start (context);
 
@@ -342,7 +347,7 @@ stop (MojitoView *view)
 {
   MojitoViewPrivate *priv = view->priv;
 
-  g_assert (priv);
+  view->priv->running = FALSE;
 
   remove_refresh_timeout (view);
 }
@@ -472,6 +477,8 @@ mojito_view_init (MojitoView *self)
   self->priv->pending_services = mojito_set_new ();
   self->priv->pending_items = mojito_item_set_new ();
   self->priv->current = mojito_item_set_new ();
+
+  self->priv->running = FALSE;
 
   mojito_online_add_notify (online_notify, self);
 }
