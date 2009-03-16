@@ -145,6 +145,8 @@ _mojito_client_open_view_cb (DBusGProxy *proxy,
   MojitoClient *client = closure->client;
   MojitoClientView *view;
 
+  /* TODO: handle error */
+
   view = _mojito_client_view_new_for_path (view_path);
 
   closure->cb (client, view, closure->userdata);
@@ -239,6 +241,8 @@ _mojito_client_get_services_cb (DBusGProxy *proxy,
   GList *services_list = NULL;
   gchar *service;
   gint i;
+
+  /* TODO: handle error */
 
   for (i = 0; (service = services[i]); i++)
   {
