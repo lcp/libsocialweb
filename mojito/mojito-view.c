@@ -281,6 +281,22 @@ load_cache (MojitoView *view)
 }
 
 static void
+install_refresh_timeout (MojitoView *view)
+{
+  if (view->priv->refresh_timeout_id == 0)
+    view->priv->refresh_timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_update, view);
+}
+
+static void
+remove_refresh_timeout (MojitoView *view)
+{
+  if (view->priv->refresh_timeout_id) {
+    g_source_remove (view->priv->refresh_timeout_id);
+    view->priv->refresh_timeout_id = 0;
+  }
+}
+
+static void
 view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 {
   MojitoView *view = MOJITO_VIEW (iface);
@@ -289,7 +305,7 @@ view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
   mojito_view_iface_return_from_start (context);
 
   if (priv->refresh_timeout_id == 0) {
-    priv->refresh_timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_update, iface);
+    install_refresh_timeout (view);
     load_cache (view);
     start_update (view);
   }
@@ -299,13 +315,10 @@ static void
 view_refresh (MojitoViewIface *iface, DBusGMethodInvocation *context)
 {
   MojitoView *view = MOJITO_VIEW (iface);
-  MojitoViewPrivate *priv = view->priv;
 
   /* Reinstall the timeout */
-  if (priv->refresh_timeout_id) {
-    g_source_remove (priv->refresh_timeout_id);
-    priv->refresh_timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_update, iface);
-  }
+  remove_refresh_timeout (view);
+  install_refresh_timeout (view);
 
   mojito_view_iface_return_from_refresh (context);
 
@@ -319,10 +332,7 @@ stop (MojitoView *view)
 
   g_assert (priv);
 
-  if (priv->refresh_timeout_id) {
-    g_source_remove (priv->refresh_timeout_id);
-    priv->refresh_timeout_id = 0;
-  }
+  remove_refresh_timeout (view);
 }
 
 static void
