@@ -11,16 +11,5 @@
       <arg name="count" type="u" direction="in"/>
       <arg name="view" type="o" direction="out"/>
     </method>
-    <!--
-        <method name="getServiceDateRange">
-        <arg name="service" type="s" direction="in"/>
-        <arg name="startdate" type="i" direction="out"/>
-        <arg name="enddate" type="i" direction="out"/>
-        </method>
-        <method name="getServiceRange">
-        <arg name="service" type="s" direction="in"/>
-        <arg name="max_count" type="i" direction="out"/>
-        </method>
-    -->
   </interface>
 </node>
