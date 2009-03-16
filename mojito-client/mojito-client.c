@@ -34,9 +34,25 @@ struct _MojitoClientPrivate {
   DBusGProxy *proxy;
 };
 
+enum
+{
+  ONLINE_CHANGED_SIGNAL,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
+
 #define MOJITO_SERVICE_NAME "com.intel.Mojito"
 #define MOJITO_SERVICE_CORE_OBJECT "/com/intel/Mojito"
 #define MOJITO_SERVICE_CORE_INTERFACE "com.intel.Mojito"
+
+static void
+_online_changed_cb (DBusGProxy *proxy, gboolean online, gpointer user_data)
+{
+  MojitoClient *client = MOJITO_CLIENT (user_data);
+
+  g_signal_emit (client, signals[ONLINE_CHANGED_SIGNAL], 0, online);
+}
 
 static void
 mojito_client_dispose (GObject *object)
@@ -73,6 +89,18 @@ mojito_client_class_init (MojitoClientClass *klass)
 
   object_class->dispose = mojito_client_dispose;
   object_class->finalize = mojito_client_finalize;
+
+  signals[ONLINE_CHANGED_SIGNAL] =
+    g_signal_new ("online-changed",
+                  MOJITO_TYPE_CLIENT,
+                  G_SIGNAL_RUN_FIRST,
+                  0,
+                  NULL,
+                  NULL,
+                  g_cclosure_marshal_VOID__BOOLEAN,
+                  G_TYPE_NONE,
+                  1,
+                  G_TYPE_BOOLEAN);
 }
 
 
@@ -120,6 +148,16 @@ mojito_client_init (MojitoClient *self)
                 error->message);
     g_clear_error (&error);
   }
+
+  dbus_g_proxy_add_signal (priv->proxy,
+                           "OnlineChanged",
+                           G_TYPE_BOOLEAN,
+                           NULL);
+  dbus_g_proxy_connect_signal (priv->proxy,
+                               "OnlineChanged",
+                               (GCallback)_online_changed_cb,
+                               self,
+                               NULL);
 }
 
 MojitoClient *
