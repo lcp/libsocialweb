@@ -53,7 +53,7 @@ static void
 state_changed (DBusGProxy *proxy, NMState state, gpointer user_data)
 {
   gboolean online = (state == NM_STATE_CONNECTED);
-  GList *l = listeners;
+  GList *l;
 
   for (l = listeners; l; l = l->next) {
     ListenerData *data = l->data;
