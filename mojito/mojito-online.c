@@ -117,4 +117,21 @@ mojito_online_add_notify (MojitoOnlineNotify callback, gpointer user_data)
   listeners = g_list_prepend (listeners, data);
 }
 
+void
+mojito_online_remove_notify (MojitoOnlineNotify callback, gpointer user_data)
+{
+  GList *l = listeners;
+
+  while (l) {
+    ListenerData *data = l->data;
+    if (data->callback == callback && data->user_data == user_data) {
+      GList *next = l->next;
+      listeners = g_list_delete_link (listeners, l);
+      l = next;
+    } else {
+      l = l->next;
+    }
+  }
+}
+
 #endif

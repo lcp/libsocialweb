@@ -29,6 +29,8 @@ typedef void (*MojitoOnlineNotify) (gboolean online, gpointer user_data);
 
 void mojito_online_add_notify (MojitoOnlineNotify callback, gpointer user_data);
 
+void mojito_online_remove_notify (MojitoOnlineNotify callback, gpointer user_data);
+
 G_END_DECLS
 
 #endif /* _MOJITO_ONLINE */
