@@ -24,6 +24,7 @@
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-cache.h>
+#include <mojito/mojito-online.h>
 
 static void view_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
@@ -297,18 +298,29 @@ remove_refresh_timeout (MojitoView *view)
 }
 
 static void
-view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
+online_notify (gboolean online, gpointer user_data)
 {
-  MojitoView *view = MOJITO_VIEW (iface);
-  MojitoViewPrivate *priv = view->priv;
+  MojitoView *view = user_data;
 
-  mojito_view_iface_return_from_start (context);
-
-  if (priv->refresh_timeout_id == 0) {
+  if (online) {
+    g_debug ("Detected online");
     install_refresh_timeout (view);
     load_cache (view);
     start_update (view);
+  } else {
+    g_debug ("Detected offline");
+    remove_refresh_timeout (view);
   }
+}
+
+static void
+view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
+{
+  MojitoView *view = MOJITO_VIEW (iface);
+
+  mojito_view_iface_return_from_start (context);
+
+  online_notify (mojito_is_online (), view);
 }
 
 static void
@@ -418,6 +430,8 @@ mojito_view_finalize (GObject *object)
 
   stop (view);
 
+  mojito_online_remove_notify (online_notify, view);
+
   G_OBJECT_CLASS (mojito_view_parent_class)->finalize (object);
 }
 
@@ -458,6 +472,8 @@ mojito_view_init (MojitoView *self)
   self->priv->pending_services = mojito_set_new ();
   self->priv->pending_items = mojito_item_set_new ();
   self->priv->current = mojito_item_set_new ();
+
+  mojito_online_add_notify (online_notify, self);
 }
 
 MojitoView*
