@@ -207,7 +207,7 @@ mojito_is_online (void)
   if (!online_init ())
     return TRUE;
 
-  dbus_g_proxy_call (proxy, "state", NULL,
+  dbus_g_proxy_call (proxy, "GetProperties", NULL,
                      G_TYPE_INVALID,
                      STRING_VARIANT_HASHTABLE, &hash, G_TYPE_INVALID);
 
