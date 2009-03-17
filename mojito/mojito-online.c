@@ -155,18 +155,14 @@ static DBusGProxy *proxy = NULL;
 #define STRING_VARIANT_HASHTABLE (dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_VALUE))
 
 static void
-props_changed (DBusGProxy *proxy, GHashTable *hash, gpointer user_data)
+props_changed (DBusGProxy *proxy, const char *key, GValue *v, gpointer user_data)
 {
-  GValue *v;
   const char *s;
 
-  v = g_hash_table_lookup (hash, "State");
-  if (v == NULL)
+  if (strcmp (key, "State") != 0)
     return;
 
   s = g_value_get_string (v);
-  if (!s)
-    return;
 
   emit_notify (strcmp (s, "online") == 0);
 }
