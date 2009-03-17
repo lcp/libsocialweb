@@ -63,6 +63,16 @@ mojito_online_remove_notify (MojitoOnlineNotify callback, gpointer user_data)
   }
 }
 
+static void
+emit_notify (gboolean online)
+{
+  GList *l;
+
+  for (l = listeners; l; l = l->next) {
+    ListenerData *data = l->data;
+    data->callback (online, data->user_data);
+  }
+}
 
 #if WITH_ONLINE_ALWAYS
 
@@ -89,13 +99,7 @@ static DBusGProxy *proxy = NULL;
 static void
 state_changed (DBusGProxy *proxy, NMState state, gpointer user_data)
 {
-  gboolean online = (state == NM_STATE_CONNECTED);
-  GList *l;
-
-  for (l = listeners; l; l = l->next) {
-    ListenerData *data = l->data;
-    data->callback (online, data->user_data);
-  }
+  emit_notify (state == NM_STATE_CONNECTED);
 }
 
 static gboolean
@@ -155,19 +159,16 @@ props_changed (DBusGProxy *proxy, GHashTable *hash, gpointer user_data)
 {
   GValue *v;
   const char *s;
-  gboolean online;
 
   v = g_hash_table_lookup (hash, "State");
-  if (v) {
-    GList *l;
-    s = g_value_get_string (v);
-    online = (strcmp (s, "online") == 0);
+  if (v == NULL)
+    return;
 
-    for (l = listeners; l; l = l->next) {
-      ListenerData *data = l->data;
-      data->callback (online, data->user_data);
-    }
-  }
+  s = g_value_get_string (v);
+  if (!s)
+    return;
+
+  emit_notify (strcmp (s, "online") == 0);
 }
 
 static gboolean
