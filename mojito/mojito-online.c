@@ -198,22 +198,23 @@ mojito_is_online (void)
   GHashTable *hash;
   GValue *v;
   const char *s;
-  gboolean ret;
+  gboolean ret = TRUE;
 
   if (!online_init ())
     return TRUE;
 
   if (!dbus_g_proxy_call (proxy, "GetProperties", NULL,
-                         G_TYPE_INVALID,
+                          G_TYPE_INVALID,
                           STRING_VARIANT_HASHTABLE, &hash, G_TYPE_INVALID)) {
     /* On error report online */
     return TRUE;
   }
 
   v = g_hash_table_lookup (hash, "State");
-  s = g_value_get_string (v);
-
-  ret = (strcmp (s, "online") == 0);
+  if (v) {
+    s = g_value_get_string (v);
+    ret = (strcmp (s, "online") == 0);
+  }
 
   g_hash_table_unref (hash);
 
