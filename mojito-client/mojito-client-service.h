@@ -68,7 +68,7 @@ mojito_client_service_get_capabilities (MojitoClientService                     
                                         MojitoClientServiceGetCapabilitiesCallback cb,
                                         gpointer                                   userdata);
 
-typedef void 
+typedef void
 (*MojitoClientServiceGetPersonaIconCallback) (MojitoClientService *service,
                                               const gchar         *persona_icon,
                                               const GError        *error,
@@ -79,7 +79,7 @@ mojito_client_service_get_persona_icon (MojitoClientService                     
                                         MojitoClientServiceGetPersonaIconCallback cb,
                                         gpointer                                  userdata);
 
-typedef void 
+typedef void
 (*MojitoClientServiceUpdateStatusCallback) (MojitoClientService *service,
                                             gboolean             success,
                                             const GError        *error,
