@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include "mojito-online.h"
+#include "mojito-marshals.h"
 
 /* This is the common infrastructure */
 typedef struct {
@@ -184,6 +185,11 @@ online_init (void)
   proxy = dbus_g_proxy_new_for_name (conn, "org.moblin.connman",
                                      "/", "org.moblin.connman.Manager");
 
+  dbus_g_object_register_marshaller (mojito_marshal_VOID__STRING_BOXED,
+                                     G_TYPE_NONE,
+                                     G_TYPE_STRING,
+                                     G_TYPE_BOXED,
+                                     G_TYPE_INVALID);
   dbus_g_proxy_add_signal (proxy, "PropertyChanged",
                            G_TYPE_STRING, G_TYPE_VALUE, NULL);
   dbus_g_proxy_connect_signal (proxy, "PropertyChanged",
