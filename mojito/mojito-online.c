@@ -184,7 +184,8 @@ online_init (void)
   proxy = dbus_g_proxy_new_for_name (conn, "org.moblin.connman",
                                      "/", "org.moblin.connman.Manager");
 
-  dbus_g_proxy_add_signal (proxy, "PropertyChanged", STRING_VARIANT_HASHTABLE, NULL);
+  dbus_g_proxy_add_signal (proxy, "PropertyChanged",
+                           G_TYPE_STRING, G_TYPE_VALUE, NULL);
   dbus_g_proxy_connect_signal (proxy, "PropertyChanged",
                                (GCallback)props_changed, NULL, NULL);
   return TRUE;
