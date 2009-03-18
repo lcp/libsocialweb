@@ -32,7 +32,6 @@ PKG_CHECK_MODULES(SOUP, libsoup-2.4 gthread-2.0)
 PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1)
 PKG_CHECK_MODULES(REST, rest)
 PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0 >= 0.9.6)
-PKG_CHECK_MODULES(NM, NetworkManager)
 
 AC_MSG_CHECKING([how to detect we are online])
 AC_ARG_WITH([online],
