@@ -1,3 +1,12 @@
+Mojito 0.10
+===
+
+* Add an online detection framework, with implementations for Network Manager,
+  Connection Manager, and a dummy implementation.
+* Don't update views when offline, and update when we go online
+* Expose the online status and signals to clients
+
+
 Mojito 0.9.1
 ===
 
