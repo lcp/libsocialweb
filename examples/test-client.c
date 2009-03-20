@@ -50,17 +50,17 @@ client_open_view_cb (MojitoClient *client,
 
 static void
 client_get_services_cb (MojitoClient *client,
-                       GList        *services,
+                       const GList        *services,
                        gpointer      userdata)
 {
-  GList *l;
+  const GList *l;
 
   for (l = services; l; l = l->next)
   {
     g_debug ("Told about service: %s", (char*)l->data);
   }
 
-  mojito_client_open_view (client, services, 10, client_open_view_cb, NULL);
+  mojito_client_open_view (client, (GList*)services, 10, client_open_view_cb, NULL);
 }
 
 int
