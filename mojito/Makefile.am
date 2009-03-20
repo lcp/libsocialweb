@@ -6,9 +6,8 @@ lib_LTLIBRARIES = libmojito.la
 %.h: %.list Makefile.am
 	glib-genmarshal --header --prefix=mojito_marshal $< > $@
 
-TELEPATHY_GLIB ?= $(top_srcdir)/../telepathy-glib/
 %-ginterface.c: %.xml Makefile.am
-	python $(TELEPATHY_GLIB)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
+	python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
 
 BUILT_SOURCES = mojito-marshals.c mojito-marshals.h
 
