@@ -122,8 +122,9 @@ online_init (void)
                                      NM_DBUS_PATH,
                                      NM_DBUS_INTERFACE);
 
-  dbus_g_proxy_add_signal (proxy, "StateChanged", G_TYPE_UINT, NULL);
-  dbus_g_proxy_connect_signal (proxy, "StateChanged",
+  /* StateChange is deprecated is 0.8 but 0.6 doesn't have StateChanged */
+  dbus_g_proxy_add_signal (proxy, "StateChange", G_TYPE_UINT, NULL);
+  dbus_g_proxy_connect_signal (proxy, "StateChange",
                                (GCallback)state_changed, NULL, NULL);
   return TRUE;
 }
