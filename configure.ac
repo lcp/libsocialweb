@@ -119,6 +119,7 @@ AC_OUTPUT([
         services/lastfm/Makefile
         services/twitter/Makefile
         tests/Makefile
+        tools/Makefile
         examples/Makefile
         mojito-client.pc
         mojito-module.pc
