@@ -9,7 +9,11 @@ lib_LTLIBRARIES = libmojito.la
 %-ginterface.c: %.xml Makefile.am
 	python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
 
-BUILT_SOURCES = mojito-marshals.c mojito-marshals.h
+BUILT_SOURCES = \
+	mojito-marshals.c mojito-marshals.h \
+	mojito-core-ginterface.c mojito-core-ginterface.h \
+	mojito-view-ginterface.c mojito-view-ginterface.h \
+	mojito-service-ginterface.c mojito-service-ginterface.h
 
 libmojito_ladir = $(pkgincludedir)/mojito
 
@@ -32,10 +36,7 @@ libmojito_la_SOURCES = mojito-types.h \
 		       mojito-online.c mojito-online.h \
 		       mojito-module.h \
 		       client-monitor.c client-monitor.h \
-		       $(BUILT_SOURCES) \
-		       mojito-core-ginterface.c mojito-core-ginterface.h \
-		       mojito-view-ginterface.c mojito-view-ginterface.h \
-		       mojito-service-ginterface.c mojito-service-ginterface.h
+		       $(BUILT_SOURCES)
 
 libmojito_la_HEADERS = \
 	mojito-types.h \
@@ -45,6 +46,8 @@ libmojito_la_HEADERS = \
 	mojito-item.h \
 	mojito-module.h \
 	mojito-utils.h
+
+CLEANFILES = $(BUILT_SOURCES)
 
 # Test suite
 TESTS = test-runner
