@@ -76,7 +76,7 @@ void mojito_client_open_view_for_service (MojitoClient                 *client,
                                           gpointer                      userdata);
 
 typedef void (*MojitoClientGetServicesCallback) (MojitoClient *client,
-                                                 GList        *services,
+                                                 const GList  *services,
                                                  gpointer      userdata);
 
 void mojito_client_get_services (MojitoClient                  *client,
