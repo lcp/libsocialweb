@@ -325,7 +325,13 @@ view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 
   mojito_view_iface_return_from_start (context);
 
-  online_notify (mojito_is_online (), view);
+  if (mojito_is_online ()) {
+    online_notify (TRUE, view);
+  } else {
+    online_notify (FALSE, view);
+    /* Online notify doesn't load the cache if we are offline, so do that now */
+    load_cache (view);
+  }
 }
 
 static void
