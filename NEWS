@@ -1,3 +1,12 @@
+Mojito 0.10.1
+===
+
+* When starting a view offline, load the cache
+* Install headers so that out-of-tree services can be written
+* Ship a copy of the tools we use from telepathy-glib
+* Add the const back to MojitoClientGetServicesCallback
+
+
 Mojito 0.10
 ===
 
