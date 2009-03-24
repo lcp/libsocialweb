@@ -270,4 +270,28 @@ test_cache_relative (void)
   s = make_relative_path ("authoricon", "/home/ross/.cache/mojito/thumbnails/abcd");
   g_assert_cmpstr (s, ==, "abcd");
 }
+
+void
+test_cache_absolute (void)
+{
+  char *s, *expected;
+
+  /* These keys don't get mangled */
+  s = make_absolute_path ("authorid", "1234");
+  g_assert (s == NULL);
+
+  s = make_absolute_path ("title", "this is a test");
+  g_assert (s == NULL);
+
+  /* These keys do */
+  s = make_absolute_path ("thumbnail", "1234");
+  g_assert (s != NULL);
+  expected = g_build_filename (g_get_user_cache_dir (), "mojito", "thumbnails", "1234", NULL);
+  g_assert_cmpstr (s, ==, expected);
+
+  s = make_absolute_path ("authoricon", "abcd");
+  g_assert (s != NULL);
+  expected = g_build_filename (g_get_user_cache_dir (), "mojito", "thumbnails", "abcd", NULL);
+  g_assert_cmpstr (s, ==, expected);
+}
 #endif
