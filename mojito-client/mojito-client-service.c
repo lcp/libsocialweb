@@ -162,10 +162,13 @@ _get_capabilities_cb (DBusGProxy *proxy,
   cb = (MojitoClientServiceGetCapabilitiesCallback)closure->cb;
   if (error)
   {
+    g_warning (G_STRLOC ": Error getting capabilities: %s",
+               error->message);
     cb (closure->service,
       0,
       error,
       closure->userdata);
+    g_error_free (error);
   } else {
     if (can_get_persona_icon)
       caps |= MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON;
@@ -212,10 +215,13 @@ _get_persona_icon_cb (DBusGProxy *proxy,
 
   if (error)
   {
+    g_warning (G_STRLOC ": Error getting persona icon: %s",
+               error->message);
     cb (closure->service,
         NULL,
         error,
         closure->userdata);
+    g_error_free (error);
   } else {
     cb (closure->service,
         persona_icon,
@@ -255,11 +261,20 @@ _update_status_cb (DBusGProxy *proxy,
   MojitoClientServiceCallClosure *closure = (MojitoClientServiceCallClosure *)userdata;
   MojitoClientServiceUpdateStatusCallback cb;
 
+  if (error)
+  {
+    g_warning (G_STRLOC ": Error updating status: %s",
+               error->message);
+  }
+
   cb = (MojitoClientServiceUpdateStatusCallback)closure->cb;
   cb (closure->service,
       success,
       error,
       closure->userdata);
+
+  if (error)
+    g_error_free (error);
 
   g_object_unref (closure->service);
   g_slice_free (MojitoClientServiceCallClosure, closure);

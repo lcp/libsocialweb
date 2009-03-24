@@ -374,6 +374,7 @@ _mojito_client_view_start_cb (DBusGProxy     *proxy,
   {
     g_warning (G_STRLOC ": Error when starting view: %s",
                error->message);
+    g_error_free (error);
   }
 }
 
@@ -397,6 +398,7 @@ _mojito_client_view_refresh_cb (DBusGProxy     *proxy,
   {
     g_warning (G_STRLOC ": Error when refreshing view: %s",
                error->message);
+    g_error_free (error);
   }
 }
 
