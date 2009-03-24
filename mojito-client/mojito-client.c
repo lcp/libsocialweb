@@ -183,13 +183,15 @@ _mojito_client_open_view_cb (DBusGProxy *proxy,
   MojitoClient *client = closure->client;
   MojitoClientView *view;
 
-  /* TODO: handle error */
-
-  view = _mojito_client_view_new_for_path (view_path);
-
-  closure->cb (client, view, closure->userdata);
-
-  g_free (view_path);
+  if (error)
+  {
+    g_warning (G_STRLOC ": Error whilst opening view: %s",
+               error->message);
+  } else {
+    view = _mojito_client_view_new_for_path (view_path);
+    closure->cb (client, view, closure->userdata);
+    g_free (view_path);
+  }
 
   g_object_unref (closure->client);
   g_free (closure);
@@ -280,17 +282,21 @@ _mojito_client_get_services_cb (DBusGProxy *proxy,
   gchar *service;
   gint i;
 
-  /* TODO: handle error */
-
-  for (i = 0; (service = services[i]); i++)
+  if (error)
   {
-    services_list = g_list_append (services_list, service);
+    g_warning (G_STRLOC ": Error getting list of services: %s",
+               error->message);
+  } else {
+    for (i = 0; (service = services[i]); i++)
+    {
+      services_list = g_list_append (services_list, service);
+    }
+
+    closure->cb (client, services_list, closure->userdata);
+
+    g_list_free (services_list);
+    g_strfreev (services);
   }
-
-  closure->cb (client, services_list, closure->userdata);
-
-  g_list_free (services_list);
-  g_strfreev (services);
 
   g_object_unref (closure->client);
   g_free (closure);
