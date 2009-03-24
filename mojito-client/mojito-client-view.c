@@ -390,8 +390,8 @@ mojito_client_view_start (MojitoClientView *view)
 
 static void
 _mojito_client_view_refresh_cb (DBusGProxy     *proxy,
-                              GError         *error,
-                              gpointer        userdata)
+                                GError         *error,
+                                gpointer        userdata)
 {
   if (error)
   {
@@ -406,8 +406,8 @@ mojito_client_view_refresh (MojitoClientView *view)
   MojitoClientViewPrivate *priv = GET_PRIVATE (view);
 
   com_intel_Mojito_View_refresh_async (priv->proxy,
-                                     _mojito_client_view_refresh_cb,
-                                     NULL);
+                                       _mojito_client_view_refresh_cb,
+                                       NULL);
 }
 
 
