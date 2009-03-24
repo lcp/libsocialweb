@@ -86,6 +86,42 @@ get_cache_filename (MojitoService *service, GHashTable *params)
 }
 
 /*
+ * make_relative_path and make_absolute_path are pretty damn nasty and should be
+ * replaced as soon as possible.  One better solution would be to change the
+ * keys to be namespaced, so that it is possible to detect keys which are paths
+ * without having to hardcode the list.
+ */
+
+/*
+ * Make an absolute path relative, for when saving it to the cache.
+ */
+static char *
+make_relative_path (const char *key, const char *value)
+{
+  if (g_str_equal (key, "authoricon") || g_str_equal (key, "thumbnail")) {
+    return g_path_get_basename (value);
+  } else {
+    return NULL;
+  }
+}
+
+/*
+ * Make a relative path absolute, for when loading from the cache.
+ */
+static char *
+make_absolute_path (const char *key, const char *value)
+{
+  if (g_str_equal (key, "authoricon") || g_str_equal (key, "thumbnail")) {
+    return g_build_filename (g_get_user_cache_dir (),
+                             "mojito", "thumbnails", value,
+                             NULL);
+
+  } else {
+    return NULL;
+  }
+}
+
+/*
  * Create a new group in the keyfile based on the MojitoItem.
  */
 static void
