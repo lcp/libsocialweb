@@ -188,6 +188,7 @@ _mojito_client_open_view_cb (DBusGProxy *proxy,
     g_warning (G_STRLOC ": Error whilst opening view: %s",
                error->message);
     g_error_free (error);
+    closure->cb (client, NULL, closure->userdata);
   } else {
     view = _mojito_client_view_new_for_path (view_path);
     closure->cb (client, view, closure->userdata);
@@ -288,6 +289,7 @@ _mojito_client_get_services_cb (DBusGProxy *proxy,
     g_warning (G_STRLOC ": Error getting list of services: %s",
                error->message);
     g_error_free (error);
+    closure->cb (client, NULL, closure->userdata);
   } else {
     for (i = 0; (service = services[i]); i++)
     {
