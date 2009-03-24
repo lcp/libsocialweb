@@ -77,6 +77,12 @@ emit_notify (gboolean online)
 
 #if WITH_ONLINE_ALWAYS
 
+/*
+ * A bit nasty but this case never uses emit_notify we get a compile warning
+ * otherwise.
+ */
+static const gpointer dummy = &emit_notify;
+
 static gboolean
 online_init (void)
 {
