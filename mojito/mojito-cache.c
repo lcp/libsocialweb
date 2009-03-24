@@ -141,7 +141,19 @@ set_keyfile_from_item (gpointer data, gpointer user_data)
 
   g_hash_table_iter_init (&iter, mojito_item_peek_hash (item));
   while (g_hash_table_iter_next (&iter, (gpointer)&key, (gpointer)&value)) {
-    g_key_file_set_string (keys, group, key, value);
+    char *new_value;
+    /*
+     * We make relative paths when saving so that the cache files are portable
+     * between users.  This normally doesn't happen but it's useful and the
+     * preloaded cache depends on this.
+     */
+    new_value = make_relative_path (key, value);
+    if (new_value) {
+      g_key_file_set_string (keys, group, key, new_value);
+      g_free (new_value);
+    } else {
+      g_key_file_set_string (keys, group, key, value);
+    }
   }
 }
 
@@ -198,7 +210,21 @@ load_item_from_keyfile (MojitoService *service, GKeyFile *keyfile, const char *g
     item = mojito_item_new ();
     mojito_item_set_service (item, service);
     for (i = 0; i < count; i++) {
-      mojito_item_take (item, keys[i], g_key_file_get_string (keyfile, group, keys[i], NULL));
+      char *value, *new_value;
+
+      value = g_key_file_get_string (keyfile, group, keys[i], NULL);
+      /*
+       * Make the cached relative paths absolute so that the client doesn't have
+       * to know any internal details.
+       */
+      new_value = make_absolute_path (keys[i], value);
+
+      if (new_value) {
+        mojito_item_take (item, keys[i], new_value);
+        g_free (value);
+      } else {
+        mojito_item_take (item, keys[i], value);
+      }
     }
   }
   g_strfreev (keys);
