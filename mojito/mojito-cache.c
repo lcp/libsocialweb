@@ -245,3 +245,29 @@ mojito_cache_load (MojitoService *service, GHashTable *params)
 
   return set;
 }
+
+
+#if BUILD_TESTS
+
+#include "test-runner.h"
+
+void
+test_cache_relative (void)
+{
+  char *s;
+
+  /* These keys don't get mangled */
+  s = make_relative_path ("authorid", "/foo/bar");
+  g_assert (s == NULL);
+
+  s = make_relative_path ("title", "this is a test");
+  g_assert (s == NULL);
+
+  /* These keys do */
+  s = make_relative_path ("thumbnail", "/home/ross/.cache/mojito/thumbnails/1234");
+  g_assert_cmpstr (s, ==, "1234");
+
+  s = make_relative_path ("authoricon", "/home/ross/.cache/mojito/thumbnails/abcd");
+  g_assert_cmpstr (s, ==, "abcd");
+}
+#endif

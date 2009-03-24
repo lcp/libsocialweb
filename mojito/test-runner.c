@@ -55,5 +55,7 @@ main (int argc, char *argv[])
   test_add ("/view/munge-3", test_view_munge_3);
   test_add ("/view/munge-4", test_view_munge_4);
 
+  test_add ("/cache/relative", test_cache_relative);
+
   return g_test_run ();
 }
