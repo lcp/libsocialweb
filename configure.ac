@@ -107,6 +107,9 @@ AM_CONDITIONAL([WITH_LASTFM], [test x$enable_lastfm_key != xno])
 servicesdir='${libdir}'/mojito/services
 AC_SUBST(servicesdir)
 
+servicesdatadir='${pkgdatadir}'/services
+AC_SUBST(servicesdatadir)
+
 
 AC_OUTPUT([
         Makefile
