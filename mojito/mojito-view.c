@@ -48,9 +48,8 @@ struct _MojitoViewPrivate {
   guint count;
   /* The refresh timeout id */
   guint refresh_timeout_id;
-  /* The set of pending services we're waiting for updates from during an update cycle */
-  MojitoSet *pending_services;
-  MojitoSet *pending_items;
+  /* The set of all items currently being considered for the client */
+  MojitoSet *all_items;
   /* The items we've sent to the client */
   MojitoSet *current;
   /* Whether we're currently running */
@@ -120,8 +119,8 @@ munge_items (MojitoView *view)
   MojitoSet *new;
 
   /* The magic */
-  list = mojito_set_as_list (priv->pending_items);
-  mojito_set_empty (priv->pending_items);
+  list = mojito_set_as_list (priv->all_items);
+  mojito_set_empty (priv->all_items);
 
   list = g_list_sort (list, (GCompareFunc)mojito_item_compare_date_newer);
 
@@ -200,8 +199,6 @@ service_updated (MojitoService *service, GHashTable *params, MojitoSet *set, gpo
     mojito_cache_save (service, params, set);
   }
 
-  mojito_set_remove (priv->pending_services, (GObject*)service);
-
   if (priv->running) {
 
     if (!set) {
@@ -210,54 +207,46 @@ service_updated (MojitoService *service, GHashTable *params, MojitoSet *set, gpo
     }
 
     if (set) {
-      mojito_set_add_from (priv->pending_items, set);
+      /* TODO: remove all items from this service */
+      mojito_set_add_from (priv->all_items, set);
       mojito_set_unref (set);
     }
 
-    /* Have all of the services got back to us now? */
-    if (mojito_set_is_empty (priv->pending_services)) {
-      MojitoSet *old_items, *new_items;
-      MojitoSet *removed_items, *added_items;
+    MojitoSet *old_items, *new_items;
+    MojitoSet *removed_items, *added_items;
 
-      old_items = priv->current;
-      new_items = munge_items (view);
+    old_items = priv->current;
+    new_items = munge_items (view);
 
-      removed_items = mojito_set_difference (old_items, new_items);
-      added_items = mojito_set_difference (new_items, old_items);
+    removed_items = mojito_set_difference (old_items, new_items);
+    added_items = mojito_set_difference (new_items, old_items);
 
-      mojito_set_foreach (removed_items, (GFunc)send_removed, view);
-      mojito_set_foreach (added_items, (GFunc)send_added, view);
+    mojito_set_foreach (removed_items, (GFunc)send_removed, view);
+    mojito_set_foreach (added_items, (GFunc)send_added, view);
 
-      mojito_set_unref (removed_items);
-      mojito_set_unref (added_items);
+    mojito_set_unref (removed_items);
+    mojito_set_unref (added_items);
 
-      mojito_set_unref (priv->current);
-      priv->current = new_items;
-    }
+    mojito_set_unref (priv->current);
+    priv->current = new_items;
   }
-
-  /* A reference was added when the update method was called, so unref it now */
-  g_object_unref (view);
 }
 
+/*
+ * Called in a timeout and asks all of the sources to refresh themselves.
+ */
 static gboolean
-start_update (MojitoView *view)
+start_refresh (MojitoView *view)
 {
   MojitoViewPrivate *priv = view->priv;
   GList *l;
 
-  mojito_set_empty (priv->pending_services);
-  mojito_set_empty (priv->pending_items);
-
-  for (l = priv->services; l; l = l->next) {
-    ServiceParamData *data = l->data;
-    mojito_set_add (priv->pending_services, g_object_ref (data->service));
-  }
+  mojito_set_empty (priv->all_items);
 
   for (l = priv->services; l; l = l->next) {
     ServiceParamData *data = l->data;
     g_debug ("Updating %s", mojito_service_get_name (data->service));
-    mojito_service_update (data->service, data->params, service_updated, g_object_ref (view));
+    mojito_service_refresh (data->service, data->params);
   }
 
   return TRUE;
@@ -269,13 +258,7 @@ load_cache (MojitoView *view)
   MojitoViewPrivate *priv = view->priv;
   GList *l;
 
-  mojito_set_empty (priv->pending_services);
-  mojito_set_empty (priv->pending_items);
-
-  for (l = priv->services; l; l = l->next) {
-    ServiceParamData *data = l->data;
-    mojito_set_add (priv->pending_services, g_object_ref (data->service));
-  }
+  mojito_set_empty (priv->all_items);
 
   for (l = priv->services; l; l = l->next) {
     ServiceParamData *data = l->data;
@@ -288,7 +271,7 @@ static void
 install_refresh_timeout (MojitoView *view)
 {
   if (view->priv->refresh_timeout_id == 0)
-    view->priv->refresh_timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_update, view);
+    view->priv->refresh_timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_refresh, view);
 }
 
 static void
@@ -310,7 +293,7 @@ online_notify (gboolean online, gpointer user_data)
     install_refresh_timeout (view);
     if (view->priv->running) {
       load_cache (view);
-      start_update (view);
+      start_refresh (view);
     }
   } else {
     g_debug ("Detected offline");
@@ -347,7 +330,7 @@ view_refresh (MojitoViewIface *iface, DBusGMethodInvocation *context)
 
   mojito_view_iface_return_from_refresh (context);
 
-  start_update (view);
+  start_refresh (view);
 }
 
 static void
@@ -480,8 +463,7 @@ mojito_view_init (MojitoView *self)
 {
   self->priv = GET_PRIVATE (self);
 
-  self->priv->pending_services = mojito_set_new ();
-  self->priv->pending_items = mojito_item_set_new ();
+  self->priv->all_items = mojito_item_set_new ();
   self->priv->current = mojito_item_set_new ();
 
   self->priv->running = FALSE;
@@ -509,6 +491,8 @@ mojito_view_add_service (MojitoView *view, MojitoService *service, GHashTable *p
   data->params = params ? params : g_hash_table_new (g_str_hash, g_str_equal);
 
   priv->services = g_list_append (priv->services, data);
+  /* TODO: use _object etc */
+  g_signal_connect (service, "refreshed", G_CALLBACK (service_updated), view);
 }
 
 
