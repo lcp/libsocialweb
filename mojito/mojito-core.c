@@ -115,6 +115,15 @@ make_param_hash (const char *s)
   return hash;
 }
 
+/* For the given name and parameters, return reference to a MojitoService. */
+static MojitoService *
+get_service (MojitoCore *core, const char *name, GHashTable *params)
+{
+  MojitoCorePrivate *priv = core->priv;
+  return g_hash_table_lookup (priv->available_services, name);
+}
+
+
 static void
 open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMethodInvocation *context)
 {
@@ -140,7 +149,7 @@ open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMetho
 
     g_debug ("%s: service name %s", __FUNCTION__, name);
 
-    service = g_hash_table_lookup (priv->available_services, name);
+    service = get_service (core, name, params);
 
     if (service) {
       mojito_view_add_service (view, service, params);
