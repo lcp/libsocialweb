@@ -44,7 +44,9 @@ typedef struct {
 struct _MojitoViewPrivate {
   /* List of ServiceParamData objects */
   GList *services;
+  /* The maximum number of items in the view */
   guint count;
+  /* The refresh timeout id */
   guint refresh_timeout_id;
   /* The set of pending services we're waiting for updates from during an update cycle */
   MojitoSet *pending_services;
