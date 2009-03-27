@@ -39,9 +39,12 @@ G_DEFINE_TYPE_WITH_CODE (MojitoCore, mojito_core, G_TYPE_OBJECT,
 
 struct _MojitoCorePrivate {
   DBusGConnection *connection;
-  /* Hash of service name to MojitoServiceProxy (but we can just pretend they
-   * are services. */
-  GHashTable *available_services;
+  /* Hash of service name to GType */
+  GHashTable *service_types;
+  /* Hash of service name to MojitoServiceProxies on the bus */
+  GHashTable *bus_services;
+  /* Hash of service name-parameter hash to MojitoService instance. */
+  GHashTable *active_services;
 };
 
 typedef const gchar *(*MojitoModuleGetNameFunc)(void);
@@ -57,7 +60,7 @@ get_services (MojitoCoreIface *self, DBusGMethodInvocation *context)
 
   array = g_ptr_array_new ();
 
-  l = g_hash_table_get_keys (priv->available_services);
+  l = g_hash_table_get_keys (priv->service_types);
   while (l) {
     g_ptr_array_add (array, l->data);
     l = g_list_delete_link (l, l);
@@ -120,7 +123,29 @@ static MojitoService *
 get_service (MojitoCore *core, const char *name, GHashTable *params)
 {
   MojitoCorePrivate *priv = core->priv;
-  return g_hash_table_lookup (priv->available_services, name);
+  char *param_hash, *key;
+  MojitoService *service;
+  GType type;
+
+  param_hash = mojito_hash_string_dict (params);
+  key = g_strconcat (name, "-", param_hash, NULL);
+  g_free (param_hash);
+
+  service = g_hash_table_lookup (priv->active_services, key);
+  if (service) {
+    g_debug ("found existing service for %s", key);
+    return g_object_ref (service);
+  }
+
+  type = GPOINTER_TO_INT (g_hash_table_lookup (priv->service_types, name));
+  if (!type)
+    return NULL;
+
+  g_debug ("created new service for %s", key);
+  service = g_object_new (type, NULL);
+  g_hash_table_insert (priv->active_services, key, service);
+  /* TODO: weak reference to remove from hash */
+  return service;
 }
 
 
@@ -259,8 +284,14 @@ populate_services (MojitoCore *core)
 
     if (service_name && service_type)
     {
+      /* Add to the service name -> type hash */
+      g_hash_table_insert (priv->service_types,
+                           (char*)service_name,
+                           GINT_TO_POINTER (service_type));
+
+      /* Create a laxy proxy object and add it to the bus */
       proxy = mojito_service_proxy_new (core, service_type);
-      g_hash_table_insert (priv->available_services,
+      g_hash_table_insert (priv->bus_services,
                            (gchar *)service_name,
                            proxy);
       path = g_strdup_printf ("/com/intel/Mojito/Service/%s", service_name);
@@ -351,8 +382,13 @@ mojito_core_init (MojitoCore *self)
 
   self->priv = priv;
 
-  priv->available_services = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                    NULL, g_object_unref);
+  priv->service_types = g_hash_table_new (g_str_hash, g_str_equal);
+
+  priv->bus_services = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                              NULL, g_object_unref);
+
+  priv->active_services = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                              g_free, g_object_unref);
 }
 
 MojitoCore*

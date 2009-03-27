@@ -479,6 +479,7 @@ mojito_view_new (guint count)
                        NULL);
 }
 
+/* This adopts the reference passed */
 void
 mojito_view_add_service (MojitoView *view, MojitoService *service, GHashTable *params)
 {
@@ -486,7 +487,7 @@ mojito_view_add_service (MojitoView *view, MojitoService *service, GHashTable *p
   ServiceParamData *data;
 
   data = g_slice_new (ServiceParamData);
-  data->service = g_object_ref (service);
+  data->service = service;
   /* Handle a NULL params hash by constructing a new hash table */
   data->params = params ? params : g_hash_table_new (g_str_hash, g_str_equal);
 
