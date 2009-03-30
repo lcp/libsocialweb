@@ -134,7 +134,7 @@ lastfm_call (RestProxyCall *call)
 }
 
 static void
-update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data)
+refresh (MojitoService *service, GHashTable *params)
 {
   MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
   RestProxyCall *call;
@@ -142,7 +142,6 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
   MojitoSet *set;
 
   if (lastfm->priv->user_id == NULL) {
-    callback (service, params, NULL, user_data);
     return;
   }
 
@@ -154,7 +153,6 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
                               NULL);
 
   if ((root = lastfm_call (call)) == NULL) {
-    callback (service, params, NULL, user_data);
     return;
   }
 
@@ -210,7 +208,7 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
 
   rest_xml_node_unref (root);
 
-  callback (service, params, set, user_data);
+  mojito_service_emit_refreshed (service, set);
 }
 
 static const char *
@@ -255,7 +253,7 @@ mojito_service_lastfm_class_init (MojitoServiceLastfmClass *klass)
   object_class->finalize = mojito_service_lastfm_finalize;
 
   service_class->get_name = get_name;
-  service_class->update = update;
+  service_class->refresh = refresh;
 }
 
 static void
