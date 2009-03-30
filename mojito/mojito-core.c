@@ -118,6 +118,22 @@ make_param_hash (const char *s)
   return hash;
 }
 
+typedef struct {
+  MojitoCore *core;
+  char *key;
+} WeakServiceData;
+
+static void
+service_destroy_notify (gpointer user_data, GObject *dead_service)
+{
+  WeakServiceData *data = user_data;
+
+  /* We need to do steal and free because the object is already dead */
+  g_hash_table_steal (data->core->priv->active_services, data->key);
+  g_free (data->key);
+  g_slice_free (WeakServiceData, data);
+}
+
 /* For the given name and parameters, return reference to a MojitoService. */
 static MojitoService *
 get_service (MojitoCore *core, const char *name, GHashTable *params)
@@ -126,6 +142,7 @@ get_service (MojitoCore *core, const char *name, GHashTable *params)
   char *param_hash, *key;
   MojitoService *service;
   GType type;
+  WeakServiceData *data;
 
   param_hash = mojito_hash_string_dict (params);
   key = g_strconcat (name, "-", param_hash, NULL);
@@ -134,6 +151,7 @@ get_service (MojitoCore *core, const char *name, GHashTable *params)
   service = g_hash_table_lookup (priv->active_services, key);
   if (service) {
     g_debug ("found existing service for %s", key);
+    g_free (key);
     return g_object_ref (service);
   }
 
@@ -144,7 +162,12 @@ get_service (MojitoCore *core, const char *name, GHashTable *params)
   g_debug ("created new service for %s", key);
   service = g_object_new (type, "params", params, NULL);
   g_hash_table_insert (priv->active_services, key, service);
-  /* TODO: weak reference to remove from hash */
+
+  data = g_slice_new0 (WeakServiceData);
+  data->core = core;
+  data->key = key;
+  g_object_weak_ref ((GObject*)service, service_destroy_notify, data);
+
   return service;
 }
 
