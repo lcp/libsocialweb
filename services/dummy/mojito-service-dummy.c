@@ -39,7 +39,7 @@ get_name (MojitoService *service)
 }
 
 static void
-update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data)
+refresh (MojitoService *service, GHashTable *params)
 {
   MojitoSet *set;
   MojitoItem *item;
@@ -64,7 +64,7 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
   mojito_set_add (set, G_OBJECT (item));
   g_object_unref (item);
 
-  callback (service, params, set, user_data);
+  mojito_service_emit_refreshed (service, set);
 }
 
 static void
@@ -113,7 +113,7 @@ mojito_service_dummy_class_init (MojitoServiceDummyClass *klass)
   object_class->finalize = mojito_service_dummy_finalize;
 
   service_class->get_name = get_name;
-  service_class->update = update;
+  service_class->refresh = refresh;
 }
 
 static void
