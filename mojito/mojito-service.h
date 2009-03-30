@@ -72,6 +72,8 @@ const char *mojito_service_get_name (MojitoService *service);
 
 void mojito_service_refresh (MojitoService *service, GHashTable *params);
 
+void mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set);
+
 G_END_DECLS
 
 #endif /* _MOJITO_SERVICE */
