@@ -36,8 +36,11 @@ path = mojito.OpenView(services, 10)
 view = bus.get_object("com.intel.Mojito", path)
 view = dbus.Interface(view, "com.intel.Mojito.View")
 
+def now():
+    return time.strftime("%T", time.localtime())
+
 def added(service, uuid, date, item):
-    print "Item %s added from %s" % (uuid, service)
+    print "[%s] Item %s added from %s" % (now(), uuid, service)
     print "Timestamp: %s" % time.strftime("%c", time.gmtime(date))
     for key in item:
         print "  %s: %s" % (key, item[key])
@@ -45,7 +48,7 @@ def added(service, uuid, date, item):
 view.connect_to_signal("ItemAdded", added)
 
 def removed(service, uuid):
-    print "Item %s removed from %s" % (uuid, service)
+    print "[%s] Item %s removed from %s" % (now(), uuid, service)
     print
 view.connect_to_signal("ItemRemoved", removed)
 
