@@ -136,6 +136,7 @@ timeline_received_cb (TwitterClient *client,
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
 
   mojito_service_emit_refreshed (service, priv->set);
+  mojito_set_empty (priv->set);
 }
 
 static void
@@ -170,7 +171,7 @@ refresh (MojitoService *service, GHashTable *params)
   if (!priv->user_set || !priv->password_set)
     return;
 
-  mojito_set_empty (twitter->priv->set);
+  mojito_set_empty (priv->set);
 
   if (g_hash_table_lookup (params, "own")) {
     twitter_client_get_user_timeline (priv->client, priv->username, 0, 0);
