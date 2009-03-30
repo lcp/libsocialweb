@@ -23,7 +23,6 @@
 #include <glib-object.h>
 #include <mojito/mojito-types.h>
 #include <mojito/mojito-service.h>
-#include <mojito/mojito-core.h>
 #include <mojito/mojito-set.h>
 
 G_BEGIN_DECLS
@@ -55,8 +54,8 @@ struct _MojitoServiceProxyClass {
 };
 
 GType mojito_service_proxy_get_type (void);
-MojitoServiceProxy *mojito_service_proxy_new (MojitoCore *core,
-                                              GType       service_type);
+MojitoServiceProxy *mojito_service_proxy_new (GType service_type);
+
 G_END_DECLS
 
 #endif /* _MOJITO_SERVICE_PROXY */

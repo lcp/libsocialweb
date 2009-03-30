@@ -143,12 +143,9 @@ mojito_service_proxy_init (MojitoServiceProxy *self)
 }
 
 MojitoServiceProxy *
-mojito_service_proxy_new (MojitoCore *core,
-                          GType       service_type)
+mojito_service_proxy_new (GType       service_type)
 {
   return (MojitoServiceProxy *)g_object_new (MOJITO_TYPE_SERVICE_PROXY,
-                                             "core",
-                                             core,
                                              "type",
                                              service_type,
                                              NULL);

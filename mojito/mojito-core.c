@@ -292,7 +292,7 @@ populate_services (MojitoCore *core)
                            GINT_TO_POINTER (service_type));
 
       /* Create a laxy proxy object and add it to the bus */
-      proxy = mojito_service_proxy_new (core, service_type);
+      proxy = mojito_service_proxy_new (service_type);
       g_hash_table_insert (priv->bus_services,
                            (gchar *)service_name,
                            proxy);
