@@ -156,5 +156,7 @@ mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set)
   priv = GET_PRIVATE (service);
 
   /* TODO: remove priv->params when the signal doesn't take it any more */
+  /* TODO: lifecycle on the set? I guess this should take a reference so the
+     view can unref later */
   g_signal_emit (service, signals[SIGNAL_REFRESHED], 0, priv->params, set);
 }

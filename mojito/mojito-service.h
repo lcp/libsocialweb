@@ -53,6 +53,7 @@ struct _MojitoServiceClass {
   GObjectClass parent_class;
   const char *(*get_name) (MojitoService *service);
   /* fires ::refreshed (MojitoSet *set, GHashTable *params) signal */
+  /* TODO: remove params */
   void (*refresh) (MojitoService *service, GHashTable *params);
   MojitoItem *(*get_last_item) (MojitoService *service);
   gchar *(*get_persona_icon) (MojitoService *service);
