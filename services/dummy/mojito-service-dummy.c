@@ -65,6 +65,7 @@ refresh (MojitoService *service, GHashTable *params)
   g_object_unref (item);
 
   mojito_service_emit_refreshed (service, set);
+  mojito_set_unref (set);
 }
 
 static void
