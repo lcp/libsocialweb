@@ -132,12 +132,6 @@ get_thumbnail (RestXmlNode *node)
   return filename;
 }
 
-typedef struct {
-  GHashTable *params;
-  MojitoServiceDataFunc callback;
-  gpointer user_data;
-}UpdateData;
-
 static void
 flickr_callback (RestProxyCall *call,
                  GError *error,
@@ -145,15 +139,12 @@ flickr_callback (RestProxyCall *call,
                  gpointer user_data)
 {
   MojitoServiceFlickr *service = MOJITO_SERVICE_FLICKR (weak_object);
-  UpdateData *data = user_data;
   RestXmlParser *parser;
   RestXmlNode *root, *node;
   MojitoSet *set;
 
   if (error) {
     g_warning ("Cannot get Flickr photos: %s", error->message);
-    data->callback ((MojitoService*)service, data->params, NULL, data->user_data);
-    g_slice_free (UpdateData, data);
     return;
   }
 
@@ -198,27 +189,18 @@ flickr_callback (RestProxyCall *call,
   rest_xml_node_unref (root);
   g_object_unref (parser);
 
-  data->callback ((MojitoService*)service, data->params, set, data->user_data);
-
-  g_slice_free (UpdateData, data);
+  mojito_service_emit_refreshed ((MojitoService*)service, set);
 }
 
 static void
-update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data)
+refresh (MojitoService *service, GHashTable *params)
 {
   MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
-  UpdateData *data;
   RestProxyCall *call;
 
   if (flickr->priv->user_id == NULL) {
-    callback (service, params, NULL, user_data);
     return;
   }
-
-  data = g_slice_new (UpdateData);
-  data->params = params;
-  data->callback = callback;
-  data->user_data = user_data;
 
   call = rest_proxy_new_call (flickr->priv->proxy);
   rest_proxy_call_add_params (call,
@@ -228,7 +210,7 @@ update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callba
                               "extras", "date_upload,icon_server",
                               NULL);
   /* TODO: GError */
-  rest_proxy_call_async (call, flickr_callback, (GObject*)service, data, NULL);
+  rest_proxy_call_async (call, flickr_callback, (GObject*)service, NULL, NULL);
 }
 
 static const char *
@@ -287,7 +269,7 @@ mojito_service_flickr_class_init (MojitoServiceFlickrClass *klass)
   object_class->finalize = mojito_service_flickr_finalize;
 
   service_class->get_name = mojito_service_flickr_get_name;
-  service_class->update = update;
+  service_class->refresh = refresh;
 }
 
 static void
