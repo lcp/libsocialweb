@@ -541,6 +541,8 @@ make_item (MojitoService *service)
 void
 test_view_munge_1 (void)
 {
+  g_message ("This test is disabled");
+#if 0
   MojitoView *view;
   MojitoViewPrivate *priv;
   MojitoService *service;
@@ -571,6 +573,7 @@ test_view_munge_1 (void)
   }
 
   g_object_unref (view);
+#endif
 }
 
 /*
@@ -580,6 +583,8 @@ test_view_munge_1 (void)
 void
 test_view_munge_2 (void)
 {
+  g_message ("This test is disabled");
+#if 0
   MojitoView *view;
   MojitoViewPrivate *priv;
   MojitoService *service;
@@ -606,6 +611,7 @@ test_view_munge_2 (void)
   g_assert (mojito_set_has (set, G_OBJECT (new_item)));
 
   g_object_unref (view);
+#endif
 }
 
 /*
@@ -615,6 +621,8 @@ test_view_munge_2 (void)
 void
 test_view_munge_3 (void)
 {
+  g_message ("This test is disabled");
+#if 0
   MojitoView *view;
   MojitoViewPrivate *priv;
   MojitoService *service_1, *service_2;
@@ -645,6 +653,7 @@ test_view_munge_3 (void)
   g_assert (mojito_set_has (set, G_OBJECT (item_2)));
 
   g_object_unref (view);
+#endif
 }
 
 /*
@@ -654,6 +663,8 @@ test_view_munge_3 (void)
 void
 test_view_munge_4 (void)
 {
+  g_message ("This test is disabled");
+#if 0
   MojitoView *view;
   MojitoViewPrivate *priv;
   MojitoService *service_1, *service_2;
@@ -686,6 +697,7 @@ test_view_munge_4 (void)
   }
 
   g_object_unref (view);
+#endif
 }
 
 #endif
