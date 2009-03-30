@@ -118,7 +118,7 @@ mojito_service_class_init (MojitoServiceClass *klass)
                   0,
                   NULL, NULL,
                   mojito_marshal_VOID__BOXED_BOXED,
-                  G_TYPE_NONE, 2, MOJITO_TYPE_SET, G_TYPE_HASH_TABLE);
+                  G_TYPE_NONE, 2, G_TYPE_HASH_TABLE, MOJITO_TYPE_SET);
 }
 
 static void
@@ -156,5 +156,5 @@ mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set)
   priv = GET_PRIVATE (service);
 
   /* TODO: remove priv->params when the signal doesn't take it any more */
-  g_signal_emit (service, signals[SIGNAL_REFRESHED], 0, set, priv->params);
+  g_signal_emit (service, signals[SIGNAL_REFRESHED], 0, priv->params, set);
 }
