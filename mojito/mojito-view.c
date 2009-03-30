@@ -120,7 +120,6 @@ munge_items (MojitoView *view)
 
   /* The magic */
   list = mojito_set_as_list (priv->all_items);
-  mojito_set_empty (priv->all_items);
 
   list = g_list_sort (list, (GCompareFunc)mojito_item_compare_date_newer);
 
@@ -185,6 +184,15 @@ munge_items (MojitoView *view)
   return new;
 }
 
+static gboolean
+remove_service (GObject *object, gpointer user_data)
+{
+  MojitoItem *item = MOJITO_ITEM (object);
+  MojitoService *service = MOJITO_SERVICE (user_data);
+
+  return mojito_item_get_service (item) == service;
+}
+
 static void
 service_updated (MojitoService *service, GHashTable *params, MojitoSet *set, gpointer user_data)
 {
@@ -207,7 +215,8 @@ service_updated (MojitoService *service, GHashTable *params, MojitoSet *set, gpo
     }
 
     if (set) {
-      /* TODO: remove all items from this service */
+      /* Remove all existing items from this service */
+      mojito_set_foreach_remove (priv->all_items, remove_service, service);
       mojito_set_add_from (priv->all_items, set);
       mojito_set_unref (set);
     }
@@ -241,8 +250,6 @@ start_refresh (MojitoView *view)
   MojitoViewPrivate *priv = view->priv;
   GList *l;
 
-  mojito_set_empty (priv->all_items);
-
   for (l = priv->services; l; l = l->next) {
     ServiceParamData *data = l->data;
     g_debug ("Updating %s", mojito_service_get_name (data->service));
@@ -257,8 +264,6 @@ load_cache (MojitoView *view)
 {
   MojitoViewPrivate *priv = view->priv;
   GList *l;
-
-  mojito_set_empty (priv->all_items);
 
   for (l = priv->services; l; l = l->next) {
     ServiceParamData *data = l->data;
