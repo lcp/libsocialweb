@@ -172,7 +172,7 @@ open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMetho
     name = tokens[0];
     params = make_param_hash (tokens[1]);
 
-    g_debug ("%s: service name %s", __FUNCTION__, name);
+    g_message ("%s: service name %s", __FUNCTION__, name);
 
     service = get_service (core, name, params);
 
@@ -301,7 +301,7 @@ populate_services (MojitoCore *core)
                                            path,
                                            (GObject*)proxy);
       g_free (path);
-      g_debug (G_STRLOC ": Imported module: %s", service_name);
+      g_message (G_STRLOC ": Imported module: %s", service_name);
     }
 
     g_module_make_resident (service_module);

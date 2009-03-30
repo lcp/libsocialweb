@@ -97,7 +97,7 @@ mojito_web_download_image (const char *url)
       /* TODO: GError */
       g_file_set_contents (filename, msg->response_body->data, msg->response_body->length, NULL);
     } else {
-      g_debug ("Cannot download %s: %s", url, msg->reason_phrase);
+      g_message ("Cannot download %s: %s", url, msg->reason_phrase);
       g_free (filename);
       filename = NULL;
     }

@@ -25,15 +25,15 @@ client_view_item_added_cb (MojitoClientView *view,
 {
   GList *l;
 
-  g_debug ("New item: service = %s uuid = %s",
+  g_print ("New item: service = %s uuid = %s\n",
            item->service,
            item->uuid);
 
-  g_debug ("Current list looks like:");
+  g_print ("Current list looks like:\n");
 
   for (l = mojito_client_view_get_sorted_items (view); l; l = l->next)
   {
-    g_debug ("%s %s", 
+    g_print ("%s %s\n",
              ((MojitoItem *)l->data)->service,
              ((MojitoItem *)l->data)->uuid);
   }
@@ -57,7 +57,7 @@ client_get_services_cb (MojitoClient *client,
 
   for (l = services; l; l = l->next)
   {
-    g_debug ("Told about service: %s", (char*)l->data);
+    g_print ("Told about service: %s\n", (char*)l->data);
   }
 
   mojito_client_open_view (client, (GList*)services, 10, client_open_view_cb, NULL);

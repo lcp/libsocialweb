@@ -119,7 +119,7 @@ status_received_cb (TwitterClient *client,
   MojitoItem *item;
 
   if (error) {
-    g_debug ("Cannot update Twitter: %s", error->message);
+    g_message ("Cannot update Twitter: %s", error->message);
     return;
   }
 

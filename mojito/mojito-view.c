@@ -199,10 +199,10 @@ service_updated (MojitoService *service, GHashTable *params, MojitoSet *set, gpo
   MojitoView *view = MOJITO_VIEW (user_data);
   MojitoViewPrivate *priv = view->priv;
 
-  g_debug ("Updated %s", mojito_service_get_name (service));
+  g_message ("Updated %s", mojito_service_get_name (service));
 
   if (set == NULL) {
-    g_debug ("Service returned NULL (not empty set). Not caching this.");
+    g_message ("Service returned NULL (not empty set). Not caching this.");
   } else {
     mojito_cache_save (service, params, set);
   }
@@ -210,7 +210,7 @@ service_updated (MojitoService *service, GHashTable *params, MojitoSet *set, gpo
   if (priv->running) {
 
     if (!set) {
-      g_debug ("Service returned NULL. Using cached material.");
+      g_message ("Service returned NULL. Using cached material.");
       set = mojito_cache_load (service, params);
     }
 
@@ -252,7 +252,7 @@ start_refresh (MojitoView *view)
 
   for (l = priv->services; l; l = l->next) {
     ServiceParamData *data = l->data;
-    g_debug ("Updating %s", mojito_service_get_name (data->service));
+    g_message ("Updating %s", mojito_service_get_name (data->service));
     mojito_service_refresh (data->service, data->params);
   }
 
@@ -267,7 +267,7 @@ load_cache (MojitoView *view)
 
   for (l = priv->services; l; l = l->next) {
     ServiceParamData *data = l->data;
-    g_debug ("Loading cache for %s", mojito_service_get_name (data->service));
+    g_message ("Loading cache for %s", mojito_service_get_name (data->service));
     service_updated (data->service, data->params, mojito_cache_load (data->service, data->params), view);
   }
 }
@@ -294,14 +294,14 @@ online_notify (gboolean online, gpointer user_data)
   MojitoView *view = user_data;
 
   if (online) {
-    g_debug ("Detected online");
+    g_message ("Detected online");
     install_refresh_timeout (view);
     if (view->priv->running) {
       load_cache (view);
       start_refresh (view);
     }
   } else {
-    g_debug ("Detected offline");
+    g_message ("Detected offline");
     remove_refresh_timeout (view);
   }
 }
