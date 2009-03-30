@@ -45,12 +45,7 @@ struct _MojitoServiceTwitterPrivate {
 
   gulong self_handle;
 
-  /* This is grim and need to be replaced with a hash of handle to data
-     structures. */
   MojitoSet *set;
-  GHashTable *params;
-  MojitoServiceDataFunc callback;
-  gpointer user_data;
 };
 
 static void
@@ -125,13 +120,6 @@ status_received_cb (TwitterClient *client,
 
   if (error) {
     g_debug ("Cannot update Twitter: %s", error->message);
-    if (service->priv->callback) {
-      service->priv->callback ((MojitoService*)service,
-                               service->priv->params,
-                               NULL,
-                               service->priv->user_data);
-      service->priv->callback = NULL;
-    }
     return;
   }
 
@@ -144,15 +132,10 @@ static void
 timeline_received_cb (TwitterClient *client,
                       gpointer       user_data)
 {
-  MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (user_data);
+  MojitoService *service = MOJITO_SERVICE (user_data);
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
 
-  if (service->priv->callback) {
-    service->priv->callback ((MojitoService*)service,
-                             service->priv->params,
-                             mojito_set_ref (service->priv->set),
-                             service->priv->user_data);
-    service->priv->callback = NULL;
-  }
+  mojito_service_emit_refreshed (service, priv->set);
 }
 
 static void
@@ -179,20 +162,14 @@ user_received_cb (TwitterClient *client,
 }
 
 static void
-update (MojitoService *service, GHashTable *params, MojitoServiceDataFunc callback, gpointer user_data)
+refresh (MojitoService *service, GHashTable *params)
 {
   MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
   MojitoServiceTwitterPrivate *priv = twitter->priv;
 
-  if (!priv->user_set || !priv->password_set) {
-    callback (service, params, NULL, user_data);
+  if (!priv->user_set || !priv->password_set)
     return;
-  }
 
-  /* TODO grim */
-  twitter->priv->params = params;
-  twitter->priv->callback = callback;
-  twitter->priv->user_data = user_data;
   mojito_set_empty (twitter->priv->set);
 
   if (g_hash_table_lookup (params, "own")) {
@@ -284,7 +261,7 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
   object_class->finalize = mojito_service_twitter_finalize;
 
   service_class->get_name = mojito_service_twitter_get_name;
-  service_class->update = update;
+  service_class->refresh = refresh;
   service_class->get_capabilities = get_capabilities;
   service_class->update_status = update_status;
   service_class->get_persona_icon = get_persona_icon;
