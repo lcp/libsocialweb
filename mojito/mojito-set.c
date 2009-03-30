@@ -230,6 +230,36 @@ mojito_set_foreach (MojitoSet *set, GFunc func, gpointer user_data)
   }
 }
 
+typedef struct {
+  MojitoSetForeachRemoveFunc func;
+  gpointer user_data;
+} RemoveData;
+
+static gboolean
+foreach_remove (gpointer key, gpointer value, gpointer user_data)
+{
+  RemoveData *data = user_data;
+  return data->func (key, data->user_data);
+}
+
+guint
+mojito_set_foreach_remove (MojitoSet *set,
+                           MojitoSetForeachRemoveFunc func,
+                           gpointer user_data)
+{
+  RemoveData data;
+
+  g_return_val_if_fail (set, 0);
+  g_return_val_if_fail (func, 0);
+
+  data.func = func;
+  data.user_data = user_data;
+
+  return g_hash_table_foreach_remove
+    (set->hash, foreach_remove, &data);
+}
+
+
 int
 mojito_set_size (MojitoSet *set)
 {
