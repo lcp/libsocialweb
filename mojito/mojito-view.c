@@ -409,6 +409,16 @@ mojito_view_dispose (GObject *object)
   MojitoView *view = MOJITO_VIEW (object);
   MojitoViewPrivate *priv = view->priv;
 
+  if (priv->all_items) {
+    mojito_set_unref (priv->all_items);
+    priv->all_items = NULL;
+  }
+
+  if (priv->current) {
+    mojito_set_unref (priv->current);
+    priv->current = NULL;
+  }
+
   while (priv->services) {
     ServiceParamData *data = priv->services->data;
     g_object_unref (data->service);
