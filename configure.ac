@@ -31,7 +31,6 @@ PKG_CHECK_MODULES(GCONF, gconf-2.0)
 PKG_CHECK_MODULES(SOUP, libsoup-2.4 gthread-2.0)
 PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1)
 PKG_CHECK_MODULES(REST, rest)
-PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0 >= 0.9.6)
 
 AC_MSG_CHECKING([how to detect we are online])
 AC_ARG_WITH([online],
@@ -102,6 +101,20 @@ AS_IF(
         AC_MSG_RESULT([not enabling Lastfm support])
 )
 AM_CONDITIONAL([WITH_LASTFM], [test x$enable_lastfm_key != xno])
+
+
+AC_MSG_CHECKING([whether to build the Twitter service])
+AC_ARG_WITH([twitter],[AS_HELP_STRING([--without-twitter], [disable the Twitter service])],
+            [], [with_twitter=yes])
+AS_IF(
+        [test "$with_twitter" = yes],
+        [
+        AC_MSG_RESULT([yes])
+        PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0 >= 0.9.6)
+        ],
+        AC_MSG_RESULT([no])
+)
+AM_CONDITIONAL([WITH_TWITTER], [test x$with_twitter = xyes])
 
 
 servicesdir='${libdir}'/mojito/services
