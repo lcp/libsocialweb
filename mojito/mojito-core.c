@@ -142,7 +142,7 @@ get_service (MojitoCore *core, const char *name, GHashTable *params)
     return NULL;
 
   g_debug ("created new service for %s", key);
-  service = g_object_new (type, NULL);
+  service = g_object_new (type, "params", params, NULL);
   g_hash_table_insert (priv->active_services, key, service);
   /* TODO: weak reference to remove from hash */
   return service;
@@ -184,6 +184,8 @@ open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMetho
 
       g_strfreev (tokens);
     }
+
+    g_hash_table_unref (params);
   }
 
   client_monitor_add (dbus_g_method_get_sender (context), (GObject*)view);

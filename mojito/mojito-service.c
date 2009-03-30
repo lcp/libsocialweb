@@ -18,7 +18,6 @@
 
 #include "mojito-service.h"
 #include "mojito-marshals.h"
-#include "mojito-core.h"
 #include "mojito-item.h"
 
 G_DEFINE_ABSTRACT_TYPE (MojitoService, mojito_service, G_TYPE_OBJECT)
@@ -29,12 +28,12 @@ G_DEFINE_ABSTRACT_TYPE (MojitoService, mojito_service, G_TYPE_OBJECT)
 typedef struct _MojitoServicePrivate MojitoServicePrivate;
 
 struct _MojitoServicePrivate {
-  MojitoCore *core;
+  GHashTable *params;
 };
 
 enum {
   PROP_0,
-  PROP_CORE
+  PROP_PARAMS
 };
 
 enum {
@@ -53,9 +52,11 @@ mojito_service_set_property (GObject      *object,
   MojitoServicePrivate *priv = GET_PRIVATE (object);
 
   switch (property_id) {
-    case PROP_CORE:
-      priv->core = g_value_dup_object (value);
-      break;
+  case PROP_PARAMS:
+    if (priv->params)
+      g_hash_table_unref (priv->params);
+    priv->params = g_value_dup_boxed (value);
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -70,9 +71,9 @@ mojito_service_get_property (GObject    *object,
   MojitoServicePrivate *priv = GET_PRIVATE (object);
 
   switch (property_id) {
-    case PROP_CORE:
-      g_value_set_object (value, priv->core);
-      break;
+  case PROP_PARAMS:
+    g_value_set_boxed (value, priv->params);
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -83,10 +84,9 @@ mojito_service_dispose (GObject *object)
 {
   MojitoServicePrivate *priv = GET_PRIVATE (object);
 
-  if (priv->core)
-  {
-    g_object_unref (priv->core);
-    priv->core = NULL;
+  if (priv->params) {
+    g_hash_table_unref (priv->params);
+    priv->params = NULL;
   }
 
   G_OBJECT_CLASS (mojito_service_parent_class)->dispose (object);
@@ -104,12 +104,12 @@ mojito_service_class_init (MojitoServiceClass *klass)
   object_class->set_property = mojito_service_set_property;
   object_class->dispose = mojito_service_dispose;
 
-  pspec = g_param_spec_object ("core",
-                               "core",
-                               "The daemon's warp core",
-                               MOJITO_TYPE_CORE,
-                               G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
-  g_object_class_install_property (object_class, PROP_CORE, pspec);
+  /* TODO: make services define gobject properties for each property they support */
+  pspec = g_param_spec_boxed ("params", "params",
+                               "The service parameters",
+                              G_TYPE_HASH_TABLE,
+                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_PARAMS, pspec);
 
   signals[SIGNAL_REFRESHED] =
     g_signal_new ("refreshed",
