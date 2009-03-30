@@ -294,4 +294,46 @@ test_set_is_empty (void)
   g_object_unref (obj);
   mojito_set_unref (set);
 }
+
+static gboolean
+remove_this (GObject *object, gpointer user_data)
+{
+  return object == user_data;
+}
+
+void
+test_set_foreach_remove (void)
+{
+  MojitoSet *set;
+  DummyObject *obj1, *obj2;
+  guint count;
+
+  set = mojito_set_new ();
+  obj1 = dummy_object_new ();
+  obj2 = dummy_object_new ();
+
+  mojito_set_add (set, G_OBJECT (obj1));
+  mojito_set_add (set, G_OBJECT (obj2));
+
+  count = mojito_set_foreach_remove (set, remove_this, NULL);
+  g_assert_cmpint (count, ==, 0);
+  g_assert_cmpint (mojito_set_size (set), ==, 2);
+
+  count = mojito_set_foreach_remove (set, remove_this, obj1);
+  g_assert_cmpint (count, ==, 1);
+  g_assert_cmpint (mojito_set_size (set), ==, 1);
+
+  count = mojito_set_foreach_remove (set, remove_this, obj1);
+  g_assert_cmpint (count, ==, 0);
+  g_assert_cmpint (mojito_set_size (set), ==, 1);
+
+  count = mojito_set_foreach_remove (set, remove_this, obj2);
+  g_assert_cmpint (count, ==, 1);
+  g_assert_cmpint (mojito_set_size (set), ==, 0);
+
+  g_object_unref (obj1);
+  g_object_unref (obj2);
+  mojito_set_unref (set);
+}
+
 #endif
