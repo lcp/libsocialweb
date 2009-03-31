@@ -140,11 +140,14 @@ set_keyfile_from_item (gpointer data, gpointer user_data)
  * Cache the items in @set to disk.
  */
 void
-mojito_cache_save (MojitoService *service, GHashTable *params, MojitoSet *set)
+mojito_cache_save (MojitoService *service, MojitoSet *set)
 {
   char *filename;
+  GHashTable *params = NULL;
 
   g_return_if_fail (MOJITO_IS_SERVICE (service));
+
+  g_object_get (service, "params", &params, NULL);
 
   filename = get_cache_filename (service, params);
 
@@ -167,6 +170,7 @@ mojito_cache_save (MojitoService *service, GHashTable *params, MojitoSet *set)
   }
 
   g_free (filename);
+  g_hash_table_unref (params);
 }
 
 /*
@@ -214,15 +218,18 @@ load_item_from_keyfile (MojitoService *service, GKeyFile *keyfile, const char *g
  * cache, or %NULL.
  */
 MojitoSet *
-mojito_cache_load (MojitoService *service, GHashTable *params)
+mojito_cache_load (MojitoService *service)
 {
   char *filename;
+  GHashTable *params = NULL;
   GKeyFile *keys;
   MojitoSet *set = NULL;
 
   g_return_val_if_fail (MOJITO_IS_SERVICE (service), NULL);
 
   keys = g_key_file_new ();
+
+  g_object_get (service, "params", &params, NULL);
 
   filename = get_cache_filename (service, params);
 
@@ -243,6 +250,7 @@ mojito_cache_load (MojitoService *service, GHashTable *params)
   }
 
   g_free (filename);
+  g_hash_table_unref (params);
 
   return set;
 }

@@ -54,7 +54,7 @@ struct _MojitoServiceClass {
   const char *(*get_name) (MojitoService *service);
   /* fires ::refreshed (MojitoSet *set, GHashTable *params) signal */
   /* TODO: remove params */
-  void (*refresh) (MojitoService *service, GHashTable *params);
+  void (*refresh) (MojitoService *service);
   MojitoItem *(*get_last_item) (MojitoService *service);
   gchar *(*get_persona_icon) (MojitoService *service);
   gboolean (*update_status) (MojitoService *service, const gchar *status_message);
@@ -71,7 +71,7 @@ GType mojito_service_get_type (void);
 
 const char *mojito_service_get_name (MojitoService *service);
 
-void mojito_service_refresh (MojitoService *service, GHashTable *params);
+void mojito_service_refresh (MojitoService *service);
 
 void mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set);
 

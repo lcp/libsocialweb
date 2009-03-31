@@ -100,7 +100,7 @@ mojito_service_proxy_get_name (MojitoService *service)
 }
 
 static void
-mojito_service_proxy_refresh (MojitoService *service, GHashTable *params)
+mojito_service_proxy_refresh (MojitoService *service)
 {
   MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
   MojitoServiceClass *class;
@@ -110,7 +110,7 @@ mojito_service_proxy_refresh (MojitoService *service, GHashTable *params)
 
   class = MOJITO_SERVICE_GET_CLASS (priv->instance);
 
-  class->refresh (priv->instance, params);
+  class->refresh (priv->instance);
 }
 
 static void

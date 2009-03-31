@@ -193,7 +193,7 @@ flickr_callback (RestProxyCall *call,
 }
 
 static void
-refresh (MojitoService *service, GHashTable *params)
+refresh (MojitoService *service)
 {
   MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
   RestProxyCall *call;

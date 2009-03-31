@@ -39,7 +39,7 @@ get_name (MojitoService *service)
 }
 
 static void
-refresh (MojitoService *service, GHashTable *params)
+refresh (MojitoService *service)
 {
   MojitoSet *set;
   MojitoItem *item;

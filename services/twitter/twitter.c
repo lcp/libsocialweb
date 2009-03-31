@@ -163,21 +163,27 @@ user_received_cb (TwitterClient *client,
 }
 
 static void
-refresh (MojitoService *service, GHashTable *params)
+refresh (MojitoService *service)
 {
   MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
   MojitoServiceTwitterPrivate *priv = twitter->priv;
+  GHashTable *params = NULL;
 
   if (!priv->user_set || !priv->password_set)
     return;
 
   mojito_set_empty (priv->set);
 
-  if (g_hash_table_lookup (params, "own")) {
+  g_object_get (service, "params", &params, NULL);
+
+  if (params && g_hash_table_lookup (params, "own")) {
     twitter_client_get_user_timeline (priv->client, priv->username, 0, 0);
   } else {
     twitter_client_get_friends_timeline (priv->client, NULL, 0);
   }
+
+  if (params)
+    g_hash_table_unref (params);
 }
 
 static const char *
