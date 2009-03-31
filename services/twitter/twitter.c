@@ -109,6 +109,30 @@ make_item_from_status (MojitoService *service, TwitterStatus *status)
 }
 
 static void
+refresh (MojitoService *service)
+{
+  MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
+  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  GHashTable *params = NULL;
+
+  if (!priv->user_set || !priv->password_set)
+    return;
+
+  mojito_set_empty (priv->set);
+
+  g_object_get (service, "params", &params, NULL);
+
+  if (params && g_hash_table_lookup (params, "own")) {
+    twitter_client_get_user_timeline (priv->client, priv->username, 0, 0);
+  } else {
+    twitter_client_get_friends_timeline (priv->client, NULL, 0);
+  }
+
+  if (params)
+    g_hash_table_unref (params);
+}
+
+static void
 status_received_cb (TwitterClient *client,
                     gulong         handle,
                     TwitterStatus *status,
@@ -158,32 +182,21 @@ user_received_cb (TwitterClient *client,
   /* Check that this is us. Not somebody else */
   if (priv->self_handle == handle ||
       g_str_equal (twitter_user_get_screen_name (user), priv->username)) {
+    gboolean need_refresh = FALSE;
+
+    if (priv->user) {
+      /* TODO: leaking the TwitterUser (causes dispose cycle in twitter-glib) */
+#if 0
+      g_object_unref (priv->user);
+#endif
+      need_refresh = TRUE;
+    }
+
     priv->user = g_object_ref (user);
+
+    if (need_refresh)
+      refresh ((MojitoService*)service);
   }
-}
-
-static void
-refresh (MojitoService *service)
-{
-  MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
-  MojitoServiceTwitterPrivate *priv = twitter->priv;
-  GHashTable *params = NULL;
-
-  if (!priv->user_set || !priv->password_set)
-    return;
-
-  mojito_set_empty (priv->set);
-
-  g_object_get (service, "params", &params, NULL);
-
-  if (params && g_hash_table_lookup (params, "own")) {
-    twitter_client_get_user_timeline (priv->client, priv->username, 0, 0);
-  } else {
-    twitter_client_get_friends_timeline (priv->client, NULL, 0);
-  }
-
-  if (params)
-    g_hash_table_unref (params);
 }
 
 static const char *
@@ -202,10 +215,13 @@ mojito_service_twitter_dispose (GObject *object)
     priv->gconf = NULL;
   }
 
+  /* TODO: leaking the TwitterUser (causes dispose cycle in twitter-glib) */
+#if 0
   if (priv->user) {
     g_object_unref (priv->user);
     priv->user = NULL;
   }
+#endif
 
   if (priv->client) {
     g_object_unref (priv->client);
