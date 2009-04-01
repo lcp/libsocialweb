@@ -30,3 +30,5 @@ src/mojito.service
 src/mojito-core
 tests/test-online
 tests/test-client-online
+tests/test-download
+tests/test-download-async
