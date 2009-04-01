@@ -41,6 +41,19 @@ mojito_web_make_sync_session (void)
   return session;
 }
 
+SoupSession *
+mojito_web_make_async_session (void)
+{
+  SoupSession *session;
+
+  session = soup_session_async_new ();
+#if WITH_GNOME
+  soup_session_add_feature_by_type (session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
+#endif
+
+  return session;
+}
+
 char *
 mojito_web_download_image (const char *url)
 {

@@ -21,4 +21,6 @@
 
 SoupSession * mojito_web_make_sync_session (void);
 
+SoupSession * mojito_web_make_async_session (void);
+
 char * mojito_web_download_image (const char *url);
