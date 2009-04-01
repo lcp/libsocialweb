@@ -45,6 +45,9 @@ struct _MojitoServiceTwitterPrivate {
 
   gulong self_handle;
 
+  /* GConf notify handles */
+  guint username_notify_id, password_notify_id;
+
   MojitoSet *set;
 };
 
@@ -211,6 +214,9 @@ mojito_service_twitter_dispose (GObject *object)
   MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
 
   if (priv->gconf) {
+    gconf_client_notify_remove (priv->gconf, priv->username_notify_id);
+    gconf_client_notify_remove (priv->gconf, priv->password_notify_id);
+
     g_object_unref (priv->gconf);
     priv->gconf = NULL;
   }
@@ -237,6 +243,7 @@ mojito_service_twitter_finalize (GObject *object)
   MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
 
   g_free (priv->username);
+
   G_OBJECT_CLASS (mojito_service_twitter_parent_class)->finalize (object);
 }
 
@@ -302,10 +309,10 @@ mojito_service_twitter_init (MojitoServiceTwitter *self)
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_DIR,
                         GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  gconf_client_notify_add (priv->gconf, KEY_USER,
-                           user_changed_cb, self, NULL, NULL);
-  gconf_client_notify_add (priv->gconf, KEY_PASSWORD,
-                           user_changed_cb, self, NULL, NULL);
+  priv->username_notify_id = gconf_client_notify_add
+    (priv->gconf, KEY_USER, user_changed_cb, self, NULL, NULL);
+  priv->password_notify_id = gconf_client_notify_add
+    (priv->gconf, KEY_PASSWORD, user_changed_cb, self, NULL, NULL);
 
   priv->client = g_object_new (TWITTER_TYPE_CLIENT,
                                "user-agent", "Mojito/" VERSION,
