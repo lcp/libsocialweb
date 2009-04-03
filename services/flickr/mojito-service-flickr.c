@@ -102,34 +102,34 @@ construct_buddy_icon_url (RestXmlNode *node)
                           rest_xml_node_get_attr (node, "owner"));
 }
 
-/* TODO: this should be async blaa blaa */
-static char *
-get_buddy_icon (RestXmlNode *node)
+typedef struct {
+  MojitoService *service;
+  MojitoSet *set;
+  GHashTable *pending;
+  gboolean running;
+} RefreshData;
+
+typedef struct {
+  RefreshData *data;
+  MojitoItem *item;
+  const char *key;
+} ImageData;
+
+static void
+image_callback (const char *url, char *filename, gpointer user_data)
 {
-  char *url, *filename;
+  ImageData *idata = user_data;
+  RefreshData *data = idata->data;
 
-  g_assert (node);
+  mojito_item_take (idata->item, idata->key, filename);
+  g_slice_free (ImageData, idata);
 
-  url = construct_buddy_icon_url (node);
-  filename = mojito_web_download_image (url);
-  g_free (url);
+  g_hash_table_remove (data->pending, url);
 
-  return filename;
-}
-
-/* TODO: this should be async blaa blaa */
-static char *
-get_thumbnail (RestXmlNode *node)
-{
-  char *url, *filename;
-
-  g_assert (node);
-
-  url = construct_photo_url (node);
-  filename = mojito_web_download_image (url);
-  g_free (url);
-
-  return filename;
+  if (data->running && g_hash_table_size (data->pending) == 0) {
+    mojito_service_emit_refreshed (data->service, data->set);
+    g_slice_free (RefreshData, data);
+  }
 }
 
 static void
@@ -139,6 +139,7 @@ flickr_callback (RestProxyCall *call,
                  gpointer user_data)
 {
   MojitoServiceFlickr *service = MOJITO_SERVICE_FLICKR (weak_object);
+  RefreshData *data = user_data;
   RestXmlParser *parser;
   RestXmlNode *root, *node;
   MojitoSet *set;
@@ -158,12 +159,14 @@ flickr_callback (RestProxyCall *call,
   /* TODO: check for failure */
 
   set = mojito_item_set_new ();
+  data->set = set;
 
   node = rest_xml_node_find (root, "photos");
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
     char *url;
     MojitoItem *item;
     gint64 date;
+    ImageData *idata;
 
     item = mojito_item_new ();
     mojito_item_set_service (item, (MojitoService*)service);
@@ -179,8 +182,23 @@ flickr_callback (RestProxyCall *call,
     date = atoi (rest_xml_node_get_attr (node, "dateupload"));
     mojito_item_take (item, "date", mojito_time_t_to_string (date));
 
-    mojito_item_take (item, "authoricon", get_buddy_icon (node));
-    mojito_item_take (item, "thumbnail", get_thumbnail (node));
+    idata = g_slice_new0 (ImageData);
+    idata->data = data;
+    idata->key = "thumbnail";
+    idata->item = item;
+    url = construct_photo_url (node);
+
+    g_hash_table_insert (data->pending, url, GINT_TO_POINTER (1));
+    mojito_web_download_image_async (url, image_callback, idata);
+
+    idata = g_slice_new0 (ImageData);
+    idata->data = data;
+    idata->key = "authoricon";
+    idata->item = item;
+    url = construct_buddy_icon_url (node);
+
+    g_hash_table_insert (data->pending, url, GINT_TO_POINTER (1));
+    mojito_web_download_image_async (url, image_callback, idata);
 
     mojito_set_add (set, G_OBJECT (item));
     g_object_unref (item);
@@ -189,7 +207,12 @@ flickr_callback (RestProxyCall *call,
   rest_xml_node_unref (root);
   g_object_unref (parser);
 
-  mojito_service_emit_refreshed ((MojitoService*)service, set);
+  if (g_hash_table_size (data->pending) == 0) {
+    mojito_service_emit_refreshed (data->service, data->set);
+    g_slice_free (RefreshData, data);
+  } else {
+    data->running = TRUE;
+  }
 }
 
 static void
@@ -197,6 +220,7 @@ refresh (MojitoService *service)
 {
   MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
   RestProxyCall *call;
+  RefreshData *data;
 
   if (flickr->priv->user_id == NULL) {
     return;
@@ -209,8 +233,14 @@ refresh (MojitoService *service)
                               "user_id", flickr->priv->user_id,
                               "extras", "date_upload,icon_server",
                               NULL);
+
+  data = g_slice_new0 (RefreshData);
+  data->service = service;
+  data->pending = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  data->running = FALSE;
+
   /* TODO: GError */
-  rest_proxy_call_async (call, flickr_callback, (GObject*)service, NULL, NULL);
+  rest_proxy_call_async (call, flickr_callback, (GObject*)service, data, NULL);
 }
 
 static const char *
