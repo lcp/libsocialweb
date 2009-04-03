@@ -111,7 +111,6 @@ typedef struct {
 
 typedef struct {
   RefreshData *data;
-  MojitoItem *item;
   const char *key;
 } ImageData;
 
@@ -120,11 +119,16 @@ image_callback (const char *url, char *filename, gpointer user_data)
 {
   ImageData *idata = user_data;
   RefreshData *data = idata->data;
+  MojitoItem *item;
 
-  mojito_item_take (idata->item, idata->key, filename);
-  g_slice_free (ImageData, idata);
-
+  item = g_hash_table_lookup (data->pending, url);
   g_hash_table_remove (data->pending, url);
+
+  if (item == NULL)
+    return;
+
+  mojito_item_take (item, idata->key, filename);
+  g_slice_free (ImageData, idata);
 
   if (data->running && g_hash_table_size (data->pending) == 0) {
     mojito_service_emit_refreshed (data->service, data->set);
@@ -185,19 +189,17 @@ flickr_callback (RestProxyCall *call,
     idata = g_slice_new0 (ImageData);
     idata->data = data;
     idata->key = "thumbnail";
-    idata->item = item;
     url = construct_photo_url (node);
 
-    g_hash_table_insert (data->pending, url, GINT_TO_POINTER (1));
+    g_hash_table_insert (data->pending, url, item);
     mojito_web_download_image_async (url, image_callback, idata);
 
     idata = g_slice_new0 (ImageData);
     idata->data = data;
     idata->key = "authoricon";
-    idata->item = item;
     url = construct_buddy_icon_url (node);
 
-    g_hash_table_insert (data->pending, url, GINT_TO_POINTER (1));
+    g_hash_table_insert (data->pending, url, item);
     mojito_web_download_image_async (url, image_callback, idata);
 
     mojito_set_add (set, G_OBJECT (item));
