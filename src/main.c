@@ -58,6 +58,7 @@ main (int argc, char **argv)
 
   g_thread_init (NULL);
   g_type_init ();
+  g_set_application_name ("mojito");
 
   if (!request_name ())
     return 0;
