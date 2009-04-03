@@ -153,6 +153,7 @@ mojito_web_download_image_async (const char *url, ImageDownloadCallback callback
   g_free (path);
 
   if (g_file_test (filename, G_FILE_TEST_EXISTS)) {
+    /* TODO: should get timestamp and make a GET call, which hopefully returns 304 */
     callback (url, filename, user_data);
   } else {
     SoupMessage *msg;
