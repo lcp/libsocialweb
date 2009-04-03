@@ -24,6 +24,8 @@
 
 #include "mojito-web.h"
 
+#define HTTP_LOGGING 0
+
 /*
  * Helper to make a known sync SoupSession with environment support.
  * TODO: should this return a ref on a singleton session?
@@ -38,6 +40,10 @@ mojito_web_make_sync_session (void)
   soup_session_add_feature_by_type (session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
 #endif
 
+#if HTTP_LOGGING
+  soup_session_add_feature (session, soup_logger_new (SOUP_LOGGER_LOG_MINIMAL, 0));
+#endif
+
   return session;
 }
 
@@ -49,6 +55,10 @@ mojito_web_make_async_session (void)
   session = soup_session_async_new ();
 #if WITH_GNOME
   soup_session_add_feature_by_type (session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
+#endif
+
+#if HTTP_LOGGING
+  soup_session_add_feature (session, soup_logger_new (SOUP_LOGGER_LOG_MINIMAL, 0));
 #endif
 
   return session;
