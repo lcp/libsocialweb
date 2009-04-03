@@ -191,6 +191,8 @@ flickr_callback (RestProxyCall *call,
     idata->key = "thumbnail";
     url = construct_photo_url (node);
 
+    /* TODO: url -> (list of items), because we can get many items with the same
+       url (i.e. buddy icons) */
     g_hash_table_insert (data->pending, url, item);
     mojito_web_download_image_async (url, image_callback, idata);
 
@@ -199,6 +201,8 @@ flickr_callback (RestProxyCall *call,
     idata->key = "authoricon";
     url = construct_buddy_icon_url (node);
 
+    /* TODO: url -> (list of items), because we can get many items with the same
+       url (i.e. buddy icons) */
     g_hash_table_insert (data->pending, url, item);
     mojito_web_download_image_async (url, image_callback, idata);
 
