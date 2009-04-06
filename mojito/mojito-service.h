@@ -52,8 +52,7 @@ typedef struct _MojitoServiceClass MojitoServiceClass;
 struct _MojitoServiceClass {
   GObjectClass parent_class;
   const char *(*get_name) (MojitoService *service);
-  /* fires ::refreshed (MojitoSet *set, GHashTable *params) signal */
-  /* TODO: remove params */
+  /* fires ::refreshed (MojitoSet *set) signal */
   void (*refresh) (MojitoService *service);
   MojitoItem *(*get_last_item) (MojitoService *service);
   gchar *(*get_persona_icon) (MojitoService *service);
