@@ -133,6 +133,7 @@ lastfm_call (RestProxyCall *call)
   return node;
 }
 
+/* TODO: this is one huge main loop blockage and should be rewritten */
 static void
 refresh (MojitoService *service)
 {
