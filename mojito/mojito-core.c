@@ -150,7 +150,6 @@ get_service (MojitoCore *core, const char *name, GHashTable *params)
 
   service = g_hash_table_lookup (priv->active_services, key);
   if (service) {
-    g_debug ("found existing service for %s", key);
     g_free (key);
     return g_object_ref (service);
   }
@@ -159,7 +158,6 @@ get_service (MojitoCore *core, const char *name, GHashTable *params)
   if (!type)
     return NULL;
 
-  g_debug ("created new service for %s", key);
   service = g_object_new (type, "params", params, NULL);
   g_hash_table_insert (priv->active_services, key, service);
 
