@@ -125,6 +125,7 @@ refresh_done (MojitoServiceFlickr *service)
 {
   mojito_service_emit_refreshed ((MojitoService*)service, service->priv->set);
   service->priv->refreshing = FALSE;
+  mojito_set_empty (service->priv->set);
   /* TODO: more cleanup? */
 }
 
@@ -180,7 +181,6 @@ flickr_callback (RestProxyCall *call,
   MojitoServiceFlickr *service = MOJITO_SERVICE_FLICKR (weak_object);
   RestXmlParser *parser;
   RestXmlNode *root, *node;
-  MojitoSet *set;
 
   if (error) {
     g_warning ("Cannot get Flickr photos: %s", error->message);
@@ -195,9 +195,6 @@ flickr_callback (RestProxyCall *call,
 
   node = rest_xml_node_find (root, "rsp");
   /* TODO: check for failure */
-
-  set = mojito_item_set_new ();
-  service->priv->set = set;
 
   node = rest_xml_node_find (root, "photos");
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
@@ -222,7 +219,7 @@ flickr_callback (RestProxyCall *call,
     fetch_image (service, item, "thumbnail", construct_photo_url (node));
     fetch_image (service, item, "authoricon", construct_buddy_icon_url (node));
 
-    mojito_set_add (set, G_OBJECT (item));
+    mojito_set_add (service->priv->set, G_OBJECT (item));
     g_object_unref (item);
   }
 
@@ -339,5 +336,6 @@ mojito_service_flickr_init (MojitoServiceFlickr *self)
   priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
 
   priv->pending = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  priv->set = mojito_item_set_new ();
   priv->refreshing = FALSE;
 }
