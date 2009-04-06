@@ -105,6 +105,7 @@ construct_buddy_icon_url (RestXmlNode *node)
 typedef struct {
   MojitoService *service;
   MojitoSet *set;
+  /* Set of URL to list of MojitoItems waiting for that URL */
   GHashTable *pending;
   gboolean running;
 } RefreshData;
@@ -126,15 +127,19 @@ image_callback (const char *url, char *filename, gpointer user_data)
 {
   ImageData *idata = user_data;
   RefreshData *data = idata->data;
-  MojitoItem *item;
+  GList *items;
 
-  item = g_hash_table_lookup (data->pending, url);
+  items = g_hash_table_lookup (data->pending, url);
   g_hash_table_remove (data->pending, url);
 
-  if (item == NULL)
-    return;
+  while (items) {
+    MojitoItem *item = items->data;
 
-  mojito_item_take (item, idata->key, filename);
+    mojito_item_put (item, idata->key, filename);
+    items = g_list_delete_link (items, items);
+  }
+
+  g_free (filename);
   g_slice_free (ImageData, idata);
 
   if (data->running && g_hash_table_size (data->pending) == 0) {
@@ -146,14 +151,16 @@ static void
 fetch_image (MojitoItem *item, RefreshData *data, const char *key, char *url)
 {
   ImageData *idata;
+  GList *items;
 
   idata = g_slice_new0 (ImageData);
   idata->data = data;
   idata->key = key;
 
-  /* TODO: url -> (list of items), because we can get many items with the same
-     url (i.e. buddy icons) */
-  g_hash_table_insert (data->pending, url, item);
+  items = g_hash_table_lookup (data->pending, url);
+  items = g_list_prepend (items, item);
+  g_hash_table_insert (data->pending, url, items);
+
   mojito_web_download_image_async (url, image_callback, idata);
 }
 
