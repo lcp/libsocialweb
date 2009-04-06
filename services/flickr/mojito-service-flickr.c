@@ -115,6 +115,13 @@ typedef struct {
 } ImageData;
 
 static void
+refresh_done (RefreshData *data)
+{
+  mojito_service_emit_refreshed (data->service, data->set);
+  g_slice_free (RefreshData, data);
+}
+
+static void
 image_callback (const char *url, char *filename, gpointer user_data)
 {
   ImageData *idata = user_data;
@@ -131,9 +138,23 @@ image_callback (const char *url, char *filename, gpointer user_data)
   g_slice_free (ImageData, idata);
 
   if (data->running && g_hash_table_size (data->pending) == 0) {
-    mojito_service_emit_refreshed (data->service, data->set);
-    g_slice_free (RefreshData, data);
+    refresh_done (data);
   }
+}
+
+static void
+fetch_image (MojitoItem *item, RefreshData *data, const char *key, char *url)
+{
+  ImageData *idata;
+
+  idata = g_slice_new0 (ImageData);
+  idata->data = data;
+  idata->key = key;
+
+  /* TODO: url -> (list of items), because we can get many items with the same
+     url (i.e. buddy icons) */
+  g_hash_table_insert (data->pending, url, item);
+  mojito_web_download_image_async (url, image_callback, idata);
 }
 
 static void
@@ -170,7 +191,6 @@ flickr_callback (RestProxyCall *call,
     char *url;
     MojitoItem *item;
     gint64 date;
-    ImageData *idata;
 
     item = mojito_item_new ();
     mojito_item_set_service (item, (MojitoService*)service);
@@ -186,25 +206,8 @@ flickr_callback (RestProxyCall *call,
     date = atoi (rest_xml_node_get_attr (node, "dateupload"));
     mojito_item_take (item, "date", mojito_time_t_to_string (date));
 
-    idata = g_slice_new0 (ImageData);
-    idata->data = data;
-    idata->key = "thumbnail";
-    url = construct_photo_url (node);
-
-    /* TODO: url -> (list of items), because we can get many items with the same
-       url (i.e. buddy icons) */
-    g_hash_table_insert (data->pending, url, item);
-    mojito_web_download_image_async (url, image_callback, idata);
-
-    idata = g_slice_new0 (ImageData);
-    idata->data = data;
-    idata->key = "authoricon";
-    url = construct_buddy_icon_url (node);
-
-    /* TODO: url -> (list of items), because we can get many items with the same
-       url (i.e. buddy icons) */
-    g_hash_table_insert (data->pending, url, item);
-    mojito_web_download_image_async (url, image_callback, idata);
+    fetch_image (item, data, "thumbnail", construct_photo_url (node));
+    fetch_image (item, data, "authoricon", construct_buddy_icon_url (node));
 
     mojito_set_add (set, G_OBJECT (item));
     g_object_unref (item);
@@ -213,11 +216,10 @@ flickr_callback (RestProxyCall *call,
   rest_xml_node_unref (root);
   g_object_unref (parser);
 
-  if (g_hash_table_size (data->pending) == 0) {
-    mojito_service_emit_refreshed (data->service, data->set);
-    g_slice_free (RefreshData, data);
-  } else {
+  if (g_hash_table_size (data->pending)> 0) {
     data->running = TRUE;
+  } else {
+    refresh_done (data);
   }
 }
 
