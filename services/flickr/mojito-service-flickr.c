@@ -40,6 +40,11 @@ struct _MojitoServiceFlickrPrivate {
   GConfClient *gconf;
   RestProxy *proxy;
   char *user_id;
+
+  /* Used when running a refresh */
+  MojitoSet *set;
+  GHashTable *pending;
+  gboolean refreshing;
 };
 
 static gboolean
@@ -111,26 +116,28 @@ typedef struct {
 } RefreshData;
 
 typedef struct {
-  RefreshData *data;
+  MojitoServiceFlickr *service;
   const char *key;
 } ImageData;
 
 static void
-refresh_done (RefreshData *data)
+refresh_done (MojitoServiceFlickr *service)
 {
-  mojito_service_emit_refreshed (data->service, data->set);
-  g_slice_free (RefreshData, data);
+  mojito_service_emit_refreshed ((MojitoService*)service, service->priv->set);
+  service->priv->refreshing = FALSE;
+  /* TODO: more cleanup? */
 }
 
 static void
 image_callback (const char *url, char *filename, gpointer user_data)
 {
   ImageData *idata = user_data;
-  RefreshData *data = idata->data;
+  MojitoServiceFlickr *flickr = idata->service;
+  MojitoServiceFlickrPrivate *priv = flickr->priv;
   GList *items;
 
-  items = g_hash_table_lookup (data->pending, url);
-  g_hash_table_remove (data->pending, url);
+  items = g_hash_table_lookup (priv->pending, url);
+  g_hash_table_remove (priv->pending, url);
 
   while (items) {
     MojitoItem *item = items->data;
@@ -142,24 +149,24 @@ image_callback (const char *url, char *filename, gpointer user_data)
   g_free (filename);
   g_slice_free (ImageData, idata);
 
-  if (data->running && g_hash_table_size (data->pending) == 0) {
-    refresh_done (data);
+  if (priv->refreshing && g_hash_table_size (priv->pending) == 0) {
+    refresh_done (flickr);
   }
 }
 
 static void
-fetch_image (MojitoItem *item, RefreshData *data, const char *key, char *url)
+fetch_image (MojitoServiceFlickr *service, MojitoItem *item, const char *key, char *url)
 {
   ImageData *idata;
   GList *items;
 
   idata = g_slice_new0 (ImageData);
-  idata->data = data;
+  idata->service = service;
   idata->key = key;
 
-  items = g_hash_table_lookup (data->pending, url);
+  items = g_hash_table_lookup (service->priv->pending, url);
   items = g_list_prepend (items, item);
-  g_hash_table_insert (data->pending, url, items);
+  g_hash_table_replace (service->priv->pending, url, items);
 
   mojito_web_download_image_async (url, image_callback, idata);
 }
@@ -171,7 +178,6 @@ flickr_callback (RestProxyCall *call,
                  gpointer user_data)
 {
   MojitoServiceFlickr *service = MOJITO_SERVICE_FLICKR (weak_object);
-  RefreshData *data = user_data;
   RestXmlParser *parser;
   RestXmlNode *root, *node;
   MojitoSet *set;
@@ -191,7 +197,7 @@ flickr_callback (RestProxyCall *call,
   /* TODO: check for failure */
 
   set = mojito_item_set_new ();
-  data->set = set;
+  service->priv->set = set;
 
   node = rest_xml_node_find (root, "photos");
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
@@ -213,8 +219,8 @@ flickr_callback (RestProxyCall *call,
     date = atoi (rest_xml_node_get_attr (node, "dateupload"));
     mojito_item_take (item, "date", mojito_time_t_to_string (date));
 
-    fetch_image (item, data, "thumbnail", construct_photo_url (node));
-    fetch_image (item, data, "authoricon", construct_buddy_icon_url (node));
+    fetch_image (service, item, "thumbnail", construct_photo_url (node));
+    fetch_image (service, item, "authoricon", construct_buddy_icon_url (node));
 
     mojito_set_add (set, G_OBJECT (item));
     g_object_unref (item);
@@ -223,10 +229,10 @@ flickr_callback (RestProxyCall *call,
   rest_xml_node_unref (root);
   g_object_unref (parser);
 
-  if (g_hash_table_size (data->pending)> 0) {
-    data->running = TRUE;
+  if (g_hash_table_size (service->priv->pending)> 0) {
+    service->priv->refreshing = TRUE;
   } else {
-    refresh_done (data);
+    refresh_done (service);
   }
 }
 
@@ -235,9 +241,13 @@ refresh (MojitoService *service)
 {
   MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
   RestProxyCall *call;
-  RefreshData *data;
 
   if (flickr->priv->user_id == NULL) {
+    return;
+  }
+
+  if (flickr->priv->refreshing) {
+    /* We're currently refreshing, ignore this latest request */
     return;
   }
 
@@ -249,13 +259,8 @@ refresh (MojitoService *service)
                               "extras", "date_upload,icon_server",
                               NULL);
 
-  data = g_slice_new0 (RefreshData);
-  data->service = service;
-  data->pending = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-  data->running = FALSE;
-
   /* TODO: GError */
-  rest_proxy_call_async (call, flickr_callback, (GObject*)service, data, NULL);
+  rest_proxy_call_async (call, flickr_callback, (GObject*)service, NULL, NULL);
 }
 
 static const char *
@@ -332,4 +337,7 @@ mojito_service_flickr_init (MojitoServiceFlickr *self)
   gconf_client_notify (priv->gconf, KEY_USER);
 
   priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
+
+  priv->pending = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  priv->refreshing = FALSE;
 }
