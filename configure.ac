@@ -143,6 +143,7 @@ AC_OUTPUT([
         services/flickr/Makefile
         services/lastfm/Makefile
         services/twitter/Makefile
+        services/myspace/Makefile
         tests/Makefile
         tools/Makefile
         examples/Makefile

@@ -11,3 +11,7 @@ endif
 if WITH_TWITTER
 SUBDIRS += twitter
 endif
+
+if WITH_MYSPACE
+SUBDIRS += myspace
+endif
