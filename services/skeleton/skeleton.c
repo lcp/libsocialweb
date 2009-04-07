@@ -32,7 +32,7 @@ struct _MojitoServiceSkeletonPrivate {
 };
 
 static void
-update (MojitoService *service, MojitoServiceDataFunc callback, gpointer user_data)
+refresh (MojitoService *service)
 {
   //MojitoServiceSkeleton *skeleton = (MojitoServiceSkeleton*)service;
 }
@@ -71,7 +71,7 @@ mojito_service_skeleton_class_init (MojitoServiceSkeletonClass *klass)
   object_class->finalize = mojito_service_skeleton_finalize;
 
   service_class->get_name = mojito_service_skeleton_get_name;
-  service_class->update = update;
+  service_class->refresh = refresh;
 }
 
 static void
