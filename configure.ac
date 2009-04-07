@@ -132,6 +132,7 @@ AC_OUTPUT([
         mojito-client/Makefile
         src/Makefile
         services/Makefile
+        services/skeleton/Makefile
         services/dummy/Makefile
         services/flickr/Makefile
         services/lastfm/Makefile
