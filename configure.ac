@@ -32,6 +32,7 @@ PKG_CHECK_MODULES(SOUP, libsoup-2.4 gthread-2.0)
 PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1)
 PKG_CHECK_MODULES(REST, rest)
 
+
 AC_MSG_CHECKING([how to detect we are online])
 AC_ARG_WITH([online],
         [AS_HELP_STRING([--with-online],
@@ -60,10 +61,10 @@ AS_IF(
         [AC_MSG_ERROR([Unknown argument to --with-online])]
 )
 
+
 AC_MSG_CHECKING([whether to use the GNOME environment])
 AC_ARG_WITH([gnome],[AS_HELP_STRING([--without-gnome], [disable support for GNOME environment])],
             [], [with_gnome=yes])
-
 AS_IF(
         [test "$with_gnome" = yes],
         [
@@ -73,6 +74,7 @@ AS_IF(
         ],
         AC_MSG_RESULT([no])
 )
+
 
 # TODO: make this a m4 function in acinclude
 AC_MSG_CHECKING([for Flickr key to use])
