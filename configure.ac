@@ -122,6 +122,28 @@ AS_IF(
 AM_CONDITIONAL([WITH_TWITTER], [test x$with_twitter = xyes])
 
 
+AC_MSG_CHECKING([for MySpace key to use])
+AC_ARG_ENABLE([myspace-key], [AS_HELP_STRING([--enable-myspace-key], [API key for MySpace])],
+                            [], [enable_myspace_key=no])
+AS_IF(
+        [test "x$enable_myspace_key" != xno],
+        [
+        MYSPACE_KEY=`echo $enable_myspace_key | cut -d: -f1`
+        MYSPACE_SECRET=`echo $enable_myspace_key | cut -d: -f2`
+        if test "$MYSPACE_KEY" -a "$MYSPACE_SECRET" -a "$MYSPACE_KEY" != "$MYSPACE_SECRET"; then
+           AC_MSG_RESULT([$MYSPACE_KEY and $MYSPACE_SECRET])
+           AC_DEFINE_UNQUOTED([MYSPACE_APIKEY], ["$MYSPACE_KEY"], [MySpace API key])
+           AC_DEFINE_UNQUOTED([MYSPACE_SECRET], ["$MYSPACE_SECRET"], [MySpace API secret])
+           HAVE_MYSPACE_KEYS=1
+        else
+           AC_MSG_RESULT([invalid keys, specify key:secret])
+        fi
+        ],
+        AC_MSG_RESULT([not enabling MySpace support])
+)
+AM_CONDITIONAL([WITH_MYSPACE], [test x$HAVE_MYSPACE_KEYS])
+
+
 servicesdir='${libdir}'/mojito/services
 AC_SUBST(servicesdir)
 
