@@ -1,3 +1,10 @@
+Mojito 0.10.4
+===
+
+* Fallback to the user ID if the real name isn't set for the author key in the
+  Flickr backend
+
+
 Mojito 0.10.3
 ===
 
