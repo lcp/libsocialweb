@@ -15,8 +15,6 @@ config.*
 configure
 libtool
 stamp-h1
-shave
-shave-libtool
 build-aux/depcomp
 build-aux/install-sh
 build-aux/compile
