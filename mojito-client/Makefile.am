@@ -1,13 +1,15 @@
+QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
+
 lib_LTLIBRARIES = libmojito-client.la
 
 %-bindings.h: ../mojito/%.xml
-	dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
+	$(QUIET_GEN)dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
 
 %.c: %.list Makefile.am
-	glib-genmarshal --body --prefix=mojito_marshal $< > $@
+	$(QUIET_GEN)glib-genmarshal --body --prefix=mojito_marshal $< > $@
 
 %.h: %.list Makefile.am
-	glib-genmarshal --header --prefix=mojito_marshal $< > $@
+	$(QUIET_GEN)glib-genmarshal --header --prefix=mojito_marshal $< > $@
 
 BUILT_SOURCES = mojito-view-bindings.h mojito-core-bindings.h \
 		mojito-service-bindings.h \

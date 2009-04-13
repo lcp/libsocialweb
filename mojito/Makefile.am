@@ -1,13 +1,15 @@
+QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
+
 lib_LTLIBRARIES = libmojito.la
 
 %.c: %.list Makefile.am
-	glib-genmarshal --body --prefix=mojito_marshal $< > $@
+	$(QUIET_GEN)glib-genmarshal --body --prefix=mojito_marshal $< > $@
 
 %.h: %.list Makefile.am
-	glib-genmarshal --header --prefix=mojito_marshal $< > $@
+	$(QUIET_GEN)glib-genmarshal --header --prefix=mojito_marshal $< > $@
 
 %-ginterface.c: %.xml Makefile.am
-	python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
+	$(QUIET_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
 
 BUILT_SOURCES = \
 	mojito-marshals.c mojito-marshals.h \
