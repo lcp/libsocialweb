@@ -20,6 +20,8 @@ libtool
 ltmain.sh
 missing
 stamp-h1
+shave
+shave-libtool
 examples/test-client
 mojito/mojito-marshals.[ch]
 mojito/mojito-*-ginterface.[ch]
