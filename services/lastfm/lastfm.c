@@ -41,6 +41,7 @@ struct _MojitoServiceLastfmPrivate {
   RestProxy *proxy;
   GConfClient *gconf;
   char *user_id;
+  guint gconf_notify_id;
 };
 
 static void
@@ -234,6 +235,9 @@ mojito_service_lastfm_dispose (GObject *object)
   }
 
   if (priv->gconf) {
+    gconf_client_notify_remove (priv->gconf,
+                                priv->gconf_notify_id);
+    gconf_client_remove_dir (priv->gconf, KEY_BASE, NULL);
     g_object_unref (priv->gconf);
     priv->gconf = NULL;
   }
@@ -274,7 +278,8 @@ mojito_service_lastfm_init (MojitoServiceLastfm *self)
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_BASE,
                         GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  gconf_client_notify_add (priv->gconf, KEY_USER,
-                           user_changed_cb, self, NULL, NULL);
+  priv->gconf_notify_id = gconf_client_notify_add (priv->gconf, KEY_USER,
+                                                   user_changed_cb, self,
+                                                   NULL, NULL);
   gconf_client_notify (priv->gconf, KEY_USER);
 }
