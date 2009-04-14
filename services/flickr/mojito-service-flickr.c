@@ -40,6 +40,7 @@ struct _MojitoServiceFlickrPrivate {
   GConfClient *gconf;
   RestProxy *proxy;
   char *user_id;
+  guint gconf_notify_id;
 
   /* Used when running a refresh */
   MojitoSet *set;
@@ -282,6 +283,9 @@ mojito_service_flickr_dispose (GObject *object)
   MojitoServiceFlickrPrivate *priv = MOJITO_SERVICE_FLICKR (object)->priv;
 
   if (priv->gconf) {
+    gconf_client_notify_remove (priv->gconf,
+                                priv->gconf_notify_id);
+    gconf_client_remove_dir (priv->gconf, KEY_BASE, NULL);
     g_object_unref (priv->gconf);
     priv->gconf = NULL;
   }
@@ -329,8 +333,9 @@ mojito_service_flickr_init (MojitoServiceFlickr *self)
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_BASE,
                         GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  gconf_client_notify_add (priv->gconf, KEY_USER,
-                           user_changed_cb, self, NULL, NULL);
+  priv->gconf_notify_id = gconf_client_notify_add (priv->gconf, KEY_USER,
+                                                   user_changed_cb, self, 
+                                                   NULL, NULL);
   gconf_client_notify (priv->gconf, KEY_USER);
 
   priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
