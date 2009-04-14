@@ -230,6 +230,20 @@ mojito_service_twitter_dispose (GObject *object)
 #endif
 
   if (priv->client) {
+    /* We must disconnect these here because otherwise we may call the
+     * callbacks called via a signal emission from a closure within
+     * twitter-glib that has a reference on the client. So just unreffing the
+     * client isn't enough.
+     */
+    g_signal_handlers_disconnect_by_func (priv->client,
+                                          status_received_cb,
+                                          object);
+    g_signal_handlers_disconnect_by_func (priv->client,
+                                          timeline_received_cb,
+                                          object);
+    g_signal_handlers_disconnect_by_func (priv->client,
+                                          user_received_cb,
+                                          object);
     g_object_unref (priv->client);
     priv->client = NULL;
   }
