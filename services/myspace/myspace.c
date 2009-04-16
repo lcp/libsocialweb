@@ -17,7 +17,6 @@
  */
 
 #include <config.h>
-#define _XOPEN_SOURCE
 #include <time.h>
 #include "myspace.h"
 #include <mojito/mojito-item.h>
