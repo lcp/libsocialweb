@@ -26,6 +26,8 @@
 #include <rest/oauth-proxy.h>
 #include <rest/rest-xml-parser.h>
 
+#define WITH_TOKENS 0
+
 G_DEFINE_TYPE (MojitoServiceMySpace, mojito_service_myspace, MOJITO_TYPE_SERVICE)
 
 #define GET_PRIVATE(o) \
@@ -239,15 +241,20 @@ mojito_service_myspace_init (MojitoServiceMySpace *self)
 
   priv = self->priv = GET_PRIVATE (self);
 
-  priv->proxy = oauth_proxy_new_with_token (
+  priv->proxy = oauth_proxy_new (
                              /* Consumer Key */
                              "4b8b511346364eb6a4d977f602f4cf6f",
                              /* Consumer Secret */
                              "77e19a30f17b4fb9b9cb06a133312d11",
-                             /* Access tokens */
-                             /* TODO: read these from the keyring */
-                             "bbUSRbS8vd9BgNyUXoJR+Iyr9sWbg8Mt2keTjeEvZPG51Xm34uDuzskoTC8IfhOI+dwHb2NsWYiI59G/LCBrWyxfXi/nmaFTjBpyxM3CEGQ=",
-                             "5f7113af8d5a44c5b55fa9feb5f69dc4",
                              /* Endpoint */
                              "http://api.myspace.com/", FALSE);
+
+#if WITH_TOKENS
+  oauth_proxy_set_token (OAUTH_PROXY (priv->proxy),
+                         "bbUSRbS8vd9BgNyUXoJR+Iyr9sWbg8Mt2keT"
+                         "jeEvZPG51Xm34uDuzskoTC8IfhOI+dwHb2Ns"
+                         "WYiI59G/LCBrWyxfXi/nmaFTjBpyxM3CEGQ=");
+  oauth_proxy_set_token_secret (OAUTH_PROXY (priv->proxy),
+                                "5f7113af8d5a44c5b55fa9feb5f69dc4");
+#endif
 }
