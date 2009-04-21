@@ -22,11 +22,6 @@ build-aux/config.*
 build-aux/ltmain.sh
 build-aux/missing
 examples/test-client
-mojito/mojito-marshals.[ch]
-mojito/mojito-*-ginterface.[ch]
-mojito-client/mojito-client-marshals.[ch]
-mojito-client/mojito-*-bindings.h
-mojito/test-runner
 src/mojito.service
 src/mojito-core
 tests/test-online
@@ -35,3 +30,7 @@ tests/test-download
 tests/test-download-async
 m4/shave
 m4/shave-libtool
+*-ginterface.[ch]
+*-bindings.h
+*-marshals.[ch]
+test-runner
