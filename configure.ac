@@ -151,11 +151,11 @@ AC_SUBST(servicesdir)
 servicesdatadir='${pkgdatadir}'/services
 AC_SUBST(servicesdatadir)
 
-SHAVE_INIT([m4],[enable])
+SHAVE_INIT([build-aux],[enable])
 
 AC_OUTPUT([
-        m4/shave
-        m4/shave-libtool
+        build-aux/shave:m4/shave.in
+        build-aux/shave-libtool:m4/shave-libtool.in
         Makefile
         mojito/Makefile
         mojito-client/Makefile

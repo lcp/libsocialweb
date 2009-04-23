@@ -15,12 +15,7 @@ config.*
 configure
 libtool
 stamp-h1
-build-aux/depcomp
-build-aux/install-sh
-build-aux/compile
-build-aux/config.*
-build-aux/ltmain.sh
-build-aux/missing
+build-aux
 examples/test-client
 src/mojito.service
 src/mojito-core
@@ -28,8 +23,6 @@ tests/test-online
 tests/test-client-online
 tests/test-download
 tests/test-download-async
-m4/shave
-m4/shave-libtool
 *-ginterface.[ch]
 *-bindings.h
 *-marshals.[ch]
