@@ -200,7 +200,7 @@ mojito_client_view_constructed (GObject *object)
   DBusConnection *conn;
   DBusError derror;
 
-  priv->connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+  priv->connection = dbus_g_bus_get (DBUS_BUS_STARTER, &error);
 
   if (!priv->connection)
   {

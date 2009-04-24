@@ -111,7 +111,7 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
   GError *error = NULL;
   gchar *path;
 
-  priv->connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+  priv->connection = dbus_g_bus_get (DBUS_BUS_STARTER, &error);
 
   if (!priv->connection)
   {

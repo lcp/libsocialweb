@@ -347,7 +347,7 @@ mojito_core_constructed (GObject *object)
   MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
   GError *error = NULL;
 
-  priv->connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+  priv->connection = dbus_g_bus_get (DBUS_BUS_STARTER, &error);
   if (error) {
     g_warning ("Failed to open connection to DBus: %s\n", error->message);
     g_error_free (error);
