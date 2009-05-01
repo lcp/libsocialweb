@@ -1,0 +1,5 @@
+[MojitoService]
+Name=MySpace
+Description=MySpace is a social networking site
+Link=http://www.myspace.com/
+AuthType=oauth
