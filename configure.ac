@@ -1,5 +1,5 @@
 AC_PREREQ(2.53)
-AC_INIT(mojito, 0.10.3)
+AC_INIT(mojito, 0.11.0)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
