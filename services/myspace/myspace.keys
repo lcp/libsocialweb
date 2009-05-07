@@ -1,5 +1,5 @@
 [MojitoService]
 Name=MySpace
-Description=MySpace is a social networking site
+Description=MySpace is an online community that lets you meet your friend's friends.  Create a community on MySpace and you can share photos, journals and interests with your growing network of mutual friends!  See who knows who, or how you are connected. Find out if you really are six people away from Kevin Bacon.
 Link=http://www.myspace.com/
 AuthType=oauth
