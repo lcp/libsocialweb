@@ -35,6 +35,7 @@ PKG_CHECK_MODULES(GCONF, gconf-2.0)
 PKG_CHECK_MODULES(SOUP, libsoup-2.4 gthread-2.0)
 PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1)
 PKG_CHECK_MODULES(REST, rest)
+PKG_CHECK_MODULES(KEYRING, gnome-keyring-1)
 
 
 AC_MSG_CHECKING([how to detect we are online])
@@ -158,6 +159,7 @@ AC_OUTPUT([
         build-aux/shave-libtool:m4/shave-libtool.in
         Makefile
         mojito/Makefile
+        mojito-keyfob/Makefile
         mojito-client/Makefile
         src/Makefile
         services/Makefile
