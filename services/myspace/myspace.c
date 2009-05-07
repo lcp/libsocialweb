@@ -22,10 +22,9 @@
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
+#include <mojito-keyfob/mojito-keyfob.h>
 #include <rest/oauth-proxy.h>
 #include <rest/rest-xml-parser.h>
-
-#define WITH_TOKENS 0
 
 G_DEFINE_TYPE (MojitoServiceMySpace, mojito_service_myspace, MOJITO_TYPE_SERVICE)
 
@@ -174,16 +173,27 @@ got_user_cb (RestProxyCall *call,
 }
 
 static void
+got_tokens_cb (OAuthProxy *proxy, gboolean authorised, gpointer user_data)
+{
+  MojitoServiceMySpace *myspace = user_data;
+  MojitoServiceMySpacePrivate *priv = myspace->priv;
+  RestProxyCall *call;
+
+  if (authorised) {
+    call = rest_proxy_new_call (priv->proxy);
+    rest_proxy_call_set_function (call, "v1/user");
+    rest_proxy_call_async (call, got_user_cb, (GObject*)myspace, NULL, NULL);
+  }
+}
+
+static void
 refresh (MojitoService *service)
 {
   MojitoServiceMySpace *myspace = (MojitoServiceMySpace*)service;
   MojitoServiceMySpacePrivate *priv = myspace->priv;
-  RestProxyCall *call;
 
   if (priv->user_id == NULL) {
-    call = rest_proxy_new_call (priv->proxy);
-    rest_proxy_call_set_function (call, "v1/user");
-    rest_proxy_call_async (call, got_user_cb, (GObject*)service, NULL, NULL);
+    mojito_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
   } else {
     get_status_updates (myspace);
   }
@@ -240,20 +250,6 @@ mojito_service_myspace_init (MojitoServiceMySpace *self)
 
   priv = self->priv = GET_PRIVATE (self);
 
-  priv->proxy = oauth_proxy_new (
-                             /* Consumer Key */
-                             "4b8b511346364eb6a4d977f602f4cf6f",
-                             /* Consumer Secret */
-                             "77e19a30f17b4fb9b9cb06a133312d11",
-                             /* Endpoint */
-                             "http://api.myspace.com/", FALSE);
-
-#if WITH_TOKENS
-  oauth_proxy_set_token (OAUTH_PROXY (priv->proxy),
-                         "bbUSRbS8vd9BgNyUXoJR+Iyr9sWbg8Mt2keT"
-                         "jeEvZPG51Xm34uDuzskoTC8IfhOI+dwHb2Ns"
-                         "WYiI59G/LCBrWyxfXi/nmaFTjBpyxM3CEGQ=");
-  oauth_proxy_set_token_secret (OAUTH_PROXY (priv->proxy),
-                                "5f7113af8d5a44c5b55fa9feb5f69dc4");
-#endif
+  priv->proxy = oauth_proxy_new (MYSPACE_APIKEY, MYSPACE_SECRET,
+                                 "http://api.myspace.com/", FALSE);
 }
