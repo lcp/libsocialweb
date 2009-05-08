@@ -18,6 +18,7 @@
 
 #include <config.h>
 #include <time.h>
+#include <string.h>
 #include "myspace.h"
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
@@ -80,15 +81,26 @@ got_status_cb (RestProxyCall *call,
              gpointer       userdata)
 {
   MojitoService *service = MOJITO_SERVICE (weak_object);
+  MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (service)->priv;
   RestXmlNode *root, *node;
   MojitoSet *set;
 
   root = node_from_call (call);
-  node = rest_xml_node_find (root, "friends");
 
   set = mojito_item_set_new ();
 
-  for (node = rest_xml_node_find (node, "user"); node; node = node->next) {
+  /*
+   * The result of /status is a <user> node, whereas /friends/status is
+   * <user><friends><user>. Look closely to find out what data we have
+   */
+  node = rest_xml_node_find (root, "friends");
+  if (node) {
+    node = rest_xml_node_find (node, "user");
+  } else {
+    node = root;
+  }
+
+  while (node) {
     /*
       <user>
       <userid>188488921</userid>
@@ -103,7 +115,7 @@ got_status_cb (RestProxyCall *call,
     */
     MojitoItem *item;
     char *id;
-    const char *name;
+    RestXmlNode *subnode;
 
     item = mojito_item_new ();
     mojito_item_set_service (item, service);
@@ -119,19 +131,27 @@ got_status_cb (RestProxyCall *call,
                       get_utc_date (rest_xml_node_find (node, "moodlastupdated")->content));
 
     mojito_item_put (item, "authorid", rest_xml_node_find (node, "userid")->content);
-    name = rest_xml_node_find (node, "name")->content;
-    if (name)
-      mojito_item_put (item, "author", name);
+    subnode = rest_xml_node_find (node, "name");
+    if (subnode && subnode->content)
+      mojito_item_put (item, "author", subnode->content);
+    else
+      mojito_item_put (item, "author", priv->display_name);
 
     /* TODO: get imageurl and put into authoricon */
 
     mojito_item_put (item, "content", rest_xml_node_find (node, "status")->content);
     /* TODO: if mood is not "(none)" then append that to the status message */
 
-    mojito_item_put (item, "url", rest_xml_node_find (node, "profileurl")->content);
+    subnode = rest_xml_node_find (node, "profileurl");
+    if (subnode && subnode->content)
+      mojito_item_put (item, "url", subnode->content);
+    else
+      mojito_item_put (item, "url", priv->profile_url);
 
     mojito_set_add (set, G_OBJECT (item));
     g_object_unref (item);
+
+    node = node->next;
   }
 
   if (!mojito_set_is_empty (set))
@@ -146,14 +166,26 @@ get_status_updates (MojitoServiceMySpace *service)
   MojitoServiceMySpacePrivate *priv = service->priv;
   char *function;
   RestProxyCall *call;
+  GHashTable *params = NULL;
 
   g_assert (priv->user_id);
 
   call = rest_proxy_new_call (priv->proxy);
 
-  function = g_strdup_printf ("v1/users/%s/friends/status", priv->user_id);
-  rest_proxy_call_set_function (call, function);
-  g_free (function);
+  g_object_get (service, "params", &params, NULL);
+
+  if (params && g_hash_table_lookup (params, "own")) {
+    function = g_strdup_printf ("v1/users/%s/status", priv->user_id);
+    rest_proxy_call_set_function (call, function);
+    g_free (function);
+  } else {
+    function = g_strdup_printf ("v1/users/%s/friends/status", priv->user_id);
+    rest_proxy_call_set_function (call, function);
+    g_free (function);
+  }
+
+  if (params)
+    g_hash_table_unref (params);
 
   rest_proxy_call_async (call, got_status_cb, (GObject*)service, NULL, NULL);
 }
