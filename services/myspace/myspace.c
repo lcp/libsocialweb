@@ -241,27 +241,25 @@ refresh (MojitoService *service)
 static guint32
 get_capabilities (MojitoService *service)
 {
-  return SERVICE_CAN_GET_PERSONA_ICON;
+  return SERVICE_CAN_UPDATE_STATUS | SERVICE_CAN_GET_PERSONA_ICON;
 }
 
-static gchar *
-get_persona_icon (MojitoService *service)
+static gboolean
+sync_auth (MojitoServiceMySpace *myspace)
 {
-  /* TODO: this sucks. Not only is it not async but there is massive duplication */
-
-  MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (service)->priv;
+  MojitoServiceMySpacePrivate *priv = myspace->priv;
 
   if (priv->user_id == NULL) {
     RestProxyCall *call;
     RestXmlNode *node;
 
     if (!mojito_keyfob_oauth_sync ((OAuthProxy*)priv->proxy))
-      return NULL;
+      return FALSE;
 
     call = rest_proxy_new_call (priv->proxy);
     rest_proxy_call_set_function (call, "v1/user");
     if (!rest_proxy_call_run (call, NULL, NULL))
-      return NULL;
+      return FALSE;
 
     node = node_from_call (call);
     priv->user_id = rest_xml_node_find (node, "userid")->content;
@@ -270,9 +268,50 @@ get_persona_icon (MojitoService *service)
     priv->image_url = rest_xml_node_find (node, "imageuri")->content;
   }
 
-  return mojito_web_download_image (priv->image_url);
+  return TRUE;
 }
 
+static gchar *
+get_persona_icon (MojitoService *service)
+{
+  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
+  MojitoServiceMySpacePrivate *priv = myspace->priv;
+
+  if (sync_auth (myspace))
+    return mojito_web_download_image (priv->image_url);
+  else
+    return NULL;
+}
+
+static gboolean
+update_status (MojitoService *service, const char *msg)
+{
+  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
+  MojitoServiceMySpacePrivate *priv = myspace->priv;
+  RestProxyCall *call;
+  char *function;
+  gboolean ret;
+
+  if (!sync_auth (myspace))
+    return FALSE;
+
+  call = rest_proxy_new_call (priv->proxy);
+  rest_proxy_call_set_method (call, "PUT");
+  function = g_strdup_printf ("v1/users/%s/status", priv->user_id);
+  rest_proxy_call_set_function (call, function);
+  g_free (function);
+
+  rest_proxy_call_add_params (call,
+                              "userId", priv->user_id,
+                              "status", msg,
+                              NULL);
+
+  ret = rest_proxy_call_run (call, NULL, NULL);
+
+  g_object_unref (call);
+
+  return ret;
+}
 
 static const char *
 mojito_service_myspace_get_name (MojitoService *service)
@@ -317,6 +356,7 @@ mojito_service_myspace_class_init (MojitoServiceMySpaceClass *klass)
   service_class->get_name = mojito_service_myspace_get_name;
   service_class->get_capabilities = get_capabilities;
   service_class->get_persona_icon = get_persona_icon;
+  service_class->update_status = update_status;
   service_class->refresh = refresh;
 }
 
