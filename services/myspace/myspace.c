@@ -238,12 +238,6 @@ refresh (MojitoService *service)
   }
 }
 
-static guint32
-get_capabilities (MojitoService *service)
-{
-  return SERVICE_CAN_UPDATE_STATUS | SERVICE_CAN_GET_PERSONA_ICON;
-}
-
 static gboolean
 sync_auth (MojitoServiceMySpace *myspace)
 {
@@ -269,6 +263,17 @@ sync_auth (MojitoServiceMySpace *myspace)
   }
 
   return TRUE;
+}
+
+static guint32
+get_capabilities (MojitoService *service)
+{
+  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
+
+  if (sync_auth (myspace))
+    return SERVICE_CAN_UPDATE_STATUS | SERVICE_CAN_GET_PERSONA_ICON;
+  else
+    return 0;
 }
 
 static gchar *
