@@ -143,7 +143,7 @@ AS_IF(
         ],
         AC_MSG_RESULT([not enabling MySpace support])
 )
-AM_CONDITIONAL([WITH_MYSPACE], [test x$HAVE_MYSPACE_KEYS])
+AM_CONDITIONAL([WITH_MYSPACE], [test "$HAVE_MYSPACE_KEYS"])
 
 
 servicesdir='${libdir}'/mojito/services
