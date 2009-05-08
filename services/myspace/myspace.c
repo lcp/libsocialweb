@@ -23,6 +23,7 @@
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
+#include <mojito/mojito-web.h>
 #include <mojito-keyfob/mojito-keyfob.h>
 #include <rest/oauth-proxy.h>
 #include <rest/rest-xml-parser.h>
@@ -237,6 +238,42 @@ refresh (MojitoService *service)
   }
 }
 
+static guint32
+get_capabilities (MojitoService *service)
+{
+  return SERVICE_CAN_GET_PERSONA_ICON;
+}
+
+static gchar *
+get_persona_icon (MojitoService *service)
+{
+  /* TODO: this sucks. Not only is it not async but there is massive duplication */
+
+  MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (service)->priv;
+
+  if (priv->user_id == NULL) {
+    RestProxyCall *call;
+    RestXmlNode *node;
+
+    if (!mojito_keyfob_oauth_sync ((OAuthProxy*)priv->proxy))
+      return NULL;
+
+    call = rest_proxy_new_call (priv->proxy);
+    rest_proxy_call_set_function (call, "v1/user");
+    if (!rest_proxy_call_run (call, NULL, NULL))
+      return NULL;
+
+    node = node_from_call (call);
+    priv->user_id = rest_xml_node_find (node, "userid")->content;
+    priv->display_name = rest_xml_node_find (node, "displayname")->content;
+    priv->profile_url = rest_xml_node_find (node, "weburi")->content;
+    priv->image_url = rest_xml_node_find (node, "imageuri")->content;
+  }
+
+  return mojito_web_download_image (priv->image_url);
+}
+
+
 static const char *
 mojito_service_myspace_get_name (MojitoService *service)
 {
@@ -278,6 +315,8 @@ mojito_service_myspace_class_init (MojitoServiceMySpaceClass *klass)
   object_class->finalize = mojito_service_myspace_finalize;
 
   service_class->get_name = mojito_service_myspace_get_name;
+  service_class->get_capabilities = get_capabilities;
+  service_class->get_persona_icon = get_persona_icon;
   service_class->refresh = refresh;
 }
 
