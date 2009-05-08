@@ -34,6 +34,8 @@ G_DEFINE_TYPE (MojitoServiceMySpace, mojito_service_myspace, MOJITO_TYPE_SERVICE
 struct _MojitoServiceMySpacePrivate {
   RestProxy *proxy;
   char *user_id;
+  char *display_name;
+  char *profile_url;
 };
 
 RestXmlNode *
@@ -168,6 +170,8 @@ got_user_cb (RestProxyCall *call,
   node = node_from_call (call);
 
   service->priv->user_id = rest_xml_node_find (node, "userid")->content;
+  service->priv->display_name = rest_xml_node_find (node, "displayname")->content;
+  service->priv->profile_url = rest_xml_node_find (node, "weburi")->content;
 
   get_status_updates (service);
 }
