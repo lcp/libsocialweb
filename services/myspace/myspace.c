@@ -37,6 +37,7 @@ struct _MojitoServiceMySpacePrivate {
   char *user_id;
   char *display_name;
   char *profile_url;
+  char *image_url;
 };
 
 RestXmlNode *
@@ -204,6 +205,7 @@ got_user_cb (RestProxyCall *call,
   service->priv->user_id = rest_xml_node_find (node, "userid")->content;
   service->priv->display_name = rest_xml_node_find (node, "displayname")->content;
   service->priv->profile_url = rest_xml_node_find (node, "weburi")->content;
+  service->priv->image_url = rest_xml_node_find (node, "imageuri")->content;
 
   get_status_updates (service);
 }
