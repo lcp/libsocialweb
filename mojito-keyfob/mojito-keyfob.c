@@ -140,6 +140,49 @@ mojito_keyfob_oauth (OAuthProxy *proxy,
   g_free (key);
 }
 
+gboolean
+mojito_keyfob_oauth_sync (OAuthProxy *proxy)
+{
+  char *server = NULL, *key = NULL, *password = NULL;
+  GnomeKeyringResult result;
+
+  g_object_get (proxy,
+                "url-format", &server,
+                "consumer-key", &key,
+                NULL);
+
+  result = gnome_keyring_find_password_sync (&oauth_schema, &password,
+                                             "server", server,
+                                             "consumer-key", key,
+                                             NULL);
+  g_free (server);
+  g_free (key);
+
+  if (result == GNOME_KEYRING_RESULT_OK) {
+    char *token = NULL, *token_secret = NULL;
+    if (decode (password, &token, &token_secret)) {
+      /*
+       * TODO: is it possible to validate these tokens generically? If so then
+       * it should be validated here, otherwise we need a way to clear the
+       * tokens for a particular key so that re-auth works.
+       */
+      oauth_proxy_set_token (proxy, token);
+      oauth_proxy_set_token_secret (proxy, token_secret);
+
+      g_free (token);
+      g_free (token_secret);
+      gnome_keyring_free_password (password);
+
+      return TRUE;
+    } else {
+      gnome_keyring_free_password (password);
+      return FALSE;
+    }
+  } else {
+    return FALSE;
+  }
+}
+
 
 #if BUILD_TESTS
 void

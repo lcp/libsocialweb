@@ -11,6 +11,8 @@ void mojito_keyfob_oauth (OAuthProxy *proxy,
                           MojitoKeyfobOAuthCallback callback,
                           gpointer user_data);
 
+gboolean mojito_keyfob_oauth_sync (OAuthProxy *proxy);
+
 G_END_DECLS
 
 #endif /* __MOJITO_KEYFOB_H__ */
