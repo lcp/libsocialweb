@@ -115,13 +115,32 @@ on_caps_changed (MojitoService *service, guint32 caps, gpointer user_data)
 }
 
 static void
+on_avatar_retrieved (MojitoService *service,
+                              const gchar   *path,
+                              gpointer       userdata)
+{
+  MojitoServiceProxy *proxy = MOJITO_SERVICE_PROXY (userdata);
+
+  mojito_service_iface_emit_avatar_retrieved (proxy, path);
+}
+
+static void
 construct_instance (MojitoService *service)
 {
   MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
 
   if (!priv->instance) {
     priv->instance = g_object_new (priv->type, NULL);
-    g_signal_connect (priv->instance, "caps-changed", G_CALLBACK (on_caps_changed), service);
+
+    g_signal_connect (priv->instance,
+                      "caps-changed",
+                      G_CALLBACK (on_caps_changed),
+                      service);
+
+    g_signal_connect (priv->instance,
+                      "avatar-retrieved-internal",
+                      G_CALLBACK (on_avatar_retrieved),
+                      service);
   }
 }
 
@@ -226,6 +245,25 @@ service_get_persona_icon (MojitoServiceIface    *self,
 }
 
 static void
+service_request_avatar (MojitoServiceIface    *self,
+                        DBusGMethodInvocation *context)
+{
+  MojitoServiceProxyPrivate *priv = GET_PRIVATE (self);
+  MojitoServiceClass *service_class;
+
+  construct_instance ((MojitoService*)self);
+
+  service_class = MOJITO_SERVICE_GET_CLASS (priv->instance);
+
+  if (service_class->request_avatar)
+  {
+    service_class->request_avatar (priv->instance);
+  }
+
+  mojito_service_iface_return_from_request_avatar (context);
+}
+
+static void
 service_update_status (MojitoServiceIface    *self,
                        const gchar           *status_message,
                        DBusGMethodInvocation *context)
@@ -286,4 +324,6 @@ service_iface_init (gpointer g_iface,
                                                 service_update_status);
   mojito_service_iface_implement_get_capabilities (klass,
                                                    service_get_capabilities);
+  mojito_service_iface_implement_request_avatar (klass,
+                                                 service_request_avatar);
 }
