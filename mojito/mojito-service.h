@@ -51,6 +51,9 @@ struct _MojitoService {
 typedef struct _MojitoServiceClass MojitoServiceClass;
 struct _MojitoServiceClass {
   GObjectClass parent_class;
+  /* signals */
+  void (*avatar_retrieved)(MojitoService *service, const gchar *path);
+  /* vfuncs */
   const char *(*get_name) (MojitoService *service);
   void (*start) (MojitoService *service);
   /* fires ::refreshed (MojitoSet *set) signal */
@@ -80,6 +83,9 @@ void mojito_service_refresh (MojitoService *service);
 void mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set);
 
 void mojito_service_emit_capabilities_changed (MojitoService *service, guint32 caps);
+
+void mojito_service_emit_avatar_retrieved (MojitoService *service,
+                                           const gchar   *path);
 
 G_END_DECLS
 

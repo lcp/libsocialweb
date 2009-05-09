@@ -39,6 +39,7 @@ enum {
 enum {
   SIGNAL_REFRESHED,
   SIGNAL_CAPS_CHANGED,
+  SIGNAL_AVATAR_RETRIEVED,
   N_SIGNALS
 };
 
@@ -129,6 +130,18 @@ mojito_service_class_init (MojitoServiceClass *klass)
                   NULL, NULL,
                   g_cclosure_marshal_VOID__UINT,
                   G_TYPE_NONE, 1, G_TYPE_UINT);
+
+  /* -internal suffix to avoid conflicts with the dbus-glib generated signal */
+  signals[SIGNAL_AVATAR_RETRIEVED] =
+    g_signal_new ("avatar-retrieved-internal",
+                  G_OBJECT_CLASS_TYPE (klass),
+                  G_SIGNAL_RUN_LAST,
+                  G_STRUCT_OFFSET (MojitoServiceClass, avatar_retrieved),
+                  NULL, NULL,
+                  g_cclosure_marshal_VOID__STRING,
+                  G_TYPE_NONE,
+                  1,
+                  G_TYPE_STRING);
 }
 
 static void
@@ -180,4 +193,13 @@ mojito_service_emit_capabilities_changed (MojitoService *service, guint32 caps)
   g_return_if_fail (MOJITO_IS_SERVICE (service));
 
   g_signal_emit (service, signals[SIGNAL_CAPS_CHANGED], 0, caps);
+}
+
+void
+mojito_service_emit_avatar_retrieved (MojitoService *service,
+                                      const gchar   *path)
+{
+  g_return_if_fail (MOJITO_IS_SERVICE (service));
+
+  g_signal_emit (service, signals[SIGNAL_AVATAR_RETRIEVED], 0, path);
 }
