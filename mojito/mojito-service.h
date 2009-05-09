@@ -60,6 +60,7 @@ struct _MojitoServiceClass {
   gboolean (*update_status) (MojitoService *service, const gchar *status_message);
   guint32 (*get_capabilities) (MojitoService *service);
   /* ::caps-changed signal emitted when this changes */
+  void (*request_avatar) (MojitoService *service);
 };
 
 typedef enum
