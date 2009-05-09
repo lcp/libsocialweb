@@ -385,6 +385,32 @@ get_persona_icon (MojitoService *service)
     return NULL;
 }
 
+static void
+_avatar_downloaded_cb (const gchar *uri,
+                       gchar       *local_path,
+                       gpointer     userdata)
+{
+  MojitoService *service = MOJITO_SERVICE (userdata);
+
+  mojito_service_emit_avatar_retrieved (service, local_path);
+  g_free (local_path);
+}
+
+static void
+request_avatar (MojitoService *service)
+{
+  MojitoServiceMySpacePrivate *priv = GET_PRIVATE (service);
+
+  if (priv->image_url)
+  {
+    mojito_web_download_image_async (priv->image_url,
+                                     _avatar_downloaded_cb,
+                                     service);
+  } else {
+    mojito_service_emit_avatar_retrieved (service, NULL);
+  }
+}
+
 static gboolean
 update_status (MojitoService *service, const char *msg)
 {
@@ -461,6 +487,7 @@ mojito_service_myspace_class_init (MojitoServiceMySpaceClass *klass)
   service_class->update_status = update_status;
   service_class->start = start;
   service_class->refresh = refresh;
+  service_class->request_avatar = request_avatar;
 }
 
 static void
