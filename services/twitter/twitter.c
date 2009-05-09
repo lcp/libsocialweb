@@ -319,6 +319,33 @@ get_persona_icon (MojitoService *service)
 }
 
 static void
+_avatar_downloaded_cb (const gchar *uri,
+                       gchar       *local_path,
+                       gpointer     userdata)
+{
+  MojitoService *service = MOJITO_SERVICE (userdata);
+
+  mojito_service_emit_avatar_retrieved (service, local_path);
+  g_free (local_path);
+}
+
+static void
+request_avatar (MojitoService *service)
+{
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+  const gchar *url;
+
+  if (priv->user) {
+    url = twitter_user_get_profile_image_url (priv->user);
+    mojito_web_download_image_async (url,
+                                     _avatar_downloaded_cb,
+                                     service);
+  } else {
+    mojito_service_emit_avatar_retrieved (service, NULL);
+  }
+}
+
+static void
 mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -335,6 +362,7 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
   service_class->get_capabilities = get_capabilities;
   service_class->update_status = update_status;
   service_class->get_persona_icon = get_persona_icon;
+  service_class->request_avatar = request_avatar;
 }
 
 static void
