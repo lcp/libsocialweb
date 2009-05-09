@@ -19,5 +19,11 @@
       <arg name="can_get_persona_icon" type="b"/>
       <arg name="can_update_status" type="b"/>
     </signal>
+
+    <method name="RequestAvatar" tp:name-for-bindings="Request_Avatar"/>
+
+    <signal name="AvatarRetrieved" tp:name-for-bindings="Avatar_Retrieved">
+      <arg name="path" type="s"/>
+    </signal>
   </interface>
 </node>
