@@ -87,18 +87,24 @@ mojito_service_proxy_dispose (GObject *object)
 }
 
 static void
-decode_caps (guint32 caps, gboolean *can_get_persona_icon, gboolean *can_update_status)
+decode_caps (guint32 caps,
+             gboolean *can_get_persona_icon,
+             gboolean *can_update_status,
+             gboolean *can_request_avatar)
 {
   g_assert (can_get_persona_icon);
   g_assert (can_update_status);
+  g_assert (can_request_avatar);
 
   *can_get_persona_icon = caps & SERVICE_CAN_GET_PERSONA_ICON;
   *can_update_status = caps & SERVICE_CAN_UPDATE_STATUS;
+  *can_request_avatar = caps & SERVICE_CAN_REQUEST_AVATAR;
 
 #if 0
-  g_debug ("got caps: %spersona icons %supdate status",
+  g_debug ("got caps: %spersona icons %supdate status %srequest avatar",
            *can_get_persona_icon ? "+" : "-",
-           *can_update_status ? "+" : "-");
+           *can_update_status ? "+" : "-",
+           *can_request_avatar ? "+" : "-");
 #endif
 }
 
@@ -106,12 +112,15 @@ static void
 on_caps_changed (MojitoService *service, guint32 caps, gpointer user_data)
 {
   MojitoServiceProxy *proxy = MOJITO_SERVICE_PROXY (user_data);
-  gboolean can_get_persona_icon, can_update_status;
+  gboolean can_get_persona_icon, can_update_status, can_request_avatar;
 
-  decode_caps (caps, &can_get_persona_icon, &can_update_status);
+  decode_caps (caps,
+               &can_get_persona_icon,
+               &can_update_status,
+               &can_request_avatar);
 
   mojito_service_iface_emit_capabilities_changed
-    (proxy, can_get_persona_icon, can_update_status);
+    (proxy, can_get_persona_icon, can_update_status, can_request_avatar);
 }
 
 static void
@@ -297,6 +306,7 @@ service_get_capabilities (MojitoServiceIface    *self,
   guint32 caps = 0;
   gboolean can_get_persona_icon;
   gboolean can_update_status;
+  gboolean can_request_avatar;
 
   construct_instance ((MojitoService*)self);
 
@@ -305,11 +315,15 @@ service_get_capabilities (MojitoServiceIface    *self,
   if (service_class->get_capabilities)
     caps = service_class->get_capabilities (priv->instance);
 
-  decode_caps (caps, &can_get_persona_icon, &can_update_status);
+  decode_caps (caps,
+               &can_get_persona_icon,
+               &can_update_status,
+               &can_request_avatar);
 
   mojito_service_iface_return_from_get_capabilities (context,
                                                      can_get_persona_icon,
-                                                     can_update_status);
+                                                     can_update_status,
+                                                     can_request_avatar);
 }
 
 static void

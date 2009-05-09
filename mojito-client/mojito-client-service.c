@@ -206,6 +206,7 @@ static void
 _get_capabilities_cb (DBusGProxy *proxy,
                       gboolean    can_get_persona_icon,
                       gboolean    can_update_status,
+                      gboolean    can_request_avatar,
                       GError     *error,
                       gpointer    userdata)
 {
@@ -228,6 +229,8 @@ _get_capabilities_cb (DBusGProxy *proxy,
       caps |= MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON;
     if (can_update_status)
       caps |= MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS;
+    if (can_request_avatar)
+      caps |= MOJITO_CLIENT_SERVICE_CAN_REQUEST_AVATAR;
     cb (closure->service,
       caps,
       error,

@@ -55,7 +55,8 @@ GType mojito_client_service_get_type (void);
 typedef enum
 {
   MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON = 1,
-  MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS = 1 << 1
+  MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS = 1 << 1,
+  MOJITO_CLIENT_SERVICE_CAN_REQUEST_AVATAR = 1 << 2
 } MojitoClientServiceCapabilityFlags;
 
 typedef void

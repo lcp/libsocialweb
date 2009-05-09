@@ -13,11 +13,13 @@
     <method name="GetCapabilities" tp:name-for-bindings="Get_Capabilities">
       <arg name="can_get_persona_icon" type="b" direction="out"/>
       <arg name="can_update_status" type="b" direction="out"/>
+      <arg name="can_request_avatar" type="b" direction="out"/>
     </method>
 
     <signal name="CapabilitiesChanged" tp:name-for-bindings="Capabilities_Changed">
       <arg name="can_get_persona_icon" type="b"/>
       <arg name="can_update_status" type="b"/>
+      <arg name="can_request_avatar" type="b" direction="out"/>
     </signal>
 
     <method name="RequestAvatar" tp:name-for-bindings="Request_Avatar"/>
