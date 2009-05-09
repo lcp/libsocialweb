@@ -73,9 +73,8 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
 
   /* Get our details. This will cause the user_received signal to be fired */
   if (priv->user_set && priv->password_set) {
-    /* Despite claiming to take an email it also takes a username */
     priv->self_handle =
-      twitter_client_show_user_from_email (priv->client, priv->username);
+      twitter_client_show_user_from_id (priv->client, priv->username);
   }
 }
 
