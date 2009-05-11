@@ -5,3 +5,8 @@ liblastfm_la_LIBADD = $(top_builddir)/mojito/libmojito.la $(REST_LIBS) $(GCONF_L
 liblastfm_la_LDFLAGS = -module -avoid-version
 
 dist_servicesdata_DATA = lastfm.keys lastfm.png
+
+servicesdata_DATA = lastfm.keys
+CLEANFILES = lastfm.keys
+EXTRA_DIST = lastfm.keys.in
+@INTLTOOL_MOJITO_KEYS@

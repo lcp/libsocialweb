@@ -1,0 +1,5 @@
+[MojitoService]
+_Name=Last.fm
+_Description=Last.fm is a playlist sharing site
+Link=http://www.last.fm/
+AuthType=username
