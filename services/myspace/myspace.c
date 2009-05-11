@@ -139,7 +139,10 @@ got_status_cb (RestProxyCall *call,
     else
       mojito_item_put (item, "author", priv->display_name);
 
-    /* TODO: get imageurl and put into authoricon */
+    /* TODO: async downloading */
+    subnode = rest_xml_node_find (node, "imageurl");
+    if (subnode && subnode->content)
+      mojito_item_take (item, "authoricon", mojito_web_download_image (subnode->content));
 
     mojito_item_put (item, "content", rest_xml_node_find (node, "status")->content);
     /* TODO: if mood is not "(none)" then append that to the status message */
