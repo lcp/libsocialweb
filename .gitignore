@@ -9,6 +9,7 @@
 .libs
 Makefile
 Makefile.in
+Makefile.in.in
 aclocal.m4
 autom4te.cache
 config.*
@@ -27,3 +28,7 @@ tests/test-download-async
 *-bindings.h
 *-marshals.[ch]
 test-runner
+intltool-*
+po/POTFILES
+po/stamp-it
+m4/intltool.m4
