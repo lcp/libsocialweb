@@ -4,4 +4,9 @@ libflickr_la_CFLAGS = -I$(top_srcdir) $(REST_CFLAGS) $(GCONF_CFLAGS) $(SOUP_CFLA
 libflickr_la_LIBADD = $(top_builddir)/mojito/libmojito.la $(REST_LIBS) $(GCONF_LIBS) $(SOUP_LIBS)
 libflickr_la_LDFLAGS = -module -avoid-version
 
-dist_servicesdata_DATA = flickr.keys flickr.png
+dist_servicesdata_DATA = flickr.png
+
+servicesdata_DATA = flickr.keys
+CLEANFILES = flickr.keys
+EXTRA_DIST = flickr.keys.in
+@INTLTOOL_MOJITO_KEYS@

@@ -1,5 +1,5 @@
 [MojitoService]
-Name=Flickr
-Description=Flickr is a photo sharing website.
+_Name=Flickr
+_Description=Flickr is a photo sharing website.
 Link=http://www.flickr.com/
 AuthType=username
