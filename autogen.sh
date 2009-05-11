@@ -1,3 +1,3 @@
 #!/bin/sh
-#gtkdocize --flavour no-tmpl || exit 1
+intltoolize --copy --force --automake
 autoreconf -v -i && ./configure $@
