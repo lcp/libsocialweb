@@ -17,6 +17,12 @@ AC_ISC_POSIX
 AC_HEADER_STDC
 AM_PROG_CC_C_O
 
+IT_PROG_INTLTOOL([0.40], [no-xml])
+GETTEXT_PACKAGE=mojito
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [The name of the gettext package.])
+AC_SUBST(GETTEXT_PACKAGE)
+AM_GLIB_GNU_GETTEXT
+
 # TODO: bit nasty, should we use gnome-common?
 CFLAGS="$CFLAGS -Wall"
 
@@ -172,6 +178,7 @@ AC_OUTPUT([
         tests/Makefile
         tools/Makefile
         examples/Makefile
+        po/Makefile.in
         mojito-client.pc
         mojito-module.pc
 ])
