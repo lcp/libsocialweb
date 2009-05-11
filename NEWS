@@ -1,3 +1,12 @@
+Mojito 0.13.2
+===
+
+* Fix Twitter authentication
+* Fix parallel builds
+* Fetch MySpace author icon
+* Enable i18n in the service metadata
+
+
 Mojito 0.13.1
 ===
 
