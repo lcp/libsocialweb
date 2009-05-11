@@ -8,7 +8,7 @@ lib_LTLIBRARIES = libmojito.la
 %.h: %.list Makefile.am
 	$(QUIET_GEN)glib-genmarshal --header --prefix=mojito_marshal $< > $@
 
-%-ginterface.c: %.xml Makefile.am
+%-ginterface.h %-ginterface.c: %.xml Makefile.am
 	$(QUIET_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
 
 BUILT_SOURCES = \
