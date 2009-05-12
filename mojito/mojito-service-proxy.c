@@ -100,6 +100,20 @@ mojito_service_proxy_get_name (MojitoService *service)
 }
 
 static void
+mojito_service_proxy_start (MojitoService *service)
+{
+  MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
+  MojitoServiceClass *class;
+
+  if (!priv->instance)
+    priv->instance = g_object_new (priv->type, NULL);
+
+  class = MOJITO_SERVICE_GET_CLASS (priv->instance);
+
+  class->start (priv->instance);
+}
+
+static void
 mojito_service_proxy_refresh (MojitoService *service)
 {
   MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
@@ -127,6 +141,7 @@ mojito_service_proxy_class_init (MojitoServiceProxyClass *klass)
   object_class->dispose = mojito_service_proxy_dispose;
 
   service_class->get_name = mojito_service_proxy_get_name;
+  service_class->start = mojito_service_proxy_start;
   service_class->refresh = mojito_service_proxy_refresh;
 
   pspec = g_param_spec_gtype ("type",
