@@ -52,6 +52,7 @@ typedef struct _MojitoServiceClass MojitoServiceClass;
 struct _MojitoServiceClass {
   GObjectClass parent_class;
   const char *(*get_name) (MojitoService *service);
+  void (*start) (MojitoService *service);
   /* fires ::refreshed (MojitoSet *set) signal */
   void (*refresh) (MojitoService *service);
   MojitoItem *(*get_last_item) (MojitoService *service);
@@ -69,6 +70,8 @@ typedef enum
 GType mojito_service_get_type (void);
 
 const char *mojito_service_get_name (MojitoService *service);
+
+void mojito_service_start (MojitoService *service);
 
 void mojito_service_refresh (MojitoService *service);
 

@@ -137,6 +137,16 @@ mojito_service_get_name (MojitoService *service)
 }
 
 void
+mojito_service_start (MojitoService *service)
+{
+  MojitoServiceClass *service_class = MOJITO_SERVICE_GET_CLASS (service);
+
+  g_return_if_fail (service_class->start);
+
+  service_class->start (service);
+}
+
+void
 mojito_service_refresh (MojitoService *service)
 {
   MojitoServiceClass *service_class = MOJITO_SERVICE_GET_CLASS (service);
