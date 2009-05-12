@@ -34,6 +34,7 @@ G_DEFINE_TYPE (MojitoServiceMySpace, mojito_service_myspace, MOJITO_TYPE_SERVICE
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_MYSPACE, MojitoServiceMySpacePrivate))
 
 struct _MojitoServiceMySpacePrivate {
+  gboolean running;
   RestProxy *proxy;
   char *user_id;
   char *display_name;
@@ -231,10 +232,21 @@ got_tokens_cb (OAuthProxy *proxy, gboolean authorised, gpointer user_data)
 }
 
 static void
+start (MojitoService *service)
+{
+  MojitoServiceMySpace *myspace = (MojitoServiceMySpace*)service;
+
+  myspace->priv->running = TRUE;
+}
+
+static void
 refresh (MojitoService *service)
 {
   MojitoServiceMySpace *myspace = (MojitoServiceMySpace*)service;
   MojitoServiceMySpacePrivate *priv = myspace->priv;
+
+  if (!priv->running)
+    return;
 
   if (priv->user_id == NULL) {
     mojito_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
@@ -367,6 +379,7 @@ mojito_service_myspace_class_init (MojitoServiceMySpaceClass *klass)
   service_class->get_capabilities = get_capabilities;
   service_class->get_persona_icon = get_persona_icon;
   service_class->update_status = update_status;
+  service_class->start = start;
   service_class->refresh = refresh;
 }
 

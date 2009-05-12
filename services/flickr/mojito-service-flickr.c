@@ -37,6 +37,7 @@ G_DEFINE_TYPE (MojitoServiceFlickr, mojito_service_flickr, MOJITO_TYPE_SERVICE)
 #define KEY_USER KEY_BASE "/user"
 
 struct _MojitoServiceFlickrPrivate {
+  gboolean running;
   GConfClient *gconf;
   RestProxy *proxy;
   char *user_id;
@@ -235,12 +236,20 @@ flickr_callback (RestProxyCall *call,
 }
 
 static void
+start (MojitoService *service)
+{
+  MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
+
+  flickr->priv->running = TRUE;
+}
+
+static void
 refresh (MojitoService *service)
 {
   MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
   RestProxyCall *call;
 
-  if (flickr->priv->user_id == NULL) {
+  if (!flickr->priv->running || flickr->priv->user_id == NULL) {
     return;
   }
 
@@ -337,6 +346,7 @@ mojito_service_flickr_class_init (MojitoServiceFlickrClass *klass)
   object_class->finalize = mojito_service_flickr_finalize;
 
   service_class->get_name = mojito_service_flickr_get_name;
+  service_class->start = start;
   service_class->refresh = refresh;
 }
 

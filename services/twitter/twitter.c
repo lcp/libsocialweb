@@ -36,6 +36,7 @@ G_DEFINE_TYPE (MojitoServiceTwitter, mojito_service_twitter, MOJITO_TYPE_SERVICE
 #define KEY_PASSWORD KEY_DIR "/password"
 
 struct _MojitoServiceTwitterPrivate {
+  gboolean running;
   GConfClient *gconf;
   gboolean user_set, password_set;
   gchar *username;
@@ -114,13 +115,21 @@ make_item_from_status (MojitoService *service, TwitterStatus *status)
 }
 
 static void
+start (MojitoService *service)
+{
+  MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
+
+  twitter->priv->running = TRUE;
+}
+
+static void
 refresh (MojitoService *service)
 {
   MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
   MojitoServiceTwitterPrivate *priv = twitter->priv;
   GHashTable *params = NULL;
 
-  if (!priv->user_set || !priv->password_set)
+  if (!priv->running || !priv->user_set || !priv->password_set)
     return;
 
   mojito_set_empty (priv->set);
@@ -307,6 +316,7 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
   object_class->finalize = mojito_service_twitter_finalize;
 
   service_class->get_name = mojito_service_twitter_get_name;
+  service_class->start = start;
   service_class->refresh = refresh;
   service_class->get_capabilities = get_capabilities;
   service_class->update_status = update_status;

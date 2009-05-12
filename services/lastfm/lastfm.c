@@ -38,6 +38,7 @@ G_DEFINE_TYPE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE)
 #define KEY_USER KEY_BASE "/user"
 
 struct _MojitoServiceLastfmPrivate {
+  gboolean running;
   RestProxy *proxy;
   GConfClient *gconf;
   char *user_id;
@@ -124,6 +125,14 @@ lastfm_call (RestProxyCall *call)
   return node;
 }
 
+static void
+start (MojitoService *service)
+{
+  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
+
+  lastfm->priv->running = TRUE;
+}
+
 /* TODO: this is one huge main loop blockage and should be rewritten */
 static void
 refresh (MojitoService *service)
@@ -133,7 +142,7 @@ refresh (MojitoService *service)
   RestXmlNode *root, *node;
   MojitoSet *set;
 
-  if (lastfm->priv->user_id == NULL) {
+  if (!lastfm->priv->running || lastfm->priv->user_id == NULL) {
     return;
   }
 
@@ -280,6 +289,7 @@ mojito_service_lastfm_class_init (MojitoServiceLastfmClass *klass)
   object_class->finalize = mojito_service_lastfm_finalize;
 
   service_class->get_name = get_name;
+  service_class->start = start;
   service_class->refresh = refresh;
 }
 
@@ -289,6 +299,8 @@ mojito_service_lastfm_init (MojitoServiceLastfm *self)
   MojitoServiceLastfmPrivate *priv;
 
   priv = self->priv = GET_PRIVATE (self);
+
+  priv->running = FALSE;
 
   priv->proxy = rest_proxy_new ("http://ws.audioscrobbler.com/2.0/", FALSE);
 
