@@ -1,4 +1,4 @@
-services_LTLIBRARIES = libmojito-service-dummy.la
+noinst_LTLIBRARIES = libmojito-service-dummy.la
 
 libmojito_service_dummy_la_SOURCES = mojito-module-dummy.c \
 				 mojito-service-dummy.c mojito-service-dummy.h
