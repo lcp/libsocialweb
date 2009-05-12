@@ -299,10 +299,17 @@ static void
 view_start (MojitoViewIface *iface, DBusGMethodInvocation *context)
 {
   MojitoView *view = MOJITO_VIEW (iface);
+  GList *l;
 
   view->priv->running = TRUE;
 
   mojito_view_iface_return_from_start (context);
+
+  /* Tell the services to start */
+  for (l = view->priv->services; l; l = l->next) {
+    MojitoService *service = l->data;
+    mojito_service_start (service);
+  }
 
   if (mojito_is_online ()) {
     online_notify (TRUE, view);
