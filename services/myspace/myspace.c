@@ -217,7 +217,7 @@ got_user_cb (RestProxyCall *call,
 static void
 got_tokens_cb (OAuthProxy *proxy, gboolean authorised, gpointer user_data)
 {
-  MojitoServiceMySpace *myspace = user_data;
+  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (user_data);
   MojitoServiceMySpacePrivate *priv = myspace->priv;
   RestProxyCall *call;
 
@@ -225,6 +225,8 @@ got_tokens_cb (OAuthProxy *proxy, gboolean authorised, gpointer user_data)
     call = rest_proxy_new_call (priv->proxy);
     rest_proxy_call_set_function (call, "v1/user");
     rest_proxy_call_async (call, got_user_cb, (GObject*)myspace, NULL, NULL);
+  } else {
+    mojito_service_emit_refreshed ((MojitoService *)myspace, NULL);
   }
 }
 
