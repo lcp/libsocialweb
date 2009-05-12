@@ -270,11 +270,28 @@ mojito_service_flickr_get_name (MojitoService *service)
 static void
 user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
-  MojitoServiceFlickr *flickr = MOJITO_SERVICE_FLICKR (user_data);
+  MojitoService *service = MOJITO_SERVICE (user_data);
+  MojitoServiceFlickr *flickr = MOJITO_SERVICE_FLICKR (service);
   MojitoServiceFlickrPrivate *priv = flickr->priv;
+  const char *new_user;
 
-  g_free (priv->user_id);
-  priv->user_id = g_strdup (gconf_value_get_string (entry->value));
+  if (entry->value) {
+    new_user = gconf_value_get_string (entry->value);
+    if (new_user && new_user[0] == '\0')
+      new_user = NULL;
+  } else {
+    new_user = NULL;
+  }
+
+  if (g_strcmp0 (new_user, priv->user_id) != 0) {
+    g_free (priv->user_id);
+    priv->user_id = g_strdup (new_user);
+
+    if (priv->user_id)
+      refresh (service);
+    else
+      mojito_service_emit_refreshed (service, NULL);
+  }
 }
 
 static void
