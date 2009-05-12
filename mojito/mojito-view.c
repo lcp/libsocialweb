@@ -203,16 +203,15 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
   }
 
   if (priv->running) {
+    MojitoSet *old_items, *new_items;
+    MojitoSet *removed_items, *added_items;
 
+    /* Remove all existing items from this service */
+    mojito_set_foreach_remove (priv->all_items, remove_service, service);
     if (set) {
-      /* Remove all existing items from this service */
-      mojito_set_foreach_remove (priv->all_items, remove_service, service);
       mojito_set_add_from (priv->all_items, set);
       mojito_set_unref (set);
     }
-
-    MojitoSet *old_items, *new_items;
-    MojitoSet *removed_items, *added_items;
 
     old_items = priv->current;
     new_items = munge_items (view);
