@@ -204,11 +204,6 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
 
   if (priv->running) {
 
-    if (!set) {
-      g_message ("Service returned NULL. Using cached material.");
-      set = mojito_cache_load (service);
-    }
-
     if (set) {
       /* Remove all existing items from this service */
       mojito_set_foreach_remove (priv->all_items, remove_service, service);
