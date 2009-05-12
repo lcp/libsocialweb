@@ -44,16 +44,6 @@ struct _MojitoServiceLastfmPrivate {
   guint gconf_notify_id;
 };
 
-static void
-user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
-{
-  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (user_data);
-  MojitoServiceLastfmPrivate *priv = lastfm->priv;
-
-  g_free (priv->user_id);
-  priv->user_id = g_strdup (gconf_value_get_string (entry->value));
-}
-
 static char *
 make_title (RestXmlNode *node)
 {
@@ -216,6 +206,33 @@ refresh (MojitoService *service)
   rest_xml_node_unref (root);
 
   mojito_service_emit_refreshed (service, set);
+}
+
+static void
+user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
+{
+  MojitoService *service = MOJITO_SERVICE (user_data);
+  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
+  MojitoServiceLastfmPrivate *priv = lastfm->priv;
+  const char *new_user;
+
+  if (entry->value) {
+    new_user = gconf_value_get_string (entry->value);
+    if (new_user && new_user[0] == '\0')
+      new_user = NULL;
+  } else {
+    new_user = NULL;
+  }
+
+  if (g_strcmp0 (new_user, priv->user_id) != 0) {
+    g_free (priv->user_id);
+    priv->user_id = g_strdup (new_user);
+
+    if (priv->user_id)
+      refresh (service);
+    else
+      mojito_service_emit_refreshed (service, NULL);
+  }
 }
 
 static const char *
