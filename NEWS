@@ -1,3 +1,11 @@
+Mojito 0.13.3
+===
+
+* Handle the username/password changing
+* Don't always read from the cache when the service returns no data
+* Don't refresh when the service is being constructed
+
+
 Mojito 0.13.2
 ===
 
