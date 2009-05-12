@@ -330,6 +330,12 @@ mojito_service_flickr_init (MojitoServiceFlickr *self)
 
   self->priv = priv = GET_PRIVATE (self);
 
+  priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
+
+  priv->pending = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  priv->set = mojito_item_set_new ();
+  priv->refreshing = FALSE;
+
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_BASE,
                         GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
@@ -337,10 +343,4 @@ mojito_service_flickr_init (MojitoServiceFlickr *self)
                                                    user_changed_cb, self, 
                                                    NULL, NULL);
   gconf_client_notify (priv->gconf, KEY_USER);
-
-  priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
-
-  priv->pending = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-  priv->set = mojito_item_set_new ();
-  priv->refreshing = FALSE;
 }
