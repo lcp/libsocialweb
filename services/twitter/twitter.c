@@ -54,7 +54,8 @@ struct _MojitoServiceTwitterPrivate {
 static void
 user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
-  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (user_data);
+  MojitoService *service = MOJITO_SERVICE (user_data);
+  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (service);
   MojitoServiceTwitterPrivate *priv = twitter->priv;
   const char *username = NULL, *password = NULL;
 
@@ -75,6 +76,8 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
   if (priv->user_set && priv->password_set) {
     priv->self_handle =
       twitter_client_show_user_from_id (priv->client, priv->username);
+  } else {
+    mojito_service_emit_refreshed (service, NULL);
   }
 }
 
