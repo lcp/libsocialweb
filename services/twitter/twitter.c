@@ -319,13 +319,7 @@ mojito_service_twitter_init (MojitoServiceTwitter *self)
 
   priv->user_set = priv->password_set = FALSE;
 
-  priv->gconf = gconf_client_get_default ();
-  gconf_client_add_dir (priv->gconf, KEY_DIR,
-                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  priv->username_notify_id = gconf_client_notify_add
-    (priv->gconf, KEY_USER, user_changed_cb, self, NULL, NULL);
-  priv->password_notify_id = gconf_client_notify_add
-    (priv->gconf, KEY_PASSWORD, user_changed_cb, self, NULL, NULL);
+  priv->set = mojito_item_set_new ();
 
   priv->client = g_object_new (TWITTER_TYPE_CLIENT,
                                "user-agent", "Mojito/" VERSION,
@@ -340,9 +334,15 @@ mojito_service_twitter_init (MojitoServiceTwitter *self)
                     G_CALLBACK (user_received_cb),
                     self);
 
-  priv->set = mojito_item_set_new ();
-
   /* Load preferences */
+  priv->gconf = gconf_client_get_default ();
+  gconf_client_add_dir (priv->gconf, KEY_DIR,
+                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
+  priv->username_notify_id = gconf_client_notify_add
+    (priv->gconf, KEY_USER, user_changed_cb, self, NULL, NULL);
+  priv->password_notify_id = gconf_client_notify_add
+    (priv->gconf, KEY_PASSWORD, user_changed_cb, self, NULL, NULL);
+
   gconf_client_notify (priv->gconf, KEY_USER);
   gconf_client_notify (priv->gconf, KEY_PASSWORD);
 }
