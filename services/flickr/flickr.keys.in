@@ -1,5 +1,5 @@
 [MojitoService]
 _Name=Flickr
-_Description=Flickr is a photo sharing website.
+_Description=Flickr - almost certainly the best online photo management and sharing application in the world.
 Link=http://www.flickr.com/
 AuthType=username
