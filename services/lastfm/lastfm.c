@@ -23,6 +23,7 @@
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-web.h>
+#include <mojito-keystore/mojito-keystore.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <gconf/gconf-client.h>
@@ -148,7 +149,7 @@ refresh (MojitoService *service)
 
   call = rest_proxy_new_call (lastfm->priv->proxy);
   rest_proxy_call_add_params (call,
-                              "api_key", LASTFM_APIKEY,
+                              "api_key", mojito_keystore_get_key ("lastfm"),
                               "method", "user.getFriends",
                               "user", lastfm->priv->user_id,
                               NULL);
@@ -166,7 +167,7 @@ refresh (MojitoService *service)
 
     call = rest_proxy_new_call (lastfm->priv->proxy);
     rest_proxy_call_add_params (call,
-                                "api_key", LASTFM_APIKEY,
+                                "api_key", mojito_keystore_get_key ("lastfm"),
                                 "method", "user.getRecentTracks",
                                 "user", rest_xml_node_find (node, "name")->content,
                                 "limit", "1",
