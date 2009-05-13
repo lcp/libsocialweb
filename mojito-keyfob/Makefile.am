@@ -1,7 +1,7 @@
 QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
 
 lib_LTLIBRARIES = libmojito-keyfob.la
-libmojito_keyfob_ladir = $(pkgincludedir)/mojito
+libmojito_keyfob_ladir = $(pkgincludedir)/mojito-keyfob
 
 libmojito_keyfob_la_CFLAGS = -I$(top_srcdir) \
 		     $(DBUS_GLIB_CFLAGS) $(KEYRING_CFLAGS) $(REST_CFLAGS)
