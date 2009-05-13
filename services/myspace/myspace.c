@@ -161,6 +161,8 @@ got_status_cb (RestProxyCall *call,
     node = node->next;
   }
 
+  rest_xml_node_unref (root);
+
   if (!mojito_set_is_empty (set))
     mojito_service_emit_refreshed (service, set);
 
@@ -212,6 +214,8 @@ got_user_cb (RestProxyCall *call,
   service->priv->display_name = rest_xml_node_find (node, "displayname")->content;
   service->priv->profile_url = rest_xml_node_find (node, "weburi")->content;
   service->priv->image_url = rest_xml_node_find (node, "imageuri")->content;
+
+  rest_xml_node_unref (node);
 
   get_status_updates (service);
 }
@@ -278,6 +282,7 @@ sync_auth (MojitoServiceMySpace *myspace)
     priv->display_name = rest_xml_node_find (node, "displayname")->content;
     priv->profile_url = rest_xml_node_find (node, "weburi")->content;
     priv->image_url = rest_xml_node_find (node, "imageuri")->content;
+    rest_xml_node_unref (node);
   }
 
   return TRUE;
