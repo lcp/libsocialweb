@@ -24,6 +24,7 @@
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-web.h>
+#include <mojito-keystore/mojito-keystore.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <gconf/gconf-client.h>
@@ -261,7 +262,7 @@ refresh (MojitoService *service)
   call = rest_proxy_new_call (flickr->priv->proxy);
   rest_proxy_call_add_params (call,
                               "method", "flickr.photos.getContactsPublicPhotos",
-                              "api_key", FLICKR_APIKEY,
+                              "api_key", mojito_keystore_get_key ("flickr"),
                               "user_id", flickr->priv->user_id,
                               "extras", "date_upload,icon_server",
                               NULL);
