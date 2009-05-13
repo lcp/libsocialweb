@@ -240,10 +240,10 @@ got_user_cb (RestProxyCall *call,
   if (!node)
     return;
 
-  service->priv->user_id = rest_xml_node_find (node, "userid")->content;
-  service->priv->display_name = rest_xml_node_find (node, "displayname")->content;
-  service->priv->profile_url = rest_xml_node_find (node, "weburi")->content;
-  service->priv->image_url = rest_xml_node_find (node, "imageuri")->content;
+  service->priv->user_id = g_strdup (rest_xml_node_find (node, "userid")->content);
+  service->priv->display_name = g_strdup (rest_xml_node_find (node, "displayname")->content);
+  service->priv->profile_url = g_strdup (rest_xml_node_find (node, "weburi")->content);
+  service->priv->image_url = g_strdup (rest_xml_node_find (node, "imageuri")->content);
 
   rest_xml_node_unref (node);
 
