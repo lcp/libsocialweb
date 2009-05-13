@@ -25,6 +25,7 @@
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-web.h>
 #include <mojito-keyfob/mojito-keyfob.h>
+#include <mojito-keystore/mojito-keystore.h>
 #include <rest/oauth-proxy.h>
 #include <rest/rest-xml-parser.h>
 
@@ -387,9 +388,11 @@ static void
 mojito_service_myspace_init (MojitoServiceMySpace *self)
 {
   MojitoServiceMySpacePrivate *priv;
+  const char *key = NULL, *secret = NULL;
 
   priv = self->priv = GET_PRIVATE (self);
 
-  priv->proxy = oauth_proxy_new (MYSPACE_APIKEY, MYSPACE_SECRET,
-                                 "http://api.myspace.com/", FALSE);
+  mojito_keystore_get_key_secret ("myspace", &key, &secret);
+
+  priv->proxy = oauth_proxy_new (key, secret, "http://api.myspace.com/", FALSE);
 }
