@@ -105,6 +105,11 @@ got_status_cb (RestProxyCall *call,
   RestXmlNode *root, *node;
   MojitoSet *set;
 
+  if (error) {
+    g_message ("Error: %s", error->message);
+    return;
+  }
+
   root = node_from_call (call);
   if (!root)
     return;
@@ -225,6 +230,11 @@ got_user_cb (RestProxyCall *call,
 {
   MojitoServiceMySpace *service = MOJITO_SERVICE_MYSPACE (weak_object);
   RestXmlNode *node;
+
+  if (error) {
+    g_message ("Error: %s", error->message);
+    return;
+  }
 
   node = node_from_call (call);
   if (!node)
