@@ -47,6 +47,7 @@ RestXmlNode *
 node_from_call (RestProxyCall *call)
 {
   static RestXmlParser *parser = NULL;
+  RestXmlNode *root;
 
   if (call == NULL)
     return NULL;
@@ -56,9 +57,24 @@ node_from_call (RestProxyCall *call)
 
   /* TODO: check call return status? */
 
-  return rest_xml_parser_parse_from_data (parser,
+  root = rest_xml_parser_parse_from_data (parser,
                                           rest_proxy_call_get_payload (call),
                                           rest_proxy_call_get_payload_length (call));
+
+  if (strcmp (root->name, "error") != 0) {
+    return root;
+  } else {
+    RestXmlNode *node;
+    node = rest_xml_node_find (root, "statusdescription");
+    if (node) {
+      g_message ("Error: %s", node->content);
+    } else {
+      g_message ("Error from MySpace: %s",
+                 rest_proxy_call_get_payload (call));
+    }
+    rest_xml_node_unref (root);
+    return NULL;
+  }
 }
 
 static char *
@@ -90,6 +106,8 @@ got_status_cb (RestProxyCall *call,
   MojitoSet *set;
 
   root = node_from_call (call);
+  if (!root)
+    return;
 
   set = mojito_item_set_new ();
 
@@ -209,6 +227,8 @@ got_user_cb (RestProxyCall *call,
   RestXmlNode *node;
 
   node = node_from_call (call);
+  if (!node)
+    return;
 
   service->priv->user_id = rest_xml_node_find (node, "userid")->content;
   service->priv->display_name = rest_xml_node_find (node, "displayname")->content;
@@ -278,6 +298,9 @@ sync_auth (MojitoServiceMySpace *myspace)
       return FALSE;
 
     node = node_from_call (call);
+    if (!node)
+      return FALSE;
+
     priv->user_id = rest_xml_node_find (node, "userid")->content;
     priv->display_name = rest_xml_node_find (node, "displayname")->content;
     priv->profile_url = rest_xml_node_find (node, "weburi")->content;
