@@ -5,9 +5,6 @@ Link=http://www.myspace.com/
 AuthType=oauth
 
 [OAuth]
-# TODO: these should be disguised somehow
-ConsumerKey=4b8b511346364eb6a4d977f602f4cf6f
-ConsumerSecret=77e19a30f17b4fb9b9cb06a133312d11
 BaseURL=http://api.myspace.com/
 RequestTokenFunction=request_token
 AuthoriseFunction=authorize
