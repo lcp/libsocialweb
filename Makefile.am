@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = mojito mojito-keyfob mojito-keystore mojito-client src services examples tests tools po
 
-pkgconfig_DATA = mojito-client.pc mojito-module.pc
+pkgconfig_DATA = mojito-client.pc mojito-module.pc mojito-keystore.pc
 pkgconfigdir   = $(libdir)/pkgconfig
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-flickr-key=DUMMY --enable-lastfm-key=DUMMY  --enable-myspace-key=DUMMY1:DUMMY2

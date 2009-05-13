@@ -186,4 +186,5 @@ AC_OUTPUT([
         po/Makefile.in
         mojito-client.pc
         mojito-module.pc
+        mojito-keystore.pc
 ])
