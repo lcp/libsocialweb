@@ -55,11 +55,22 @@ node_from_call (RestProxyCall *call)
   if (parser == NULL)
     parser = rest_xml_parser_new ();
 
-  /* TODO: check call return status? */
+  if (!SOUP_STATUS_IS_SUCCESSFUL (rest_proxy_call_get_status_code (call))) {
+    g_message ("Error from MySpace: %s (%d)",
+               rest_proxy_call_get_status_message (call),
+               rest_proxy_call_get_status_code (call));
+    return NULL;
+  }
 
   root = rest_xml_parser_parse_from_data (parser,
                                           rest_proxy_call_get_payload (call),
                                           rest_proxy_call_get_payload_length (call));
+
+  if (root == NULL) {
+    g_message ("Error from MySpace: %s",
+               rest_proxy_call_get_payload (call));
+    return NULL;
+  }
 
   if (strcmp (root->name, "error") != 0) {
     return root;
