@@ -221,6 +221,16 @@ service_update_status (MojitoServiceIface    *self,
 }
 
 static void
+decode_caps (guint32 caps, gboolean *can_get_persona_icon, gboolean *can_update_status)
+{
+  g_assert (can_get_persona_icon);
+  g_assert (can_update_status);
+
+  *can_get_persona_icon = caps & SERVICE_CAN_GET_PERSONA_ICON;
+  *can_update_status = caps & SERVICE_CAN_UPDATE_STATUS;
+}
+
+static void
 service_get_capabilities (MojitoServiceIface    *self,
                           DBusGMethodInvocation *context)
 {
@@ -237,8 +247,7 @@ service_get_capabilities (MojitoServiceIface    *self,
   if (service_class->get_capabilities)
     caps = service_class->get_capabilities (priv->instance);
 
-  can_get_persona_icon = caps & SERVICE_CAN_GET_PERSONA_ICON;
-  can_update_status = caps & SERVICE_CAN_UPDATE_STATUS;
+  decode_caps (caps, &can_get_persona_icon, &can_update_status);
 
   mojito_service_iface_return_from_get_capabilities (context,
                                                      can_get_persona_icon,
