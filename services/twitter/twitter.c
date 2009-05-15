@@ -78,6 +78,11 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
     priv->self_handle =
       twitter_client_show_user_from_id (priv->client, priv->username);
   } else {
+    /* TODO: yes, this leaks.  Dispose cycle in twitter-glib */
+    if (priv->user)
+      priv->user = NULL;
+
+    mojito_service_emit_capabilities_changed (service, 0);
     mojito_service_emit_refreshed (service, NULL);
   }
 }
