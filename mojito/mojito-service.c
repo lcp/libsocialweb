@@ -159,11 +159,7 @@ mojito_service_refresh (MojitoService *service)
 void
 mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set)
 {
-  MojitoServicePrivate *priv;
-
   g_return_if_fail (MOJITO_IS_SERVICE (service));
-
-  priv = GET_PRIVATE (service);
 
   g_signal_emit (service, signals[SIGNAL_REFRESHED], 0, set ? mojito_set_ref (set) : NULL);
 }
