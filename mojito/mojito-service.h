@@ -59,6 +59,7 @@ struct _MojitoServiceClass {
   gchar *(*get_persona_icon) (MojitoService *service);
   gboolean (*update_status) (MojitoService *service, const gchar *status_message);
   guint32 (*get_capabilities) (MojitoService *service);
+  /* ::caps-changed signal emitted when this changes */
 };
 
 typedef enum
@@ -76,6 +77,8 @@ void mojito_service_start (MojitoService *service);
 void mojito_service_refresh (MojitoService *service);
 
 void mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set);
+
+void mojito_service_emit_capabilities_changed (MojitoService *service, guint32 caps);
 
 G_END_DECLS
 

@@ -38,6 +38,7 @@ enum {
 
 enum {
   SIGNAL_REFRESHED,
+  SIGNAL_CAPS_CHANGED,
   N_SIGNALS
 };
 
@@ -119,6 +120,15 @@ mojito_service_class_init (MojitoServiceClass *klass)
                   NULL, NULL,
                   g_cclosure_marshal_VOID__BOXED,
                   G_TYPE_NONE, 1, MOJITO_TYPE_SET);
+
+  signals[SIGNAL_CAPS_CHANGED] =
+    g_signal_new ("caps-changed",
+                  G_OBJECT_CLASS_TYPE (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL,
+                  g_cclosure_marshal_VOID__UINT,
+                  G_TYPE_NONE, 1, G_TYPE_UINT);
 }
 
 static void
@@ -162,4 +172,12 @@ mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set)
   g_return_if_fail (MOJITO_IS_SERVICE (service));
 
   g_signal_emit (service, signals[SIGNAL_REFRESHED], 0, set ? mojito_set_ref (set) : NULL);
+}
+
+void
+mojito_service_emit_capabilities_changed (MojitoService *service, guint32 caps)
+{
+  g_return_if_fail (MOJITO_IS_SERVICE (service));
+
+  g_signal_emit (service, signals[SIGNAL_CAPS_CHANGED], 0, caps);
 }
