@@ -14,5 +14,10 @@
       <arg name="can_get_persona_icon" type="b" direction="out"/>
       <arg name="can_update_status" type="b" direction="out"/>
     </method>
+
+    <signal name="CapabilitiesChanged" tp:name-for-bindings="Capabilities_Changed">
+      <arg name="can_get_persona_icon" type="b"/>
+      <arg name="can_update_status" type="b"/>
+    </signal>
   </interface>
 </node>
