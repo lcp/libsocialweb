@@ -286,8 +286,12 @@ update_status (MojitoService *service,
 static guint32
 get_capabilities (MojitoService *service)
 {
-  return SERVICE_CAN_UPDATE_STATUS |
-    SERVICE_CAN_GET_PERSONA_ICON;
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+
+  if (priv->user)
+    return SERVICE_CAN_UPDATE_STATUS | SERVICE_CAN_GET_PERSONA_ICON;
+  else
+    return 0;
 }
 
 static gchar *
