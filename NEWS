@@ -1,3 +1,11 @@
+Mojito 0.13.9
+===
+
+* Add CapabilitiesChanged signal to the services
+* Use it in Twitter and MySpace
+* Fix memory corruption in MySpace
+
+
 Mojito 0.13.8
 ===
 
