@@ -301,9 +301,12 @@ refresh (MojitoService *service)
   }
 }
 
+static guint32 get_capabilities (MojitoService *service);
+
 static gboolean
 sync_auth (MojitoServiceMySpace *myspace)
 {
+  MojitoService *service = (MojitoService *)myspace;
   MojitoServiceMySpacePrivate *priv = myspace->priv;
 
   if (priv->user_id == NULL) {
@@ -327,6 +330,8 @@ sync_auth (MojitoServiceMySpace *myspace)
     priv->profile_url = g_strdup (rest_xml_node_find (node, "weburi")->content);
     priv->image_url = g_strdup (rest_xml_node_find (node, "imageuri")->content);
     rest_xml_node_unref (node);
+
+    mojito_service_emit_capabilities_changed (service, get_capabilities (service));
   }
 
   return TRUE;
