@@ -322,10 +322,10 @@ sync_auth (MojitoServiceMySpace *myspace)
     if (!node)
       return FALSE;
 
-    priv->user_id = rest_xml_node_find (node, "userid")->content;
-    priv->display_name = rest_xml_node_find (node, "displayname")->content;
-    priv->profile_url = rest_xml_node_find (node, "weburi")->content;
-    priv->image_url = rest_xml_node_find (node, "imageuri")->content;
+    priv->user_id = g_strdup (rest_xml_node_find (node, "userid")->content);
+    priv->display_name = g_strdup (rest_xml_node_find (node, "displayname")->content);
+    priv->profile_url = g_strdup (rest_xml_node_find (node, "weburi")->content);
+    priv->image_url = g_strdup (rest_xml_node_find (node, "imageuri")->content);
     rest_xml_node_unref (node);
   }
 
