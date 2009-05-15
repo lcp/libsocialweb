@@ -182,6 +182,8 @@ timeline_received_cb (TwitterClient *client,
   mojito_set_empty (priv->set);
 }
 
+static guint32 get_capabilities (MojitoService *service);
+
 static void
 user_received_cb (TwitterClient *client,
                   gulong         handle,
@@ -189,8 +191,9 @@ user_received_cb (TwitterClient *client,
                   const GError  *error,
                   gpointer       userdata)
 {
-  MojitoServiceTwitter *service = (MojitoServiceTwitter *)userdata;
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (userdata);
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (twitter);
+  MojitoService *service = (MojitoService*)twitter;
 
   if (!user) {
     g_warning (G_STRLOC ": Error when getting user information: %s",
@@ -213,8 +216,10 @@ user_received_cb (TwitterClient *client,
 
     priv->user = g_object_ref (user);
 
+    mojito_service_emit_capabilities_changed (service, get_capabilities (service));
+
     if (need_refresh)
-      refresh ((MojitoService*)service);
+      refresh (service);
   }
 }
 
