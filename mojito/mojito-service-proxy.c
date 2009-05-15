@@ -86,14 +86,22 @@ mojito_service_proxy_dispose (GObject *object)
   G_OBJECT_CLASS (mojito_service_proxy_parent_class)->dispose (object);
 }
 
+static void
+construct_instance (MojitoService *service)
+{
+  MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
+
+  if (!priv->instance)
+    priv->instance = g_object_new (priv->type, NULL);
+}
+
 static const gchar *
 mojito_service_proxy_get_name (MojitoService *service)
 {
   MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
   MojitoServiceClass *class;
 
-  if (!priv->instance)
-    priv->instance = g_object_new (priv->type, NULL);
+  construct_instance (service);
 
   class = MOJITO_SERVICE_GET_CLASS (priv->instance);
   return class->get_name (priv->instance);
@@ -105,8 +113,7 @@ mojito_service_proxy_start (MojitoService *service)
   MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
   MojitoServiceClass *class;
 
-  if (!priv->instance)
-    priv->instance = g_object_new (priv->type, NULL);
+  construct_instance (service);
 
   class = MOJITO_SERVICE_GET_CLASS (priv->instance);
 
@@ -119,8 +126,7 @@ mojito_service_proxy_refresh (MojitoService *service)
   MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
   MojitoServiceClass *class;
 
-  if (!priv->instance)
-    priv->instance = g_object_new (priv->type, NULL);
+  construct_instance (service);
 
   class = MOJITO_SERVICE_GET_CLASS (priv->instance);
 
@@ -175,8 +181,7 @@ service_get_persona_icon (MojitoServiceIface    *self,
   MojitoServiceClass *service_class;
   gchar *persona_icon = NULL;
 
-  if (!priv->instance)
-    priv->instance = g_object_new (priv->type, NULL);
+  construct_instance ((MojitoService*)self);
 
   service_class = MOJITO_SERVICE_GET_CLASS (priv->instance);
 
@@ -199,8 +204,7 @@ service_update_status (MojitoServiceIface    *self,
   MojitoServiceClass *service_class;
   gboolean res = TRUE;
 
-  if (!priv->instance)
-    priv->instance = g_object_new (priv->type, NULL);
+  construct_instance ((MojitoService*)self);
 
   service_class = MOJITO_SERVICE_GET_CLASS (priv->instance);
 
@@ -226,8 +230,7 @@ service_get_capabilities (MojitoServiceIface    *self,
   gboolean can_get_persona_icon;
   gboolean can_update_status;
 
-  if (!priv->instance)
-    priv->instance = g_object_new (priv->type, NULL);
+  construct_instance ((MojitoService*)self);
 
   service_class = MOJITO_SERVICE_GET_CLASS (priv->instance);
 
