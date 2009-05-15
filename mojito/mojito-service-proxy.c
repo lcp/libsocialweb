@@ -87,12 +87,42 @@ mojito_service_proxy_dispose (GObject *object)
 }
 
 static void
+decode_caps (guint32 caps, gboolean *can_get_persona_icon, gboolean *can_update_status)
+{
+  g_assert (can_get_persona_icon);
+  g_assert (can_update_status);
+
+  *can_get_persona_icon = caps & SERVICE_CAN_GET_PERSONA_ICON;
+  *can_update_status = caps & SERVICE_CAN_UPDATE_STATUS;
+
+#if 0
+  g_debug ("got caps: %spersona icons %supdate status",
+           *can_get_persona_icon ? "+" : "-",
+           *can_update_status ? "+" : "-");
+#endif
+}
+
+static void
+on_caps_changed (MojitoService *service, guint32 caps, gpointer user_data)
+{
+  MojitoServiceProxy *proxy = MOJITO_SERVICE_PROXY (user_data);
+  gboolean can_get_persona_icon, can_update_status;
+
+  decode_caps (caps, &can_get_persona_icon, &can_update_status);
+
+  mojito_service_iface_emit_capabilities_changed
+    (proxy, can_get_persona_icon, can_update_status);
+}
+
+static void
 construct_instance (MojitoService *service)
 {
   MojitoServiceProxyPrivate *priv = GET_PRIVATE (service);
 
-  if (!priv->instance)
+  if (!priv->instance) {
     priv->instance = g_object_new (priv->type, NULL);
+    g_signal_connect (priv->instance, "caps-changed", G_CALLBACK (on_caps_changed), service);
+  }
 }
 
 static const gchar *
@@ -218,16 +248,6 @@ service_update_status (MojitoServiceIface    *self,
   }
 
   mojito_service_iface_return_from_update_status (context, res);
-}
-
-static void
-decode_caps (guint32 caps, gboolean *can_get_persona_icon, gboolean *can_update_status)
-{
-  g_assert (can_get_persona_icon);
-  g_assert (can_update_status);
-
-  *can_get_persona_icon = caps & SERVICE_CAN_GET_PERSONA_ICON;
-  *can_update_status = caps & SERVICE_CAN_UPDATE_STATUS;
 }
 
 static void
