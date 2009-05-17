@@ -21,6 +21,7 @@
 
 #include "mojito-client-service.h"
 #include "mojito-service-bindings.h"
+#include "mojito-client-marshals.h"
 
 G_DEFINE_TYPE (MojitoClientService, mojito_client_service, G_TYPE_OBJECT)
 
@@ -33,6 +34,14 @@ struct _MojitoClientServicePrivate {
   DBusGConnection *connection;
   DBusGProxy *proxy;
 };
+
+enum
+{
+  CAPS_CHANGED_SIGNAL,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0 };
 
 #define MOJITO_CLIENT_SERVICE_NAME "com.intel.Mojito"
 #define MOJITO_CLIENT_SERVICE_OBJECT "/com/intel/Mojito/Service/%s"
@@ -95,11 +104,40 @@ mojito_client_service_class_init (MojitoClientServiceClass *klass)
   object_class->set_property = mojito_client_service_set_property;
   object_class->dispose = mojito_client_service_dispose;
   object_class->finalize = mojito_client_service_finalize;
+
+  signals[CAPS_CHANGED_SIGNAL] =
+    g_signal_new ("capabilities-changed",
+                  MOJITO_CLIENT_TYPE_SERVICE,
+                  G_SIGNAL_RUN_FIRST,
+                  G_STRUCT_OFFSET (MojitoClientServiceClass, capabilities_changed),
+                  NULL,
+                  NULL,
+                  g_cclosure_marshal_VOID__UINT,
+                  G_TYPE_NONE,
+                  1,
+                  G_TYPE_UINT);
 }
 
 static void
 mojito_client_service_init (MojitoClientService *self)
 {
+}
+
+static void
+_capabilities_changed_cb (DBusGProxy *proxy,
+                          gboolean    can_get_persona_icon,
+                          gboolean    can_update_status,
+                          gpointer user_data)
+{
+  MojitoClientService *service = MOJITO_CLIENT_SERVICE (user_data);
+  guint32 caps = 0;
+
+  if (can_get_persona_icon)
+    caps |= MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON;
+  if (can_update_status)
+    caps |= MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS;
+
+  g_signal_emit (service, signals[CAPS_CHANGED_SIGNAL], 0, caps);
 }
 
 gboolean
@@ -136,6 +174,22 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
     g_propagate_error (error_out, error);
     return FALSE;
   }
+
+  dbus_g_object_register_marshaller (mojito_marshal_VOID__BOOLEAN_BOOLEAN,
+                                     G_TYPE_NONE,
+                                     G_TYPE_BOOLEAN,
+                                     G_TYPE_BOOLEAN,
+                                     G_TYPE_INVALID);
+  dbus_g_proxy_add_signal (priv->proxy,
+                           "CapabilitiesChanged",
+                           G_TYPE_BOOLEAN,
+                           G_TYPE_BOOLEAN,
+                           NULL);
+  dbus_g_proxy_connect_signal (priv->proxy,
+                               "CapabilitiesChanged",
+                               (GCallback)_capabilities_changed_cb,
+                               service,
+                               NULL);
 
   return TRUE;
 }

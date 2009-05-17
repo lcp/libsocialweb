@@ -47,6 +47,7 @@ typedef struct {
 
 typedef struct {
   GObjectClass parent_class;
+  void (*capabilities_changed) (MojitoClientService *service, guint32 caps);
 } MojitoClientServiceClass;
 
 GType mojito_client_service_get_type (void);
