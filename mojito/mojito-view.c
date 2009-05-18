@@ -33,8 +33,8 @@ G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_VIEW, MojitoViewPrivate))
 
-/* Refresh every 10 minutes */
-#define REFRESH_TIMEOUT (10 * 60)
+/* Refresh every 5 minutes */
+#define REFRESH_TIMEOUT (5 * 60)
 
 struct _MojitoViewPrivate {
   /* List of MojitoService objects */
