@@ -105,22 +105,9 @@ AS_IF(
 AM_CONDITIONAL([WITH_LASTFM], [test x$enable_lastfm_key != xno])
 
 
-AC_MSG_CHECKING([whether to build the Twitter service])
-AC_ARG_WITH([twitter],[AS_HELP_STRING([--without-twitter], [disable the Twitter service])],
-            [], [with_twitter=yes])
-AS_IF(
-        [test "$with_twitter" = yes],
-        [
-        AC_MSG_RESULT([yes])
-        PKG_CHECK_MODULES(TWITTER, twitter-glib-1.0 >= 0.9.6)
-        ],
-        AC_MSG_RESULT([no])
-)
-AM_CONDITIONAL([WITH_TWITTER], [test x$with_twitter = xyes])
-
-
 MOJITO_OAUTH_KEYS(MySpace, myspace, MYSPACE)
 MOJITO_OAUTH_KEYS(Flickr, flickr, FLICKR)
+MOJITO_OAUTH_KEYS(Twitter, twitter, TWITTER)
 
 
 servicesdir='${libdir}'/mojito/services
