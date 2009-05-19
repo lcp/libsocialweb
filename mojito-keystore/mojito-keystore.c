@@ -46,6 +46,9 @@ static const Keys keys[] = {
 #ifdef MYSPACE_APIKEY
   { "myspace", MYSPACE_APIKEY, MYSPACE_SECRET },
 #endif
+#ifdef TWITTER_APIKEY
+  { "twitter", TWITTER_APIKEY, TWITTER_SECRET },
+#endif
   { NULL }
 };
 
@@ -130,6 +133,12 @@ test_key_secret (void)
   g_assert (ret == TRUE);
   g_assert_cmpstr (key, ==, MYSPACE_APIKEY);
   g_assert_cmpstr (secret, ==, MYSPACE_SECRET);
+
+  key = secret = NULL;
+  ret = mojito_keystore_get_key_secret ("twitter", &key, &secret);
+  g_assert (ret == TRUE);
+  g_assert_cmpstr (key, ==, TWITTER_APIKEY);
+  g_assert_cmpstr (secret, ==, TWITTER_SECRET);
 }
 
 static void
@@ -145,6 +154,9 @@ test_key (void)
 
   key = mojito_keystore_get_key ("myspace");
   g_assert_cmpstr (key, ==, MYSPACE_APIKEY);
+
+  key = mojito_keystore_get_key ("twitter");
+  g_assert_cmpstr (key, ==, TWITTER_APIKEY);
 }
 
 int
