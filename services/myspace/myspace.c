@@ -368,7 +368,9 @@ get_capabilities (MojitoService *service)
   MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
 
   if (sync_auth (myspace))
-    return SERVICE_CAN_UPDATE_STATUS | SERVICE_CAN_GET_PERSONA_ICON;
+    return SERVICE_CAN_UPDATE_STATUS |
+      SERVICE_CAN_GET_PERSONA_ICON |
+      SERVICE_CAN_REQUEST_AVATAR;
   else
     return 0;
 }
