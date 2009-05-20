@@ -38,7 +38,7 @@ typedef struct {
 
 static const Keys keys[] = {
 #ifdef FLICKR_APIKEY
-  { "flickr", FLICKR_APIKEY, NULL },
+  { "flickr", FLICKR_APIKEY, FLICKR_SECRET },
 #endif
 #ifdef LASTFM_APIKEY
   { "lastfm", LASTFM_APIKEY, NULL },
