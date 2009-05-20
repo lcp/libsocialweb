@@ -55,7 +55,7 @@ mojito_keyfob_flickr (FlickrProxy *proxy,
                           MojitoKeyfobCallback callback,
                           gpointer user_data)
 {
-  char *key = NULL;
+  const char *key;
   CallbackData *data;
 
   /* TODO: hacky, make a proper singleton or proper object */
@@ -64,7 +64,7 @@ mojito_keyfob_flickr (FlickrProxy *proxy,
   data->callback = callback;
   data->user_data = user_data;
 
-  g_object_get (proxy, "consumer-key", &key, NULL);
+  key = flickr_proxy_get_api_key (proxy);
 
   gnome_keyring_find_password (&flickr_schema,
                                find_flickr_key_cb,
@@ -72,23 +72,21 @@ mojito_keyfob_flickr (FlickrProxy *proxy,
                                "server", FLICKR_SERVER,
                                "api-key", key,
                                NULL);
-
-  g_free (key);
 }
 
 gboolean
 mojito_keyfob_flickr_sync (FlickrProxy *proxy)
 {
-  char *key = NULL, *password = NULL;
+  const char *key;
+  char *password = NULL;
   GnomeKeyringResult result;
 
-  g_object_get (proxy, "consumer-key", &key, NULL);
+  key = flickr_proxy_get_api_key (proxy);
 
   result = gnome_keyring_find_password_sync (&flickr_schema, &password,
                                              "server", FLICKR_SERVER,
                                              "api-key", key,
                                              NULL);
-  g_free (key);
 
   if (result == GNOME_KEYRING_RESULT_OK) {
     /* TODO: validate so the caller doesn't need to */
