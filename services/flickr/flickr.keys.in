@@ -2,4 +2,4 @@
 _Name=Flickr
 _Description=Flickr - almost certainly the best online photo management and sharing application in the world.
 Link=http://www.flickr.com/
-AuthType=username
+AuthType=flickr

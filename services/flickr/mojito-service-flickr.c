@@ -25,24 +25,18 @@
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-web.h>
 #include <mojito-keystore/mojito-keystore.h>
-#include <rest/rest-proxy.h>
+#include <mojito-keyfob/mojito-keyfob.h>
+#include <rest/flickr-proxy.h>
 #include <rest/rest-xml-parser.h>
-#include <gconf/gconf-client.h>
 
 G_DEFINE_TYPE (MojitoServiceFlickr, mojito_service_flickr, MOJITO_TYPE_SERVICE)
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_FLICKR, MojitoServiceFlickrPrivate))
 
-#define KEY_BASE "/apps/mojito/services/flickr"
-#define KEY_USER KEY_BASE "/user"
-
 struct _MojitoServiceFlickrPrivate {
   gboolean running;
-  GConfClient *gconf;
   RestProxy *proxy;
-  char *user_id;
-  guint gconf_notify_id;
 
   /* Used when running a refresh */
   MojitoSet *set;
@@ -237,20 +231,41 @@ flickr_callback (RestProxyCall *call,
 }
 
 static void
-start (MojitoService *service)
+get_photos (MojitoServiceFlickr *flickr)
 {
-  MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
+  RestProxyCall *call;
+  GError *error = NULL;
 
-  flickr->priv->running = TRUE;
+  call = rest_proxy_new_call (flickr->priv->proxy);
+  rest_proxy_call_set_function (call, "flickr.photos.getContactsPhotos");
+  rest_proxy_call_add_param (call, "extras", "date_upload,icon_server");
+
+  if (!rest_proxy_call_async (call, flickr_callback, (GObject*)flickr, NULL, &error)) {
+    g_warning ("Cannot get photos: %s", error->message);
+    g_error_free (error);
+  }
+}
+
+static void
+got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
+{
+  MojitoServiceFlickr *flickr = MOJITO_SERVICE_FLICKR (user_data);
+
+  if (authorised) {
+    /* TODO: this assumes that the tokens are valid. we should call checkToken
+       and re-auth if required. */
+    get_photos (flickr);
+  } else {
+    mojito_service_emit_refreshed ((MojitoService *)flickr, NULL);
+  }
 }
 
 static void
 refresh (MojitoService *service)
 {
   MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
-  RestProxyCall *call;
 
-  if (!flickr->priv->running || flickr->priv->user_id == NULL) {
+  if (!flickr->priv->running) {
     return;
   }
 
@@ -259,16 +274,15 @@ refresh (MojitoService *service)
     return;
   }
 
-  call = rest_proxy_new_call (flickr->priv->proxy);
-  rest_proxy_call_add_params (call,
-                              "method", "flickr.photos.getContactsPublicPhotos",
-                              "api_key", mojito_keystore_get_key ("flickr"),
-                              "user_id", flickr->priv->user_id,
-                              "extras", "date_upload,icon_server",
-                              NULL);
+  mojito_keyfob_flickr ((FlickrProxy*)flickr->priv->proxy, got_tokens_cb, service);
+}
 
-  /* TODO: GError */
-  rest_proxy_call_async (call, flickr_callback, (GObject*)service, NULL, NULL);
+static void
+start (MojitoService *service)
+{
+  MojitoServiceFlickr *flickr = (MojitoServiceFlickr*)service;
+
+  flickr->priv->running = TRUE;
 }
 
 static const char *
@@ -278,44 +292,9 @@ mojito_service_flickr_get_name (MojitoService *service)
 }
 
 static void
-user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
-{
-  MojitoService *service = MOJITO_SERVICE (user_data);
-  MojitoServiceFlickr *flickr = MOJITO_SERVICE_FLICKR (service);
-  MojitoServiceFlickrPrivate *priv = flickr->priv;
-  const char *new_user;
-
-  if (entry->value) {
-    new_user = gconf_value_get_string (entry->value);
-    if (new_user && new_user[0] == '\0')
-      new_user = NULL;
-  } else {
-    new_user = NULL;
-  }
-
-  if (g_strcmp0 (new_user, priv->user_id) != 0) {
-    g_free (priv->user_id);
-    priv->user_id = g_strdup (new_user);
-
-    if (priv->user_id)
-      refresh (service);
-    else
-      mojito_service_emit_refreshed (service, NULL);
-  }
-}
-
-static void
 mojito_service_flickr_dispose (GObject *object)
 {
   MojitoServiceFlickrPrivate *priv = MOJITO_SERVICE_FLICKR (object)->priv;
-
-  if (priv->gconf) {
-    gconf_client_notify_remove (priv->gconf,
-                                priv->gconf_notify_id);
-    gconf_client_remove_dir (priv->gconf, KEY_BASE, NULL);
-    g_object_unref (priv->gconf);
-    priv->gconf = NULL;
-  }
 
   if (priv->proxy) {
     g_object_unref (priv->proxy);
@@ -323,16 +302,6 @@ mojito_service_flickr_dispose (GObject *object)
   }
 
   G_OBJECT_CLASS (mojito_service_flickr_parent_class)->dispose (object);
-}
-
-static void
-mojito_service_flickr_finalize (GObject *object)
-{
-  MojitoServiceFlickrPrivate *priv = MOJITO_SERVICE_FLICKR (object)->priv;
-
-  g_free (priv->user_id);
-
-  G_OBJECT_CLASS (mojito_service_flickr_parent_class)->finalize (object);
 }
 
 static void
@@ -344,7 +313,6 @@ mojito_service_flickr_class_init (MojitoServiceFlickrClass *klass)
   g_type_class_add_private (klass, sizeof (MojitoServiceFlickrPrivate));
 
   object_class->dispose = mojito_service_flickr_dispose;
-  object_class->finalize = mojito_service_flickr_finalize;
 
   service_class->get_name = mojito_service_flickr_get_name;
   service_class->start = start;
@@ -355,20 +323,14 @@ static void
 mojito_service_flickr_init (MojitoServiceFlickr *self)
 {
   MojitoServiceFlickrPrivate *priv;
+  const char *key = NULL, *secret = NULL;
 
   self->priv = priv = GET_PRIVATE (self);
 
-  priv->proxy = rest_proxy_new ("http://api.flickr.com/services/rest/", FALSE);
+  mojito_keystore_get_key_secret ("flickr", &key, &secret);
+  priv->proxy = flickr_proxy_new (key, secret);
 
   priv->pending = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   priv->set = mojito_item_set_new ();
   priv->refreshing = FALSE;
-
-  priv->gconf = gconf_client_get_default ();
-  gconf_client_add_dir (priv->gconf, KEY_BASE,
-                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  priv->gconf_notify_id = gconf_client_notify_add (priv->gconf, KEY_USER,
-                                                   user_changed_cb, self, 
-                                                   NULL, NULL);
-  gconf_client_notify (priv->gconf, KEY_USER);
 }
