@@ -5,10 +5,11 @@
 
 G_BEGIN_DECLS
 
-typedef void (*MojitoKeyfobOAuthCallback) (OAuthProxy *proxy, gboolean authorised, gpointer user_data);
+/* Generic callback */
+typedef void (*MojitoKeyfobCallback) (RestProxy *proxy, gboolean authorised, gpointer user_data);
 
 void mojito_keyfob_oauth (OAuthProxy *proxy,
-                          MojitoKeyfobOAuthCallback callback,
+                          MojitoKeyfobCallback callback,
                           gpointer user_data);
 
 gboolean mojito_keyfob_oauth_sync (OAuthProxy *proxy);

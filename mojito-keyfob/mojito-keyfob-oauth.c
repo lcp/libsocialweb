@@ -14,7 +14,7 @@ static const GnomeKeyringPasswordSchema oauth_schema = {
 
 typedef struct {
   OAuthProxy *proxy;
-  MojitoKeyfobOAuthCallback callback;
+  MojitoKeyfobCallback callback;
   gpointer user_data;
 } CallbackData;
 
@@ -99,12 +99,12 @@ find_oauth_key_cb (GnomeKeyringResult result,
       g_free (token);
       g_free (token_secret);
 
-      data->callback (data->proxy, TRUE, data->user_data);
+      data->callback ((RestProxy*)data->proxy, TRUE, data->user_data);
     } else {
-      data->callback (data->proxy, FALSE, data->user_data);
+      data->callback ((RestProxy*)data->proxy, FALSE, data->user_data);
     }
   } else {
-    data->callback (data->proxy, FALSE, data->user_data);
+    data->callback ((RestProxy*)data->proxy, FALSE, data->user_data);
   }
 
   /* Cleanup of data is done by gnome-keyring, bless it */
@@ -112,7 +112,7 @@ find_oauth_key_cb (GnomeKeyringResult result,
 
 void
 mojito_keyfob_oauth (OAuthProxy *proxy,
-                          MojitoKeyfobOAuthCallback callback,
+                          MojitoKeyfobCallback callback,
                           gpointer user_data)
 {
   char *server = NULL, *key = NULL;
