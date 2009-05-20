@@ -8,7 +8,8 @@ libmojito_keyfob_la_CFLAGS = -I$(top_srcdir) \
 libmojito_keyfob_la_LIBADD = $(DBUS_GLIB_LIBS) $(KEYRING_LIBS) $(REST_LIBS)
 
 libmojito_keyfob_la_SOURCES = \
-	mojito-keyfob.c mojito-keyfob.h
+	mojito-keyfob.h \
+	mojito-keyfob-oauth.c
 
 libmojito_keyfob_la_HEADERS = \
 	mojito-keyfob.h
