@@ -117,7 +117,7 @@ test_key_secret (void)
   ret = mojito_keystore_get_key_secret ("flickr", &key, &secret);
   g_assert (ret == TRUE);
   g_assert_cmpstr (key, ==, FLICKR_APIKEY);
-  g_assert (secret == NULL);
+  g_assert_cmpstr (secret, ==, FLICKR_SECRET);
 
   key = secret = NULL;
   ret = mojito_keystore_get_key_secret ("lastfm", &key, &secret);
