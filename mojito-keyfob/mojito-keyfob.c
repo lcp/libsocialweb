@@ -78,7 +78,7 @@ callback_data_free (CallbackData *data)
  * we have to ask the user to authenticate.
  */
 static void
-find_key_cb (GnomeKeyringResult result,
+find_oauth_key_cb (GnomeKeyringResult result,
              const char *string,
              gpointer user_data)
 {
@@ -130,7 +130,7 @@ mojito_keyfob_oauth (OAuthProxy *proxy,
                 NULL);
 
   gnome_keyring_find_password (&oauth_schema,
-                               find_key_cb,
+                               find_oauth_key_cb,
                                data, (GDestroyNotify)callback_data_free,
                                "server", server,
                                "consumer-key", key,
