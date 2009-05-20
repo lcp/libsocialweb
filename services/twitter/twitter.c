@@ -299,7 +299,9 @@ get_capabilities (MojitoService *service)
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
 
   if (priv->user)
-    return SERVICE_CAN_UPDATE_STATUS | SERVICE_CAN_GET_PERSONA_ICON;
+    return SERVICE_CAN_UPDATE_STATUS |
+      SERVICE_CAN_GET_PERSONA_ICON |
+      SERVICE_CAN_REQUEST_AVATAR;
   else
     return 0;
 }
