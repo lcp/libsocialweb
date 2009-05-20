@@ -45,6 +45,8 @@ decode (const char *string, char **token, char **token_secret)
   return ret;
 }
 
+#if BUILD_TESTS
+/* Disable this unless we're building tests for now until it is exposed for bisho */
 static char *
 encode (const char *token, const char *secret)
 {
@@ -64,6 +66,7 @@ encode (const char *token, const char *secret)
 
   return string;
 }
+#endif
 
 static void
 callback_data_free (CallbackData *data)
