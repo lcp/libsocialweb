@@ -91,21 +91,6 @@ AS_IF(
 )
 
 
-# TODO: make this a m4 function in acinclude
-AC_MSG_CHECKING([for Flickr key to use])
-AC_ARG_ENABLE([flickr-key], [AS_HELP_STRING([--enable-flickr-key], [API key for Flickr])],
-                            [], [enable_flickr_key=no])
-AS_IF(
-        [test "x$enable_flickr_key" != xno],
-        [
-        AC_MSG_RESULT([$enable_flickr_key])
-        AC_DEFINE_UNQUOTED([FLICKR_APIKEY], ["$enable_flickr_key"], [Flickr API key])
-        ],
-        AC_MSG_RESULT([not enabling Flickr support])
-)
-AM_CONDITIONAL([WITH_FLICKR], [test x$enable_flickr_key != xno])
-
-
 AC_MSG_CHECKING([for Lastfm key to use])
 AC_ARG_ENABLE([lastfm-key], [AS_HELP_STRING([--enable-lastfm-key], [API key for Lastfm])],
                             [], [enable_lastfm_key=no])
@@ -135,6 +120,7 @@ AM_CONDITIONAL([WITH_TWITTER], [test x$with_twitter = xyes])
 
 
 MOJITO_OAUTH_KEYS(MySpace, myspace, MYSPACE)
+MOJITO_OAUTH_KEYS(Flickr, flickr, FLICKR)
 
 
 servicesdir='${libdir}'/mojito/services
