@@ -262,7 +262,7 @@ got_user_cb (RestProxyCall *call,
 }
 
 static void
-got_tokens_cb (OAuthProxy *proxy, gboolean authorised, gpointer user_data)
+got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
 {
   MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (user_data);
   MojitoServiceMySpacePrivate *priv = myspace->priv;
