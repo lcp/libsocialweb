@@ -233,6 +233,29 @@ get_status_updates (MojitoServiceMySpace *service)
   rest_proxy_call_async (call, got_status_cb, (GObject*)service, NULL, NULL);
 }
 
+/*
+ * For a given parent @node, get the child node called @name and return a copy
+ * of the content, or NULL. If the content is the empty string, NULL is
+ * returned.
+ */
+static char *
+get_child_node_value (RestXmlNode *node, const char *name)
+{
+  RestXmlNode *subnode;
+
+  g_assert (node);
+  g_assert (name);
+
+  subnode = rest_xml_node_find (node, name);
+  if (!subnode)
+    return NULL;
+
+  if (subnode->content && subnode->content[0])
+    return g_strdup (subnode->content);
+  else
+    return NULL;
+}
+
 static void
 got_user_cb (RestProxyCall *call,
              GError        *error,
@@ -240,6 +263,7 @@ got_user_cb (RestProxyCall *call,
              gpointer       userdata)
 {
   MojitoServiceMySpace *service = MOJITO_SERVICE_MYSPACE (weak_object);
+  MojitoServiceMySpacePrivate *priv = service->priv;
   RestXmlNode *node;
 
   if (error) {
@@ -251,10 +275,10 @@ got_user_cb (RestProxyCall *call,
   if (!node)
     return;
 
-  service->priv->user_id = g_strdup (rest_xml_node_find (node, "userid")->content);
-  service->priv->display_name = g_strdup (rest_xml_node_find (node, "displayname")->content);
-  service->priv->profile_url = g_strdup (rest_xml_node_find (node, "weburi")->content);
-  service->priv->image_url = g_strdup (rest_xml_node_find (node, "imageuri")->content);
+  priv->user_id = get_child_node_value (node, "userid");
+  priv->display_name = get_child_node_value (node, "displayname");
+  priv->profile_url = get_child_node_value (node, "weburi");
+  priv->image_url = get_child_node_value (node, "imageuri");
 
   rest_xml_node_unref (node);
 
@@ -325,10 +349,11 @@ sync_auth (MojitoServiceMySpace *myspace)
     if (!node)
       return FALSE;
 
-    priv->user_id = g_strdup (rest_xml_node_find (node, "userid")->content);
-    priv->display_name = g_strdup (rest_xml_node_find (node, "displayname")->content);
-    priv->profile_url = g_strdup (rest_xml_node_find (node, "weburi")->content);
-    priv->image_url = g_strdup (rest_xml_node_find (node, "imageuri")->content);
+    priv->user_id = get_child_node_value (node, "userid");
+    priv->display_name = get_child_node_value (node, "displayname");
+    priv->profile_url = get_child_node_value (node, "weburi");
+    priv->image_url = get_child_node_value (node, "imageuri");
+
     rest_xml_node_unref (node);
 
     mojito_service_emit_capabilities_changed (service, get_capabilities (service));
