@@ -32,6 +32,7 @@ test-runner
 intltool-*
 po/POTFILES
 po/stamp-it
+po/*.gmo
 m4/intltool.m4
 po/.intltool-merge-cache
 services/*/*.keys
