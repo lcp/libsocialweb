@@ -184,8 +184,8 @@ _proxy_item_removed_cb (DBusGProxy  *proxy,
 
   if (item)
   {
-    g_hash_table_remove (priv->uuid_to_items, uuid);
     g_signal_emit (view, signals[ITEM_REMOVED_SIGNAL], 0, item);
+    g_hash_table_remove (priv->uuid_to_items, uuid);
   } else {
     g_critical (G_STRLOC ": Asked to remove unknown item with uuid: %s",
                 uuid);
