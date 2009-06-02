@@ -25,6 +25,7 @@
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-web.h>
 #include <gconf/gconf-client.h>
+#include <mojito/mojito-online.h>
 
 G_DEFINE_TYPE (MojitoServiceTwitter, mojito_service_twitter, MOJITO_TYPE_SERVICE)
 
@@ -273,9 +274,25 @@ mojito_service_twitter_dispose (GObject *object)
 }
 
 static void
+online_notify (gboolean online, gpointer user_data)
+{
+  MojitoService *service = (MojitoService *) user_data;
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+
+  if (online) {
+    gconf_client_notify (priv->gconf, KEY_USER);
+    gconf_client_notify (priv->gconf, KEY_PASSWORD);
+  } else {
+    mojito_service_emit_capabilities_changed (service, 0);
+  }
+}
+
+static void
 mojito_service_twitter_finalize (GObject *object)
 {
   MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
+
+  mojito_online_remove_notify (online_notify, object);
 
   g_free (priv->username);
 
@@ -400,6 +417,10 @@ mojito_service_twitter_init (MojitoServiceTwitter *self)
   priv->password_notify_id = gconf_client_notify_add
     (priv->gconf, KEY_PASSWORD, user_changed_cb, self, NULL, NULL);
 
-  gconf_client_notify (priv->gconf, KEY_USER);
-  gconf_client_notify (priv->gconf, KEY_PASSWORD);
+  if (mojito_is_online ())
+  {
+    online_notify (TRUE, self);
+  }
+
+  mojito_online_add_notify (online_notify, self);
 }
