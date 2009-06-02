@@ -23,7 +23,6 @@
 #include "mojito-online.h"
 #include "mojito-view.h"
 #include "client-monitor.h"
-#include "mojito-service-proxy.h"
 
 #include "mojito-core-ginterface.h"
 
@@ -313,7 +312,7 @@ populate_services (MojitoCore *core)
                            GINT_TO_POINTER (service_type));
 
       /* Create a laxy proxy object and add it to the bus */
-      proxy = mojito_service_proxy_new (service_type);
+      proxy = g_object_new (service_type, NULL);
       g_hash_table_insert (priv->bus_services,
                            (gchar *)service_name,
                            proxy);
