@@ -28,6 +28,7 @@
 #include <mojito-keystore/mojito-keystore.h>
 #include <rest/oauth-proxy.h>
 #include <rest/rest-xml-parser.h>
+#include <mojito/mojito-online.h>
 
 G_DEFINE_TYPE (MojitoServiceMySpace, mojito_service_myspace, MOJITO_TYPE_SERVICE)
 
@@ -450,6 +451,18 @@ mojito_service_myspace_get_name (MojitoService *service)
 }
 
 static void
+online_notify (gboolean online, gpointer user_data)
+{
+  MojitoServiceMySpace *service = (MojitoServiceMySpace *) user_data;
+
+  if (online) {
+    sync_auth (service);
+  } else {
+    mojito_service_emit_capabilities_changed ((MojitoService *)service, 0);
+  }
+}
+
+static void
 mojito_service_myspace_dispose (GObject *object)
 {
   MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (object)->priv;
@@ -467,6 +480,7 @@ mojito_service_myspace_finalize (GObject *object)
 {
   MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (object)->priv;
 
+  mojito_online_remove_notify (online_notify, object);
   g_free (priv->user_id);
 
   G_OBJECT_CLASS (mojito_service_myspace_parent_class)->finalize (object);
@@ -503,4 +517,11 @@ mojito_service_myspace_init (MojitoServiceMySpace *self)
   mojito_keystore_get_key_secret ("myspace", &key, &secret);
 
   priv->proxy = oauth_proxy_new (key, secret, "http://api.myspace.com/", FALSE);
+
+  if (mojito_is_online ())
+  {
+    online_notify (TRUE, self);
+  }
+
+  mojito_online_add_notify (online_notify, self);
 }
