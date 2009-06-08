@@ -1,3 +1,10 @@
+Mojito 0.15
+===
+
+* Re-attempt MySpace and Twitter authentication when we go online
+* Add asynchronous avatar fetching
+
+
 Mojito 0.14
 ===
 
