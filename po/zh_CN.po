@@ -1,0 +1,67 @@
+# mojito
+# Copyright (C) 2009 Intel
+# This file is distributed under the same license as the PACKAGE package.
+# Zhu Yanhai <yanhai.zhu@intel.com>, 2009.
+#
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: mojito\n"
+"Report-Msgid-Bugs-To: bugzilla.moblin.org\n"
+"POT-Creation-Date: 2009-05-30 14:47+0100\n"
+"PO-Revision-Date: 2009-06-08 10:44+0800\n"
+"Last-Translator: Zhu Yanhai <yanhai.zhu@intel.com>\n"
+"Language-Team: zh_CN <yanhai.zhu@intel.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../services/lastfm/lastfm.keys.in.h:1
+msgid "Last.fm"
+msgstr "Last.fm"
+
+#: ../services/lastfm/lastfm.keys.in.h:2
+msgid ""
+"Last.fm is a music service that learns what you love. Every track you play "
+"will tell your Last.fm profile something about what you like. It can connect "
+"you to other people who like what you like - and recommend songs from their "
+"music collections and yours too."
+msgstr "Last.fm是一项知道你喜欢什么样的音乐的服务.你每多听一首歌,Last.fm就会多知道些关于"
+"你的喜好的信息.它可以让你与和你有共同爱好的其他人取得联系 - 并且从他们的收藏和你自己的收藏中"
+"向你推荐歌曲."
+
+#: ../services/twitter/twitter.keys.in.h:1
+msgid "Twitter"
+msgstr "Twitter"
+
+#: ../services/twitter/twitter.keys.in.h:2
+msgid ""
+"Twitter is a service for friends, family, and co–workers to communicate and "
+"stay connected through the exchange of quick, frequent answers to one simple "
+"question: What are you doing?"
+msgstr "Twitter是一项供朋友,家人和同事们联系和沟通的服务,它的存在就是为解决其他人经常向你"
+"提出的这样一个问题提供答案:你现在在干什么"
+
+#: ../services/flickr/flickr.keys.in.h:1
+msgid "Flickr"
+msgstr "Flickr"
+
+#: ../services/flickr/flickr.keys.in.h:2
+msgid ""
+"Flickr - almost certainly the best online photo management and sharing "
+"application in the world."
+msgstr "Flicker - 几乎是目前世界上最好的在线照片管理和共享系统."
+
+#: ../services/myspace/myspace.keys.in.h:1
+msgid "MySpace"
+msgstr "MySpace"
+
+#: ../services/myspace/myspace.keys.in.h:2
+msgid ""
+"MySpace is a leading social portal for connecting people, content, and "
+"culture from around the world. Create a profile, share photos, professional "
+"and viral videos, blog, instant message your friends, and listen to music on "
+"the world’s largest music community."
+msgstr "MySpace是一个连接全世界各种人种,文化,信息的先进社交门户网站.您可以在上边建立自己的"
+"个人信息,共享照片,写博客,看视频,给朋友发消息,并且在世界最大的音乐社区里欣赏音乐."
