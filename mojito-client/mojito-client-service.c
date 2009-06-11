@@ -127,7 +127,8 @@ static void
 _capabilities_changed_cb (DBusGProxy *proxy,
                           gboolean    can_get_persona_icon,
                           gboolean    can_update_status,
-                          gpointer user_data)
+                          gboolean    can_request_avatar,
+                          gpointer    user_data)
 {
   MojitoClientService *service = MOJITO_CLIENT_SERVICE (user_data);
   guint32 caps = 0;
@@ -136,6 +137,8 @@ _capabilities_changed_cb (DBusGProxy *proxy,
     caps |= MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON;
   if (can_update_status)
     caps |= MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS;
+  if (can_request_avatar)
+    caps |= MOJITO_CLIENT_SERVICE_CAN_REQUEST_AVATAR;
 
   g_signal_emit (service, signals[CAPS_CHANGED_SIGNAL], 0, caps);
 }
@@ -175,13 +178,15 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
     return FALSE;
   }
 
-  dbus_g_object_register_marshaller (mojito_marshal_VOID__BOOLEAN_BOOLEAN,
+  dbus_g_object_register_marshaller (mojito_marshal_VOID__BOOLEAN_BOOLEAN_BOOLEAN,
                                      G_TYPE_NONE,
+                                     G_TYPE_BOOLEAN,
                                      G_TYPE_BOOLEAN,
                                      G_TYPE_BOOLEAN,
                                      G_TYPE_INVALID);
   dbus_g_proxy_add_signal (priv->proxy,
                            "CapabilitiesChanged",
+                           G_TYPE_BOOLEAN,
                            G_TYPE_BOOLEAN,
                            G_TYPE_BOOLEAN,
                            NULL);
