@@ -98,57 +98,63 @@ mojito_is_online (void)
 #endif
 
 #if WITH_ONLINE_NM
-#include <NetworkManager.h>
-#include <dbus/dbus-glib.h>
+#include <libnm-glib/nm-client.h>
 
-static DBusGProxy *proxy = NULL;
+/*
+ * Use NMClient since it correctly handles the NetworkManager service
+ * appearing and disappearing, as can happen at boot time, or during
+ * a network subsystem restart.
+ */
+static NMClient *client = NULL;
+
+static gboolean
+we_are_online (gpointer user_data)
+{
+  emit_notify (mojito_is_online ());
+  return FALSE;
+}
 
 static void
-state_changed (DBusGProxy *proxy, NMState state, gpointer user_data)
+state_changed (NMClient        *client,
+	       const GParamSpec *pspec,
+	       gpointer          data)
 {
-  emit_notify (state == NM_STATE_CONNECTED);
+  if (mojito_is_online()) {
+    /* NM is notifying us too early - workaround that */
+    g_timeout_add (1500, (GSourceFunc)we_are_online, NULL);
+  } else {
+    emit_notify (FALSE); /* mojito_is_online ()); */
+  }
 }
 
 static gboolean
 online_init (void)
 {
-  DBusGConnection *conn;
-
-  if (proxy)
-    return TRUE;
-
-  conn = dbus_g_bus_get (DBUS_BUS_SYSTEM, NULL);
-  if (!conn) {
-    g_warning ("Cannot get connection to system message bus");
-    return FALSE;
+  if (!client) {
+    client = nm_client_new();
+    g_signal_connect (client, "notify::" NM_CLIENT_STATE,
+		      G_CALLBACK (state_changed), NULL);
   }
-
-  proxy = dbus_g_proxy_new_for_name (conn,
-                                     NM_DBUS_SERVICE,
-                                     NM_DBUS_PATH,
-                                     NM_DBUS_INTERFACE);
-
-  /* StateChange is deprecated is 0.8 but 0.6 doesn't have StateChanged */
-  dbus_g_proxy_add_signal (proxy, "StateChange", G_TYPE_UINT, NULL);
-  dbus_g_proxy_connect_signal (proxy, "StateChange",
-                               (GCallback)state_changed, NULL, NULL);
   return TRUE;
 }
 
 gboolean
 mojito_is_online (void)
 {
-  /* On error, assume we are online */
-  NMState state = NM_STATE_CONNECTED;
+  NMState state = NM_STATE_UNKNOWN;
+ 
+  g_object_get (G_OBJECT (client), NM_CLIENT_STATE, &state, NULL);
 
-  if (!online_init ())
+  switch (state) {
+  case NM_STATE_CONNECTED:
     return TRUE;
-
-  dbus_g_proxy_call (proxy, "state", NULL,
-                     G_TYPE_INVALID,
-                     G_TYPE_UINT, &state, G_TYPE_INVALID);
-
-  return state == NM_STATE_CONNECTED;
+  case NM_STATE_CONNECTING:
+  case NM_STATE_ASLEEP:
+  case NM_STATE_DISCONNECTED:
+  case NM_STATE_UNKNOWN:
+  default:
+    return FALSE;
+  }
 }
 
 #endif
