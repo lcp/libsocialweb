@@ -46,6 +46,48 @@ struct _MojitoServiceLastfmPrivate {
   guint gconf_notify_id;
 };
 
+/*
+ * Run the call, displaying any errors as appropriate, and return the parsed
+ * document if it succeeded.
+ */
+static RestXmlNode *
+lastfm_call (RestProxyCall *call)
+{
+  GError *error = NULL;
+  RestXmlParser *parser;
+  RestXmlNode *node;
+
+  g_assert (call);
+
+  rest_proxy_call_run (call, NULL, &error);
+  parser = rest_xml_parser_new ();
+  node = rest_xml_parser_parse_from_data (parser,
+                                          rest_proxy_call_get_payload (call),
+                                          rest_proxy_call_get_payload_length (call));
+  g_object_unref (call);
+
+  /* No content, or wrong content */
+  if (node == NULL || strcmp (node->name, "lfm") != 0) {
+    g_printerr ("Cannot make Last.fm call: %s\n",
+                error ? error->message : "unknown reason");
+    if (error) g_error_free (error);
+    if (node) rest_xml_node_unref (node);
+    return NULL;
+  }
+
+  if (strcmp (rest_xml_node_get_attr (node, "status"), "ok") != 0) {
+    RestXmlNode *node2;
+    node2 = rest_xml_node_find (node, "error");
+    g_printerr ("Cannot make Last.fm call: %s (code %s)\n",
+                node2->content,
+                rest_xml_node_get_attr (node2, "code"));
+    rest_xml_node_unref (node);
+    return NULL;
+  }
+
+  return node;
+}
+
 static char *
 make_title (RestXmlNode *node)
 {
@@ -85,45 +127,39 @@ get_image (RestXmlNode *node, const char *size)
   return NULL;
 }
 
-/*
- * Run the call, displaying any errors as appropriate, and return the parsed
- * document if it succeeded.
- */
-static RestXmlNode *
-lastfm_call (RestProxyCall *call)
+static char *
+get_album_image (MojitoServiceLastfm *lastfm, RestXmlNode *track)
 {
-  GError *error = NULL;
-  RestXmlParser *parser;
-  RestXmlNode *node;
+  char *url;
+  RestProxyCall *call;
+  RestXmlNode *artist;
+  const char *mbid;
 
-  g_assert (call);
+  url = get_image (track, "medium");
+  if (url)
+    return url;
 
-  rest_proxy_call_run (call, NULL, &error);
-  parser = rest_xml_parser_new ();
-  node = rest_xml_parser_parse_from_data (parser,
-                                          rest_proxy_call_get_payload (call),
-                                          rest_proxy_call_get_payload_length (call));
+  /* If we didn't find a track image, then try the artist image */
+  call = rest_proxy_new_call (lastfm->priv->proxy);
+  rest_proxy_call_add_params (call,
+                              "method", "artist.getInfo",
+                              "api_key", mojito_keystore_get_key ("lastfm"),
+                              NULL);
 
-  /* No content, or wrong content */
-  if (node == NULL || strcmp (node->name, "lfm") != 0) {
-    g_printerr ("Cannot make Last.fm call: %s\n",
-                error ? error->message : "unknown reason");
-    if (error) g_error_free (error);
-    if (node) rest_xml_node_unref (node);
-    return NULL;
+  artist = rest_xml_node_find (track, "artist");
+  mbid = rest_xml_node_get_attr (artist, "mbid");
+  if (mbid && mbid[0] != '\0') {
+    rest_proxy_call_add_param (call, "mbid", mbid);
+  } else {
+    rest_proxy_call_add_param (call, "artist", artist->content);
   }
 
-  if (strcmp (rest_xml_node_get_attr (node, "status"), "ok") != 0) {
-    RestXmlNode *node2;
-    node2 = rest_xml_node_find (node, "error");
-    g_printerr ("Cannot make Last.fm call: %s (code %s)\n",
-                node2->content,
-                rest_xml_node_get_attr (node2, "code"));
-    rest_xml_node_unref (node);
+  if ((artist = lastfm_call (call)) == NULL)
     return NULL;
-  }
 
-  return node;
+  url = get_image (artist, "medium");
+  rest_xml_node_unref (artist);
+  return url;
 }
 
 static void
@@ -193,7 +229,7 @@ refresh (MojitoService *service)
     mojito_item_take (item, "title", make_title (track));
     mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
 
-    mojito_item_take (item, "thumbnail", get_image (track, "large"));
+    mojito_item_take (item, "thumbnail", get_album_image (lastfm, track));
 
     date = rest_xml_node_find (track, "date");
     mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
