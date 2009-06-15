@@ -265,13 +265,10 @@ populate_services (MojitoCore *core)
     return;
   }
 
-  fi = g_file_enumerator_next_file (enumerator, NULL, &error);
-
-  while (fi)
+  while ((fi = g_file_enumerator_next_file (enumerator, NULL, &error)) != NULL)
   {
     if (!(g_str_has_suffix (g_file_info_get_name (fi), ".so")))
     {
-      fi = g_file_enumerator_next_file (enumerator, NULL, &error);
       continue;
     }
 
@@ -325,8 +322,6 @@ populate_services (MojitoCore *core)
     }
 
     g_module_make_resident (service_module);
-
-    fi = g_file_enumerator_next_file (enumerator, NULL, &error);
   }
 
   if (error)
