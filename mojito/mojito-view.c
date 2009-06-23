@@ -194,11 +194,7 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
   MojitoView *view = MOJITO_VIEW (user_data);
   MojitoViewPrivate *priv = view->priv;
 
-  g_message ("Updated %s", mojito_service_get_name (service));
-
-  if (set == NULL) {
-    g_message ("Service returned NULL (not empty set). Not caching this.");
-  } else {
+  if (set) {
     mojito_cache_save (service, set);
   }
 
@@ -241,7 +237,6 @@ start_refresh (MojitoView *view)
 
   for (l = priv->services; l; l = l->next) {
     MojitoService *service = l->data;
-    g_message ("Updating %s", mojito_service_get_name (service));
     mojito_service_refresh (service);
   }
 
@@ -256,7 +251,6 @@ load_cache (MojitoView *view)
 
   for (l = priv->services; l; l = l->next) {
     MojitoService *service = l->data;
-    g_message ("Loading cache for %s", mojito_service_get_name (service));
     service_updated (service, mojito_cache_load (service), view);
   }
 }
@@ -283,14 +277,12 @@ online_notify (gboolean online, gpointer user_data)
   MojitoView *view = user_data;
 
   if (online) {
-    g_message ("Detected online");
     install_refresh_timeout (view);
     if (view->priv->running) {
       load_cache (view);
       start_refresh (view);
     }
   } else {
-    g_message ("Detected offline");
     remove_refresh_timeout (view);
   }
 }
