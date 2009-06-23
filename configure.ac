@@ -69,7 +69,7 @@ AS_IF(
         [test "$with_online" = networkmanager],
         [
         AC_MSG_RESULT([Network Manager])
-        PKG_CHECK_MODULES(NM, libnm_glib)
+        PKG_CHECK_MODULES(NM, libnm_glib >= 0.7)
         AC_DEFINE([WITH_ONLINE_NM], 1, [NM online detection])
         ],
 
