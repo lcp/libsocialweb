@@ -34,5 +34,7 @@ po/POTFILES
 po/stamp-it
 po/*.gmo
 m4/intltool.m4
+m4/libtool.m4
+m4/lt*.m4
 po/.intltool-merge-cache
 services/*/*.keys
