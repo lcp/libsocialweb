@@ -142,7 +142,10 @@ gboolean
 mojito_is_online (void)
 {
   NMState state = NM_STATE_UNKNOWN;
- 
+
+  if (!online_init ())
+    return TRUE;
+
   g_object_get (G_OBJECT (client), NM_CLIENT_STATE, &state, NULL);
 
   switch (state) {
