@@ -1,7 +1,20 @@
+Mojito 0.17
+===
+
+* Translations
+* Fix potential crash in client library
+* Fallback to artist image when fetching lastfm artwork
+* Fix module loading logic
+* Remove the service proxy concept
+* Use libnm_glib instead of DBus directly
+* Remove rather verbose logging
+
+
 Mojito 0.16
 ===
 
 * Port client side library to include new capabilities (MB#3389.)
+
 
 Mojito 0.15
 ===
