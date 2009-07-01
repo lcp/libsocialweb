@@ -1,0 +1,52 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Moblin\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-06-26 08:47+0000\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Andrzej Zaborowski <andrew.zaborowski@intel.com>\n"
+"Language-Team: Moblin\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Poedit-Language: Polish\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+# <it's a proper name, not translatable>
+#: ../services/lastfm/lastfm.keys.in.h:1
+msgid "Last.fm"
+msgstr "Last.fm"
+
+# Last.fm is a music service that learns what you like. Each song you listen to adds more details to your profile about your preferences. It can connect you with others with the same tastes, and it will recommend you songs from their collections and yours.
+#: ../services/lastfm/lastfm.keys.in.h:2
+msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
+msgstr "Last.fm to serwis muzyczny który uczy się czego lubisz słuchać. Każdy odegrany utwór wzbogaci wiedzę profilu Last.fm o Twoich preferencjach. Może Cię wtedy połączyć z ludźmi którzy kochają to samo co Ty lub polecić utwory z ich kolekcji oraz z Twojej."
+
+#: ../services/twitter/twitter.keys.in.h:1
+msgid "Twitter"
+msgstr "Twitter"
+
+# Twitter is a service to communicate with friends, family and colleagues, in which you respond frequently (and with few words) to this simple question: what are you doing?
+#: ../services/twitter/twitter.keys.in.h:2
+msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
+msgstr "Twitter to serwis do komunikacji z Twoimi przyjaciółmi, rodziną i znajomymi z pracy za pomocą częstego (i zwięzłego) odpowiadania na jedno proste pytanie: Co robisz?"
+
+#: ../services/flickr/flickr.keys.in.h:1
+msgid "Flickr"
+msgstr "Flickr"
+
+# Flicker is, almost without a doubt, the best application in the world to manage and share photos online.
+#: ../services/flickr/flickr.keys.in.h:2
+msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgstr "Flickr - prawdopodobnie najlepsza sieciowa platforma do zarządzania i dzielenia się zdjęciami."
+
+#: ../services/myspace/myspace.keys.in.h:1
+msgid "MySpace"
+msgstr "MySpace"
+
+# MySpace is one of the main social portals to connect people and cultures of the whole world. Create a profile, share your photos, your videos (professional or viral) or your blogs, send instant messages to friends and listen to music in the largest musical community in the world.
+#: ../services/myspace/myspace.keys.in.h:2
+msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
+msgstr "MySpace to przodujący portal społecznościowy do łączenia ze sobą ludzi i kultur z całego świata. Stwórz profil, dziel się zdjęciami i animacjami, bloguj, wysyłaj wiadomości do Twoich znajomych i słuchaj muzyki w największej na świecie społeczności muzycznej."
+
