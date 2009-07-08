@@ -121,6 +121,7 @@ make_item_from_status (MojitoService *service, TwitterStatus *status)
   mojito_item_take (item, "authorid", g_strdup_printf ("%d", twitter_user_get_id (user)));
   mojito_item_take (item, "authoricon", mojito_web_download_image
                     (twitter_user_get_profile_image_url (user)));
+  mojito_item_put (item, "location", twitter_user_get_location (user));
 
   return item;
 }

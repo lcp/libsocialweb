@@ -49,3 +49,8 @@ Path to a local copy of the item's graphical representation.
 cached
 
 Set if the item was retrieved from the local cache.
+
+Bonus extra keys
+==
+
+location on Twitter, free-form location string
