@@ -196,6 +196,8 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
 
   if (set) {
     mojito_cache_save (service, set);
+  } else {
+    mojito_cache_drop (service);
   }
 
   if (priv->running) {
