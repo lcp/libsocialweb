@@ -39,8 +39,7 @@ G_DEFINE_TYPE (MojitoServiceTwitter, mojito_service_twitter, MOJITO_TYPE_SERVICE
 struct _MojitoServiceTwitterPrivate {
   gboolean running;
   GConfClient *gconf;
-  gboolean user_set, password_set;
-  gchar *username;
+  gchar *username, *password;
 
   TwitterClient *client;
   TwitterUser *user;
@@ -64,24 +63,27 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
   if (g_str_equal (entry->key, KEY_USER)) {
     if (entry->value)
       username = gconf_value_get_string (entry->value);
-    g_object_set (priv->client, "email", username, NULL);
-    priv->user_set = (username && username[0] != '\0');
+    if (username[0] == '\0')
+      username = NULL;
     priv->username = g_strdup (username);
   } else if (g_str_equal (entry->key, KEY_PASSWORD)) {
     if (entry->value)
       password = gconf_value_get_string (entry->value);
-    g_object_set (priv->client, "password", password, NULL);
-    priv->password_set = (password && password[0] != '\0');
+    if (password[0] == '\0')
+      password = NULL;
+    priv->password = g_strdup (password);
   }
 
   /* Get our details. This will cause the user_received signal to be fired */
-  if (priv->user_set && priv->password_set) {
+  if (priv->username && priv->password) {
+    /* TODO: yes, this leaks.  Dispose cycle in twitter-glib */
+    priv->user = NULL;
+    twitter_client_set_user (priv->client, priv->username, priv->password);
     priv->self_handle =
       twitter_client_show_user_from_id (priv->client, priv->username);
   } else {
     /* TODO: yes, this leaks.  Dispose cycle in twitter-glib */
-    if (priv->user)
-      priv->user = NULL;
+    priv->user = NULL;
 
     mojito_service_emit_capabilities_changed (service, 0);
     mojito_service_emit_refreshed (service, NULL);
@@ -135,7 +137,7 @@ refresh (MojitoService *service)
   MojitoServiceTwitterPrivate *priv = twitter->priv;
   GHashTable *params = NULL;
 
-  if (!priv->running || !priv->user_set || !priv->password_set)
+  if (!priv->running || !priv->user)
     return;
 
   mojito_set_empty (priv->set);
@@ -196,33 +198,54 @@ user_received_cb (TwitterClient *client,
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (twitter);
   MojitoService *service = (MojitoService*)twitter;
 
-  if (!user) {
-    g_warning (G_STRLOC ": Error when getting user information: %s",
-               error->message);
-    return;
-  }
-
   /* Check that this is us. Not somebody else */
-  if (priv->self_handle == handle ||
-      g_str_equal (twitter_user_get_screen_name (user), priv->username)) {
-    gboolean need_refresh = FALSE;
+  if (priv->self_handle == handle) {
+    if (user) {
+      //g_str_equal (twitter_user_get_screen_name (user), priv->username)) {
 
-    if (priv->user) {
-      /* TODO: leaking the TwitterUser (causes dispose cycle in twitter-glib) */
-#if 0
-      g_object_unref (priv->user);
-#endif
-      need_refresh = TRUE;
-    }
+      if (priv->user) {
+        /* TODO: leaking the TwitterUser (causes dispose cycle in twitter-glib) */
+        //g_object_unref (priv->user);
+      }
 
-    priv->user = g_object_ref (user);
+      priv->user = g_object_ref (user);
 
-    mojito_service_emit_capabilities_changed (service, get_capabilities (service));
+      mojito_service_emit_capabilities_changed (service, get_capabilities (service));
 
-    if (need_refresh)
       refresh (service);
+    } else {
+      g_message ("Cannot login to Twitter: %s", error->message);
+      priv->user = NULL;
+      mojito_service_emit_capabilities_changed (service, 0);
+      mojito_service_emit_refreshed (service, NULL);
+    }
   }
 }
+
+static gboolean
+authenticate_cb (TwitterClient *client, TwitterAuthState state, gpointer user_data)
+{
+  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (user_data);
+  MojitoService *service = MOJITO_SERVICE (twitter);
+
+  switch (state) {
+  case TWITTER_AUTH_FAILED:
+    /* Authentication failed, emit an empty set */
+    g_message ("Cannot login to Twitter");
+    twitter->priv->user = NULL;
+    mojito_service_emit_capabilities_changed (service, 0);
+    mojito_service_emit_refreshed (service, NULL);
+    break;
+  case TWITTER_AUTH_NEGOTIATING:
+  case TWITTER_AUTH_RETRY:
+  case TWITTER_AUTH_SUCCESS:
+    /* Nothing to do here */
+    break;
+  }
+
+  return FALSE;
+}
+
 
 static const char *
 mojito_service_twitter_get_name (MojitoService *service)
@@ -391,13 +414,14 @@ mojito_service_twitter_init (MojitoServiceTwitter *self)
 
   self->priv = priv = GET_PRIVATE (self);
 
-  priv->user_set = priv->password_set = FALSE;
-
   priv->set = mojito_item_set_new ();
 
   priv->client = g_object_new (TWITTER_TYPE_CLIENT,
                                "user-agent", "Mojito/" VERSION,
                                NULL);
+  g_signal_connect (priv->client, "authenticate",
+                    G_CALLBACK (authenticate_cb),
+                    self);
   g_signal_connect (priv->client, "status-received",
                     G_CALLBACK (status_received_cb),
                     self);
