@@ -1,3 +1,11 @@
+Mojito 0.18
+===
+
+* Translations
+* Fix Twitter authentication logic
+* Drop the local caches if data cannot be accessed
+
+
 Mojito 0.17
 ===
 
