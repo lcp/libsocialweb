@@ -255,6 +255,25 @@ mojito_cache_load (MojitoService *service)
   return set;
 }
 
+void
+mojito_cache_drop (MojitoService *service)
+{
+  char *filename;
+  GHashTable *params = NULL;
+
+  g_return_if_fail (MOJITO_IS_SERVICE (service));
+
+  g_object_get (service, "params", &params, NULL);
+
+  filename = get_cache_filename (service, params);
+
+  g_hash_table_unref (params);
+
+  g_remove (filename);
+
+  g_free (filename);
+}
+
 
 #if BUILD_TESTS
 

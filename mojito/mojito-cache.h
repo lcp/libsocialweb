@@ -28,6 +28,8 @@ void mojito_cache_save (MojitoService *service, MojitoSet *set);
 
 MojitoSet * mojito_cache_load (MojitoService *service);
 
+void mojito_cache_drop (MojitoService *service);
+
 G_END_DECLS
 
 #endif /* _MOJITO_CACHE */
