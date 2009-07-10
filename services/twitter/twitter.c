@@ -63,13 +63,13 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
   if (g_str_equal (entry->key, KEY_USER)) {
     if (entry->value)
       username = gconf_value_get_string (entry->value);
-    if (username[0] == '\0')
+    if (username && username[0] == '\0')
       username = NULL;
     priv->username = g_strdup (username);
   } else if (g_str_equal (entry->key, KEY_PASSWORD)) {
     if (entry->value)
       password = gconf_value_get_string (entry->value);
-    if (password[0] == '\0')
+    if (password && password[0] == '\0')
       password = NULL;
     priv->password = g_strdup (password);
   }
