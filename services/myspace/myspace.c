@@ -326,7 +326,7 @@ refresh (MojitoService *service)
   }
 }
 
-static guint32 get_capabilities (MojitoService *service);
+static const char ** get_dynamic_caps (MojitoService *service);
 
 static gboolean
 sync_auth (MojitoServiceMySpace *myspace)
@@ -357,23 +357,39 @@ sync_auth (MojitoServiceMySpace *myspace)
 
     rest_xml_node_unref (node);
 
-    mojito_service_emit_capabilities_changed (service, get_capabilities (service));
+    mojito_service_emit_capabilities_changed (service, get_dynamic_caps (service));
   }
 
   return TRUE;
 }
 
-static guint32
-get_capabilities (MojitoService *service)
+static const char **
+get_static_caps (MojitoService *service)
+{
+  static const char * caps[] = {
+    CAN_UPDATE_STATUS,
+    CAN_REQUEST_AVATAR,
+    NULL
+  };
+
+  return caps;
+}
+
+static const char **
+get_dynamic_caps (MojitoService *service)
 {
   MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
+  static const char * caps[] = {
+    CAN_UPDATE_STATUS,
+    CAN_REQUEST_AVATAR,
+    NULL
+  };
+  static const char * no_caps[] = { NULL };
 
   if (sync_auth (myspace))
-    return SERVICE_CAN_UPDATE_STATUS |
-      SERVICE_CAN_GET_PERSONA_ICON |
-      SERVICE_CAN_REQUEST_AVATAR;
+    return caps;
   else
-    return 0;
+    return no_caps;
 }
 
 static gchar *
@@ -458,7 +474,7 @@ online_notify (gboolean online, gpointer user_data)
   if (online) {
     sync_auth (service);
   } else {
-    mojito_service_emit_capabilities_changed ((MojitoService *)service, 0);
+    mojito_service_emit_capabilities_changed ((MojitoService *)service, NULL);
   }
 }
 
@@ -498,7 +514,8 @@ mojito_service_myspace_class_init (MojitoServiceMySpaceClass *klass)
   object_class->finalize = mojito_service_myspace_finalize;
 
   service_class->get_name = mojito_service_myspace_get_name;
-  service_class->get_capabilities = get_capabilities;
+  service_class->get_static_caps = get_static_caps;
+  service_class->get_dynamic_caps = get_dynamic_caps;
   service_class->get_persona_icon = get_persona_icon;
   service_class->update_status = update_status;
   service_class->start = start;
