@@ -53,6 +53,8 @@ struct _MojitoServiceClass {
   GObjectClass parent_class;
   /* signals */
   void (*avatar_retrieved)(MojitoService *service, const gchar *path);
+  void (*caps_changed) (MojitoService *service, char **caps);
+
   /* vfuncs */
   const char *(*get_name) (MojitoService *service);
   void (*start) (MojitoService *service);
@@ -61,17 +63,15 @@ struct _MojitoServiceClass {
   MojitoItem *(*get_last_item) (MojitoService *service);
   gchar *(*get_persona_icon) (MojitoService *service);
   gboolean (*update_status) (MojitoService *service, const gchar *status_message);
-  guint32 (*get_capabilities) (MojitoService *service);
-  /* ::caps-changed signal emitted when this changes */
+
+  const gchar ** (*get_static_caps) (MojitoService *service);
+  const gchar ** (*get_dynamic_caps) (MojitoService *service);
+
   void (*request_avatar) (MojitoService *service);
 };
 
-typedef enum
-{
-  SERVICE_CAN_GET_PERSONA_ICON = 1,
-  SERVICE_CAN_UPDATE_STATUS = 1 << 1,
-  SERVICE_CAN_REQUEST_AVATAR = 1 << 2
-} MojitoServiceCapabilityFlags;
+#define CAN_UPDATE_STATUS "can-update-status"
+#define CAN_REQUEST_AVATAR "can-request-avatar"
 
 GType mojito_service_get_type (void);
 
@@ -83,7 +83,7 @@ void mojito_service_refresh (MojitoService *service);
 
 void mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set);
 
-void mojito_service_emit_capabilities_changed (MojitoService *service, guint32 caps);
+void mojito_service_emit_capabilities_changed (MojitoService *service, const char **caps);
 
 void mojito_service_emit_avatar_retrieved (MojitoService *service,
                                            const gchar   *path);

@@ -129,10 +129,10 @@ mojito_service_class_init (MojitoServiceClass *klass)
     g_signal_new ("caps-changed",
                   G_OBJECT_CLASS_TYPE (klass),
                   G_SIGNAL_RUN_LAST,
-                  0,
+                  G_STRUCT_OFFSET (MojitoServiceClass, caps_changed),
                   NULL, NULL,
-                  g_cclosure_marshal_VOID__UINT,
-                  G_TYPE_NONE, 1, G_TYPE_UINT);
+                  g_cclosure_marshal_VOID__POINTER,
+                  G_TYPE_NONE, 1, G_TYPE_STRV);
 
   /* -internal suffix to avoid conflicts with the dbus-glib generated signal */
   signals[SIGNAL_AVATAR_RETRIEVED] =
@@ -148,39 +148,9 @@ mojito_service_class_init (MojitoServiceClass *klass)
 }
 
 static void
-decode_caps (guint32 caps,
-             gboolean *can_get_persona_icon,
-             gboolean *can_update_status,
-             gboolean *can_request_avatar)
+on_caps_changed (MojitoService *service, const char **caps, gpointer userdata)
 {
-  g_assert (can_get_persona_icon);
-  g_assert (can_update_status);
-  g_assert (can_request_avatar);
-
-  *can_get_persona_icon = caps & SERVICE_CAN_GET_PERSONA_ICON;
-  *can_update_status = caps & SERVICE_CAN_UPDATE_STATUS;
-  *can_request_avatar = caps & SERVICE_CAN_REQUEST_AVATAR;
-
-#if 0
-  g_debug ("got caps: %spersona icons %supdate status %srequest avatar",
-           *can_get_persona_icon ? "+" : "-",
-           *can_update_status ? "+" : "-",
-           *can_request_avatar ? "+" : "-");
-#endif
-}
-
-static void
-on_caps_changed (MojitoService *service, guint32 caps, gpointer userdata)
-{
-  gboolean can_get_persona_icon, can_update_status, can_request_avatar;
-
-  decode_caps (caps,
-               &can_get_persona_icon,
-               &can_update_status,
-               &can_request_avatar);
-
-  mojito_service_iface_emit_capabilities_changed
-    (service, can_get_persona_icon, can_update_status, can_request_avatar);
+  mojito_service_iface_emit_capabilities_changed (service, caps);
 }
 
 static void
@@ -244,7 +214,7 @@ mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set)
 }
 
 void
-mojito_service_emit_capabilities_changed (MojitoService *service, guint32 caps)
+mojito_service_emit_capabilities_changed (MojitoService *service, const char **caps)
 {
   g_return_if_fail (MOJITO_IS_SERVICE (service));
 
@@ -318,29 +288,31 @@ service_update_status (MojitoServiceIface    *self,
 }
 
 static void
-service_get_capabilities (MojitoServiceIface    *self,
-                          DBusGMethodInvocation *context)
+service_get_static_caps (MojitoServiceIface *self, DBusGMethodInvocation *context)
 {
   MojitoServiceClass *service_class;
-  guint32 caps = 0;
-  gboolean can_get_persona_icon;
-  gboolean can_update_status;
-  gboolean can_request_avatar;
+  const char **caps = NULL;
 
   service_class = MOJITO_SERVICE_GET_CLASS (self);
 
-  if (service_class->get_capabilities)
-    caps = service_class->get_capabilities ((MojitoService *)self);
+  if (service_class->get_static_caps)
+    caps = service_class->get_static_caps ((MojitoService *)self);
 
-  decode_caps (caps,
-               &can_get_persona_icon,
-               &can_update_status,
-               &can_request_avatar);
+  mojito_service_iface_return_from_get_static_capabilities (context, caps);
+}
 
-  mojito_service_iface_return_from_get_capabilities (context,
-                                                     can_get_persona_icon,
-                                                     can_update_status,
-                                                     can_request_avatar);
+static void
+service_get_dynamic_caps (MojitoServiceIface *self, DBusGMethodInvocation *context)
+{
+  MojitoServiceClass *service_class;
+  const char **caps = NULL;
+
+  service_class = MOJITO_SERVICE_GET_CLASS (self);
+
+  if (service_class->get_dynamic_caps)
+    caps = service_class->get_dynamic_caps ((MojitoService *)self);
+
+  mojito_service_iface_return_from_get_dynamic_capabilities (context, caps);
 }
 
 static void
@@ -353,8 +325,10 @@ service_iface_init (gpointer g_iface,
                                                    service_get_persona_icon);
   mojito_service_iface_implement_update_status (klass,
                                                 service_update_status);
-  mojito_service_iface_implement_get_capabilities (klass,
-                                                   service_get_capabilities);
+  mojito_service_iface_implement_get_static_capabilities (klass,
+                                                   service_get_static_caps);
+  mojito_service_iface_implement_get_dynamic_capabilities (klass,
+                                                   service_get_dynamic_caps);
   mojito_service_iface_implement_request_avatar (klass,
                                                  service_request_avatar);
 }

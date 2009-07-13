@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <node name="/Service_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
   <interface name="com.intel.Mojito.Service">
     <method name="GetPersonaIcon" tp:name-for-bindings="Get_Persona_Icon">
@@ -10,16 +11,16 @@
       <arg name="success" type="b" direction="out"/>
     </method>
 
-    <method name="GetCapabilities" tp:name-for-bindings="Get_Capabilities">
-      <arg name="can_get_persona_icon" type="b" direction="out"/>
-      <arg name="can_update_status" type="b" direction="out"/>
-      <arg name="can_request_avatar" type="b" direction="out"/>
+    <method name="GetStaticCapabilities" tp:name-for-bindings="Get_Static_Capabilities">
+      <arg name="caps" type="as" direction="out"/>
+    </method>
+
+    <method name="GetDynamicCapabilities" tp:name-for-bindings="Get_Dynamic_Capabilities">
+      <arg name="caps" type="as" direction="out"/>
     </method>
 
     <signal name="CapabilitiesChanged" tp:name-for-bindings="Capabilities_Changed">
-      <arg name="can_get_persona_icon" type="b"/>
-      <arg name="can_update_status" type="b"/>
-      <arg name="can_request_avatar" type="b" direction="out"/>
+      <arg name="caps" type="as" direction="out"/>
     </signal>
 
     <method name="RequestAvatar" tp:name-for-bindings="Request_Avatar"/>
