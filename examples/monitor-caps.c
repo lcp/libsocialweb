@@ -19,16 +19,36 @@
 #include <mojito-client/mojito-client.h>
 
 static void
-get_caps_cb (MojitoClientService *service,
-             guint32 caps, const GError *error, gpointer user_data)
-{
-  g_print ("[%p] Caps %u\n", service, caps);
+print_caps (const char **caps) {
+  while (*caps) {
+    g_print ("%s", *caps++);
+    if (*caps)
+      g_print (", ");
+  }
+  g_print ("\n");
 }
 
 static void
-on_caps_changed (MojitoClientService *service, guint32 caps, gpointer user_data)
+get_static_caps_cb (MojitoClientService *service,
+             const char **caps, const GError *error, gpointer user_data)
 {
-  g_print ("[%p] New Caps %u\n", service, caps);
+  g_print ("[%p] Static caps:", service);
+  print_caps (caps);
+}
+
+static void
+get_dynamic_caps_cb (MojitoClientService *service,
+             const char **caps, const GError *error, gpointer user_data)
+{
+  g_print ("[%p] Dynamic caps:", service);
+  print_caps (caps);
+}
+
+static void
+on_caps_changed (MojitoClientService *service, const char **caps, gpointer user_data)
+{
+  g_print ("[%p] Updated dynamic caps:", service);
+  print_caps (caps);
 }
 
 static void
@@ -44,7 +64,8 @@ client_get_services_cb (MojitoClient *client,
     g_print ("Told about service: %s\n", (char*)l->data);
     service = mojito_client_get_service (client, (char*)l->data);
     g_signal_connect (service, "capabilities-changed", G_CALLBACK (on_caps_changed), NULL);
-    mojito_client_service_get_capabilities (service, get_caps_cb, NULL);
+    mojito_client_service_get_static_capabilities (service, get_static_caps_cb, NULL);
+    mojito_client_service_get_dynamic_capabilities (service, get_dynamic_caps_cb, NULL);
   }
 }
 
