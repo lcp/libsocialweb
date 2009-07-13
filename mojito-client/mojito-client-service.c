@@ -112,10 +112,10 @@ mojito_client_service_class_init (MojitoClientServiceClass *klass)
                   G_STRUCT_OFFSET (MojitoClientServiceClass, capabilities_changed),
                   NULL,
                   NULL,
-                  g_cclosure_marshal_VOID__UINT,
+                  g_cclosure_marshal_VOID__POINTER,
                   G_TYPE_NONE,
                   1,
-                  G_TYPE_UINT);
+                  G_TYPE_STRV);
 }
 
 static void
@@ -125,21 +125,10 @@ mojito_client_service_init (MojitoClientService *self)
 
 static void
 _capabilities_changed_cb (DBusGProxy *proxy,
-                          gboolean    can_get_persona_icon,
-                          gboolean    can_update_status,
-                          gboolean    can_request_avatar,
+                          char      **caps,
                           gpointer    user_data)
 {
   MojitoClientService *service = MOJITO_CLIENT_SERVICE (user_data);
-  guint32 caps = 0;
-
-  if (can_get_persona_icon)
-    caps |= MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON;
-  if (can_update_status)
-    caps |= MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS;
-  if (can_request_avatar)
-    caps |= MOJITO_CLIENT_SERVICE_CAN_REQUEST_AVATAR;
-
   g_signal_emit (service, signals[CAPS_CHANGED_SIGNAL], 0, caps);
 }
 
@@ -178,17 +167,9 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
     return FALSE;
   }
 
-  dbus_g_object_register_marshaller (mojito_marshal_VOID__BOOLEAN_BOOLEAN_BOOLEAN,
-                                     G_TYPE_NONE,
-                                     G_TYPE_BOOLEAN,
-                                     G_TYPE_BOOLEAN,
-                                     G_TYPE_BOOLEAN,
-                                     G_TYPE_INVALID);
   dbus_g_proxy_add_signal (priv->proxy,
                            "CapabilitiesChanged",
-                           G_TYPE_BOOLEAN,
-                           G_TYPE_BOOLEAN,
-                           G_TYPE_BOOLEAN,
+                           G_TYPE_STRV,
                            NULL);
   dbus_g_proxy_connect_signal (priv->proxy,
                                "CapabilitiesChanged",
@@ -209,14 +190,11 @@ typedef struct
 
 static void
 _get_capabilities_cb (DBusGProxy *proxy,
-                      gboolean    can_get_persona_icon,
-                      gboolean    can_update_status,
-                      gboolean    can_request_avatar,
+                      char      **caps,
                       GError     *error,
                       gpointer    userdata)
 {
   MojitoClientServiceCallClosure *closure = (MojitoClientServiceCallClosure *)userdata;
-  guint32 caps = 0;
   MojitoClientServiceGetCapabilitiesCallback cb;
 
   cb = (MojitoClientServiceGetCapabilitiesCallback)closure->cb;
@@ -225,21 +203,13 @@ _get_capabilities_cb (DBusGProxy *proxy,
     g_warning (G_STRLOC ": Error getting capabilities: %s",
                error->message);
     cb (closure->service,
-      0,
+      NULL,
       error,
       closure->userdata);
     g_error_free (error);
   } else {
-    if (can_get_persona_icon)
-      caps |= MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON;
-    if (can_update_status)
-      caps |= MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS;
-    if (can_request_avatar)
-      caps |= MOJITO_CLIENT_SERVICE_CAN_REQUEST_AVATAR;
-    cb (closure->service,
-      caps,
-      error,
-      closure->userdata);
+    cb (closure->service, (const char**)caps, error, closure->userdata);
+    g_strfreev (caps);
   }
 
   g_object_unref (closure->service);
@@ -247,9 +217,9 @@ _get_capabilities_cb (DBusGProxy *proxy,
 }
 
 void
-mojito_client_service_get_capabilities (MojitoClientService                       *service,
-                                        MojitoClientServiceGetCapabilitiesCallback cb,
-                                        gpointer                                   userdata)
+mojito_client_service_get_static_capabilities (MojitoClientService                       *service,
+                                               MojitoClientServiceGetCapabilitiesCallback cb,
+                                               gpointer                                   userdata)
 {
   MojitoClientServicePrivate *priv = GET_PRIVATE (service);
   MojitoClientServiceCallClosure *closure;
@@ -259,9 +229,27 @@ mojito_client_service_get_capabilities (MojitoClientService                     
   closure->cb = (GCallback)cb;
   closure->userdata = userdata;
 
-  com_intel_Mojito_Service_get_capabilities_async (priv->proxy,
-                                                   _get_capabilities_cb,
-                                                   closure);
+  com_intel_Mojito_Service_get_static_capabilities_async (priv->proxy,
+                                                          _get_capabilities_cb,
+                                                          closure);
+}
+
+void
+mojito_client_service_get_dynamic_capabilities (MojitoClientService                       *service,
+                                                MojitoClientServiceGetCapabilitiesCallback cb,
+                                                gpointer                                   userdata)
+{
+  MojitoClientServicePrivate *priv = GET_PRIVATE (service);
+  MojitoClientServiceCallClosure *closure;
+
+  closure = g_slice_new0 (MojitoClientServiceCallClosure);
+  closure->service = g_object_ref (service);
+  closure->cb = (GCallback)cb;
+  closure->userdata = userdata;
+
+  com_intel_Mojito_Service_get_dynamic_capabilities_async (priv->proxy,
+                                                           _get_capabilities_cb,
+                                                           closure);
 }
 
 static void

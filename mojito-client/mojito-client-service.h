@@ -52,23 +52,21 @@ typedef struct {
 
 GType mojito_client_service_get_type (void);
 
-typedef enum
-{
-  MOJITO_CLIENT_SERVICE_CAN_GET_PERSONA_ICON = 1,
-  MOJITO_CLIENT_SERVICE_CAN_UPDATE_STATUS = 1 << 1,
-  MOJITO_CLIENT_SERVICE_CAN_REQUEST_AVATAR = 1 << 2
-} MojitoClientServiceCapabilityFlags;
-
 typedef void
 (*MojitoClientServiceGetCapabilitiesCallback) (MojitoClientService *service,
-                                               guint32              caps,
+                                               const char         **caps,
                                                const GError        *error,
                                                gpointer             userdata);
 
 void
-mojito_client_service_get_capabilities (MojitoClientService                       *service,
-                                        MojitoClientServiceGetCapabilitiesCallback cb,
-                                        gpointer                                   userdata);
+mojito_client_service_get_static_capabilities (MojitoClientService                       *service,
+                                               MojitoClientServiceGetCapabilitiesCallback cb,
+                                               gpointer                                   userdata);
+
+void
+mojito_client_service_get_dynamic_capabilities (MojitoClientService                       *service,
+                                                MojitoClientServiceGetCapabilitiesCallback cb,
+                                                gpointer                                   userdata);
 
 typedef void
 (*MojitoClientServiceGetPersonaIconCallback) (MojitoClientService *service,
