@@ -52,6 +52,9 @@ typedef struct {
 
 GType mojito_client_service_get_type (void);
 
+#define CAN_UPDATE_STATUS "can-update-status"
+#define CAN_REQUEST_AVATAR "can-request-avatar"
+
 typedef void
 (*MojitoClientServiceGetCapabilitiesCallback) (MojitoClientService *service,
                                                const char         **caps,
