@@ -52,6 +52,8 @@ struct _MojitoServiceTwitterPrivate {
   MojitoSet *set;
 };
 
+static const char ** get_dynamic_caps (MojitoService *service);
+
 static void
 user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
@@ -85,7 +87,7 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
     /* TODO: yes, this leaks.  Dispose cycle in twitter-glib */
     priv->user = NULL;
 
-    mojito_service_emit_capabilities_changed (service, 0);
+    mojito_service_emit_capabilities_changed (service, NULL);
     mojito_service_emit_refreshed (service, NULL);
   }
 }
@@ -185,8 +187,6 @@ timeline_received_cb (TwitterClient *client,
   mojito_set_empty (priv->set);
 }
 
-static guint32 get_capabilities (MojitoService *service);
-
 static void
 user_received_cb (TwitterClient *client,
                   gulong         handle,
@@ -210,13 +210,13 @@ user_received_cb (TwitterClient *client,
 
       priv->user = g_object_ref (user);
 
-      mojito_service_emit_capabilities_changed (service, get_capabilities (service));
+      mojito_service_emit_capabilities_changed (service, get_dynamic_caps (service));
 
       refresh (service);
     } else {
       g_message ("Cannot login to Twitter: %s", error->message);
       priv->user = NULL;
-      mojito_service_emit_capabilities_changed (service, 0);
+      mojito_service_emit_capabilities_changed (service, NULL);
       mojito_service_emit_refreshed (service, NULL);
     }
   }
@@ -233,7 +233,7 @@ authenticate_cb (TwitterClient *client, TwitterAuthState state, gpointer user_da
     /* Authentication failed, emit an empty set */
     g_message ("Cannot login to Twitter");
     twitter->priv->user = NULL;
-    mojito_service_emit_capabilities_changed (service, 0);
+    mojito_service_emit_capabilities_changed (service, NULL);
     mojito_service_emit_refreshed (service, NULL);
     break;
   case TWITTER_AUTH_NEGOTIATING:
@@ -306,7 +306,7 @@ online_notify (gboolean online, gpointer user_data)
     gconf_client_notify (priv->gconf, KEY_USER);
     gconf_client_notify (priv->gconf, KEY_PASSWORD);
   } else {
-    mojito_service_emit_capabilities_changed (service, 0);
+    mojito_service_emit_capabilities_changed (service, NULL);
   }
 }
 
@@ -333,17 +333,33 @@ update_status (MojitoService *service,
   return TRUE;
 }
 
-static guint32
-get_capabilities (MojitoService *service)
+static const char **
+get_static_caps (MojitoService *service)
+{
+  static const char * caps[] = {
+    CAN_UPDATE_STATUS,
+    CAN_REQUEST_AVATAR,
+    NULL
+  };
+
+  return caps;
+}
+
+static const char **
+get_dynamic_caps (MojitoService *service)
 {
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+  static const char * caps[] = {
+    CAN_UPDATE_STATUS,
+    CAN_REQUEST_AVATAR,
+    NULL
+  };
+  static const char * no_caps[] = { NULL };
 
   if (priv->user)
-    return SERVICE_CAN_UPDATE_STATUS |
-      SERVICE_CAN_GET_PERSONA_ICON |
-      SERVICE_CAN_REQUEST_AVATAR;
+    return caps;
   else
-    return 0;
+    return no_caps;
 }
 
 static gchar *
@@ -401,7 +417,8 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
   service_class->get_name = mojito_service_twitter_get_name;
   service_class->start = start;
   service_class->refresh = refresh;
-  service_class->get_capabilities = get_capabilities;
+  service_class->get_static_caps = get_static_caps;
+  service_class->get_dynamic_caps = get_dynamic_caps;
   service_class->update_status = update_status;
   service_class->get_persona_icon = get_persona_icon;
   service_class->request_avatar = request_avatar;
