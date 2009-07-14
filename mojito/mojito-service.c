@@ -41,8 +41,6 @@ enum {
 
 enum {
   SIGNAL_REFRESHED,
-  SIGNAL_CAPS_CHANGED,
-  SIGNAL_AVATAR_RETRIEVED,
   N_SIGNALS
 };
 
@@ -124,55 +122,11 @@ mojito_service_class_init (MojitoServiceClass *klass)
                   NULL, NULL,
                   g_cclosure_marshal_VOID__BOXED,
                   G_TYPE_NONE, 1, MOJITO_TYPE_SET);
-
-  signals[SIGNAL_CAPS_CHANGED] =
-    g_signal_new ("caps-changed",
-                  G_OBJECT_CLASS_TYPE (klass),
-                  G_SIGNAL_RUN_LAST,
-                  G_STRUCT_OFFSET (MojitoServiceClass, caps_changed),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__POINTER,
-                  G_TYPE_NONE, 1, G_TYPE_STRV);
-
-  /* -internal suffix to avoid conflicts with the dbus-glib generated signal */
-  signals[SIGNAL_AVATAR_RETRIEVED] =
-    g_signal_new ("avatar-retrieved-internal",
-                  G_OBJECT_CLASS_TYPE (klass),
-                  G_SIGNAL_RUN_LAST,
-                  G_STRUCT_OFFSET (MojitoServiceClass, avatar_retrieved),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__STRING,
-                  G_TYPE_NONE,
-                  1,
-                  G_TYPE_STRING);
-}
-
-static void
-on_caps_changed (MojitoService *service, const char **caps, gpointer userdata)
-{
-  mojito_service_iface_emit_capabilities_changed (service, caps);
-}
-
-static void
-on_avatar_retrieved (MojitoService *service,
-                     const gchar   *path,
-                     gpointer       userdata)
-{
-  mojito_service_iface_emit_avatar_retrieved (service, path);
 }
 
 static void
 mojito_service_init (MojitoService *self)
 {
-  g_signal_connect (self,
-                    "caps-changed",
-                    G_CALLBACK (on_caps_changed),
-                    NULL);
-
-  g_signal_connect (self,
-                    "avatar-retrieved-internal",
-                    G_CALLBACK (on_avatar_retrieved),
-                    NULL);
 }
 
 const char *
@@ -218,7 +172,7 @@ mojito_service_emit_capabilities_changed (MojitoService *service, const char **c
 {
   g_return_if_fail (MOJITO_IS_SERVICE (service));
 
-  g_signal_emit (service, signals[SIGNAL_CAPS_CHANGED], 0, caps);
+  mojito_service_iface_emit_capabilities_changed (MOJITO_SERVICE_IFACE (service), caps);
 }
 
 void
@@ -227,7 +181,7 @@ mojito_service_emit_avatar_retrieved (MojitoService *service,
 {
   g_return_if_fail (MOJITO_IS_SERVICE (service));
 
-  g_signal_emit (service, signals[SIGNAL_AVATAR_RETRIEVED], 0, path);
+  mojito_service_iface_emit_avatar_retrieved (service, path);
 }
 
 static void
