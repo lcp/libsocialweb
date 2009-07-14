@@ -88,6 +88,8 @@ void mojito_service_emit_capabilities_changed (MojitoService *service, const cha
 void mojito_service_emit_avatar_retrieved (MojitoService *service,
                                            const gchar   *path);
 
+void mojito_service_emit_user_changed (MojitoService *service);
+
 G_END_DECLS
 
 #endif /* _MOJITO_SERVICE */

@@ -184,6 +184,15 @@ mojito_service_emit_avatar_retrieved (MojitoService *service,
   mojito_service_iface_emit_avatar_retrieved (service, path);
 }
 
+void
+mojito_service_emit_user_changed (MojitoService *service)
+{
+  g_return_if_fail (MOJITO_IS_SERVICE (service));
+
+  mojito_service_iface_emit_user_changed (service);
+}
+
+
 static void
 service_get_persona_icon (MojitoServiceIface    *self,
                           DBusGMethodInvocation *context)
