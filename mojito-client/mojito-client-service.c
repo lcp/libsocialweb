@@ -38,6 +38,7 @@ struct _MojitoClientServicePrivate {
 enum
 {
   CAPS_CHANGED_SIGNAL,
+  USER_CHANGED_SIGNAL,
   LAST_SIGNAL
 };
 
@@ -116,6 +117,16 @@ mojito_client_service_class_init (MojitoClientServiceClass *klass)
                   G_TYPE_NONE,
                   1,
                   G_TYPE_STRV);
+
+  signals[USER_CHANGED_SIGNAL] =
+    g_signal_new ("user-changed",
+                  MOJITO_CLIENT_TYPE_SERVICE,
+                  G_SIGNAL_RUN_FIRST,
+                  G_STRUCT_OFFSET (MojitoClientServiceClass, user_changed),
+                  NULL,
+                  NULL,
+                  g_cclosure_marshal_VOID__VOID,
+                  G_TYPE_NONE, 0);
 }
 
 static void
@@ -130,6 +141,14 @@ _capabilities_changed_cb (DBusGProxy *proxy,
 {
   MojitoClientService *service = MOJITO_CLIENT_SERVICE (user_data);
   g_signal_emit (service, signals[CAPS_CHANGED_SIGNAL], 0, caps);
+}
+
+static void
+_user_changed_cb (DBusGProxy *proxy,
+                          gpointer    user_data)
+{
+  MojitoClientService *service = MOJITO_CLIENT_SERVICE (user_data);
+  g_signal_emit (service, signals[USER_CHANGED_SIGNAL], 0);
 }
 
 gboolean
@@ -174,6 +193,15 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
   dbus_g_proxy_connect_signal (priv->proxy,
                                "CapabilitiesChanged",
                                (GCallback)_capabilities_changed_cb,
+                               service,
+                               NULL);
+
+  dbus_g_proxy_add_signal (priv->proxy,
+                           "UserChanged",
+                           G_TYPE_INVALID);
+  dbus_g_proxy_connect_signal (priv->proxy,
+                               "UserChanged",
+                               (GCallback)_user_changed_cb,
                                service,
                                NULL);
 
