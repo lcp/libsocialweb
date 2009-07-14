@@ -87,6 +87,7 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
     /* TODO: yes, this leaks.  Dispose cycle in twitter-glib */
     priv->user = NULL;
 
+    mojito_service_emit_user_changed (service);
     mojito_service_emit_capabilities_changed (service, NULL);
     mojito_service_emit_refreshed (service, NULL);
   }
@@ -210,12 +211,15 @@ user_received_cb (TwitterClient *client,
 
       priv->user = g_object_ref (user);
 
+      mojito_service_emit_user_changed (service);
       mojito_service_emit_capabilities_changed (service, get_dynamic_caps (service));
 
       refresh (service);
     } else {
       g_message ("Cannot login to Twitter: %s", error->message);
       priv->user = NULL;
+
+      mojito_service_emit_user_changed (service);
       mojito_service_emit_capabilities_changed (service, NULL);
       mojito_service_emit_refreshed (service, NULL);
     }
@@ -233,6 +237,7 @@ authenticate_cb (TwitterClient *client, TwitterAuthState state, gpointer user_da
     /* Authentication failed, emit an empty set */
     g_message ("Cannot login to Twitter");
     twitter->priv->user = NULL;
+    mojito_service_emit_user_changed (service);
     mojito_service_emit_capabilities_changed (service, NULL);
     mojito_service_emit_refreshed (service, NULL);
     break;
