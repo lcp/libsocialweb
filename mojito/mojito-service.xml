@@ -28,5 +28,8 @@
     <signal name="AvatarRetrieved" tp:name-for-bindings="Avatar_Retrieved">
       <arg name="path" type="s"/>
     </signal>
+
+    <signal name="UserChanged" tp:name-for-bindings="User_Changed"/>
+
   </interface>
 </node>
