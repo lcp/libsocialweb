@@ -135,7 +135,7 @@ get_album_image (MojitoServiceLastfm *lastfm, RestXmlNode *track)
   RestXmlNode *artist;
   const char *mbid;
 
-  url = get_image (track, "medium");
+  url = get_image (track, "large");
   if (url)
     return url;
 
@@ -157,7 +157,7 @@ get_album_image (MojitoServiceLastfm *lastfm, RestXmlNode *track)
   if ((artist = lastfm_call (call)) == NULL)
     return NULL;
 
-  url = get_image (artist, "medium");
+  url = get_image (artist, "large");
   rest_xml_node_unref (artist);
   return url;
 }
