@@ -200,6 +200,7 @@ refresh (MojitoService *service)
     MojitoItem *item;
     RestXmlNode *recent, *track, *date;
     const char *s;
+    char *id;
 
     call = rest_proxy_new_call (lastfm->priv->proxy);
     rest_proxy_call_add_params (call,
@@ -223,8 +224,11 @@ refresh (MojitoService *service)
     item = mojito_item_new ();
     mojito_item_set_service (item, service);
 
-    /* TODO user+track url? user+timestamp? */
-    mojito_item_put (item, "id", rest_xml_node_find (track, "url")->content);
+    id = g_strdup_printf ("%s %s",
+                          rest_xml_node_find (track, "url")->content,
+                          rest_xml_node_find (node, "name")->content);
+    mojito_item_take (item, "id", id);
+
     mojito_item_put (item, "url", rest_xml_node_find (track, "url")->content);
     mojito_item_take (item, "title", make_title (track));
     mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
