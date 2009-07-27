@@ -1,8 +1,13 @@
+# pl locale
+# Copyright (C) 2009 Intel Corporation
+# This file is distributed under the same license as the mojito package.
+# Andrzej Zaborowski <andrew.zaborowski@intel.com>, 2009.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Moblin\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-26 08:47+0000\n"
+"POT-Creation-Date: 2009-07-18 09:16+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Andrzej Zaborowski <andrew.zaborowski@intel.com>\n"
 "Language-Team: Moblin\n"
