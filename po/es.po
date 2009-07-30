@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-22 09:16+0000\n"
+"POT-Creation-Date: 2009-07-29 09:16+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Tomás Galicia <tomas.galicia@intel.com>\n"
 "Language-Team: \n"
@@ -19,8 +19,16 @@ msgstr "Last.fm"
 
 # Last.fm is a music service that learns what you like. Each song you listen to adds more details to your profile about your preferences. It can connect you with others with the same tastes, and it will recommend you songs from their collections and yours.
 #: ../services/lastfm/lastfm.keys.in.h:2
-msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm es un servicio de música que aprende lo que te gusta. Cada canción que oigas le dará más detalles a tu perfil sobre tus preferencias. Te puede conectar con otros que tengan tus mismos gustos, y te recomendará canciones de entre sus colecciones y las tuyas."
+msgid ""
+"Last.fm is a music service that learns what you love. Every track you play "
+"will tell your Last.fm profile something about what you like. It can connect "
+"you to other people who like what you like - and recommend songs from their "
+"music collections and yours too."
+msgstr ""
+"Last.fm es un servicio de música que aprende lo que te gusta. Cada canción "
+"que oigas le dará más detalles a tu perfil sobre tus preferencias. Te puede "
+"conectar con otros que tengan tus mismos gustos, y te recomendará canciones "
+"de entre sus colecciones y las tuyas."
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
@@ -28,8 +36,14 @@ msgstr "Twitter"
 
 # Twitter is a service to communicate with friends, family and colleagues, in which you respond frequently (and with few words) to this simple question: what are you doing?
 #: ../services/twitter/twitter.keys.in.h:2
-msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter es un servicio para comunicarte con tus amigos, familiares y colegas, respondiendo con frecuencia (y con pocas palabras) a esta simple pregunta: ¿qué estás haciendo?"
+msgid ""
+"Twitter is a service for friends, family, and co–workers to communicate and "
+"stay connected through the exchange of quick, frequent answers to one simple "
+"question: What are you doing?"
+msgstr ""
+"Twitter es un servicio para comunicarte con tus amigos, familiares y "
+"colegas, respondiendo con frecuencia (y con pocas palabras) a esta simple "
+"pregunta: ¿qué estás haciendo?"
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
@@ -37,8 +51,12 @@ msgstr "Flickr"
 
 # Flicker is, almost without a doubt, the best application in the world to manage and share photos online.
 #: ../services/flickr/flickr.keys.in.h:2
-msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr "Flickr es, casi con seguridad, la mejor aplicación de todo el mundo para administrar y compartir fotos en línea."
+msgid ""
+"Flickr - almost certainly the best online photo management and sharing "
+"application in the world."
+msgstr ""
+"Flickr es, casi con seguridad, la mejor aplicación de todo el mundo para "
+"administrar y compartir fotos en línea."
 
 #: ../services/myspace/myspace.keys.in.h:1
 msgid "MySpace"
@@ -46,6 +64,13 @@ msgstr "MySpace"
 
 # MySpace is one of the main social portals to connect people and cultures of the whole world. Create a profile, share your photos, your videos (professional or viral) or your blogs, send instant messages to friends and listen to music in the largest musical community in the world.
 #: ../services/myspace/myspace.keys.in.h:2
-msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace es uno de los principales portales sociales para conectar a la gente y a las culturas de todo el mundo. Crea un perfil, comparte tus fotos, tus videos (profesionales y virales) o tus blogs, envía mensajes instantáneos a tus amigos, y escucha música en la mayor comunidad musical del mundo."
-
+msgid ""
+"MySpace is a leading social portal for connecting people, content, and "
+"culture from around the world. Create a profile, share photos, professional "
+"and viral videos, blog, instant message your friends, and listen to music on "
+"the world’s largest music community."
+msgstr ""
+"MySpace es uno de los principales portales sociales para conectar a la gente "
+"y a las culturas de todo el mundo. Crea un perfil, comparte tus fotos, tus "
+"videos (profesionales y virales) o tus blogs, envía mensajes instantáneos a "
+"tus amigos, y escucha música en la mayor comunidad musical del mundo."
