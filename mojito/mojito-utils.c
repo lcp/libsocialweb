@@ -27,6 +27,8 @@ mojito_time_t_from_string (const char *s)
   SoupDate *date;
   time_t t;
 
+  g_return_val_if_fail (s, 0);
+
   date = soup_date_new_from_string (s);
   t = soup_date_to_time_t (date);
   soup_date_free (date);
@@ -53,11 +55,16 @@ mojito_date_to_iso (const char *s)
   SoupDate *date;
   char *iso;
 
-  date = soup_date_new_from_string (s);
-  iso = soup_date_to_string (date, SOUP_DATE_ISO8601);
-  soup_date_free (date);
+  g_return_val_if_fail (s, NULL);
 
-  return iso;
+  date = soup_date_new_from_string (s);
+  if (date) {
+    iso = soup_date_to_string (date, SOUP_DATE_ISO8601);
+    soup_date_free (date);
+    return iso;
+  } else {
+    return NULL;
+  }
 }
 
 /**
