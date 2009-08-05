@@ -1,16 +1,21 @@
+# Dutch translation of mojito.
+# Copyright (C) 2009 THE mojito'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the mojito package.
+# Auke Kok <auke-jan.h.kok@intel.com>, 2009.
+# , fuzzy
+# 
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: mojito moblin2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-29 09:16+0000\n"
-"PO-Revision-Date: \n"
-"Last-Translator: Tomás Galicia <tomas.galicia@intel.com>\n"
-"Language-Team: \n"
+"POT-Creation-Date: 2009-08-04 02:35+0000\n"
+"PO-Revision-Date: 2009-08-04 15:46-0700\n"
+"Last-Translator: Auke Kok <auke-jan.h.kok@intel.com>\n"
+"Language-Team: Dutch\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: Portuguese\n"
-"X-Poedit-SourceCharset: utf-8\n"
+"Content-Type: text/plain; charset=iso-8859-15\n"
+"Content-Transfer-Encoding: 8bit"
 
 #: ../services/lastfm/lastfm.keys.in.h:1
 msgid "Last.fm"
@@ -22,11 +27,7 @@ msgid ""
 "will tell your Last.fm profile something about what you like. It can connect "
 "you to other people who like what you like - and recommend songs from their "
 "music collections and yours too."
-msgstr ""
-"Last.fm é um serviço de música que aprende o que você curte. Cada trilha "
-"que você tocar vai guardar no seu perfil Last.fm algo sobre o que você "
-"curte. Ele pode te conectar com  gente que gosta do que você gosta - e "
-"recomenda canções de suas coleções e dos outros também."
+msgstr "Last.fm is een muziek service dat leert wat voor muziek je graag luisterd. Iedere song die je speelt verteld je Last.fm profiel wat je leuk vind. Last.fm kan je verbinden met anderen die dezelfde muziek keuze hebben - en nieuwe muziek aanraden van andere en je eigen muziekcollecties."
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
@@ -37,10 +38,7 @@ msgid ""
 "Twitter is a service for friends, family, and co–workers to communicate and "
 "stay connected through the exchange of quick, frequent answers to one simple "
 "question: What are you doing?"
-msgstr ""
-"Twitter é um serviço para amigos, familia, e colegas para se comunicar e "
-"manter-se conectado através da troca de rápidas e frequentes respostas a uma "
-"pergunta básica: O que você está fazendo?"
+msgstr "Twitter is een service voor vrienden, familie en collega's "
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
@@ -50,9 +48,7 @@ msgstr "Flickr"
 msgid ""
 "Flickr - almost certainly the best online photo management and sharing "
 "application in the world."
-msgstr ""
-"Flickr - é com certeza o melhor aplicativo de gerenciamento e "
-"compartilhamento de fotos online do mundo."
+msgstr "Flickr - waarschijnlijk de beste online foto beheer en uitwissel applicatie in de wereld."
 
 #: ../services/myspace/myspace.keys.in.h:1
 msgid "MySpace"
@@ -64,8 +60,6 @@ msgid ""
 "culture from around the world. Create a profile, share photos, professional "
 "and viral videos, blog, instant message your friends, and listen to music on "
 "the world’s largest music community."
-msgstr ""
-"MySpace é um portal social para conexão de pessoas, conteúdo e cultura de "
-"todo o mundo. Crie um perfil, compartilhe fotos, vídeos profissionais e "
-"virais, blog, mensagens instantâneos a amigos, e ouça músicas da maior "
-"comunidade de música do mundo."
+msgstr "MySpace is een vooruitstrevend sociaal portal om mensen te verbinden met elkaar, inhoud en cultuur over de wereld. Maak een profiel aan en wissel foto's, professionele en ondergrondse video's, blog en stuur berichten naar vrienden, en luister naar muziek op de grootste muziekgemeenschap."
+""
+
