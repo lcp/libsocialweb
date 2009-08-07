@@ -17,113 +17,209 @@
  */
 
 #include <config.h>
-#include <stdlib.h>
+#include <time.h>
+#include <string.h>
 #include "twitter.h"
-#include <twitter-glib/twitter-glib.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
+#include <mojito/mojito-online.h>
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-web.h>
-#include <gconf/gconf-client.h>
-#include <mojito/mojito-online.h>
+#include <mojito-keyfob/mojito-keyfob.h>
+#include <mojito-keystore/mojito-keystore.h>
+#include <rest/oauth-proxy.h>
+#include <rest/rest-xml-parser.h>
+#include <libsoup/soup.h>
 
 G_DEFINE_TYPE (MojitoServiceTwitter, mojito_service_twitter, MOJITO_TYPE_SERVICE)
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitterPrivate))
 
-#define KEY_DIR "/apps/mojito/services/twitter"
-#define KEY_USER KEY_DIR "/user"
-#define KEY_PASSWORD KEY_DIR "/password"
-
 struct _MojitoServiceTwitterPrivate {
   gboolean running;
-  GConfClient *gconf;
-  gchar *username, *password;
-
-  TwitterClient *client;
-  TwitterUser *user;
-
-  gulong self_handle;
-
-  /* GConf notify handles */
-  guint username_notify_id, password_notify_id;
-
-  MojitoSet *set;
+  RestProxy *proxy;
+  char *user_id;
+  char *image_url;
 };
 
-static const char ** get_dynamic_caps (MojitoService *service);
-
-static void
-user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
+RestXmlNode *
+node_from_call (RestProxyCall *call)
 {
-  MojitoService *service = MOJITO_SERVICE (user_data);
-  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (service);
-  MojitoServiceTwitterPrivate *priv = twitter->priv;
-  const char *username = NULL, *password = NULL;
+  static RestXmlParser *parser = NULL;
+  RestXmlNode *root;
 
-  if (g_str_equal (entry->key, KEY_USER)) {
-    if (entry->value)
-      username = gconf_value_get_string (entry->value);
-    if (username && username[0] == '\0')
-      username = NULL;
-    priv->username = g_strdup (username);
-  } else if (g_str_equal (entry->key, KEY_PASSWORD)) {
-    if (entry->value)
-      password = gconf_value_get_string (entry->value);
-    if (password && password[0] == '\0')
-      password = NULL;
-    priv->password = g_strdup (password);
+  if (call == NULL)
+    return NULL;
+
+  if (parser == NULL)
+    parser = rest_xml_parser_new ();
+
+  if (!SOUP_STATUS_IS_SUCCESSFUL (rest_proxy_call_get_status_code (call))) {
+    g_message ("Error from Twitter: %s (%d)",
+               rest_proxy_call_get_status_message (call),
+               rest_proxy_call_get_status_code (call));
+    return NULL;
   }
 
-  /* Get our details. This will cause the user_received signal to be fired */
-  if (priv->username && priv->password) {
-    /* TODO: yes, this leaks.  Dispose cycle in twitter-glib */
-    priv->user = NULL;
-    twitter_client_set_user (priv->client, priv->username, priv->password);
-    priv->self_handle =
-      twitter_client_show_user_from_id (priv->client, priv->username);
-  } else {
-    /* TODO: yes, this leaks.  Dispose cycle in twitter-glib */
-    priv->user = NULL;
+  root = rest_xml_parser_parse_from_data (parser,
+                                          rest_proxy_call_get_payload (call),
+                                          rest_proxy_call_get_payload_length (call));
 
-    mojito_service_emit_user_changed (service);
-    mojito_service_emit_capabilities_changed (service, NULL);
-    mojito_service_emit_refreshed (service, NULL);
+  g_object_unref (call);
+
+  if (root == NULL) {
+    g_message ("Error from Twitter: %s",
+               rest_proxy_call_get_payload (call));
+    return NULL;
   }
+
+  return root;
+}
+
+static char *
+make_date (const char *s)
+{
+  struct tm tm;
+  strptime (s, "%a %b %d %T %z %Y", &tm);
+  return mojito_time_t_to_string (timegm (&tm));
 }
 
 static MojitoItem *
-make_item_from_status (MojitoService *service, TwitterStatus *status)
+make_item (MojitoService *service, RestXmlNode *node)
 {
   MojitoItem *item;
-  TwitterUser *user;
-  GTimeVal timeval;
-  char *date;
+  RestXmlNode *u_node, *n;
+  const char *post_id, *user_id, *user_name;
+  char *url;
 
-  g_assert (MOJITO_IS_SERVICE (service));
-  g_assert (TWITTER_IS_STATUS (status));
+  u_node = rest_xml_node_find (node, "user");
 
   item = mojito_item_new ();
-  mojito_item_set_service (item, MOJITO_SERVICE (service));
+  mojito_item_set_service (item, service);
 
-  twitter_date_to_time_val (twitter_status_get_created_at (status), &timeval);
-  date = mojito_time_t_to_string (timeval.tv_sec);
+  post_id = rest_xml_node_find (node, "id")->content;
+  user_id = rest_xml_node_find (u_node, "screen_name")->content;
+  mojito_item_put (item, "authorid", user_id);
 
-  mojito_item_put (item, "id", twitter_status_get_url (status));
-  mojito_item_put (item, "url", twitter_status_get_url (status));
-  mojito_item_take (item, "date", date);
-  /* TODO: need a better name for this */
-  mojito_item_put (item, "content", twitter_status_get_text (status));
+  url = g_strdup_printf ("http://twitter.com/%s/statuses/%s", user_id, post_id);
+  mojito_item_put (item, "id", url);
+  mojito_item_take (item, "url", url);
 
-  user = twitter_status_get_user (status);
-  mojito_item_put (item, "author", twitter_user_get_name (user));
-  mojito_item_take (item, "authorid", g_strdup_printf ("%d", twitter_user_get_id (user)));
-  mojito_item_take (item, "authoricon", mojito_web_download_image
-                    (twitter_user_get_profile_image_url (user)));
-  mojito_item_put (item, "location", twitter_user_get_location (user));
+  user_name = rest_xml_node_find (node, "name")->content;
+  mojito_item_put (item, "author", user_name);
+
+  mojito_item_put (item, "content", rest_xml_node_find (node, "text")->content);
+
+  const char *date;
+  date = rest_xml_node_find (node, "created_at")->content;
+  mojito_item_take (item, "date", make_date (date));
+
+  n = rest_xml_node_find (u_node, "location");
+  if (n && n->content)
+    mojito_item_put (item, "location", n->content);
+
+  n = rest_xml_node_find (u_node, "profile_image_url");
+  if (n && n->content)
+    mojito_item_take (item, "authoricon", mojito_web_download_image (n->content));
 
   return item;
+}
+
+static void
+tweets_cb (RestProxyCall *call,
+           GError        *error,
+           GObject       *weak_object,
+           gpointer       userdata)
+{
+  MojitoService *service = MOJITO_SERVICE (weak_object);
+  RestXmlNode *root, *node;
+  MojitoSet *set;
+
+  if (error) {
+    g_message ("Error: %s", error->message);
+    return;
+  }
+
+  root = node_from_call (call);
+  if (!root)
+    return;
+
+  set = mojito_item_set_new ();
+
+  for (node = rest_xml_node_find (root, "status"); node; node = node->next) {
+    MojitoItem *item;
+    /* TODO: skip the user's own tweets */
+
+    item = make_item (service, node);
+    if (item)
+      mojito_set_add (set, (GObject *)item);
+  }
+
+  mojito_service_emit_refreshed (service, set);
+
+  /* TODO cleanup */
+
+  rest_xml_node_unref (root);
+}
+
+static void
+get_status_updates (MojitoServiceTwitter *twitter)
+{
+  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  RestProxyCall *call;
+
+  if (!priv->user_id || !priv->running)
+    return;
+
+  call = rest_proxy_new_call (priv->proxy);
+  rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
+  g_debug ("calling friends_timeline");
+  rest_proxy_call_async (call, tweets_cb, (GObject*)twitter, NULL, NULL);
+}
+
+static void
+verify_cb (RestProxyCall *call,
+           GError        *error,
+           GObject       *weak_object,
+           gpointer       userdata)
+{
+  MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (weak_object);
+  RestXmlNode *node;
+
+  if (error) {
+    g_message ("Error: %s", error->message);
+    return;
+  }
+
+  node = node_from_call (call);
+  if (!node)
+    return;
+
+  service->priv->user_id = g_strdup (rest_xml_node_find (node, "id")->content);
+  service->priv->image_url = g_strdup (rest_xml_node_find (node, "profile_image_url")->content);
+
+  rest_xml_node_unref (node);
+
+  if (service->priv->running)
+    get_status_updates (service);
+}
+
+static void
+got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
+{
+  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (user_data);
+  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  RestProxyCall *call;
+
+  if (authorised) {
+    call = rest_proxy_new_call (priv->proxy);
+    rest_proxy_call_set_function (call, "account/verify_credentials.xml");
+    g_debug ("calling verify_credentials");
+    rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
+  } else {
+    mojito_service_emit_refreshed ((MojitoService *)twitter, NULL);
+  }
 }
 
 static void
@@ -139,204 +235,15 @@ refresh (MojitoService *service)
 {
   MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
   MojitoServiceTwitterPrivate *priv = twitter->priv;
-  GHashTable *params = NULL;
 
-  if (!priv->running || !priv->user)
+  if (!priv->running)
     return;
 
-  mojito_set_empty (priv->set);
-
-  g_object_get (service, "params", &params, NULL);
-
-  if (params && g_hash_table_lookup (params, "own")) {
-    twitter_client_get_user_timeline (priv->client, priv->username, 0, 0);
+  if (priv->user_id) {
+    get_status_updates (twitter);
   } else {
-    twitter_client_get_friends_timeline (priv->client, NULL, 0);
+    mojito_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
   }
-
-  if (params)
-    g_hash_table_unref (params);
-}
-
-static void
-status_received_cb (TwitterClient *client,
-                    gulong         handle,
-                    TwitterStatus *status,
-                    const GError  *error,
-                    gpointer       user_data)
-{
-  MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (user_data);
-  MojitoItem *item;
-
-  if (error) {
-    g_message ("Cannot update Twitter: %s", error->message);
-    return;
-  }
-
-  item = make_item_from_status ((MojitoService*)service, status);
-  mojito_set_add (service->priv->set, (GObject*)item);
-  g_object_unref (item);
-}
-
-static void
-timeline_received_cb (TwitterClient *client,
-                      gpointer       user_data)
-{
-  MojitoService *service = MOJITO_SERVICE (user_data);
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
-
-  mojito_service_emit_refreshed (service, priv->set);
-  mojito_set_empty (priv->set);
-}
-
-static void
-user_received_cb (TwitterClient *client,
-                  gulong         handle,
-                  TwitterUser   *user,
-                  const GError  *error,
-                  gpointer       userdata)
-{
-  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (userdata);
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (twitter);
-  MojitoService *service = (MojitoService*)twitter;
-
-  /* Check that this is us. Not somebody else */
-  if (priv->self_handle == handle) {
-    if (user) {
-      //g_str_equal (twitter_user_get_screen_name (user), priv->username)) {
-
-      if (priv->user) {
-        /* TODO: leaking the TwitterUser (causes dispose cycle in twitter-glib) */
-        //g_object_unref (priv->user);
-      }
-
-      priv->user = g_object_ref (user);
-
-      mojito_service_emit_user_changed (service);
-      mojito_service_emit_capabilities_changed (service, get_dynamic_caps (service));
-
-      refresh (service);
-    } else {
-      g_message ("Cannot login to Twitter: %s", error->message);
-      priv->user = NULL;
-
-      mojito_service_emit_user_changed (service);
-      mojito_service_emit_capabilities_changed (service, NULL);
-      mojito_service_emit_refreshed (service, NULL);
-    }
-  }
-}
-
-static gboolean
-authenticate_cb (TwitterClient *client, TwitterAuthState state, gpointer user_data)
-{
-  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (user_data);
-  MojitoService *service = MOJITO_SERVICE (twitter);
-
-  switch (state) {
-  case TWITTER_AUTH_FAILED:
-    /* Authentication failed, emit an empty set */
-    g_message ("Cannot login to Twitter");
-    twitter->priv->user = NULL;
-    mojito_service_emit_user_changed (service);
-    mojito_service_emit_capabilities_changed (service, NULL);
-    mojito_service_emit_refreshed (service, NULL);
-    break;
-  case TWITTER_AUTH_NEGOTIATING:
-  case TWITTER_AUTH_RETRY:
-  case TWITTER_AUTH_SUCCESS:
-    /* Nothing to do here */
-    break;
-  }
-
-  return FALSE;
-}
-
-
-static const char *
-mojito_service_twitter_get_name (MojitoService *service)
-{
-  return "twitter";
-}
-
-static void
-mojito_service_twitter_dispose (GObject *object)
-{
-  MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
-
-  if (priv->gconf) {
-    gconf_client_notify_remove (priv->gconf, priv->username_notify_id);
-    gconf_client_notify_remove (priv->gconf, priv->password_notify_id);
-
-    g_object_unref (priv->gconf);
-    priv->gconf = NULL;
-  }
-
-  /* TODO: leaking the TwitterUser (causes dispose cycle in twitter-glib) */
-#if 0
-  if (priv->user) {
-    g_object_unref (priv->user);
-    priv->user = NULL;
-  }
-#endif
-
-  if (priv->client) {
-    /* We must disconnect these here because otherwise we may call the
-     * callbacks called via a signal emission from a closure within
-     * twitter-glib that has a reference on the client. So just unreffing the
-     * client isn't enough.
-     */
-    g_signal_handlers_disconnect_by_func (priv->client,
-                                          status_received_cb,
-                                          object);
-    g_signal_handlers_disconnect_by_func (priv->client,
-                                          timeline_received_cb,
-                                          object);
-    g_signal_handlers_disconnect_by_func (priv->client,
-                                          user_received_cb,
-                                          object);
-    g_object_unref (priv->client);
-    priv->client = NULL;
-  }
-
-  G_OBJECT_CLASS (mojito_service_twitter_parent_class)->dispose (object);
-}
-
-static void
-online_notify (gboolean online, gpointer user_data)
-{
-  MojitoService *service = (MojitoService *) user_data;
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
-
-  if (online) {
-    gconf_client_notify (priv->gconf, KEY_USER);
-    gconf_client_notify (priv->gconf, KEY_PASSWORD);
-  } else {
-    mojito_service_emit_capabilities_changed (service, NULL);
-  }
-}
-
-static void
-mojito_service_twitter_finalize (GObject *object)
-{
-  MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
-
-  mojito_online_remove_notify (online_notify, object);
-
-  g_free (priv->username);
-
-  G_OBJECT_CLASS (mojito_service_twitter_parent_class)->finalize (object);
-}
-
-static gboolean
-update_status (MojitoService *service,
-               const gchar   *status_msg)
-{
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
-
-  twitter_client_add_status (priv->client, status_msg);
-
-  return TRUE;
 }
 
 static const char **
@@ -362,28 +269,40 @@ get_dynamic_caps (MojitoService *service)
   };
   static const char * no_caps[] = { NULL };
 
-  if (priv->user)
+  if (priv->user_id)
     return caps;
   else
     return no_caps;
 }
 
-static gchar *
-get_persona_icon (MojitoService *service)
+static gboolean
+update_status (MojitoService *service, const char *msg)
 {
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
-  const gchar *url;
+  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (service);
+  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  RestProxyCall *call;
+  gboolean ret;
 
-  if (priv->user) {
-    url = twitter_user_get_profile_image_url (priv->user);
-    return mojito_web_download_image (url);
-  } else {
-    return NULL;
-  }
+  if (!priv->user_id)
+    return FALSE;
+
+  call = rest_proxy_new_call (priv->proxy);
+  rest_proxy_call_set_method (call, "POST");
+  rest_proxy_call_set_function (call, "statuses/update.xml");
+
+  rest_proxy_call_add_params (call,
+                              "status", msg,
+                              NULL);
+
+  ret = rest_proxy_call_run (call, NULL, NULL);
+
+  g_object_unref (call);
+
+  return ret;
 }
 
 static void
-_avatar_downloaded_cb (const gchar *uri,
+avatar_downloaded_cb (const gchar *uri,
                        gchar       *local_path,
                        gpointer     userdata)
 {
@@ -397,16 +316,55 @@ static void
 request_avatar (MojitoService *service)
 {
   MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
-  const gchar *url;
 
-  if (priv->user) {
-    url = twitter_user_get_profile_image_url (priv->user);
-    mojito_web_download_image_async (url,
-                                     _avatar_downloaded_cb,
+  if (priv->image_url) {
+    mojito_web_download_image_async (priv->image_url,
+                                     avatar_downloaded_cb,
                                      service);
-  } else {
-    mojito_service_emit_avatar_retrieved (service, NULL);
   }
+}
+
+static void
+online_notify (gboolean online, gpointer user_data)
+{
+  MojitoServiceTwitter *service = (MojitoServiceTwitter *) user_data;
+
+  if (online) {
+    mojito_keyfob_oauth ((OAuthProxy*)service->priv->proxy, got_tokens_cb, service);
+  } else {
+    mojito_service_emit_capabilities_changed ((MojitoService *)service, NULL);
+  }
+}
+
+
+static const char *
+mojito_service_twitter_get_name (MojitoService *service)
+{
+  return "twitter";
+}
+
+static void
+mojito_service_twitter_dispose (GObject *object)
+{
+  MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
+
+  if (priv->proxy) {
+    g_object_unref (priv->proxy);
+    priv->proxy = NULL;
+  }
+
+  G_OBJECT_CLASS (mojito_service_twitter_parent_class)->dispose (object);
+}
+
+static void
+mojito_service_twitter_finalize (GObject *object)
+{
+  MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
+
+  g_free (priv->user_id);
+  g_free (priv->image_url);
+
+  G_OBJECT_CLASS (mojito_service_twitter_parent_class)->finalize (object);
 }
 
 static void
@@ -426,7 +384,6 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
   service_class->get_static_caps = get_static_caps;
   service_class->get_dynamic_caps = get_dynamic_caps;
   service_class->update_status = update_status;
-  service_class->get_persona_icon = get_persona_icon;
   service_class->request_avatar = request_avatar;
 }
 
@@ -434,40 +391,16 @@ static void
 mojito_service_twitter_init (MojitoServiceTwitter *self)
 {
   MojitoServiceTwitterPrivate *priv;
+  const char *key = NULL, *secret = NULL;
 
-  self->priv = priv = GET_PRIVATE (self);
+  priv = self->priv = GET_PRIVATE (self);
 
-  priv->set = mojito_item_set_new ();
+  mojito_keystore_get_key_secret ("twitter", &key, &secret);
 
-  priv->client = g_object_new (TWITTER_TYPE_CLIENT,
-                               "user-agent", "Mojito/" VERSION,
-                               NULL);
-  g_signal_connect (priv->client, "authenticate",
-                    G_CALLBACK (authenticate_cb),
-                    self);
-  g_signal_connect (priv->client, "status-received",
-                    G_CALLBACK (status_received_cb),
-                    self);
-  g_signal_connect (priv->client, "timeline-complete",
-                    G_CALLBACK (timeline_received_cb),
-                    self);
-  g_signal_connect (priv->client, "user-received",
-                    G_CALLBACK (user_received_cb),
-                    self);
-
-  /* Load preferences */
-  priv->gconf = gconf_client_get_default ();
-  gconf_client_add_dir (priv->gconf, KEY_DIR,
-                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  priv->username_notify_id = gconf_client_notify_add
-    (priv->gconf, KEY_USER, user_changed_cb, self, NULL, NULL);
-  priv->password_notify_id = gconf_client_notify_add
-    (priv->gconf, KEY_PASSWORD, user_changed_cb, self, NULL, NULL);
-
-  if (mojito_is_online ())
-  {
-    online_notify (TRUE, self);
-  }
+  priv->proxy = oauth_proxy_new (key, secret, "http://twitter.com/", FALSE);
 
   mojito_online_add_notify (online_notify, self);
+  if (mojito_is_online ()) {
+    online_notify (TRUE, self);
+  }
 }
