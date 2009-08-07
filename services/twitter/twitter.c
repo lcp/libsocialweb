@@ -37,6 +37,10 @@ G_DEFINE_TYPE (MojitoServiceTwitter, mojito_service_twitter, MOJITO_TYPE_SERVICE
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitterPrivate))
 
 struct _MojitoServiceTwitterPrivate {
+  enum {
+    OWN,
+    FRIENDS
+  } type;
   gboolean running;
   RestProxy *proxy;
   char *user_id;
@@ -173,8 +177,14 @@ get_status_updates (MojitoServiceTwitter *twitter)
     return;
 
   call = rest_proxy_new_call (priv->proxy);
-  rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
-  g_debug ("calling friends_timeline");
+  switch (priv->type) {
+  case OWN:
+    rest_proxy_call_set_function (call, "statuses/user_timeline.xml");
+    break;
+  case FRIENDS:
+    rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
+    break;
+  }
   rest_proxy_call_async (call, tweets_cb, (GObject*)twitter, NULL, NULL);
 }
 
@@ -344,6 +354,31 @@ mojito_service_twitter_get_name (MojitoService *service)
 }
 
 static void
+mojito_service_twitter_constructed (GObject *object)
+{
+  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (object);
+  MojitoServiceTwitterPrivate *priv;
+  const char *key = NULL, *secret = NULL;
+
+  priv = twitter->priv = GET_PRIVATE (twitter);
+
+  if (mojito_service_get_param ((MojitoService*)twitter, "own")) {
+    priv->type = OWN;
+  } else {
+    priv->type = FRIENDS;
+  }
+
+  mojito_keystore_get_key_secret ("twitter", &key, &secret);
+
+  priv->proxy = oauth_proxy_new (key, secret, "http://twitter.com/", FALSE);
+
+  mojito_online_add_notify (online_notify, twitter);
+  if (mojito_is_online ()) {
+    online_notify (TRUE, twitter);
+  }
+}
+
+static void
 mojito_service_twitter_dispose (GObject *object)
 {
   MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
@@ -375,6 +410,7 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
 
   g_type_class_add_private (klass, sizeof (MojitoServiceTwitterPrivate));
 
+  object_class->constructed = mojito_service_twitter_constructed;
   object_class->dispose = mojito_service_twitter_dispose;
   object_class->finalize = mojito_service_twitter_finalize;
 
@@ -390,17 +426,4 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
 static void
 mojito_service_twitter_init (MojitoServiceTwitter *self)
 {
-  MojitoServiceTwitterPrivate *priv;
-  const char *key = NULL, *secret = NULL;
-
-  priv = self->priv = GET_PRIVATE (self);
-
-  mojito_keystore_get_key_secret ("twitter", &key, &secret);
-
-  priv->proxy = oauth_proxy_new (key, secret, "http://twitter.com/", FALSE);
-
-  mojito_online_add_notify (online_notify, self);
-  if (mojito_is_online ()) {
-    online_notify (TRUE, self);
-  }
 }
