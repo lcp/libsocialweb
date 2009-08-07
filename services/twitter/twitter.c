@@ -90,8 +90,9 @@ make_date (const char *s)
 }
 
 static MojitoItem *
-make_item (MojitoService *service, RestXmlNode *node)
+make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
 {
+  MojitoServiceTwitterPrivate *priv = twitter->priv;
   MojitoItem *item;
   RestXmlNode *u_node, *n;
   const char *post_id, *user_id, *user_name;
@@ -99,11 +100,16 @@ make_item (MojitoService *service, RestXmlNode *node)
 
   u_node = rest_xml_node_find (node, "user");
 
+  user_id = rest_xml_node_find (u_node, "screen_name")->content;
+
+  /* For friend feeds, ignore our own tweets */
+  if (priv->type == FRIENDS && g_str_equal (user_id, priv->user_id))
+    return NULL;
+
   item = mojito_item_new ();
-  mojito_item_set_service (item, service);
+  mojito_item_set_service (item, (MojitoService *)twitter);
 
   post_id = rest_xml_node_find (node, "id")->content;
-  user_id = rest_xml_node_find (u_node, "screen_name")->content;
   mojito_item_put (item, "authorid", user_id);
 
   url = g_strdup_printf ("http://twitter.com/%s/statuses/%s", user_id, post_id);
@@ -136,7 +142,7 @@ tweets_cb (RestProxyCall *call,
            GObject       *weak_object,
            gpointer       userdata)
 {
-  MojitoService *service = MOJITO_SERVICE (weak_object);
+  MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (weak_object);
   RestXmlNode *root, *node;
   MojitoSet *set;
 
@@ -160,7 +166,7 @@ tweets_cb (RestProxyCall *call,
       mojito_set_add (set, (GObject *)item);
   }
 
-  mojito_service_emit_refreshed (service, set);
+  mojito_service_emit_refreshed ((MojitoService *)service, set);
 
   /* TODO cleanup */
 
