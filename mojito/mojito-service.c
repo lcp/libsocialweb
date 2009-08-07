@@ -111,7 +111,7 @@ mojito_service_class_init (MojitoServiceClass *klass)
   pspec = g_param_spec_boxed ("params", "params",
                                "The service parameters",
                               G_TYPE_HASH_TABLE,
-                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+                              G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_PARAMS, pspec);
 
   signals[SIGNAL_REFRESHED] =
@@ -276,6 +276,25 @@ service_get_dynamic_caps (MojitoServiceIface *self, DBusGMethodInvocation *conte
     caps = service_class->get_dynamic_caps ((MojitoService *)self);
 
   mojito_service_iface_return_from_get_dynamic_capabilities (context, caps);
+}
+
+/*
+ * Convenience function for subclasses to lookup a paramter
+ */
+const char *
+mojito_service_get_param (MojitoService *service, const char *key)
+{
+  MojitoServicePrivate *priv;
+
+  g_return_val_if_fail (MOJITO_IS_SERVICE (service), NULL);
+  g_return_val_if_fail (key, NULL);
+
+  priv = GET_PRIVATE (service);
+
+  if (priv->params)
+    return g_hash_table_lookup (priv->params, key);
+  else
+    return NULL;
 }
 
 static void

@@ -90,6 +90,8 @@ void mojito_service_emit_avatar_retrieved (MojitoService *service,
 
 void mojito_service_emit_user_changed (MojitoService *service);
 
+const char * mojito_service_get_param (MojitoService *service, const char *key);
+
 G_END_DECLS
 
 #endif /* _MOJITO_SERVICE */
