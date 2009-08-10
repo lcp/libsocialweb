@@ -68,7 +68,7 @@ node_from_call (RestProxyCall *call)
                                           rest_proxy_call_get_payload_length (call));
 
   if (root == NULL) {
-    g_message ("Error from MySpace: %s",
+    g_message ("Invalid XML from MySpace: %s",
                rest_proxy_call_get_payload (call));
     return NULL;
   }
@@ -419,6 +419,17 @@ request_avatar (MojitoService *service)
 }
 
 static void
+_status_updated_cb (RestProxyCall *call,
+                    GError        *error,
+                    GObject       *weak_object,
+                    gpointer       userdata)
+{
+  MojitoService *service = MOJITO_SERVICE (weak_object);
+
+  mojito_service_emit_status_updated (service, error == NULL);
+}
+
+static void
 update_status (MojitoService *service, const char *msg)
 {
   MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
@@ -440,9 +451,7 @@ update_status (MojitoService *service, const char *msg)
                               "status", msg,
                               NULL);
 
-  rest_proxy_call_run (call, NULL, NULL);
-
-  g_object_unref (call);
+  rest_proxy_call_async (call, _status_updated_cb, (GObject *)service, NULL, NULL);
 }
 
 static const char *
