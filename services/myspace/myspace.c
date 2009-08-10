@@ -392,18 +392,6 @@ get_dynamic_caps (MojitoService *service)
     return no_caps;
 }
 
-static gchar *
-get_persona_icon (MojitoService *service)
-{
-  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
-  MojitoServiceMySpacePrivate *priv = myspace->priv;
-
-  if (sync_auth (myspace))
-    return mojito_web_download_image (priv->image_url);
-  else
-    return NULL;
-}
-
 static void
 _avatar_downloaded_cb (const gchar *uri,
                        gchar       *local_path,
@@ -516,7 +504,6 @@ mojito_service_myspace_class_init (MojitoServiceMySpaceClass *klass)
   service_class->get_name = mojito_service_myspace_get_name;
   service_class->get_static_caps = get_static_caps;
   service_class->get_dynamic_caps = get_dynamic_caps;
-  service_class->get_persona_icon = get_persona_icon;
   service_class->update_status = update_status;
   service_class->start = start;
   service_class->refresh = refresh;
