@@ -125,15 +125,23 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
   if (g_regex_match (priv->twitpic_re, content, 0, &match_info)) {
     char *twitpic_id, *new_content;
 
+    /* Construct the thumbnail URL and download the image */
     twitpic_id = g_match_info_fetch (match_info, 1);
     url = g_strconcat ("http://twitpic.com/show/thumb/", twitpic_id, NULL);
     mojito_item_take (item, "thumbnail", mojito_web_download_image (url));
     g_free (url);
 
+    /* Remove the URL from the tweet and use that as the title */
     new_content = g_regex_replace (priv->twitpic_re,
                                    content, -1,
                                    0, "", 0, NULL);
-    mojito_item_take (item, "content", new_content);
+    mojito_item_take (item, "title", new_content);
+
+    /* Update the URL to point at twitpic */
+    url = g_strconcat ("http://twitpic.com/", twitpic_id, NULL);
+    mojito_item_take (item, "url", url);
+
+    g_free (twitpic_id);
   } else {
     mojito_item_put (item, "content", content);
   }
