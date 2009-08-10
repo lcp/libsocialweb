@@ -231,7 +231,6 @@ got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
   if (authorised) {
     call = rest_proxy_new_call (priv->proxy);
     rest_proxy_call_set_function (call, "account/verify_credentials.xml");
-    g_debug ("calling verify_credentials");
     rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
   } else {
     mojito_service_emit_refreshed ((MojitoService *)twitter, NULL);
