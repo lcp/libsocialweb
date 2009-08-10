@@ -314,7 +314,6 @@ mojito_client_service_get_dynamic_capabilities (MojitoClientService             
 
 static void
 _update_status_cb (DBusGProxy *proxy,
-                   gboolean    success,
                    GError     *error,
                    gpointer    userdata)
 {
@@ -329,7 +328,6 @@ _update_status_cb (DBusGProxy *proxy,
 
   cb = (MojitoClientServiceUpdateStatusCallback)closure->cb;
   cb (closure->service,
-      success,
       error,
       closure->userdata);
 

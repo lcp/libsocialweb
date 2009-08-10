@@ -78,7 +78,6 @@ mojito_client_service_request_avatar (MojitoClientService *service);
 
 typedef void
 (*MojitoClientServiceUpdateStatusCallback) (MojitoClientService *service,
-                                            gboolean             success,
                                             const GError        *error,
                                             gpointer             userdata);
 
