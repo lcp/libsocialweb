@@ -292,6 +292,17 @@ get_dynamic_caps (MojitoService *service)
 }
 
 static void
+_status_updated_cb (RestProxyCall *call,
+                    GError        *error,
+                    GObject       *weak_object,
+                    gpointer       userdata)
+{
+  MojitoService *service = MOJITO_SERVICE (weak_object);
+
+  mojito_service_emit_status_updated (service, error == NULL);
+}
+
+static void
 update_status (MojitoService *service, const char *msg)
 {
   MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (service);
@@ -309,9 +320,7 @@ update_status (MojitoService *service, const char *msg)
                               "status", msg,
                               NULL);
 
-  rest_proxy_call_run (call, NULL, NULL);
-
-  g_object_unref (call);
+  rest_proxy_call_async (call, _status_updated_cb, (GObject *)service, NULL, NULL);
 }
 
 static void
