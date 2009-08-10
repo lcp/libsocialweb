@@ -215,20 +215,15 @@ service_update_status (MojitoServiceIface    *self,
                        DBusGMethodInvocation *context)
 {
   MojitoServiceClass *service_class;
-  gboolean res = TRUE;
 
   service_class = MOJITO_SERVICE_GET_CLASS (self);
 
   if (service_class->update_status)
   {
-    res = service_class->update_status ((MojitoService *)self, status_message);
-    if (res == FALSE)
-    {
-      g_warning (G_STRLOC ": Error updating status message");
-    }
+    service_class->update_status ((MojitoService *)self, status_message);
   }
 
-  mojito_service_iface_return_from_update_status (context, res);
+  mojito_service_iface_return_from_update_status (context);
 }
 
 static void

@@ -61,7 +61,7 @@ struct _MojitoServiceClass {
   /* fires ::refreshed (MojitoSet *set) signal */
   void (*refresh) (MojitoService *service);
   MojitoItem *(*get_last_item) (MojitoService *service);
-  gboolean (*update_status) (MojitoService *service, const gchar *status_message);
+  void (*update_status) (MojitoService *service, const gchar *status_message);
 
   const gchar ** (*get_static_caps) (MojitoService *service);
   const gchar ** (*get_dynamic_caps) (MojitoService *service);

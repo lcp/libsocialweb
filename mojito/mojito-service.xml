@@ -4,7 +4,6 @@
   <interface name="com.intel.Mojito.Service">
     <method name="UpdateStatus" tp:name-for-bindings="Update_Status">
       <arg name="status_message" type="s" direction="in"/>
-      <arg name="success" type="b" direction="out"/>
     </method>
 
     <method name="GetStaticCapabilities" tp:name-for-bindings="Get_Static_Capabilities">
