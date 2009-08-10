@@ -291,16 +291,15 @@ get_dynamic_caps (MojitoService *service)
     return no_caps;
 }
 
-static gboolean
+static void
 update_status (MojitoService *service, const char *msg)
 {
   MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (service);
   MojitoServiceTwitterPrivate *priv = twitter->priv;
   RestProxyCall *call;
-  gboolean ret;
 
   if (!priv->user_id)
-    return FALSE;
+    return;
 
   call = rest_proxy_new_call (priv->proxy);
   rest_proxy_call_set_method (call, "POST");
@@ -310,11 +309,9 @@ update_status (MojitoService *service, const char *msg)
                               "status", msg,
                               NULL);
 
-  ret = rest_proxy_call_run (call, NULL, NULL);
+  rest_proxy_call_run (call, NULL, NULL);
 
   g_object_unref (call);
-
-  return ret;
 }
 
 static void
