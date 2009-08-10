@@ -418,17 +418,16 @@ request_avatar (MojitoService *service)
   }
 }
 
-static gboolean
+static void
 update_status (MojitoService *service, const char *msg)
 {
   MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
   MojitoServiceMySpacePrivate *priv = myspace->priv;
   RestProxyCall *call;
   char *function;
-  gboolean ret;
 
   if (!sync_auth (myspace))
-    return FALSE;
+    return;
 
   call = rest_proxy_new_call (priv->proxy);
   rest_proxy_call_set_method (call, "PUT");
@@ -441,11 +440,9 @@ update_status (MojitoService *service, const char *msg)
                               "status", msg,
                               NULL);
 
-  ret = rest_proxy_call_run (call, NULL, NULL);
+  rest_proxy_call_run (call, NULL, NULL);
 
   g_object_unref (call);
-
-  return ret;
 }
 
 static const char *
