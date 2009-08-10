@@ -84,6 +84,8 @@ void mojito_service_emit_refreshed (MojitoService *service, MojitoSet *set);
 
 void mojito_service_emit_capabilities_changed (MojitoService *service, const char **caps);
 
+void mojito_service_emit_status_updated (MojitoService *service, gboolean success);
+
 void mojito_service_emit_avatar_retrieved (MojitoService *service,
                                            const gchar   *path);
 

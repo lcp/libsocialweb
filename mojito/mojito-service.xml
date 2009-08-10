@@ -6,6 +6,10 @@
       <arg name="status_message" type="s" direction="in"/>
     </method>
 
+    <signal name="StatusUpdated" tp:name-for-bindings="Status_Updated">
+      <arg name="success" type="b"/>
+    </signal>
+
     <method name="GetStaticCapabilities" tp:name-for-bindings="Get_Static_Capabilities">
       <arg name="caps" type="as" direction="out"/>
     </method>

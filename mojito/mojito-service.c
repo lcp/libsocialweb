@@ -176,6 +176,14 @@ mojito_service_emit_capabilities_changed (MojitoService *service, const char **c
 }
 
 void
+mojito_service_emit_status_updated (MojitoService *service, gboolean success)
+{
+  g_return_if_fail (MOJITO_IS_SERVICE (service));
+
+  mojito_service_iface_emit_status_updated (service, success);
+}
+
+void
 mojito_service_emit_avatar_retrieved (MojitoService *service,
                                       const gchar   *path)
 {
