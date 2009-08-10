@@ -45,6 +45,7 @@ struct _MojitoServiceTwitterPrivate {
   RestProxy *proxy;
   char *user_id;
   char *image_url;
+  GRegex *twitpic_re;
 };
 
 RestXmlNode *
@@ -95,8 +96,9 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
   MojitoServiceTwitterPrivate *priv = twitter->priv;
   MojitoItem *item;
   RestXmlNode *u_node, *n;
-  const char *post_id, *user_id, *user_name;
+  const char *post_id, *user_id, *user_name, *date, *content;
   char *url;
+  GMatchInfo *match_info;
 
   u_node = rest_xml_node_find (node, "user");
 
@@ -119,9 +121,24 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
   user_name = rest_xml_node_find (node, "name")->content;
   mojito_item_put (item, "author", user_name);
 
-  mojito_item_put (item, "content", rest_xml_node_find (node, "text")->content);
+  content = rest_xml_node_find (node, "text")->content;
+  if (g_regex_match (priv->twitpic_re, content, 0, &match_info)) {
+    char *twitpic_id, *new_content;
 
-  const char *date;
+    twitpic_id = g_match_info_fetch (match_info, 1);
+    url = g_strconcat ("http://twitpic.com/show/thumb/", twitpic_id, NULL);
+    mojito_item_take (item, "thumbnail", mojito_web_download_image (url));
+    g_free (url);
+
+    new_content = g_regex_replace (priv->twitpic_re,
+                                   content, -1,
+                                   0, "", 0, NULL);
+    mojito_item_take (item, "content", new_content);
+  } else {
+    mojito_item_put (item, "content", content);
+  }
+  g_match_info_free (match_info);
+
   date = rest_xml_node_find (node, "created_at")->content;
   mojito_item_take (item, "date", make_date (date));
 
@@ -379,6 +396,9 @@ mojito_service_twitter_constructed (GObject *object)
     priv->type = FRIENDS;
   }
 
+  priv->twitpic_re = g_regex_new ("http://twitpic.com/([A-Za-z0-9]+)", 0, 0, NULL);
+  g_assert (priv->twitpic_re);
+
   mojito_keystore_get_key_secret ("twitter", &key, &secret);
 
   priv->proxy = oauth_proxy_new (key, secret, "http://twitter.com/", FALSE);
@@ -397,6 +417,11 @@ mojito_service_twitter_dispose (GObject *object)
   if (priv->proxy) {
     g_object_unref (priv->proxy);
     priv->proxy = NULL;
+  }
+
+  if (priv->twitpic_re) {
+    g_regex_unref (priv->twitpic_re);
+    priv->twitpic_re = NULL;
   }
 
   G_OBJECT_CLASS (mojito_service_twitter_parent_class)->dispose (object);
