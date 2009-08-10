@@ -39,6 +39,7 @@ enum
 {
   AVATAR_RETRIEVED_SIGNAL,
   CAPS_CHANGED_SIGNAL,
+  STATUS_UPDATED_SIGNAL,
   USER_CHANGED_SIGNAL,
   LAST_SIGNAL
 };
@@ -131,6 +132,18 @@ mojito_client_service_class_init (MojitoClientServiceClass *klass)
                   1,
                   G_TYPE_STRV);
 
+  signals[STATUS_UPDATED_SIGNAL] =
+    g_signal_new ("status-updated",
+                  MOJITO_CLIENT_TYPE_SERVICE,
+                  G_SIGNAL_RUN_FIRST,
+                  G_STRUCT_OFFSET (MojitoClientServiceClass, status_updated),
+                  NULL,
+                  NULL,
+                  g_cclosure_marshal_VOID__BOOLEAN,
+                  G_TYPE_NONE,
+                  1,
+                  G_TYPE_BOOLEAN);
+
   signals[USER_CHANGED_SIGNAL] =
     g_signal_new ("user-changed",
                   MOJITO_CLIENT_TYPE_SERVICE,
@@ -163,6 +176,15 @@ _capabilities_changed_cb (DBusGProxy *proxy,
 {
   MojitoClientService *service = MOJITO_CLIENT_SERVICE (user_data);
   g_signal_emit (service, signals[CAPS_CHANGED_SIGNAL], 0, caps);
+}
+
+static void
+_status_updated_cb (DBusGProxy *proxy,
+                    gboolean    success,
+                    gpointer    user_data)
+{
+  MojitoClientService *service = MOJITO_CLIENT_SERVICE (user_data);
+  g_signal_emit (service, signals[STATUS_UPDATED_SIGNAL], 0, success);
 }
 
 static void
@@ -225,6 +247,16 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
   dbus_g_proxy_connect_signal (priv->proxy,
                                "CapabilitiesChanged",
                                (GCallback)_capabilities_changed_cb,
+                               service,
+                               NULL);
+
+  dbus_g_proxy_add_signal (priv->proxy,
+                           "StatusUpdated",
+                           G_TYPE_BOOLEAN,
+                           G_TYPE_INVALID);
+  dbus_g_proxy_connect_signal (priv->proxy,
+                               "StatusUpdated",
+                               (GCallback)_status_updated_cb,
                                service,
                                NULL);
 
