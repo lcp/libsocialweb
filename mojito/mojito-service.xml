@@ -2,10 +2,6 @@
 
 <node name="/Service_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
   <interface name="com.intel.Mojito.Service">
-    <method name="GetPersonaIcon" tp:name-for-bindings="Get_Persona_Icon">
-      <arg name="uri" type="s" direction="out"/>
-    </method>
-
     <method name="UpdateStatus" tp:name-for-bindings="Update_Status">
       <arg name="status_message" type="s" direction="in"/>
       <arg name="success" type="b" direction="out"/>

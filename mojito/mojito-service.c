@@ -194,25 +194,6 @@ mojito_service_emit_user_changed (MojitoService *service)
 
 
 static void
-service_get_persona_icon (MojitoServiceIface    *self,
-                          DBusGMethodInvocation *context)
-{
-  MojitoServiceClass *service_class;
-  gchar *persona_icon = NULL;
-
-  service_class = MOJITO_SERVICE_GET_CLASS (self);
-
-  if (service_class->get_persona_icon)
-  {
-    persona_icon = service_class->get_persona_icon ((MojitoService *)self);
-  }
-
-  mojito_service_iface_return_from_get_persona_icon (context, persona_icon);
-
-  g_free (persona_icon);
-}
-
-static void
 service_request_avatar (MojitoServiceIface    *self,
                         DBusGMethodInvocation *context)
 {
@@ -303,8 +284,6 @@ service_iface_init (gpointer g_iface,
 {
   MojitoServiceIfaceClass *klass = (MojitoServiceIfaceClass *)g_iface;
 
-  mojito_service_iface_implement_get_persona_icon (klass,
-                                                   service_get_persona_icon);
   mojito_service_iface_implement_update_status (klass,
                                                 service_update_status);
   mojito_service_iface_implement_get_static_capabilities (klass,
