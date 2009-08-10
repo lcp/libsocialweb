@@ -37,6 +37,7 @@ struct _MojitoClientServicePrivate {
 
 enum
 {
+  AVATAR_RETRIEVED_SIGNAL,
   CAPS_CHANGED_SIGNAL,
   USER_CHANGED_SIGNAL,
   LAST_SIGNAL
@@ -106,6 +107,18 @@ mojito_client_service_class_init (MojitoClientServiceClass *klass)
   object_class->dispose = mojito_client_service_dispose;
   object_class->finalize = mojito_client_service_finalize;
 
+  signals[AVATAR_RETRIEVED_SIGNAL] =
+    g_signal_new ("avatar-retrieved",
+                  MOJITO_CLIENT_TYPE_SERVICE,
+                  G_SIGNAL_RUN_FIRST,
+                  G_STRUCT_OFFSET (MojitoClientServiceClass, avatar_retrieved),
+                  NULL,
+                  NULL,
+                  g_cclosure_marshal_VOID__STRING,
+                  G_TYPE_NONE,
+                  1,
+                  G_TYPE_STRING);
+
   signals[CAPS_CHANGED_SIGNAL] =
     g_signal_new ("capabilities-changed",
                   MOJITO_CLIENT_TYPE_SERVICE,
@@ -132,6 +145,15 @@ mojito_client_service_class_init (MojitoClientServiceClass *klass)
 static void
 mojito_client_service_init (MojitoClientService *self)
 {
+}
+
+static void
+_avatar_retrieved_cb (DBusGProxy *proxy,
+                      char       *path,
+                      gpointer    user_data)
+{
+  MojitoClientService *service = MOJITO_CLIENT_SERVICE (user_data);
+  g_signal_emit (service, signals[AVATAR_RETRIEVED_SIGNAL], 0, path);
 }
 
 static void
@@ -185,6 +207,16 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
     g_propagate_error (error_out, error);
     return FALSE;
   }
+
+  dbus_g_proxy_add_signal (priv->proxy,
+                           "AvatarRetrieved",
+                           G_TYPE_STRING,
+                           G_TYPE_INVALID);
+  dbus_g_proxy_connect_signal (priv->proxy,
+                               "AvatarRetrieved",
+                               (GCallback)_avatar_retrieved_cb,
+                               service,
+                               NULL);
 
   dbus_g_proxy_add_signal (priv->proxy,
                            "CapabilitiesChanged",
@@ -281,56 +313,6 @@ mojito_client_service_get_dynamic_capabilities (MojitoClientService             
 }
 
 static void
-_get_persona_icon_cb (DBusGProxy *proxy,
-                      gchar      *persona_icon,
-                      GError     *error,
-                      gpointer    userdata)
-{
-  MojitoClientServiceCallClosure *closure = (MojitoClientServiceCallClosure *)userdata;
-  MojitoClientServiceGetPersonaIconCallback cb;
-
-  cb = (MojitoClientServiceGetPersonaIconCallback)closure->cb;
-
-  if (error)
-  {
-    g_warning (G_STRLOC ": Error getting persona icon: %s",
-               error->message);
-    cb (closure->service,
-        NULL,
-        error,
-        closure->userdata);
-    g_error_free (error);
-  } else {
-    cb (closure->service,
-        persona_icon,
-        error,
-        closure->userdata);
-    g_free (persona_icon);
-  }
-
-  g_object_unref (closure->service);
-  g_slice_free (MojitoClientServiceCallClosure, closure);
-}
-
-void
-mojito_client_service_get_persona_icon (MojitoClientService                      *service,
-                                        MojitoClientServiceGetPersonaIconCallback cb,
-                                        gpointer                                  userdata)
-{
-  MojitoClientServicePrivate *priv = GET_PRIVATE (service);
-  MojitoClientServiceCallClosure *closure;
-
-  closure = g_slice_new0 (MojitoClientServiceCallClosure);
-  closure->service = g_object_ref (service);
-  closure->cb = (GCallback)cb;
-  closure->userdata = userdata;
-
-  com_intel_Mojito_Service_get_persona_icon_async (priv->proxy,
-                                                   _get_persona_icon_cb,
-                                                   closure);
-}
-
-static void
 _update_status_cb (DBusGProxy *proxy,
                    gboolean    success,
                    GError     *error,
@@ -380,3 +362,16 @@ mojito_client_service_update_status (MojitoClientService                    *ser
                                                 closure);
 }
 
+static void
+_request_avatar_cb (DBusGProxy *proxy, GError *error, gpointer userdata)
+{
+  /* TODO: print the error to the console? */
+}
+
+void
+mojito_client_service_request_avatar (MojitoClientService *service)
+{
+  MojitoClientServicePrivate *priv = GET_PRIVATE (service);
+
+  com_intel_Mojito_Service_request_avatar_async (priv->proxy, _request_avatar_cb, NULL);
+}
