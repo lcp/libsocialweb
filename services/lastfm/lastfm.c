@@ -170,13 +170,51 @@ start (MojitoService *service)
   lastfm->priv->running = TRUE;
 }
 
+static MojitoItem *
+make_item (MojitoServiceLastfm *lastfm, RestXmlNode *user, RestXmlNode *track)
+{
+  RestXmlNode *date;
+  MojitoItem *item;
+  const char *s;
+  char *id;
+
+  item = mojito_item_new ();
+  mojito_item_set_service (item, (MojitoService *)lastfm);
+
+  id = g_strdup_printf ("%s %s",
+                        rest_xml_node_find (track, "url")->content,
+                        rest_xml_node_find (user, "name")->content);
+  mojito_item_take (item, "id", id);
+
+  mojito_item_put (item, "url", rest_xml_node_find (track, "url")->content);
+  mojito_item_take (item, "title", make_title (track));
+  mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
+
+  mojito_item_take (item, "thumbnail", get_album_image (lastfm, track));
+
+  date = rest_xml_node_find (track, "date");
+  mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
+
+  s = rest_xml_node_find (user, "realname")->content;
+  if (s) {
+    mojito_item_put (item, "author", s);
+  } else {
+    mojito_item_put (item, "author", rest_xml_node_find (user, "name")->content);
+  }
+
+  mojito_item_put (item, "authorid", rest_xml_node_find (user, "name")->content);
+  mojito_item_take (item, "authoricon", get_image (user, "medium"));
+
+  return item;
+}
+
 /* TODO: this is one huge main loop blockage and should be rewritten */
 static void
 refresh (MojitoService *service)
 {
   MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
   RestProxyCall *call;
-  RestXmlNode *root, *node;
+  RestXmlNode *users_root, *user_node;
   MojitoSet *set;
 
   if (!lastfm->priv->running || lastfm->priv->user_id == NULL) {
@@ -190,23 +228,21 @@ refresh (MojitoService *service)
                               "user", lastfm->priv->user_id,
                               NULL);
 
-  if ((root = lastfm_call (call)) == NULL) {
+  if ((users_root = lastfm_call (call)) == NULL) {
     return;
   }
 
   set = mojito_item_set_new ();
 
-  for (node = rest_xml_node_find (root, "user"); node; node = node->next) {
+  for (user_node = rest_xml_node_find (users_root, "user"); user_node; user_node = user_node->next) {
     MojitoItem *item;
-    RestXmlNode *recent, *track, *date;
-    const char *s;
-    char *id;
+    RestXmlNode *recent, *track;
 
     call = rest_proxy_new_call (lastfm->priv->proxy);
     rest_proxy_call_add_params (call,
                                 "api_key", mojito_keystore_get_key ("lastfm"),
                                 "method", "user.getRecentTracks",
-                                "user", rest_xml_node_find (node, "name")->content,
+                                "user", rest_xml_node_find (user_node, "name")->content,
                                 "limit", "1",
                                 NULL);
 
@@ -221,39 +257,14 @@ refresh (MojitoService *service)
       continue;
     }
 
-    item = mojito_item_new ();
-    mojito_item_set_service (item, service);
-
-    id = g_strdup_printf ("%s %s",
-                          rest_xml_node_find (track, "url")->content,
-                          rest_xml_node_find (node, "name")->content);
-    mojito_item_take (item, "id", id);
-
-    mojito_item_put (item, "url", rest_xml_node_find (track, "url")->content);
-    mojito_item_take (item, "title", make_title (track));
-    mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
-
-    mojito_item_take (item, "thumbnail", get_album_image (lastfm, track));
-
-    date = rest_xml_node_find (track, "date");
-    mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
-
-    s = rest_xml_node_find (node, "realname")->content;
-    if (s) {
-      mojito_item_put (item, "author", s);
-    } else {
-      mojito_item_put (item, "author", rest_xml_node_find (node, "name")->content);
-    }
-
-    mojito_item_put (item, "authorid", rest_xml_node_find (node, "name")->content);
-    mojito_item_take (item, "authoricon", get_image (node, "medium"));
+    item = make_item (lastfm, user_node, track);
+    if (item)
+      mojito_set_add (set, (GObject*)item);
 
     rest_xml_node_unref (recent);
-
-    mojito_set_add (set, (GObject*)item);
   }
 
-  rest_xml_node_unref (root);
+  rest_xml_node_unref (users_root);
 
   mojito_service_emit_refreshed (service, set);
 }
