@@ -1,3 +1,15 @@
+Mojito 0.20
+===
+
+* Start of the API cleanup
+* Port Twitter to OAuth (dropping twitter-glib)
+* Don't show your own tweets
+* Remove GetPersonaIcon
+* Remove the return value from UpdateStatus
+* Add StatusUpdated signal
+* Support twitpic URLs
+
+
 Mojito 0.19.2
 ===
 
