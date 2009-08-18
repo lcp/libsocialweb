@@ -333,6 +333,7 @@ sync_auth (MojitoServiceMySpace *myspace)
 {
   MojitoService *service = (MojitoService *)myspace;
   MojitoServiceMySpacePrivate *priv = myspace->priv;
+  GError *error = NULL;
 
   if (priv->user_id == NULL) {
     RestProxyCall *call;
@@ -343,8 +344,11 @@ sync_auth (MojitoServiceMySpace *myspace)
 
     call = rest_proxy_new_call (priv->proxy);
     rest_proxy_call_set_function (call, "v1/user");
-    if (!rest_proxy_call_run (call, NULL, NULL))
+    if (!rest_proxy_call_sync (call, &error)) {
+      g_warning ("Cannot login to MySpace: %s", error->message);
+      g_error_free (error);
       return FALSE;
+    }
 
     node = node_from_call (call);
     if (!node)
