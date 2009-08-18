@@ -59,7 +59,7 @@ lastfm_call (RestProxyCall *call)
 
   g_assert (call);
 
-  rest_proxy_call_run (call, NULL, &error);
+  rest_proxy_call_sync (call, &error);
   parser = rest_xml_parser_new ();
   node = rest_xml_parser_parse_from_data (parser,
                                           rest_proxy_call_get_payload (call),
