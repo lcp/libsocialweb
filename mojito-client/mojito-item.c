@@ -78,3 +78,16 @@ mojito_item_is_from_cache (MojitoItem *item)
   return g_hash_table_lookup (item->props, "cached") != NULL;
 }
 
+gboolean
+mojito_item_has_key (MojitoItem  *item,
+                     const gchar *key)
+{
+  return (g_hash_table_lookup (item->props, key) != NULL);
+}
+
+const gchar *
+mojito_item_get_value (MojitoItem  *item,
+                       const gchar *key)
+{
+  return g_hash_table_lookup (item->props, key);
+}

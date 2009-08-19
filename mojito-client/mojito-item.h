@@ -37,6 +37,10 @@ void mojito_item_free (MojitoItem *item);
 MojitoItem *mojito_item_new (void);
 
 gboolean mojito_item_is_from_cache (MojitoItem *item);
+gboolean mojito_item_has_key (MojitoItem  *item,
+                              const gchar *key);
+const gchar *mojito_item_get_value (MojitoItem  *item,
+                                    const gchar *key);
 
 GType mojito_item_get_type (void);
 
