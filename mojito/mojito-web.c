@@ -67,13 +67,14 @@ mojito_web_make_async_session (void)
 char *
 mojito_web_download_image (const char *url)
 {
-  static SoupSession *session = NULL;
+  static GOnce once = G_ONCE_INIT;
+  SoupSession *session;
   char *md5, *path, *filename;
 
   g_return_val_if_fail (url, NULL);
 
-  if (session == NULL)
-    session = mojito_web_make_sync_session ();
+  g_once (&once, (GThreadFunc)mojito_web_make_sync_session, NULL);
+  session = once.retval;
 
   md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, url, -1);
 
@@ -140,14 +141,15 @@ async_download_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 void
 mojito_web_download_image_async (const char *url, ImageDownloadCallback callback, gpointer user_data)
 {
-  static SoupSession *session = NULL;
+  static GOnce once = G_ONCE_INIT;
+  SoupSession *session;
   char *md5, *path, *filename;
 
   g_return_if_fail (url);
   g_return_if_fail (callback);
 
-  if (session == NULL)
-    session = mojito_web_make_async_session ();
+  g_once (&once, (GThreadFunc)mojito_web_make_sync_session, NULL);
+  session = once.retval;
 
   md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, url, -1);
 
