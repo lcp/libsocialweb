@@ -7,10 +7,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mojito\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-17 09:25+0000\n"
+"POT-Creation-Date: 2009-08-19 09:24+0000\n"
 "PO-Revision-Date: 2009-08-19 14:36+0700\n"
 "Last-Translator: Anuchit Chalothorn <anoochit@gmail.com>\n"
-"Language-Team: Thai <L10N@opentle.org>\n"
+"Language-Team: Thai <thai-l10n@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,23 +22,37 @@ msgid "Last.fm"
 msgstr "Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
-msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "เป็นเพลงบริการที่เรียนรู้สิ่งที่คุณรัก. ติดตามทุกคุณเล่นจะบอก Last.fm โปรไฟล์ของคุณสิ่งที่เกี่ยวกับสิ่งที่คุณต้องการ สามารถเชื่อมโยงคุณเข้ากับคนอื่นๆที่ต้องการสิ่งที่คุณต้องการ - แนะนำเพลงจากเพลงของเขาและชุดของคุณ."
+msgid ""
+"Last.fm is a music service that learns what you love. Every track you play "
+"will tell your Last.fm profile something about what you like. It can connect "
+"you to other people who like what you like - and recommend songs from their "
+"music collections and yours too."
+msgstr ""
+"เป็นเพลงบริการที่เรียนรู้สิ่งที่คุณรัก. ติดตามทุกคุณเล่นจะบอก Last.fm "
+"โปรไฟล์ของคุณสิ่งที่เกี่ยวกับสิ่งที่คุณต้องการ สามารถเชื่อมโยงคุณเข้ากับคนอื่นๆที่ต้องการสิ่งที่คุณต้องการ "
+"- แนะนำเพลงจากเพลงของเขาและชุดของคุณ."
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
 msgstr "Twitter"
 
 #: ../services/twitter/twitter.keys.in.h:2
-msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter เป็นบริการสำหรับเพื่อนครอบครัวและเพื่อนร่วมงานในการสื่อสารและติดต่อผ่าน การแลกเปลี่ยนรวดเร็ว, คำตอบบ่อยครั้งของคำถามง่ายๆ: คุณกำลังทำอะไร"
+msgid ""
+"Twitter is a service for friends, family, and co–workers to communicate and "
+"stay connected through the exchange of quick, frequent answers to one simple "
+"question: What are you doing?"
+msgstr ""
+"Twitter เป็นบริการสำหรับเพื่อนครอบครัวและเพื่อนร่วมงานในการสื่อสารและติดต่อผ่าน "
+"การแลกเปลี่ยนรวดเร็ว, คำตอบบ่อยครั้งของคำถามง่ายๆ: คุณกำลังทำอะไร"
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
 msgstr "Flickr"
 
 #: ../services/flickr/flickr.keys.in.h:2
-msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgid ""
+"Flickr - almost certainly the best online photo management and sharing "
+"application in the world."
 msgstr "Flickr - โลกออนไลน์ที่เหมาะดีที่สุดในการแบ่งปันภาพถ่ายและแป่งบันแอปพลิเคชันในโลก."
 
 #: ../services/myspace/myspace.keys.in.h:1
@@ -46,6 +60,12 @@ msgid "MySpace"
 msgstr "MySpace"
 
 #: ../services/myspace/myspace.keys.in.h:2
-msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace เป็นผู้นำสังคมพอร์ทัลสำหรับการเชื่อมต่อคนเนื้อหาและวัฒนธรรมจากทั่วโลก. สร้างโปรไฟล์แบ่งปันภาพถ่ายระดับมืออาชีพและวิดีโอบล็อก โปรแกรมส่งข้อความของคุณเพื่อนและชุมชนเพลงที่ใหญ่ที่สุดในโลก."
-
+msgid ""
+"MySpace is a leading social portal for connecting people, content, and "
+"culture from around the world. Create a profile, share photos, professional "
+"and viral videos, blog, instant message your friends, and listen to music on "
+"the world’s largest music community."
+msgstr ""
+"MySpace เป็นผู้นำสังคมพอร์ทัลสำหรับการเชื่อมต่อคนเนื้อหาและวัฒนธรรมจากทั่วโลก. "
+"สร้างโปรไฟล์แบ่งปันภาพถ่ายระดับมืออาชีพและวิดีโอบล็อก "
+"โปรแกรมส่งข้อความของคุณเพื่อนและชุมชนเพลงที่ใหญ่ที่สุดในโลก."
