@@ -35,7 +35,9 @@ mojito_web_make_sync_session (void)
 {
   SoupSession *session;
 
-  session = soup_session_sync_new ();
+  session = soup_session_sync_new_with_options
+    (SOUP_SESSION_USER_AGENT, PACKAGE "/" VERSION, NULL);
+
 #if WITH_GNOME
   soup_session_add_feature_by_type (session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
 #endif
@@ -52,7 +54,9 @@ mojito_web_make_async_session (void)
 {
   SoupSession *session;
 
-  session = soup_session_async_new ();
+  session = soup_session_async_new_with_options
+    (SOUP_SESSION_USER_AGENT, PACKAGE "/" VERSION, NULL);
+
 #if WITH_GNOME
   soup_session_add_feature_by_type (session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
 #endif
