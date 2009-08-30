@@ -1,8 +1,7 @@
 # Translation of mojito to Indonesian.
-# Copyright (C) 2009 Andika Triwidada
+# Copyright (C) 
 # This file is distributed under the same license as the PACKAGE package.
 # Andika Triwidada <andika@gmail.com>, 2009.
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: mojito master\n"
