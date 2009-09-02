@@ -1,8 +1,9 @@
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-29 09:16+0000\n"
+"POT-Creation-Date: 2009-08-24 09:25+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Tomás Galicia <tomas.galicia@intel.com>\n"
 "Language-Team: \n"
@@ -17,50 +18,29 @@ msgid "Last.fm"
 msgstr "音樂社群 Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
-msgid ""
-"Last.fm is a music service that learns what you love. Every track you play "
-"will tell your Last.fm profile something about what you like. It can connect "
-"you to other people who like what you like - and recommend songs from their "
-"music collections and yours too."
-msgstr ""
-"音樂社群網站 Last.fm 會根據你的音樂喜好來提供你全新的音樂服務。Last.fm 會收集"
-"每次你收聽的歌曲來判斷你的音樂喜好。Last.fm 會找出和你音樂喜好相近的使用者並"
-"隨機播放你和他們的音樂收藏。"
+msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
+msgstr "音樂社群網站 Last.fm 會根據你的音樂喜好來提供你全新的音樂服務。Last.fm 會收集每次你收聽的歌曲來判斷你的音樂喜好。Last.fm 會找出和你音樂喜好相近的使用者並隨機播放你和他們的音樂收藏。"
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
 msgstr "Twitter 網站"
 
 #: ../services/twitter/twitter.keys.in.h:2
-msgid ""
-"Twitter is a service for friends, family, and co–workers to communicate and "
-"stay connected through the exchange of quick, frequent answers to one simple "
-"question: What are you doing?"
-msgstr ""
-"Twitter 是我們和朋友、家人及工作同仁交流的社交網路，透過它可知道對方在做什"
-"麼。"
+msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
+msgstr "Twitter 是我們和朋友、家人及工作同仁交流的社交網路，透過它可知道對方在做什麼。"
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
 msgstr "網路相簿網站 Flickr"
 
 #: ../services/flickr/flickr.keys.in.h:2
-msgid ""
-"Flickr - almost certainly the best online photo management and sharing "
-"application in the world."
-msgstr ""
-"網路相簿網站 Flickr 可稱得上是世界當之無愧的最佳線上相片管理和分享應用程式。"
+msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgstr "網路相簿網站 Flickr 可稱得上是世界當之無愧的最佳線上相片管理和分享應用程式。"
 
 #: ../services/myspace/myspace.keys.in.h:1
 msgid "MySpace"
 msgstr "MySpace 網站"
 
 #: ../services/myspace/myspace.keys.in.h:2
-msgid ""
-"MySpace is a leading social portal for connecting people, content, and "
-"culture from around the world. Create a profile, share photos, professional "
-"and viral videos, blog, instant message your friends, and listen to music on "
-"the world’s largest music community."
-msgstr ""
-"MySpace 是社交門檻來連繫全世界的人、內容和文化。建立檔案、分享照片、專業影"
-"片、部落格、給你朋友留訊息和聆聽在世界上最大的音樂社群中的音樂。"
+msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
+msgstr "MySpace 是用來連繫全世界的人、內容和文化的社交入口網站。建立檔案、分享照片、專業影片、部落格、給你朋友留訊息和聆聽在世界上最大的音樂社群中的音樂。"
