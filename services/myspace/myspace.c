@@ -283,7 +283,8 @@ got_user_cb (RestProxyCall *call,
 
   rest_xml_node_unref (node);
 
-  get_status_updates (service);
+  if (priv->running)
+    get_status_updates (service);
 }
 
 static void
@@ -326,47 +327,6 @@ refresh (MojitoService *service)
   }
 }
 
-static const char ** get_dynamic_caps (MojitoService *service);
-
-static gboolean
-sync_auth (MojitoServiceMySpace *myspace)
-{
-  MojitoService *service = (MojitoService *)myspace;
-  MojitoServiceMySpacePrivate *priv = myspace->priv;
-  GError *error = NULL;
-
-  if (priv->user_id == NULL) {
-    RestProxyCall *call;
-    RestXmlNode *node;
-
-    if (!mojito_keyfob_oauth_sync ((OAuthProxy*)priv->proxy))
-      return FALSE;
-
-    call = rest_proxy_new_call (priv->proxy);
-    rest_proxy_call_set_function (call, "v1/user");
-    if (!rest_proxy_call_sync (call, &error)) {
-      g_warning ("Cannot login to MySpace: %s", error->message);
-      g_error_free (error);
-      return FALSE;
-    }
-
-    node = node_from_call (call);
-    if (!node)
-      return FALSE;
-
-    priv->user_id = get_child_node_value (node, "userid");
-    priv->display_name = get_child_node_value (node, "displayname");
-    priv->profile_url = get_child_node_value (node, "weburi");
-    priv->image_url = get_child_node_value (node, "imageuri");
-
-    rest_xml_node_unref (node);
-
-    mojito_service_emit_capabilities_changed (service, get_dynamic_caps (service));
-  }
-
-  return TRUE;
-}
-
 static const char **
 get_static_caps (MojitoService *service)
 {
@@ -390,7 +350,7 @@ get_dynamic_caps (MojitoService *service)
   };
   static const char * no_caps[] = { NULL };
 
-  if (sync_auth (myspace))
+  if (myspace->priv->proxy)
     return caps;
   else
     return no_caps;
@@ -441,7 +401,7 @@ update_status (MojitoService *service, const char *msg)
   RestProxyCall *call;
   char *function;
 
-  if (!sync_auth (myspace))
+  if (!priv->proxy)
     return;
 
   call = rest_proxy_new_call (priv->proxy);
@@ -474,9 +434,10 @@ online_notify (gboolean online, gpointer user_data)
     const char *key = NULL, *secret = NULL;
     mojito_keystore_get_key_secret ("myspace", &key, &secret);
     priv->proxy = oauth_proxy_new (key, secret, "http://api.myspace.com/", FALSE);
-    sync_auth (service);
+    mojito_keyfob_oauth ((OAuthProxy *)priv->proxy, got_tokens_cb, service);
   } else {
     mojito_service_emit_capabilities_changed ((MojitoService *)service, NULL);
+
     if (priv->proxy) {
       g_object_unref (priv->proxy);
       priv->proxy = NULL;
