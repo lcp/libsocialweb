@@ -468,11 +468,19 @@ static void
 online_notify (gboolean online, gpointer user_data)
 {
   MojitoServiceMySpace *service = (MojitoServiceMySpace *) user_data;
+  MojitoServiceMySpacePrivate *priv = service->priv;
 
   if (online) {
+    const char *key = NULL, *secret = NULL;
+    mojito_keystore_get_key_secret ("myspace", &key, &secret);
+    priv->proxy = oauth_proxy_new (key, secret, "http://api.myspace.com/", FALSE);
     sync_auth (service);
   } else {
     mojito_service_emit_capabilities_changed ((MojitoService *)service, NULL);
+    if (priv->proxy) {
+      g_object_unref (priv->proxy);
+      priv->proxy = NULL;
+    }
   }
 }
 
@@ -523,17 +531,9 @@ mojito_service_myspace_class_init (MojitoServiceMySpaceClass *klass)
 static void
 mojito_service_myspace_init (MojitoServiceMySpace *self)
 {
-  MojitoServiceMySpacePrivate *priv;
-  const char *key = NULL, *secret = NULL;
+  self->priv = GET_PRIVATE (self);
 
-  priv = self->priv = GET_PRIVATE (self);
-
-  mojito_keystore_get_key_secret ("myspace", &key, &secret);
-
-  priv->proxy = oauth_proxy_new (key, secret, "http://api.myspace.com/", FALSE);
-
-  if (mojito_is_online ())
-  {
+  if (mojito_is_online ()) {
     online_notify (TRUE, self);
   }
 
