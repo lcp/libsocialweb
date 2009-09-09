@@ -11,6 +11,7 @@ lib_LTLIBRARIES = libmojito-client.la
 %.h: %.list Makefile.am
 	$(QUIET_GEN)glib-genmarshal --header --prefix=mojito_marshal $< > $@
 
+EXTRA_DIST = mojito-client-marshals.list
 BUILT_SOURCES = mojito-view-bindings.h mojito-core-bindings.h \
 		mojito-service-bindings.h \
 		mojito-client-marshals.c mojito-client-marshals.h
