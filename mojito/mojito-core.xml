@@ -12,6 +12,10 @@
       <arg name="view" type="o" direction="out"/>
     </method>
 
+    <method name="HideItem" tp:name-for-bindings="Hide_Item">
+      <arg name="uid" type="s"/>
+    </method>
+
     <method name="IsOnline" tp:name-for-bindings="Is_Online">
       <arg name="online" type="b" direction="out"/>
     </method>
