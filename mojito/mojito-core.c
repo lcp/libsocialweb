@@ -44,6 +44,8 @@ struct _MojitoCorePrivate {
   GHashTable *bus_services;
   /* Hash of service name-parameter hash to MojitoService instance. */
   GHashTable *active_services;
+  /* Hash of banned UID strings to a senitel (TODO: to timestamp) */
+  GHashTable *banned_uids;
   /* List of open views */
   GList *views;
 };
@@ -229,6 +231,20 @@ open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMetho
   g_free (path);
 }
 
+static void
+core_hide_item (MojitoCoreIface *iface, const gchar *uid, DBusGMethodInvocation *context)
+{
+  MojitoCore *core = MOJITO_CORE (iface);
+
+  g_hash_table_insert (core->priv->banned_uids, g_strdup (uid), GINT_TO_POINTER (42));
+
+  g_list_foreach (core->priv->views, (GFunc)mojito_view_recalculate, NULL);
+
+  /* TODO: persist */
+
+  mojito_core_iface_return_from_hide_item (context);
+}
+
 /* Online notifications */
 static void
 is_online (MojitoCoreIface *self, DBusGMethodInvocation *context)
@@ -390,6 +406,7 @@ core_iface_init (gpointer g_iface, gpointer iface_data)
 
   mojito_core_iface_implement_get_services (klass, get_services);
   mojito_core_iface_implement_open_view (klass, open_view);
+  mojito_core_iface_implement_hide_item (klass, core_hide_item);
   mojito_core_iface_implement_is_online (klass, is_online);
 }
 
@@ -419,6 +436,9 @@ mojito_core_init (MojitoCore *self)
 
   priv->active_services = g_hash_table_new_full (g_str_hash, g_str_equal,
                                               g_free, g_object_unref);
+
+  priv->banned_uids = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                                   g_free, NULL);
 }
 
 MojitoCore*
