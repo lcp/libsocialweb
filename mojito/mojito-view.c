@@ -111,13 +111,21 @@ static MojitoSet *
 munge_items (MojitoView *view)
 {
   MojitoViewPrivate *priv = view->priv;
-  GList *list;
+  GList *list, *l = NULL;
   int count, service_max;
   GHashTable *counts;
   MojitoSet *new;
 
   /* The magic */
   list = mojito_set_as_list (priv->all_items);
+
+  while (list) {
+    if (!mojito_core_is_item_banned (priv->core, (MojitoItem *)list->data)) {
+      l = g_list_prepend (l, list->data);
+    }
+    list = g_list_delete_link (list, list);
+  }
+  list = l;
 
   list = g_list_sort (list, (GCompareFunc)mojito_item_compare_date_newer);
 
