@@ -20,6 +20,7 @@
 #include "mojito-view.h"
 #include "mojito-view-ginterface.h"
 
+#include <mojito/mojito-core.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
@@ -37,6 +38,7 @@ G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
 #define REFRESH_TIMEOUT (5 * 60)
 
 struct _MojitoViewPrivate {
+  MojitoCore *core;
   /* List of MojitoService objects */
   GList *services;
   /* The maximum number of items in the view */
@@ -53,6 +55,7 @@ struct _MojitoViewPrivate {
 
 enum {
   PROP_0,
+  PROP_CORE,
   PROP_COUNT,
 };
 
@@ -368,6 +371,9 @@ mojito_view_get_property (GObject    *object,
   MojitoViewPrivate *priv = MOJITO_VIEW (object)->priv;
 
   switch (property_id) {
+  case PROP_CORE:
+    g_value_set_object (value, priv->core);
+    break;
   case PROP_COUNT:
     g_value_set_uint (value, priv->count);
     break;
@@ -385,6 +391,9 @@ mojito_view_set_property (GObject      *object,
   MojitoViewPrivate *priv = MOJITO_VIEW (object)->priv;
 
   switch (property_id) {
+  case PROP_CORE:
+    priv->core = g_value_dup_object (value);
+    break;
   case PROP_COUNT:
     priv->count = g_value_get_uint (value);
     break;
@@ -398,6 +407,11 @@ mojito_view_dispose (GObject *object)
 {
   MojitoView *view = MOJITO_VIEW (object);
   MojitoViewPrivate *priv = view->priv;
+
+  if (priv->core) {
+    g_object_unref (priv->core);
+    priv->core = NULL;
+  }
 
   if (priv->all_items) {
     mojito_set_unref (priv->all_items);
@@ -454,6 +468,11 @@ mojito_view_class_init (MojitoViewClass *klass)
   object_class->dispose = mojito_view_dispose;
   object_class->finalize = mojito_view_finalize;
 
+  pspec = g_param_spec_object ("core", "core", "The core",
+                               MOJITO_TYPE_CORE,
+                               G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+  g_object_class_install_property (object_class, PROP_CORE, pspec);
+
   pspec = g_param_spec_uint ("count", "count", "The number of items",
                              1, G_MAXUINT, 10,
                              G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
@@ -474,9 +493,10 @@ mojito_view_init (MojitoView *self)
 }
 
 MojitoView*
-mojito_view_new (guint count)
+mojito_view_new (MojitoCore *core, guint count)
 {
   return g_object_new (MOJITO_TYPE_VIEW,
+                       "core", core,
                        "count", count,
                        NULL);
 }

@@ -55,7 +55,7 @@ typedef struct {
 
 GType mojito_view_get_type (void);
 
-MojitoView* mojito_view_new (guint count);
+MojitoView * mojito_view_new (MojitoCore *core, guint count);
 
 void mojito_view_add_service (MojitoView *view, MojitoService *service, GHashTable *params);
 
