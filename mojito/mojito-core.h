@@ -58,6 +58,8 @@ MojitoCore* mojito_core_new (void);
 
 void mojito_core_run (MojitoCore *core);
 
+gboolean mojito_core_is_item_banned (MojitoCore *core, MojitoItem *item);
+
 G_END_DECLS
 
 #endif /* _MOJITO_CORE */

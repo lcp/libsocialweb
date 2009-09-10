@@ -458,3 +458,16 @@ mojito_core_run (MojitoCore *core)
   g_main_loop_run (loop);
   g_main_loop_unref (loop);
 }
+
+gboolean
+mojito_core_is_item_banned (MojitoCore *core, MojitoItem *item)
+{
+  const char *id;
+
+  g_return_val_if_fail (MOJITO_IS_CORE (core), FALSE);
+  g_return_val_if_fail (MOJITO_IS_ITEM (item), FALSE);
+
+  id = mojito_item_get (item, "id");
+
+  return g_hash_table_lookup (core->priv->banned_uids, id) != NULL;
+}
