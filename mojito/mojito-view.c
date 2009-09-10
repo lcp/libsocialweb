@@ -191,6 +191,35 @@ remove_service (GObject *object, gpointer user_data)
   return mojito_item_get_service (item) == service;
 }
 
+void
+mojito_view_recalculate (MojitoView *view)
+{
+  MojitoViewPrivate *priv;
+  MojitoSet *old_items, *new_items;
+  MojitoSet *removed_items, *added_items;
+
+  g_return_if_fail (MOJITO_IS_VIEW (view));
+
+  priv = view->priv;
+  if (!priv->running)
+    return;
+
+  old_items = priv->current;
+  new_items = munge_items (view);
+
+  removed_items = mojito_set_difference (old_items, new_items);
+  added_items = mojito_set_difference (new_items, old_items);
+
+  mojito_set_foreach (removed_items, (GFunc)send_removed, view);
+  mojito_set_foreach (added_items, (GFunc)send_added, view);
+
+  mojito_set_unref (removed_items);
+  mojito_set_unref (added_items);
+
+  mojito_set_unref (priv->current);
+  priv->current = new_items;
+}
+
 static void
 service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
 {
@@ -203,32 +232,14 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
     mojito_cache_drop (service);
   }
 
-  if (priv->running) {
-    MojitoSet *old_items, *new_items;
-    MojitoSet *removed_items, *added_items;
-
-    /* Remove all existing items from this service */
-    mojito_set_foreach_remove (priv->all_items, remove_service, service);
-    if (set) {
-      mojito_set_add_from (priv->all_items, set);
-      mojito_set_unref (set);
-    }
-
-    old_items = priv->current;
-    new_items = munge_items (view);
-
-    removed_items = mojito_set_difference (old_items, new_items);
-    added_items = mojito_set_difference (new_items, old_items);
-
-    mojito_set_foreach (removed_items, (GFunc)send_removed, view);
-    mojito_set_foreach (added_items, (GFunc)send_added, view);
-
-    mojito_set_unref (removed_items);
-    mojito_set_unref (added_items);
-
-    mojito_set_unref (priv->current);
-    priv->current = new_items;
+  /* Remove all existing items from this service */
+  mojito_set_foreach_remove (priv->all_items, remove_service, service);
+  if (set) {
+    mojito_set_add_from (priv->all_items, set);
+    mojito_set_unref (set);
   }
+
+  mojito_view_recalculate (view);
 }
 
 /*

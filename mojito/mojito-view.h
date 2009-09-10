@@ -59,6 +59,8 @@ MojitoView * mojito_view_new (MojitoCore *core, guint count);
 
 void mojito_view_add_service (MojitoView *view, MojitoService *service, GHashTable *params);
 
+void mojito_view_recalculate (MojitoView *view);
+
 G_END_DECLS
 
 #endif /* _MOJITO_VIEW */
