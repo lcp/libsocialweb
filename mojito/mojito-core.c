@@ -178,6 +178,8 @@ view_weak_notify_list (gpointer data, GObject *old_view)
 {
   MojitoCore *core = data;
 
+  g_assert (MOJITO_IS_CORE (core));
+
   core->priv->views = g_list_remove (core->priv->views, old_view);
 }
 
@@ -224,7 +226,7 @@ open_view (MojitoCoreIface *self, const char **services, guint count, DBusGMetho
   client_monitor_add (dbus_g_method_get_sender (context), (GObject*)view);
   g_object_weak_ref ((GObject*)view, view_weak_notify, dbus_g_method_get_sender (context));
 
-  g_object_weak_ref ((GObject*)view, view_weak_notify_list, view);
+  g_object_weak_ref ((GObject*)view, view_weak_notify_list, core);
   priv->views = g_list_prepend (priv->views, view);
 
   mojito_core_iface_return_from_open_view (context, path);
