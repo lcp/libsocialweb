@@ -393,3 +393,22 @@ mojito_client_is_online (MojitoClient *client,
                                     _mojito_client_is_online_cb,
                                     closure);
 }
+
+static void
+_hide_item_cb (DBusGProxy *proxy, GError *error, gpointer userdata)
+{
+  /* no-op */
+}
+
+void
+mojito_client_hide_item (MojitoClient *client, MojitoItem *item)
+{
+  MojitoClientPrivate *priv;
+
+  g_return_if_fail (MOJITO_IS_CLIENT (client));
+  g_return_if_fail (item);
+
+  priv = GET_PRIVATE (client);
+
+  com_intel_Mojito_hide_item_async (priv->proxy, item->uuid, _hide_item_cb, NULL);
+}

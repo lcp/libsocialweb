@@ -90,6 +90,8 @@ void mojito_client_is_online (MojitoClient *client,
                               MojitoClientIsOnlineCallback cb,
                               gpointer userdata);
 
+void mojito_client_hide_item (MojitoClient *client, MojitoItem *item);
+
 G_END_DECLS
 
 #endif /* _MOJITO_CLIENT */
