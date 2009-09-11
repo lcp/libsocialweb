@@ -21,6 +21,7 @@
 #include "mojito-view-ginterface.h"
 
 #include <mojito/mojito-core.h>
+#include <mojito/mojito-debug.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
@@ -261,6 +262,9 @@ start_refresh (MojitoView *view)
 
   for (l = priv->services; l; l = l->next) {
     MojitoService *service = l->data;
+    MOJITO_DEBUG (VIEWS, "Refreshing %s on view %p",
+                  mojito_service_get_name (service),
+                  view);
     mojito_service_refresh (service);
   }
 

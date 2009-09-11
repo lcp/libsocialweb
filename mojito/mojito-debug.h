@@ -19,7 +19,8 @@
 #include <glib.h>
 
 typedef enum {
-  MOJITO_DEBUG_MAIN_LOOP = 1 << 0
+  MOJITO_DEBUG_MAIN_LOOP = 1 << 0,
+  MOJITO_DEBUG_VIEWS = 1 << 1
 } MojitoDebugFlags;
 
 extern guint mojito_debug_flags;
