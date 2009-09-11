@@ -275,6 +275,8 @@ refresh (MojitoService *service)
   }
 
   mojito_keyfob_flickr ((FlickrProxy*)flickr->priv->proxy, got_tokens_cb, service);
+  /* TODO: BUG: this is a async operation and before it invokes the callback the
+     service object might have died. */
 }
 
 static void
