@@ -19,6 +19,7 @@
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-bindings.h>
 #include <mojito/mojito-core.h>
+#include <mojito/mojito-debug.h>
 #include "poll.h"
 
 static gboolean
@@ -62,12 +63,14 @@ main (int argc, char **argv)
   g_set_prgname ("mojito");
   g_set_application_name ("Mojito");
 
+  mojito_debug_init ();
+
   if (!request_name ())
     return 0;
 
   core = mojito_core_new ();
 
-  if (g_getenv ("MOJITO_POLL"))
+  if (MOJITO_DEBUG_ENABLED (MAIN_LOOP))
     poll_init ();
 
   mojito_core_run (core);
