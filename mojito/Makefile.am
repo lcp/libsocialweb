@@ -37,6 +37,7 @@ libmojito_la_SOURCES = mojito-types.h \
 		       mojito-set.c mojito-set.h \
 		       mojito-cache.c mojito-cache.h \
 		       mojito-online.c mojito-online.h \
+		       mojito-banned.c mojito-banned.h \
 		       mojito-module.h \
 		       client-monitor.c client-monitor.h \
 		       $(BUILT_SOURCES)
