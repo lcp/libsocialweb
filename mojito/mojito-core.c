@@ -22,6 +22,7 @@
 #include "mojito-utils.h"
 #include "mojito-online.h"
 #include "mojito-view.h"
+#include "mojito-banned.h"
 #include "client-monitor.h"
 
 #include "mojito-core-ginterface.h"
@@ -240,7 +241,8 @@ core_hide_item (MojitoCoreIface *iface, const gchar *uid, DBusGMethodInvocation 
 
   g_list_foreach (core->priv->views, (GFunc)mojito_view_recalculate, NULL);
 
-  /* TODO: persist */
+  /* TODO: do in an idle or on quit? */
+  mojito_ban_save (core->priv->banned_uids);
 
   mojito_core_iface_return_from_hide_item (context);
 }
@@ -370,6 +372,8 @@ mojito_core_constructed (GObject *object)
   MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
   GError *error = NULL;
 
+  priv->banned_uids = mojito_ban_load ();
+
   priv->connection = dbus_g_bus_get (DBUS_BUS_STARTER, &error);
   if (error) {
     g_warning ("Failed to open connection to DBus: %s\n", error->message);
@@ -436,9 +440,6 @@ mojito_core_init (MojitoCore *self)
 
   priv->active_services = g_hash_table_new_full (g_str_hash, g_str_equal,
                                               g_free, g_object_unref);
-
-  priv->banned_uids = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                   g_free, NULL);
 }
 
 MojitoCore*
