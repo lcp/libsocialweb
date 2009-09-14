@@ -450,6 +450,8 @@ mojito_service_myspace_dispose (GObject *object)
 {
   MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (object)->priv;
 
+  mojito_online_remove_notify (online_notify, object);
+
   if (priv->proxy) {
     g_object_unref (priv->proxy);
     priv->proxy = NULL;
@@ -463,7 +465,6 @@ mojito_service_myspace_finalize (GObject *object)
 {
   MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (object)->priv;
 
-  mojito_online_remove_notify (online_notify, object);
   g_free (priv->user_id);
 
   G_OBJECT_CLASS (mojito_service_myspace_parent_class)->finalize (object);
