@@ -21,6 +21,7 @@ examples/test-client
 examples/monitor-caps
 src/mojito.service
 src/mojito-core
+mojito-keystore/test-suite
 tests/test-online
 tests/test-client-online
 tests/test-download
@@ -33,6 +34,7 @@ intltool-*
 po/POTFILES
 po/stamp-it
 po/*.gmo
+po/mojito.pot
 m4/intltool.m4
 m4/libtool.m4
 m4/lt*.m4
