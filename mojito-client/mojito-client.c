@@ -378,8 +378,8 @@ _mojito_client_is_online_cb (DBusGProxy *proxy,
 
 void
 mojito_client_is_online (MojitoClient *client,
-                              MojitoClientIsOnlineCallback cb,
-                              gpointer userdata)
+                         MojitoClientIsOnlineCallback cb,
+                         gpointer userdata)
 {
   MojitoClientPrivate *priv = GET_PRIVATE (client);
   IsOnlineClosure *closure;
@@ -395,13 +395,16 @@ mojito_client_is_online (MojitoClient *client,
 }
 
 static void
-_hide_item_cb (DBusGProxy *proxy, GError *error, gpointer userdata)
+_hide_item_cb (DBusGProxy *proxy,
+               GError     *error,
+               gpointer    userdata)
 {
   /* no-op */
 }
 
 void
-mojito_client_hide_item (MojitoClient *client, MojitoItem *item)
+mojito_client_hide_item (MojitoClient *client,
+                         MojitoItem   *item)
 {
   MojitoClientPrivate *priv;
 
