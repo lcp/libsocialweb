@@ -422,6 +422,8 @@ mojito_service_twitter_dispose (GObject *object)
 {
   MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
 
+  mojito_online_remove_notify (online_notify, object);
+
   if (priv->proxy) {
     g_object_unref (priv->proxy);
     priv->proxy = NULL;
