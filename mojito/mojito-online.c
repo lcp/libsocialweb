@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include "mojito-online.h"
+#include "mojito-debug.h"
 #include "mojito-marshals.h"
 
 /* This is the common infrastructure */
@@ -68,6 +69,8 @@ static void
 emit_notify (gboolean online)
 {
   GList *l;
+
+  MOJITO_DEBUG (ONLINE, "Now %s", online ? "online" : "offline");
 
   for (l = listeners; l; l = l->next) {
     ListenerData *data = l->data;

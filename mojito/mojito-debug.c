@@ -29,7 +29,8 @@ mojito_debug_init (void)
   static gboolean setup_done = FALSE;
   static const GDebugKey keys[] = {
     { "main-loop", MOJITO_DEBUG_MAIN_LOOP },
-    { "views", MOJITO_DEBUG_VIEWS }
+    { "views", MOJITO_DEBUG_VIEWS },
+    { "online", MOJITO_DEBUG_ONLINE }
   };
 
   if (G_LIKELY (setup_done))
