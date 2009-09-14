@@ -544,7 +544,7 @@ void
 test_view_new (void)
 {
   MojitoView *view;
-  view = mojito_view_new (5);
+  view = mojito_view_new (NULL, 5);
   g_object_unref (view);
 }
 
