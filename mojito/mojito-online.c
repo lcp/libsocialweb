@@ -243,3 +243,7 @@ mojito_is_online (void)
   return ret;
 }
 #endif
+
+#if WITH_ONLINE_TEST
+#include "mojito-online-testui.c"
+#endif

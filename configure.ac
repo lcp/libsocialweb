@@ -51,7 +51,7 @@ PKG_CHECK_MODULES(KEYRING, gnome-keyring-1)
 AC_MSG_CHECKING([how to detect we are online])
 AC_ARG_WITH([online],
         [AS_HELP_STRING([--with-online],
-                [how to check if we are online (always, connman, networkmanager)])],
+                [how to check if we are online (always, connman, networkmanager, test)])],
         [], [with_online=always])
 AS_IF(
         [test "$with_online" = always],
@@ -71,6 +71,13 @@ AS_IF(
         AC_MSG_RESULT([Network Manager])
         PKG_CHECK_MODULES(NM, libnm_glib >= 0.7)
         AC_DEFINE([WITH_ONLINE_NM], 1, [NM online detection])
+        ],
+
+        [test "$with_online" = "test"],
+        [
+        AC_MSG_RESULT([test UI])
+        PKG_CHECK_MODULES(GTK, gtk+-2.0)
+        AC_DEFINE([WITH_ONLINE_TEST], 1, [Test UI online detection])
         ],
 
         [AC_MSG_ERROR([Unknown argument to --with-online])]
