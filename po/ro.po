@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: mojito\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-08-24 09:25+0000\n"
-"PO-Revision-Date: 2009-08-29 06:00+0200\n"
+"PO-Revision-Date: 2009-09-14 14:17+0200\n"
 "Last-Translator: Cosmin Bordeianu <elloxar@gmail.com>\n"
 "Language-Team: Moblin Romania <live@moblin.ro>\n"
 "MIME-Version: 1.0\n"
@@ -24,7 +24,7 @@ msgstr "Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
 msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm este un serviciu de muzică ce învaţă preferințele dvs. Fiecare piesa ascultată va spune ceva profilului dvs. Last.fm despre ceea ce vă place. Vă poate conecta cu alte persoane ale căror preferințe coincid cu ale dvs. - şi să vă recomande cântece din colecţiile de muzică ale lor și a dvs. de asemenea."
+msgstr "Last.fm este un serviciu de muzică ce învaţă preferințele dvs. Fiecare piesa ascultată va spune ceva profilului dvs. Last.fm despre ce vă place. Vă poate conecta cu alte persoane ale căror preferințe coincid cu ale dvs. - şi să vă recomande cântece din colecţiile de muzică ale lor și ale dvs."
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
@@ -48,5 +48,5 @@ msgstr "MySpace"
 
 #: ../services/myspace/myspace.keys.in.h:2
 msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace este un portal avansat destinat interacțiunii oamenilor, conţinutului, şi a cultelor din întreaga lume. Puteți crea un profil, un blog, să împărtășiți fotografii și clipuri video (personale sau profesionale), să comunicați instant cu prietenii și să ascultați muzică în cea mai mare comunitate de muzică din lume."
+msgstr "MySpace este un portal avansat destinat interacțiunii oamenilor, conţinutului şi a cultelor din întreaga lume. Puteți crea un profil, un blog, să împărtășiți fotografii și clipuri video (personale sau profesionale), să comunicați instant cu prietenii și să ascultați muzică în cea mai mare comunitate de muzică din lume."
 
