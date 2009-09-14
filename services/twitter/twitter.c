@@ -373,12 +373,25 @@ request_avatar (MojitoService *service)
 static void
 online_notify (gboolean online, gpointer user_data)
 {
-  MojitoServiceTwitter *service = (MojitoServiceTwitter *) user_data;
+  MojitoServiceTwitter *twitter = (MojitoServiceTwitter *)user_data;
+  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  const char *key = NULL, *secret = NULL;
 
   if (online) {
-    mojito_keyfob_oauth ((OAuthProxy*)service->priv->proxy, got_tokens_cb, service);
+    mojito_keystore_get_key_secret ("twitter", &key, &secret);
+
+    priv->proxy = oauth_proxy_new (key, secret, "http://twitter.com/", FALSE);
+
+    mojito_keyfob_oauth ((OAuthProxy *)priv->proxy, got_tokens_cb, twitter);
   } else {
-    mojito_service_emit_capabilities_changed ((MojitoService *)service, NULL);
+    if (priv->proxy) {
+      g_object_unref (priv->proxy);
+      priv->proxy = NULL;
+    }
+    g_free (priv->user_id);
+    priv->user_id = NULL;
+
+    mojito_service_emit_capabilities_changed ((MojitoService *)twitter, NULL);
   }
 }
 
@@ -394,7 +407,6 @@ mojito_service_twitter_constructed (GObject *object)
 {
   MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (object);
   MojitoServiceTwitterPrivate *priv;
-  const char *key = NULL, *secret = NULL;
 
   priv = twitter->priv = GET_PRIVATE (twitter);
 
@@ -406,10 +418,6 @@ mojito_service_twitter_constructed (GObject *object)
 
   priv->twitpic_re = g_regex_new ("http://twitpic.com/([A-Za-z0-9]+)", 0, 0, NULL);
   g_assert (priv->twitpic_re);
-
-  mojito_keystore_get_key_secret ("twitter", &key, &secret);
-
-  priv->proxy = oauth_proxy_new (key, secret, "http://twitter.com/", FALSE);
 
   mojito_online_add_notify (online_notify, twitter);
   if (mojito_is_online ()) {
