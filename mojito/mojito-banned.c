@@ -56,6 +56,8 @@ mojito_ban_load (void)
       g_message ("Cannot load ban list: %s", error->message);
     g_error_free (error);
   }
+  g_object_unref (dstream);
+  g_object_unref (stream);
   g_object_unref (file);
   return hash;
 }
@@ -97,5 +99,7 @@ mojito_ban_save (GHashTable *hash)
     g_message ("Cannot save ban list: %s", error->message);
     g_error_free (error);
   }
+  g_object_unref (dstream);
+  g_object_unref (stream);
   g_object_unref (file);
 }
