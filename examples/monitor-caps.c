@@ -32,7 +32,7 @@ static void
 get_static_caps_cb (MojitoClientService *service,
              const char **caps, const GError *error, gpointer user_data)
 {
-  g_print ("[%p] Static caps:", service);
+  g_print ("[%s] Static caps:", mojito_client_service_get_name (service));
   print_caps (caps);
 }
 
@@ -40,7 +40,7 @@ static void
 get_dynamic_caps_cb (MojitoClientService *service,
              const char **caps, const GError *error, gpointer user_data)
 {
-  g_print ("[%p] Dynamic caps:", service);
+  g_print ("[%s] Dynamic caps:", mojito_client_service_get_name (service));
   print_caps (caps);
 }
 
