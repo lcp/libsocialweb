@@ -31,6 +31,7 @@ G_DEFINE_TYPE (MojitoClientService, mojito_client_service, G_TYPE_OBJECT)
 typedef struct _MojitoClientServicePrivate MojitoClientServicePrivate;
 
 struct _MojitoClientServicePrivate {
+  char *name;
   DBusGConnection *connection;
   DBusGProxy *proxy;
 };
@@ -93,6 +94,10 @@ mojito_client_service_dispose (GObject *object)
 static void
 mojito_client_service_finalize (GObject *object)
 {
+  MojitoClientServicePrivate *priv = GET_PRIVATE (object);
+
+  g_free (priv->name);
+
   G_OBJECT_CLASS (mojito_client_service_parent_class)->finalize (object);
 }
 
@@ -213,6 +218,8 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
     g_propagate_error (error_out, error);
     return FALSE;
   }
+
+  priv->name = g_strdup (service_name);
 
   path = g_strdup_printf (MOJITO_CLIENT_SERVICE_OBJECT, service_name);
   priv->proxy = dbus_g_proxy_new_for_name_owner (priv->connection,
@@ -404,4 +411,10 @@ mojito_client_service_request_avatar (MojitoClientService *service)
   MojitoClientServicePrivate *priv = GET_PRIVATE (service);
 
   com_intel_Mojito_Service_request_avatar_async (priv->proxy, _request_avatar_cb, NULL);
+}
+
+const char *
+mojito_client_service_get_name (MojitoClientService *service)
+{
+  return GET_PRIVATE (service)->name;
 }

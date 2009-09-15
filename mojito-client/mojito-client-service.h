@@ -88,6 +88,8 @@ mojito_client_service_update_status (MojitoClientService                    *ser
                                      const gchar                            *status_msg,
                                      gpointer                                userdata);
 
+const char * mojito_client_service_get_name (MojitoClientService *service);
+
 G_END_DECLS
 
 #endif /* _MOJITO_CLIENT_SERVICE */
