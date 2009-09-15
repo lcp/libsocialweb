@@ -257,14 +257,44 @@ get_child_node_value (RestXmlNode *node, const char *name)
     return NULL;
 }
 
+static const char **
+get_static_caps (MojitoService *service)
+{
+  static const char * caps[] = {
+    CAN_UPDATE_STATUS,
+    CAN_REQUEST_AVATAR,
+    NULL
+  };
+
+  return caps;
+}
+
+static const char **
+get_dynamic_caps (MojitoService *service)
+{
+  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
+  static const char * caps[] = {
+    CAN_UPDATE_STATUS,
+    CAN_REQUEST_AVATAR,
+    NULL
+  };
+  static const char * no_caps[] = { NULL };
+
+  if (myspace->priv->proxy)
+    return caps;
+  else
+    return no_caps;
+}
+
 static void
 got_user_cb (RestProxyCall *call,
              GError        *error,
              GObject       *weak_object,
              gpointer       userdata)
 {
-  MojitoServiceMySpace *service = MOJITO_SERVICE_MYSPACE (weak_object);
-  MojitoServiceMySpacePrivate *priv = service->priv;
+  MojitoService *service = MOJITO_SERVICE (weak_object);
+  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
+  MojitoServiceMySpacePrivate *priv = myspace->priv;
   RestXmlNode *node;
 
   if (error) {
@@ -283,8 +313,11 @@ got_user_cb (RestProxyCall *call,
 
   rest_xml_node_unref (node);
 
+  mojito_service_emit_capabilities_changed
+    (service, get_dynamic_caps (service));
+
   if (priv->running)
-    get_status_updates (service);
+    get_status_updates (myspace);
 }
 
 static void
@@ -325,35 +358,6 @@ refresh (MojitoService *service)
   } else {
     get_status_updates (myspace);
   }
-}
-
-static const char **
-get_static_caps (MojitoService *service)
-{
-  static const char * caps[] = {
-    CAN_UPDATE_STATUS,
-    CAN_REQUEST_AVATAR,
-    NULL
-  };
-
-  return caps;
-}
-
-static const char **
-get_dynamic_caps (MojitoService *service)
-{
-  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
-  static const char * caps[] = {
-    CAN_UPDATE_STATUS,
-    CAN_REQUEST_AVATAR,
-    NULL
-  };
-  static const char * no_caps[] = { NULL };
-
-  if (myspace->priv->proxy)
-    return caps;
-  else
-    return no_caps;
 }
 
 static void
