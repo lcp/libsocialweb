@@ -219,13 +219,43 @@ get_status_updates (MojitoServiceTwitter *twitter)
   rest_proxy_call_async (call, tweets_cb, (GObject*)twitter, NULL, NULL);
 }
 
+static const char **
+get_static_caps (MojitoService *service)
+{
+  static const char * caps[] = {
+    CAN_UPDATE_STATUS,
+    CAN_REQUEST_AVATAR,
+    NULL
+  };
+
+  return caps;
+}
+
+static const char **
+get_dynamic_caps (MojitoService *service)
+{
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+  static const char * caps[] = {
+    CAN_UPDATE_STATUS,
+    CAN_REQUEST_AVATAR,
+    NULL
+  };
+  static const char * no_caps[] = { NULL };
+
+  if (priv->user_id)
+    return caps;
+  else
+    return no_caps;
+}
+
 static void
 verify_cb (RestProxyCall *call,
            GError        *error,
            GObject       *weak_object,
            gpointer       userdata)
 {
-  MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (weak_object);
+  MojitoService *service = MOJITO_SERVICE (weak_object);
+  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (service);
   RestXmlNode *node;
 
   if (error) {
@@ -237,13 +267,15 @@ verify_cb (RestProxyCall *call,
   if (!node)
     return;
 
-  service->priv->user_id = g_strdup (rest_xml_node_find (node, "id")->content);
-  service->priv->image_url = g_strdup (rest_xml_node_find (node, "profile_image_url")->content);
+  twitter->priv->user_id = g_strdup (rest_xml_node_find (node, "id")->content);
+  twitter->priv->image_url = g_strdup (rest_xml_node_find (node, "profile_image_url")->content);
 
   rest_xml_node_unref (node);
 
-  if (service->priv->running)
-    get_status_updates (service);
+  mojito_service_emit_capabilities_changed (service, get_dynamic_caps (service));
+
+  if (twitter->priv->running)
+    get_status_updates (twitter);
 }
 
 static void
@@ -284,35 +316,6 @@ refresh (MojitoService *service)
   } else {
     mojito_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
   }
-}
-
-static const char **
-get_static_caps (MojitoService *service)
-{
-  static const char * caps[] = {
-    CAN_UPDATE_STATUS,
-    CAN_REQUEST_AVATAR,
-    NULL
-  };
-
-  return caps;
-}
-
-static const char **
-get_dynamic_caps (MojitoService *service)
-{
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
-  static const char * caps[] = {
-    CAN_UPDATE_STATUS,
-    CAN_REQUEST_AVATAR,
-    NULL
-  };
-  static const char * no_caps[] = { NULL };
-
-  if (priv->user_id)
-    return caps;
-  else
-    return no_caps;
 }
 
 static void
