@@ -28,8 +28,8 @@ mojito_ban_load (void)
   GHashTable *hash;
   char *path;
   GFile *file;
-  GFileInputStream *stream;
-  GDataInputStream *dstream;
+  GFileInputStream *stream = NULL;
+  GDataInputStream *dstream = NULL;
   GError *error = NULL;
   char *line;
 
@@ -56,8 +56,10 @@ mojito_ban_load (void)
       g_message ("Cannot load ban list: %s", error->message);
     g_error_free (error);
   }
-  g_object_unref (dstream);
-  g_object_unref (stream);
+  if (dstream)
+    g_object_unref (dstream);
+  if (stream)
+    g_object_unref (stream);
   g_object_unref (file);
   return hash;
 }
@@ -67,8 +69,8 @@ mojito_ban_save (GHashTable *hash)
 {
   char *path;
   GFile *file;
-  GFileOutputStream *stream;
-  GDataOutputStream *dstream;
+  GFileOutputStream *stream = NULL;
+  GDataOutputStream *dstream = NULL;
   GError *error = NULL;
   GHashTableIter iter;
   gpointer key, value;
@@ -99,7 +101,9 @@ mojito_ban_save (GHashTable *hash)
     g_message ("Cannot save ban list: %s", error->message);
     g_error_free (error);
   }
-  g_object_unref (dstream);
-  g_object_unref (stream);
+  if (dstream)
+    g_object_unref (dstream);
+  if (stream)
+    g_object_unref (stream);
   g_object_unref (file);
 }
