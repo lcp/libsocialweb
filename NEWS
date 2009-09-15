@@ -1,3 +1,10 @@
+Mojito 0.21.1
+===
+
+* Emit caps-changed when Twitter and MySpace log in
+* Don't leak file streams when saving the ban list
+
+
 Mojito 0.21
 ===
 
