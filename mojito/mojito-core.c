@@ -265,21 +265,71 @@ online_changed (gboolean online, gpointer user_data)
 }
 
 static void
-populate_services (MojitoCore *core)
+load_module (MojitoCore *core, const char *file)
 {
-  /* FIXME: Get the services from directory */
   MojitoCorePrivate *priv = core->priv;
-  GFile *services_dir_file;
-  GFileEnumerator *enumerator;
-  GError *error = NULL;
-  GFileInfo *fi;
-  gchar *module_path = NULL;
   GModule *service_module;
   const gchar *service_name;
   GType service_type;
   gpointer sym;
   MojitoServiceProxy *proxy;
   gchar *path;
+
+  service_module = g_module_open (file, G_MODULE_BIND_LOCAL);
+  if (service_module == NULL) {
+    g_critical (G_STRLOC ": error opening module: %s",
+                g_module_error());
+    g_module_close (service_module);
+    return;
+  }
+
+  if (!g_module_symbol (service_module, "mojito_module_get_name", &sym)) {
+    g_critical ("Cannot get symbol mojito_module_get_name: %s",
+                g_module_error());
+    g_module_close (service_module);
+    return;
+  } else {
+    service_name = (*(MojitoModuleGetNameFunc)sym)();
+  }
+
+  if (!g_module_symbol (service_module, "mojito_module_get_type", &sym)) {
+    g_critical ("Cannot get symbol mojito_module_get_type: %s",
+                g_module_error());
+    g_module_close (service_module);
+    return;
+  } else {
+    service_type = (*(MojitoModuleGetTypeFunc)sym)();
+  }
+
+  if (service_name && service_type) {
+    g_module_make_resident (service_module);
+
+    /* Add to the service name -> type hash */
+    g_hash_table_insert (priv->service_types,
+                         (char*)service_name,
+                         GINT_TO_POINTER (service_type));
+
+    /* Create an instance and add it to the bus */
+    proxy = g_object_new (service_type, NULL);
+    g_hash_table_insert (priv->bus_services,
+                         (gchar *)service_name,
+                         proxy);
+    path = g_strdup_printf ("/com/intel/Mojito/Service/%s", service_name);
+    dbus_g_connection_register_g_object (priv->connection,
+                                         path,
+                                         (GObject*)proxy);
+    g_free (path);
+    g_message ("Imported module: %s", service_name);
+  }
+}
+
+static void
+load_modules_from_dir (MojitoCore *core)
+{
+  GFile *services_dir_file;
+  GFileEnumerator *enumerator;
+  GError *error = NULL;
+  GFileInfo *fi;
 
   services_dir_file = g_file_new_for_path (MOJITO_SERVICES_MODULES_DIR);
 
@@ -288,73 +338,28 @@ populate_services (MojitoCore *core)
                                           G_FILE_QUERY_INFO_NONE,
                                           NULL,
                                           &error);
+  g_object_unref (services_dir_file);
 
   if (!enumerator)
   {
     g_critical (G_STRLOC ": error whilst enumerating directory children: %s",
                 error->message);
     g_clear_error (&error);
-    g_object_unref (services_dir_file);
     return;
   }
 
   while ((fi = g_file_enumerator_next_file (enumerator, NULL, &error)) != NULL)
   {
-    if (!(g_str_has_suffix (g_file_info_get_name (fi), ".so")))
+    if (g_str_has_suffix (g_file_info_get_name (fi), ".so"))
     {
-      continue;
+      char *module_path;
+
+      module_path = g_build_filename (MOJITO_SERVICES_MODULES_DIR,
+                                      g_file_info_get_name (fi),
+                                      NULL);
+      load_module (core, module_path);
+      g_free (module_path);
     }
-
-    module_path = g_build_filename (MOJITO_SERVICES_MODULES_DIR,
-                                    g_file_info_get_name (fi),
-                                    NULL);
-    service_module = g_module_open (module_path, G_MODULE_BIND_LOCAL);
-    if (service_module == NULL)
-    {
-      g_critical (G_STRLOC ": error opening module: %s",
-                  g_module_error());
-      continue;
-    }
-
-    service_name = NULL;
-    if (!g_module_symbol (service_module, "mojito_module_get_name", &sym))
-    {
-      g_critical (G_STRLOC ": error getting symbol: %s",
-                  g_module_error());
-    } else {
-      service_name = (*(MojitoModuleGetNameFunc)sym)();
-    }
-
-    service_type = 0;
-    if (!g_module_symbol (service_module, "mojito_module_get_type", &sym))
-    {
-      g_critical (G_STRLOC ": error getting symbol: %s",
-                  g_module_error());
-    } else {
-      service_type =  (*(MojitoModuleGetTypeFunc)sym)();
-    }
-
-    if (service_name && service_type)
-    {
-      /* Add to the service name -> type hash */
-      g_hash_table_insert (priv->service_types,
-                           (char*)service_name,
-                           GINT_TO_POINTER (service_type));
-
-      /* Create a laxy proxy object and add it to the bus */
-      proxy = g_object_new (service_type, NULL);
-      g_hash_table_insert (priv->bus_services,
-                           (gchar *)service_name,
-                           proxy);
-      path = g_strdup_printf ("/com/intel/Mojito/Service/%s", service_name);
-      dbus_g_connection_register_g_object (priv->connection,
-                                           path,
-                                           (GObject*)proxy);
-      g_free (path);
-      g_message (G_STRLOC ": Imported module: %s", service_name);
-    }
-
-    g_module_make_resident (service_module);
   }
 
   if (error)
@@ -364,7 +369,6 @@ populate_services (MojitoCore *core)
     g_clear_error (&error);
   }
 
-  g_object_unref (services_dir_file);
   g_object_unref (enumerator);
 }
 
@@ -386,7 +390,7 @@ mojito_core_constructed (GObject *object)
 
   client_monitor_init (priv->connection);
 
-  populate_services ((MojitoCore *)object);
+  load_modules_from_dir ((MojitoCore *)object);
 
   mojito_online_add_notify (online_changed, object);
 }
