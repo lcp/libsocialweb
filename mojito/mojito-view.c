@@ -548,6 +548,7 @@ test_view_new (void)
   g_object_unref (view);
 }
 
+#if 0
 static MojitoItem *
 make_item_dated (MojitoService *service, time_t date)
 {
@@ -572,6 +573,7 @@ make_item (MojitoService *service)
 {
   return make_item_dated (service, time (NULL));
 }
+#endif
 
 /*
  * Create a view of 5 items on a single service, add 5 items to the pending
