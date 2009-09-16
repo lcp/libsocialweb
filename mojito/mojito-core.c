@@ -373,10 +373,34 @@ load_modules_from_dir (MojitoCore *core)
 }
 
 static void
+load_modules_from_string (MojitoCore *core, const char *s)
+{
+  char **modules, **basename;
+
+  modules = g_strsplit (s, ",", 0);
+
+  for (basename = modules; *basename; basename++) {
+    char *name, *path;
+
+    name = g_strconcat ("lib", *basename, NULL);
+    path = g_build_filename (MOJITO_SERVICES_MODULES_DIR, name, NULL);
+
+    load_module (core, path);
+
+    g_free (path);
+    g_free (name);
+  }
+
+  g_strfreev (modules);
+}
+
+static void
 mojito_core_constructed (GObject *object)
 {
-  MojitoCorePrivate *priv = MOJITO_CORE (object)->priv;
+  MojitoCore *core = MOJITO_CORE (object);
+  MojitoCorePrivate *priv = core->priv;
   GError *error = NULL;
+  const char *modules;
 
   priv->banned_uids = mojito_ban_load ();
 
@@ -390,7 +414,12 @@ mojito_core_constructed (GObject *object)
 
   client_monitor_init (priv->connection);
 
-  load_modules_from_dir ((MojitoCore *)object);
+  modules = g_getenv ("MOJITO_MODULES");
+  if (modules) {
+    load_modules_from_string (core, modules);
+  } else {
+    load_modules_from_dir (core);
+  }
 
   mojito_online_add_notify (online_changed, object);
 }
