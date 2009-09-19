@@ -1,300 +1,47 @@
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-18 15:52+0000\n"
+"POT-Creation-Date: 2009-09-18 15:51+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Cheng-Chia Tseng <pswo10680@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n!=1;\n"
 "X-Poedit-Language: Chinese\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:57
-msgid "Less than a minute ago"
-msgstr "少於一分鐘前"
+#: ../services/lastfm/lastfm.keys.in.h:1
+msgid "Last.fm"
+msgstr "Last.fm"
 
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:61
-msgid "A few minutes ago"
-msgstr "幾分鐘前"
+#: ../services/lastfm/lastfm.keys.in.h:2
+msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
+msgstr "音樂社群網站 Last.fm 會根據你的音樂喜好來提供你全新的音樂服務。Last.fm 會收集每次你收聽的歌曲來判斷你的音樂喜好。Last.fm 會找出和你音樂喜好相近的使用者並隨機播放你和他們的音樂收藏。"
 
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:65
-msgid "A couple of hours ago"
-msgstr "幾小時前"
+#: ../services/twitter/twitter.keys.in.h:1
+msgid "Twitter"
+msgstr "Twitter"
 
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:72
-msgid "Earlier today"
-msgstr "更早之前的今天"
+#: ../services/twitter/twitter.keys.in.h:2
+msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
+msgstr "Twitter 是我們和朋友、家人及工作同仁交流的社交網路，透過它可知道對方在做什麼。"
 
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:75
-msgid "Yesterday"
-msgstr "昨天"
+#: ../services/flickr/flickr.keys.in.h:1
+msgid "Flickr"
+msgstr "Flickr"
 
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:83
-#, c-format
-msgid "On %A"
-msgstr "在 %A"
+#: ../services/flickr/flickr.keys.in.h:2
+msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgstr "網路相簿網站 Flickr 可稱得上是世界當之無愧的最佳線上相片管理和分享應用程式。"
 
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:89
-msgid "Unknown"
-msgstr "未知"
+#: ../services/myspace/myspace.keys.in.h:1
+msgid "MySpace"
+msgstr "MySpace"
 
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:96
-msgid "Last week"
-msgstr "上禮拜"
-
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:99
-msgid "A couple of weeks ago"
-msgstr "幾個禮拜前"
-
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:105
-msgid "This month"
-msgstr "這個月"
-
-#. Now Jan., last used in Dec.
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:109
-msgid "Last month"
-msgstr "上個月"
-
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:112
-msgid "This year"
-msgstr "今年"
-
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:115
-msgid "Last year"
-msgstr "去年"
-
-#: ../libmoblin-panel/moblin-panel/mpl-utils.c:117
-msgid "Ages ago"
-msgstr "好幾年前"
-
-#: ../src/moblin-netbook.c:341
-#: ../src/mnb-toolbar.c:1348
-msgid "zones"
-msgstr "區域"
-
-#: ../src/moblin-netbook.c:451
-msgid "Moblin Netbook Effects"
-msgstr "Moblin 網路筆電特效"
-
-#: ../src/moblin-netbook.c:455
-msgid "Effects for Moblin Netbooks"
-msgstr "給 Moblin 網路筆電用的特效"
-
-#: ../src/mnb-notification.c:257
-msgid "Dismiss"
-msgstr "取消"
-
-#: ../src/mnb-notification-cluster.c:657
-msgid "Dismiss All"
-msgstr "取消所有"
-
-#. translators: translate this to a suitable time format for your locale
-#. * showing only hours and minutes. For available format specifiers see
-#. * http://www.opengroup.org/onlinepubs/007908799/xsh/strftime.html
-#.
-#: ../src/mnb-toolbar.c:671
-msgid "%l:%M %P"
-msgstr "%l:%M %P"
-
-#. translators: translate this to a suitable date format for your locale.
-#. * For availabe format specifiers see
-#. * http://www.opengroup.org/onlinepubs/007908799/xsh/strftime.html
-#.
-#: ../src/mnb-toolbar.c:681
-msgid "%B %e, %Y"
-msgstr "%Y年%B%e日"
-
-#: ../src/switcher/mnb-switcher.c:280
-msgid "No Zones yet"
-msgstr "還沒有區域"
-
-#: ../src/switcher/mnb-switcher.c:300
-msgid "Applications you’re using will show up here. You will be able to switch and organize them to your heart's content."
-msgstr "你正在使用的應用程式會顯示在這裡。你可以根據你內心的想法來切換以及整理它們。"
-
-#: ../src/switcher/mnb-switcher-zone-apps.c:408
-msgid "No applications on this zone"
-msgstr "這個區域沒有應用程式"
-
-#~ msgid "power & brightness"
-#~ msgstr "電源和亮度"
-#~ msgid "volume"
-#~ msgstr "音量"
-#~ msgid "bluetooth"
-#~ msgstr "藍牙"
-#~ msgid "networks"
-#~ msgstr "網路"
-#~ msgid "test"
-#~ msgstr "測試"
-#~ msgid ""
-#~ "You need to play some music, look at some pictures or watch some video to "
-#~ "see your history here. In the meantime, you could take a look at some "
-#~ "sample media:"
-#~ msgstr ""
-#~ "您要播放音樂、瀏覽照片或觀看影片來顯示您的歷史紀錄。現在，您可以瀏覽一些媒"
-#~ "體樣本："
-#~ msgid "Recently played"
-#~ msgstr "最近播放"
-#~ msgid "Search results"
-#~ msgstr "搜尋結果"
-#~ msgid "Playqueue"
-#~ msgstr "播放序列"
-#~ msgid "Season %u, Episode %u"
-#~ msgstr "%u 季 %u 集"
-#~ msgid "Previous"
-#~ msgstr "上一個"
-#~ msgid "Next"
-#~ msgstr "下一個"
-#~ msgid "Media"
-#~ msgstr "媒體"
-#~ msgid "Search"
-#~ msgstr "搜尋"
-#~ msgid "Season %d Episode %d"
-#~ msgstr "%d 季 %d 集"
-#~ msgid "Season %d"
-#~ msgstr "%d 季"
-#~ msgid "Episode %d"
-#~ msgstr "%d 集"
-#~ msgid "Year %d"
-#~ msgstr "%d 年"
-#~ msgid "media"
-#~ msgstr "媒體"
-#~ msgid "Favourite Applications"
-#~ msgstr "最愛應用程式"
-#~ msgid "Applications"
-#~ msgstr "應用程式"
-#~ msgid "applications"
-#~ msgstr "應用程式"
-#~ msgid ""
-#~ "As you visit web pages, your favorites will appear here and on the New "
-#~ "tab page in the browser."
-#~ msgstr ""
-#~ "正如您所訪問的網頁，您的收藏夾會在這裡出現，您在瀏覽器中的新標籤頁。"
-#~ msgid "Untitled"
-#~ msgstr "無標題"
-#~ msgid "New tab"
-#~ msgstr "新的標籤"
-#~ msgid "Internet"
-#~ msgstr "網際網路"
-#~ msgid "Go"
-#~ msgstr "去"
-#~ msgid "Tabs"
-#~ msgstr "標籤"
-#~ msgid "Favorite pages"
-#~ msgstr "喜愛的網頁"
-#~ msgid "internet"
-#~ msgstr "網際網路"
-#~ msgid "Search for %%s on %s"
-#~ msgstr "在%s上搜尋 %%s"
-#~ msgid "Go to %s"
-#~ msgstr "去 %s"
-#~ msgid "Copy"
-#~ msgstr "複製"
-#~ msgid "the current selection to pasteboard"
-#~ msgstr "目前選項至剪貼板"
-#~ msgid "your selection"
-#~ msgstr "選擇語言"
-#~ msgid "Pasteboard"
-#~ msgstr "剪貼板"
-#~ msgid "You need to copy some text to use Pasteboard"
-#~ msgstr "您必須複製一些文字來使用剪貼板"
-#~ msgid "Clear pasteboard"
-#~ msgstr "除剪貼板"
-#~ msgid "pasteboard"
-#~ msgstr "剪貼板"
-#~ msgid "<b>Appointments</b>"
-#~ msgstr "<b>約會</b>"
-#~ msgid "No calendar entries this week"
-#~ msgstr "這禮拜行事曆上沒有任何項目"
-#~ msgid ""
-#~ "Your friends' feeds and web services will appear here. Activate your "
-#~ "accounts now!"
-#~ msgstr "您朋友的文章和網路服務會出現在這裡。起動您的帳戶！"
-#~ msgid "<b>Welcome to Moblin 2.0 for Netbooks</b>"
-#~ msgstr "<b>歡迎來到 Moblin 2.0 隨身型易網機</b>"
-#~ msgid ""
-#~ "As Moblin is a bit different to other computers, we've put together a "
-#~ "couple of bits and pieces to help you find your way around. We hope you "
-#~ "enjoy it, The Moblin Team."
-#~ msgstr ""
-#~ "由於 Moblin 和其他電腦有些不同，我們將一些東西湊在一起以幫助您更快熟悉 "
-#~ "Moblin。希望您喜歡我們的 Moblin。Moblin 小組。"
-#~ msgid "Web page"
-#~ msgstr "網頁"
-#~ msgid "Nothing to do today"
-#~ msgstr "今天沒事可做"
-#~ msgid "Due %x"
-#~ msgstr "%x到期"
-#~ msgid "people"
-#~ msgstr "大家"
-#~ msgid "Send an email"
-#~ msgstr "發送電子郵件"
-#~ msgid "Edit details"
-#~ msgstr "編輯分割區"
-#~ msgid "Send a message"
-#~ msgstr "發送訊息"
-#~ msgid ""
-#~ "Sorry, we can't find any people. Have you set up a Messenger account?"
-#~ msgstr "很抱歉，我們無法找到任何人。您成立了一個 Messenger 的帳戶？"
-#~ msgid "People"
-#~ msgstr "大家"
-#~ msgid "Selection"
-#~ msgstr "選擇語言"
-#~ msgid "Nobody selected"
-#~ msgstr "沒有選取任何人"
-#~ msgid "Zone %d"
-#~ msgstr "區域 %d"
-#~ msgid "New zone (0)"
-#~ msgstr "新區域(0)"
-#~ msgid "Choose zone for application:"
-#~ msgstr "應用程式選取區域："
-#~ msgid "To activate the toolbar, move your cursor to the top of the screen"
-#~ msgstr "要激活工具欄，移動您的滑鼠到屏面上方"
-#~ msgid "Offline"
-#~ msgstr "下線"
-#~ msgid "Available"
-#~ msgstr "可用"
-#~ msgid "Away"
-#~ msgstr "離開"
-#~ msgid "Busy"
-#~ msgstr "忙"
-#~ msgid "Close"
-#~ msgstr "關閉"
-#~ msgid "Change"
-#~ msgstr "更換"
-#~ msgid "Unknown account"
-#~ msgstr "未知使用者"
-#~ msgid "Edit"
-#~ msgstr "修改"
-#~ msgid "Enter your %s status here..."
-#~ msgstr "在這裡輸入您%s狀態......"
-#~ msgid "Enter your current status here..."
-#~ msgstr "在這裡輸入您目前狀態......"
-#~ msgid "Post"
-#~ msgstr "發表"
-#~ msgid "Your current status"
-#~ msgstr "您目前狀態"
-#~ msgid "Your current status - you are offline"
-#~ msgstr "您目前狀態 - 您未上線"
-#~ msgid ""
-#~ "To update your web status you need to setup a Web Services account with a "
-#~ "provider that supports status messages"
-#~ msgstr ""
-#~ "要更新您的網路狀態，您必須設定一個網路服務帳戶，提供此帳戶的一方須能支援狀"
-#~ "態訊息"
-#~ msgid ""
-#~ "To update your IM status you need to setup an Instant Messaging account"
-#~ msgstr "要更新您的 IM 狀態，您必須要設定一個 IM 帳戶"
-#~ msgid "status"
-#~ msgstr "狀態"
-#~ msgid "myzone"
-#~ msgstr "我的地區"
-#~ msgid "Local"
-#~ msgstr "本機"
-#~ msgid "tray icon has requested a size of (%i x %i), resizing to (%i x %i)"
-#~ msgstr "工作匣圖示須要的大小? (%i x %i)，重新調整到 (%i x %i)"
+#: ../services/myspace/myspace.keys.in.h:2
+msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
+msgstr "MySpace 是用來連繫全世界的人、內容和文化的社交入口網站。建立檔案、分享照片、專業影片、部落格、給你朋友留訊息和聆聽在世界上最大的音樂社群中的音樂。"
 
