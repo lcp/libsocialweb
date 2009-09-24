@@ -113,6 +113,20 @@ AS_IF(
 AM_CONDITIONAL([WITH_LASTFM], [test x$enable_lastfm_key != xno])
 
 
+AC_MSG_CHECKING([for Digg key to use])
+AC_ARG_ENABLE([digg-key], [AS_HELP_STRING([--enable-digg-key], [API key for Digg])],
+                            [], [enable_digg_key=no])
+AS_IF(
+        [test "x$enable_digg_key" != xno],
+        [
+        AC_MSG_RESULT([$enable_digg_key])
+        AC_DEFINE_UNQUOTED([DIGG_APIKEY], ["$enable_digg_key"], [Digg API key])
+        ],
+        AC_MSG_RESULT([not enabling Digg support])
+)
+AM_CONDITIONAL([WITH_DIGG], [test x$enable_digg_key != xno])
+
+
 MOJITO_OAUTH_KEYS(MySpace, myspace, MYSPACE)
 MOJITO_OAUTH_KEYS(Flickr, flickr, FLICKR)
 MOJITO_OAUTH_KEYS(Twitter, twitter, TWITTER)
@@ -142,6 +156,7 @@ AC_OUTPUT([
         services/lastfm/Makefile
         services/twitter/Makefile
         services/myspace/Makefile
+        services/digg/Makefile
         tests/Makefile
         tools/Makefile
         examples/Makefile

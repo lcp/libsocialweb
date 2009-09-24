@@ -49,6 +49,9 @@ static const Keys keys[] = {
 #ifdef TWITTER_APIKEY
   { "twitter", TWITTER_APIKEY, TWITTER_SECRET },
 #endif
+#ifdef DIGG_APIKEY
+  { "digg", DIGG_APIKEY, NULL },
+#endif
   { NULL }
 };
 
@@ -139,6 +142,12 @@ test_key_secret (void)
   g_assert (ret == TRUE);
   g_assert_cmpstr (key, ==, TWITTER_APIKEY);
   g_assert_cmpstr (secret, ==, TWITTER_SECRET);
+
+  key = secret = NULL;
+  ret = mojito_keystore_get_key_secret ("digg", &key, &secret);
+  g_assert (ret == TRUE);
+  g_assert_cmpstr (key, ==, DIGG_APIKEY);
+  g_assert (secret == NULL);
 }
 
 static void
@@ -157,6 +166,9 @@ test_key (void)
 
   key = mojito_keystore_get_key ("twitter");
   g_assert_cmpstr (key, ==, TWITTER_APIKEY);
+
+  key = mojito_keystore_get_key ("digg");
+  g_assert_cmpstr (key, ==, DIGG_APIKEY);
 }
 
 int
