@@ -1,3 +1,10 @@
+Mojito 0.21.2
+===
+
+* Support notification of changing credentials
+* Eliminate a race between claiming the DBus name and actually working
+
+
 Mojito 0.21.1
 ===
 
