@@ -67,6 +67,8 @@ struct _MojitoServiceClass {
   const gchar ** (*get_dynamic_caps) (MojitoService *service);
 
   void (*request_avatar) (MojitoService *service);
+
+  void (*credentials_updated) (MojitoService *service);
 };
 
 #define CAN_UPDATE_STATUS "can-update-status"

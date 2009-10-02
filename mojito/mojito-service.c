@@ -262,6 +262,19 @@ service_get_dynamic_caps (MojitoServiceIface *self, DBusGMethodInvocation *conte
   mojito_service_iface_return_from_get_dynamic_capabilities (context, caps);
 }
 
+static void
+service_credentials_updated (MojitoServiceIface *self, DBusGMethodInvocation *context)
+{
+  MojitoServiceClass *service_class;
+
+  service_class = MOJITO_SERVICE_GET_CLASS (self);
+
+  if (service_class->credentials_updated)
+    service_class->credentials_updated ((MojitoService *)self);
+
+  mojito_service_iface_return_from_credentials_updated (context);
+}
+
 /*
  * Convenience function for subclasses to lookup a paramter
  */
@@ -295,4 +308,6 @@ service_iface_init (gpointer g_iface,
                                                    service_get_dynamic_caps);
   mojito_service_iface_implement_request_avatar (klass,
                                                  service_request_avatar);
+  mojito_service_iface_implement_credentials_updated (klass,
+                                                      service_credentials_updated);
 }

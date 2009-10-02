@@ -28,7 +28,11 @@
       <arg name="path" type="s"/>
     </signal>
 
+    <!-- Signal to clients that the user has changed so they should re-fetch the
+         avatar and so on -->
     <signal name="UserChanged" tp:name-for-bindings="User_Changed"/>
 
+    <!-- Inform the server that the credentials have been changed -->
+    <method name="CredentialsUpdated" tp:name-for-bindings="Credentials_Updated"/>
   </interface>
 </node>
