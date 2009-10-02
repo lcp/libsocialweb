@@ -65,13 +65,13 @@ main (int argc, char **argv)
 
   mojito_debug_init ();
 
-  if (!request_name ())
-    return 0;
-
   core = mojito_core_new ();
 
   if (MOJITO_DEBUG_ENABLED (MAIN_LOOP))
     poll_init ();
+
+  if (!request_name ())
+    return 0;
 
   mojito_core_run (core);
 
