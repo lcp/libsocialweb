@@ -171,11 +171,12 @@ mojito_is_online (void)
 #include <dbus/dbus-glib.h>
 
 static DBusGProxy *proxy = NULL;
+static gboolean current_state;
 
 #define STRING_VARIANT_HASHTABLE (dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_VALUE))
 
 static void
-props_changed (DBusGProxy *proxy, const char *key, GValue *v, gpointer user_data)
+prop_changed (DBusGProxy *proxy, const char *key, GValue *v, gpointer user_data)
 {
   const char *s;
 
@@ -184,7 +185,32 @@ props_changed (DBusGProxy *proxy, const char *key, GValue *v, gpointer user_data
 
   s = g_value_get_string (v);
 
-  emit_notify (strcmp (s, "online") == 0);
+  current_state = (g_strcmp0 (s, "online") == 0);
+
+  emit_notify (current_state);
+}
+
+static void
+got_props_cb (DBusGProxy *proxy, DBusGProxyCall *call, void *user_data)
+{
+  GHashTable *hash;
+  GError *error = NULL;
+  const GValue *value;
+  const char *s;
+
+  if (!dbus_g_proxy_end_call (proxy, call, &error, STRING_VARIANT_HASHTABLE, &hash, G_TYPE_INVALID)) {
+    g_printerr ("Cannot get current online state: %s", error->message);
+    g_error_free (error);
+    return;
+  }
+
+  value = g_hash_table_lookup (hash, "State");
+  if (value) {
+    s = g_value_get_string (value);
+    current_state = (g_strcmp0 (s, "online") == 0);
+  }
+
+  g_hash_table_unref (hash);
 }
 
 static gboolean
@@ -212,7 +238,13 @@ online_init (void)
   dbus_g_proxy_add_signal (proxy, "PropertyChanged",
                            G_TYPE_STRING, G_TYPE_VALUE, NULL);
   dbus_g_proxy_connect_signal (proxy, "PropertyChanged",
-                               (GCallback)props_changed, NULL, NULL);
+                               (GCallback)prop_changed, NULL, NULL);
+
+  /* Get the current state */
+  dbus_g_proxy_begin_call (proxy, "GetProperties",
+                           got_props_cb, NULL, NULL,
+                           G_TYPE_INVALID);
+
   return TRUE;
 }
 
@@ -220,30 +252,10 @@ online_init (void)
 gboolean
 mojito_is_online (void)
 {
-  GHashTable *hash;
-  GValue *v;
-  const char *s;
-  gboolean ret = TRUE;
-
   if (!online_init ())
     return TRUE;
 
-  if (!dbus_g_proxy_call (proxy, "GetProperties", NULL,
-                          G_TYPE_INVALID,
-                          STRING_VARIANT_HASHTABLE, &hash, G_TYPE_INVALID)) {
-    /* On error report online */
-    return TRUE;
-  }
-
-  v = g_hash_table_lookup (hash, "State");
-  if (v) {
-    s = g_value_get_string (v);
-    ret = (strcmp (s, "online") == 0);
-  }
-
-  g_hash_table_unref (hash);
-
-  return ret;
+  return current_state;
 }
 #endif
 
