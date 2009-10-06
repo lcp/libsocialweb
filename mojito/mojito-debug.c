@@ -24,7 +24,7 @@
 guint mojito_debug_flags;
 
 void
-mojito_debug_init (void)
+mojito_debug_init (const char *string)
 {
   static gboolean setup_done = FALSE;
   static const GDebugKey keys[] = {
@@ -36,8 +36,7 @@ mojito_debug_init (void)
   if (G_LIKELY (setup_done))
     return;
 
-  mojito_debug_flags = g_parse_debug_string (g_getenv ("MOJITO_DEBUG"),
-                                             keys, G_N_ELEMENTS (keys));
+  mojito_debug_flags = g_parse_debug_string (string, keys, G_N_ELEMENTS (keys));
 
   setup_done = TRUE;
 }

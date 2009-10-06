@@ -33,4 +33,4 @@ extern guint mojito_debug_flags;
       { g_message ("[" #category "] " G_STRLOC ": " x, ##a); }        \
   } G_STMT_END
 
-void mojito_debug_init (void);
+void mojito_debug_init (const char *string);

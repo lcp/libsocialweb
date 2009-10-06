@@ -16,11 +16,20 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <config.h>
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-bindings.h>
 #include <mojito/mojito-core.h>
 #include <mojito/mojito-debug.h>
 #include "poll.h"
+
+static char *debug_opts = NULL;
+
+static const GOptionEntry entries[] = {
+  /* TODO: extract the debug flags and list them here */
+  { "debug", 'd', 0, G_OPTION_ARG_STRING, &debug_opts, "Debug flags", "DEBUG" },
+  { NULL }
+};
 
 static gboolean
 request_name (void)
@@ -56,6 +65,8 @@ request_name (void)
 int
 main (int argc, char **argv)
 {
+  GOptionContext *context;
+  GError *error = NULL;
   MojitoCore *core;
 
   g_thread_init (NULL);
@@ -63,7 +74,14 @@ main (int argc, char **argv)
   g_set_prgname ("mojito");
   g_set_application_name ("Mojito");
 
-  mojito_debug_init ();
+  context = g_option_context_new (NULL);
+  g_option_context_add_main_entries (context, entries, GETTEXT_PACKAGE);
+  if (!g_option_context_parse (context, &argc, &argv, &error)) {
+    g_printerr ("Cannot parse options: %s\n", error->message);
+    return 1;
+  }
+
+  mojito_debug_init (debug_opts ? debug_opts : g_getenv ("MOJITO_DEBUG"));
 
   core = mojito_core_new ();
 
