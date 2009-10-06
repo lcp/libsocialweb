@@ -109,8 +109,6 @@ mojito_client_init (MojitoClient *self)
 {
   MojitoClientPrivate *priv = GET_PRIVATE (self);
   GError *error = NULL;
-  DBusConnection *conn;
-  DBusError derror;
 
   priv->connection = dbus_g_bus_get (DBUS_BUS_STARTER, &error);
 
@@ -122,32 +120,10 @@ mojito_client_init (MojitoClient *self)
     return;
   }
 
-  conn = dbus_g_connection_get_connection (priv->connection);
-  dbus_error_init (&derror);
-  if (!dbus_bus_start_service_by_name (conn,
-                                       MOJITO_SERVICE_NAME,
-                                       0, 
-                                       NULL, 
-                                       &derror))
-  {
-    g_critical (G_STRLOC ": Error starting mojito service: %s",
-                derror.message);
-    dbus_error_free (&derror);
-    return;
-  }
-
-  priv->proxy = dbus_g_proxy_new_for_name_owner (priv->connection,
-                                                 MOJITO_SERVICE_NAME,
-                                                 MOJITO_SERVICE_CORE_OBJECT,
-                                                 MOJITO_SERVICE_CORE_INTERFACE,
-                                                 &error);
-
-  if (!priv->proxy)
-  {
-    g_critical (G_STRLOC ": Error setting up proxy for remote object: %s",
-                error->message);
-    g_clear_error (&error);
-  }
+  priv->proxy = dbus_g_proxy_new_for_name (priv->connection,
+                                           MOJITO_SERVICE_NAME,
+                                           MOJITO_SERVICE_CORE_OBJECT,
+                                           MOJITO_SERVICE_CORE_INTERFACE);
 
   dbus_g_proxy_add_signal (priv->proxy,
                            "OnlineChanged",
