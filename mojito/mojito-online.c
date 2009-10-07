@@ -208,6 +208,7 @@ got_props_cb (DBusGProxy *proxy, DBusGProxyCall *call, void *user_data)
   if (value) {
     s = g_value_get_string (value);
     current_state = (g_strcmp0 (s, "online") == 0);
+    emit_notify (current_state);
   }
 
   g_hash_table_unref (hash);
@@ -239,6 +240,8 @@ online_init (void)
                            G_TYPE_STRING, G_TYPE_VALUE, NULL);
   dbus_g_proxy_connect_signal (proxy, "PropertyChanged",
                                (GCallback)prop_changed, NULL, NULL);
+
+  current_state = FALSE;
 
   /* Get the current state */
   dbus_g_proxy_begin_call (proxy, "GetProperties",
