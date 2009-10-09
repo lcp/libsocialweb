@@ -2,7 +2,7 @@
 #define __MOJITO_KEYFOB_H__
 
 #include <rest/oauth-proxy.h>
-#include <rest/flickr-proxy.h>
+#include <rest-extras/flickr-proxy.h>
 
 G_BEGIN_DECLS
 

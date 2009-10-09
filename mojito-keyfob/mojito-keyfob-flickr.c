@@ -1,6 +1,6 @@
 #include <string.h>
 #include <mojito-keyfob/mojito-keyfob.h>
-#include <rest/flickr-proxy.h>
+#include <rest-extras/flickr-proxy.h>
 #include <gnome-keyring.h>
 
 #define FLICKR_SERVER "http://flickr.com/"

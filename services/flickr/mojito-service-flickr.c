@@ -26,7 +26,7 @@
 #include <mojito/mojito-web.h>
 #include <mojito-keystore/mojito-keystore.h>
 #include <mojito-keyfob/mojito-keyfob.h>
-#include <rest/flickr-proxy.h>
+#include <rest-extras/flickr-proxy.h>
 #include <rest/rest-xml-parser.h>
 
 G_DEFINE_TYPE (MojitoServiceFlickr, mojito_service_flickr, MOJITO_TYPE_SERVICE)
