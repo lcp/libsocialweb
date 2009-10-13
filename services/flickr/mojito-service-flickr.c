@@ -171,9 +171,9 @@ fetch_image (MojitoServiceFlickr *service, MojitoItem *item, const char *key, ch
 
 static void
 flickr_callback (RestProxyCall *call,
-                 GError *error,
-                 GObject *weak_object,
-                 gpointer user_data)
+                 const GError  *error,
+                 GObject       *weak_object,
+                 gpointer       user_data)
 {
   MojitoServiceFlickr *service = MOJITO_SERVICE_FLICKR (weak_object);
   RestXmlParser *parser;

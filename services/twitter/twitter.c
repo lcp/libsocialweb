@@ -193,7 +193,7 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
 
 static void
 tweets_cb (RestProxyCall *call,
-           GError        *error,
+           const GError  *error,
            GObject       *weak_object,
            gpointer       userdata)
 {
@@ -280,7 +280,7 @@ get_dynamic_caps (MojitoService *service)
 
 static void
 verify_cb (RestProxyCall *call,
-           GError        *error,
+           const GError  *error,
            GObject       *weak_object,
            gpointer       userdata)
 {
@@ -350,7 +350,7 @@ refresh (MojitoService *service)
 
 static void
 _status_updated_cb (RestProxyCall *call,
-                    GError        *error,
+                    const GError  *error,
                     GObject       *weak_object,
                     gpointer       userdata)
 {

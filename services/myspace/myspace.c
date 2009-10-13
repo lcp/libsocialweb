@@ -108,9 +108,9 @@ get_utc_date (const char *s)
 
 static void
 got_status_cb (RestProxyCall *call,
-             GError        *error,
-             GObject       *weak_object,
-             gpointer       userdata)
+               const GError  *error,
+               GObject       *weak_object,
+               gpointer       userdata)
 {
   MojitoService *service = MOJITO_SERVICE (weak_object);
   MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (service)->priv;
@@ -288,7 +288,7 @@ get_dynamic_caps (MojitoService *service)
 
 static void
 got_user_cb (RestProxyCall *call,
-             GError        *error,
+             const GError  *error,
              GObject       *weak_object,
              gpointer       userdata)
 {
@@ -388,7 +388,7 @@ request_avatar (MojitoService *service)
 
 static void
 _status_updated_cb (RestProxyCall *call,
-                    GError        *error,
+                    const GError  *error,
                     GObject       *weak_object,
                     gpointer       userdata)
 {
