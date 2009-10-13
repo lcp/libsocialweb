@@ -90,6 +90,33 @@ make_date (const char *s)
   return mojito_time_t_to_string (timegm (&tm));
 }
 
+/*
+ * Remove trailing and leading whitespace and hyphens in an attempt to clean up
+ * twitpic tweets.
+ */
+static void
+cleanup_twitpic (char *string)
+{
+  guchar *start;
+  size_t len;
+
+  g_return_if_fail (string != NULL);
+
+  for (start = (guchar*) string; *start && (g_ascii_isspace (*start) || *start == '-'); start++)
+    ;
+
+  len = strlen ((char*)start);
+
+  g_memmove (string, start, len + 1);
+
+  while (len--) {
+    if (g_ascii_isspace ((guchar) string[len]) || string[len] == '-')
+      string[len] = '\0';
+    else
+      break;
+  }
+}
+
 static MojitoItem *
 make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
 {
@@ -135,6 +162,9 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
     new_content = g_regex_replace (priv->twitpic_re,
                                    content, -1,
                                    0, "", 0, NULL);
+
+    cleanup_twitpic (new_content);
+
     mojito_item_take (item, "title", new_content);
 
     /* Update the URL to point at twitpic */
