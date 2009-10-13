@@ -99,34 +99,8 @@ AS_IF(
 )
 
 
-AC_MSG_CHECKING([for Lastfm key to use])
-AC_ARG_ENABLE([lastfm-key], [AS_HELP_STRING([--enable-lastfm-key], [API key for Lastfm])],
-                            [], [enable_lastfm_key=no])
-AS_IF(
-        [test "x$enable_lastfm_key" != xno],
-        [
-        AC_MSG_RESULT([$enable_lastfm_key])
-        AC_DEFINE_UNQUOTED([LASTFM_APIKEY], ["$enable_lastfm_key"], [Lastfm API key])
-        ],
-        AC_MSG_RESULT([not enabling Lastfm support])
-)
-AM_CONDITIONAL([WITH_LASTFM], [test x$enable_lastfm_key != xno])
-
-
-AC_MSG_CHECKING([for Digg key to use])
-AC_ARG_ENABLE([digg-key], [AS_HELP_STRING([--enable-digg-key], [API key for Digg])],
-                            [], [enable_digg_key=no])
-AS_IF(
-        [test "x$enable_digg_key" != xno],
-        [
-        AC_MSG_RESULT([$enable_digg_key])
-        AC_DEFINE_UNQUOTED([DIGG_APIKEY], ["$enable_digg_key"], [Digg API key])
-        ],
-        AC_MSG_RESULT([not enabling Digg support])
-)
-AM_CONDITIONAL([WITH_DIGG], [test x$enable_digg_key != xno])
-
-
+MOJITO_API_KEY(Last.fm, lastfm, LASTFM)
+MOJITO_API_KEY(Digg, digg, DIGG)
 MOJITO_OAUTH_KEYS(MySpace, myspace, MYSPACE)
 MOJITO_OAUTH_KEYS(Flickr, flickr, FLICKR)
 MOJITO_OAUTH_KEYS(Twitter, twitter, TWITTER)
