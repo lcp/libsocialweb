@@ -22,6 +22,22 @@ AS_IF(
 AM_CONDITIONAL([WITH_$3], [test "$HAVE_$3_KEYS"])])
 
 
+# MOJITO_API_KEY(DisplayName,optionname,VARNAME)
+AC_DEFUN([MOJITO_API_KEY],
+[AC_MSG_CHECKING([for $1 key to use])
+AC_ARG_ENABLE([$2-key], [AS_HELP_STRING([--enable-$2-key], [API key for $1])],
+                            [], [enable_$2_key=no])
+AS_IF(
+        [test "x$enable_$2_key" != xno],
+        [
+        AC_MSG_RESULT([$enable_$2_key])
+        AC_DEFINE_UNQUOTED([$3_APIKEY], ["$enable_$2_key"], [$1 API key])
+        ],
+        AC_MSG_RESULT([not enabling $1 support])
+)
+AM_CONDITIONAL([WITH_$3], [test x$enable_$2_key != xno])])
+
+
 # Set ALL_LINGUAS based on the .po files present. Optional argument is the name
 # of the po directory.
 AC_DEFUN([AS_ALL_LINGUAS],
