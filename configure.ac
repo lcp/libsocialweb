@@ -99,10 +99,10 @@ AS_IF(
 )
 
 
-MOJITO_API_KEY(Last.fm, lastfm, LASTFM)
 MOJITO_API_KEY(Digg, digg, DIGG)
-MOJITO_OAUTH_KEYS(MySpace, myspace, MYSPACE)
 MOJITO_OAUTH_KEYS(Flickr, flickr, FLICKR)
+MOJITO_API_KEY(Last.fm, lastfm, LASTFM)
+MOJITO_OAUTH_KEYS(MySpace, myspace, MYSPACE)
 MOJITO_OAUTH_KEYS(Twitter, twitter, TWITTER)
 
 
