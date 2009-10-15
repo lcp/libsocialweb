@@ -94,12 +94,12 @@ main (int    argc,
                           clutter_actor_get_width (app->stage),
                           clutter_actor_get_height (app->stage));
 
-  /* Create the client side object for Mojito and open a view for Flickr. This
+  /* Create the client side object for Mojito and open a view for Lastfm. This
    * is an asynchronous call so a callback will be fired when it is ready
    */
   app->client = mojito_client_new ();
   mojito_client_open_view_for_service (app->client,
-                                       "flickr",
+                                       "lastfm",
                                        10,
                                        _client_view_opened_cb,
                                        app);
