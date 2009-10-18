@@ -523,5 +523,5 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
 static void
 mojito_service_twitter_init (MojitoServiceTwitter *self)
 {
-  twitter->priv = GET_PRIVATE (self);
+  self->priv = GET_PRIVATE (self);
 }
