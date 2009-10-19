@@ -30,7 +30,8 @@ mojito_debug_init (const char *string)
   static const GDebugKey keys[] = {
     { "main-loop", MOJITO_DEBUG_MAIN_LOOP },
     { "views", MOJITO_DEBUG_VIEWS },
-    { "online", MOJITO_DEBUG_ONLINE }
+    { "online", MOJITO_DEBUG_ONLINE },
+    { "item", MOJITO_DEBUG_ITEM }
   };
 
   if (G_LIKELY (setup_done))

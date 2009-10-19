@@ -21,7 +21,8 @@
 typedef enum {
   MOJITO_DEBUG_MAIN_LOOP = 1 << 0,
   MOJITO_DEBUG_VIEWS = 1 << 1,
-  MOJITO_DEBUG_ONLINE = 1 << 2
+  MOJITO_DEBUG_ONLINE = 1 << 2,
+  MOJITO_DEBUG_ITEM = 1 << 3
 } MojitoDebugFlags;
 
 extern guint mojito_debug_flags;
