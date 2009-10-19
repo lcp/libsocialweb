@@ -66,6 +66,8 @@ void mojito_item_put (MojitoItem *item, const char *key, const char *value);
 
 void mojito_item_take (MojitoItem *item, const char *key, char *value);
 
+void mojito_item_request_image_fetch (MojitoItem *item, const gchar *key, const gchar *url);
+
 const char * mojito_item_get (MojitoItem *item, const char *key);
 
 int mojito_item_compare_date_older (MojitoItem *a, MojitoItem *b);

@@ -17,7 +17,9 @@
  */
 
 #include <mojito/mojito-utils.h>
+#include <mojito/mojito-web.h>
 #include "mojito-item.h"
+#include "mojito-debug.h"
 
 G_DEFINE_TYPE (MojitoItem, mojito_item, G_TYPE_OBJECT)
 
@@ -30,6 +32,7 @@ struct _MojitoItemPrivate {
   GHashTable *hash;
   time_t cached_date;
   gboolean ready;
+  gint remaining_fetches;
 };
 
 enum
@@ -248,4 +251,56 @@ gboolean
 mojito_item_get_ready (MojitoItem *item)
 {
   return item->priv->ready;
+}
+
+typedef struct {
+  MojitoItem *item;
+  const gchar *key;
+} RequestImageFetchClosure;
+
+static void
+_image_download_cb (const char               *url,
+                    char                     *file,
+                    RequestImageFetchClosure *closure)
+{
+  MOJITO_DEBUG (ITEM, "Image fetched: %s to %s", url, file);
+  mojito_item_take (closure->item,
+                    closure->key,
+                    file);
+
+  if (g_atomic_int_dec_and_test (&(closure->item->priv->remaining_fetches)))
+  {
+    closure->item->priv->ready = TRUE;
+    MOJITO_DEBUG (ITEM, "All outstanding fetches completed. Signalling ready: %s",
+                  mojito_item_get (closure->item, "id"));
+    g_object_notify (G_OBJECT (closure->item), "ready");
+  }
+
+  g_object_unref (closure->item);
+  g_slice_free (RequestImageFetchClosure, closure);
+}
+
+void
+mojito_item_request_image_fetch (MojitoItem  *item,
+                                 const gchar *key,
+                                 const gchar *url)
+{
+  MojitoItemPrivate *priv = item->priv;
+  RequestImageFetchClosure *closure;
+
+  /* We are not ready now */
+  priv->ready = FALSE;
+  g_atomic_int_inc (&priv->remaining_fetches);
+
+  closure = g_slice_new0 (RequestImageFetchClosure);
+
+  closure->key = g_intern_string (key);
+  closure->item = g_object_ref (item);
+
+  MOJITO_DEBUG (ITEM, "Scheduling fetch for %s on: %s",
+                url,
+                mojito_item_get (closure->item, "id"));
+  mojito_web_download_image_async (url,
+                                   (ImageDownloadCallback)_image_download_cb,
+                                   closure);
 }
