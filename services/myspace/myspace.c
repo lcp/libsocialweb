@@ -280,7 +280,7 @@ get_dynamic_caps (MojitoService *service)
   };
   static const char * no_caps[] = { NULL };
 
-  if (myspace->priv->proxy)
+  if (myspace->priv->user_id)
     return caps;
   else
     return no_caps;
