@@ -111,6 +111,10 @@ set_keyfile_from_item (gpointer data, gpointer user_data)
   if (group == NULL)
     return;
 
+  /* Skip items that are not ready. Their properties will not be intact */
+  if (!mojito_item_get_ready (item))
+    return;
+
   /* Set a magic field saying that this item is cached */
   g_key_file_set_string (keys, group, "cached", "1");
 
