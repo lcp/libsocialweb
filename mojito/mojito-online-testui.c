@@ -59,5 +59,7 @@ online_init (void)
 gboolean
 mojito_is_online (void)
 {
+  online_init ();
+
   return gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button));
 }
