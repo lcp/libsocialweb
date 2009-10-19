@@ -446,6 +446,9 @@ online_notify (gboolean online, gpointer user_data)
       g_object_unref (priv->proxy);
       priv->proxy = NULL;
     }
+
+    g_free (priv->user_id);
+    priv->user_id = NULL;
   }
 }
 
