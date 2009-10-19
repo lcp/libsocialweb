@@ -76,6 +76,8 @@ void mojito_item_dump (MojitoItem *item);
 
 GHashTable *mojito_item_peek_hash (MojitoItem *item);
 
+gboolean mojito_item_get_ready (MojitoItem *item);
+
 /* Convenience function */
 MojitoSet * mojito_item_set_new (void);
 

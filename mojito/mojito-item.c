@@ -29,6 +29,13 @@ struct _MojitoItemPrivate {
   MojitoService *service;
   GHashTable *hash;
   time_t cached_date;
+  gboolean ready;
+};
+
+enum
+{
+  PROP_0,
+  PROP_READY
 };
 
 static void
@@ -46,13 +53,42 @@ mojito_item_dispose (GObject *object)
 }
 
 static void
+mojito_item_get_property (GObject    *object,
+                          guint       property_id,
+                          GValue     *value,
+                          GParamSpec *pspec)
+{
+  MojitoItem *item = MOJITO_ITEM (object);
+  MojitoItemPrivate *priv = item->priv;
+
+  switch (property_id)
+  {
+    case PROP_READY:
+      g_value_set_boolean (value, priv->ready);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+  }
+}
+
+
+static void
 mojito_item_class_init (MojitoItemClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GParamSpec *pspec;
 
   g_type_class_add_private (klass, sizeof (MojitoItemPrivate));
 
   object_class->dispose = mojito_item_dispose;
+  object_class->get_property = mojito_item_get_property;
+
+  pspec = g_param_spec_boolean ("ready",
+                                "ready",
+                                "Whether item is ready to set out",
+                                FALSE,
+                                G_PARAM_READABLE);
+  g_object_class_install_property (object_class, PROP_READY, pspec);
 }
 
 static void
@@ -61,6 +97,9 @@ mojito_item_init (MojitoItem *self)
   self->priv = GET_PRIVATE (self);
 
   self->priv->hash = g_hash_table_new_full (NULL, NULL, NULL, g_free);
+
+  /* All items are ready for now */
+  self->priv->ready = TRUE;
 }
 
 MojitoItem*
@@ -203,4 +242,10 @@ mojito_item_peek_hash (MojitoItem *item)
   g_return_val_if_fail (MOJITO_IS_ITEM (item), NULL);
 
   return item->priv->hash;
+}
+
+gboolean
+mojito_item_get_ready (MojitoItem *item)
+{
+  return item->priv->ready;
 }
