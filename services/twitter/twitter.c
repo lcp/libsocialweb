@@ -18,6 +18,7 @@
 
 #include <config.h>
 #include <time.h>
+#include <stdlib.h>
 #include <string.h>
 #include "twitter.h"
 #include <mojito/mojito-item.h>
@@ -321,6 +322,32 @@ get_dynamic_caps (MojitoService *service)
 }
 
 static void
+sanity_check_date (RestProxyCall *call)
+{
+  GHashTable *headers;
+  SoupDate *call_date;
+  const char *s;
+  time_t call_time, diff;
+
+  headers = rest_proxy_call_get_response_headers (call);
+  s = g_hash_table_lookup (headers, "Date");
+  if (s) {
+    call_date = soup_date_new_from_string (s);
+    if (call_date) {
+      call_time = soup_date_to_time_t (call_date);
+      diff = labs (time (NULL) - call_time);
+      /* More than five minutes difference between local time and the response
+         time? */
+      if (diff > (60 * 5)) {
+        g_warning ("%ld seconds difference between HTTP time and system time!", diff);
+      }
+    }
+    soup_date_free (call_date);
+  }
+  g_hash_table_unref (headers);
+}
+
+static void
 verify_cb (RestProxyCall *call,
            const GError  *error,
            GObject       *weak_object,
@@ -331,6 +358,7 @@ verify_cb (RestProxyCall *call,
   RestXmlNode *node;
 
   if (error) {
+    sanity_check_date (call);
     g_message ("Error: %s", error->message);
     return;
   }
