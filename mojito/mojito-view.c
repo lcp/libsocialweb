@@ -108,6 +108,20 @@ send_removed (gpointer data, gpointer user_data)
                                        mojito_item_get (item, "id"));
 }
 
+static void
+_item_ready_notify_cb (MojitoItem *item,
+                       GParamSpec *pspec,
+                       MojitoView *view)
+{
+  /* TODO: Use a timeout to rate limit this */
+
+  MOJITO_DEBUG (VIEWS, "Item became ready. Redoing view.");
+  mojito_view_recalculate (view);
+  g_signal_handlers_disconnect_by_func (item,
+                                        _item_ready_notify_cb,
+                                        view);
+}
+
 static MojitoSet *
 munge_items (MojitoView *view)
 {
@@ -116,13 +130,23 @@ munge_items (MojitoView *view)
   int count, service_max;
   GHashTable *counts;
   MojitoSet *new;
+  MojitoItem *item;
 
   /* The magic */
   list = mojito_set_as_list (priv->all_items);
 
   while (list) {
-    if (!mojito_core_is_item_banned (priv->core, (MojitoItem *)list->data)) {
-      l = g_list_prepend (l, list->data);
+    item = (MojitoItem *)list->data;
+    if (!mojito_core_is_item_banned (priv->core, item)) {
+
+      if (mojito_item_get_ready (item)) {
+        l = g_list_prepend (l, list->data);
+      } else {
+        g_signal_connect (item,
+                          "notify::ready",
+                          (GCallback)_item_ready_notify_cb,
+                          view);
+      }
     }
     list = g_list_delete_link (list, list);
   }
