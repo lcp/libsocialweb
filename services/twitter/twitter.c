@@ -27,6 +27,7 @@
 #include <mojito/mojito-web.h>
 #include <mojito-keyfob/mojito-keyfob.h>
 #include <mojito-keystore/mojito-keystore.h>
+#include <gconf/gconf-client.h>
 #include <rest/oauth-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <libsoup/soup.h>
@@ -35,6 +36,8 @@ G_DEFINE_TYPE (MojitoServiceTwitter, mojito_service_twitter, MOJITO_TYPE_SERVICE
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitterPrivate))
+
+#define TWITTER_USE_OAUTH 0
 
 struct _MojitoServiceTwitterPrivate {
   enum {
@@ -46,7 +49,46 @@ struct _MojitoServiceTwitterPrivate {
   char *user_id;
   char *image_url;
   GRegex *twitpic_re;
+#if ! TWITTER_USE_OAUTH
+  GConfClient *gconf;
+  guint gconf_notify_id[2];
+  char *username, *password;
+#endif
 };
+
+#define KEY_BASE "/apps/mojito/services/twitter"
+#define KEY_USER KEY_BASE "/user"
+#define KEY_PASS KEY_BASE "/password"
+
+#if ! TWITTER_USE_OAUTH
+static void online_notify (gboolean online, gpointer user_data);
+static void credentials_updated (MojitoService *service);
+
+static void
+auth_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
+{
+  MojitoService *service = MOJITO_SERVICE (user_data);
+  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (service);
+  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  const char *username = NULL, *password = NULL;
+
+  if (g_str_equal (entry->key, KEY_USER)) {
+    if (entry->value)
+      username = gconf_value_get_string (entry->value);
+    if (username && username[0] == '\0')
+      username = NULL;
+    priv->username = g_strdup (username);
+  } else if (g_str_equal (entry->key, KEY_PASS)) {
+    if (entry->value)
+      password = gconf_value_get_string (entry->value);
+    if (password && password[0] == '\0')
+      password = NULL;
+    priv->password = g_strdup (password);
+  }
+
+  credentials_updated (service);
+}
+#endif
 
 RestXmlNode *
 node_from_call (RestProxyCall *call)
@@ -344,7 +386,11 @@ refresh (MojitoService *service)
   if (priv->user_id) {
     get_status_updates (twitter);
   } else {
+#if TWITTER_USE_OAUTH
     mojito_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
+#else
+    got_tokens_cb (priv->proxy, TRUE, twitter);
+#endif
   }
 }
 
@@ -408,14 +454,27 @@ online_notify (gboolean online, gpointer user_data)
 {
   MojitoServiceTwitter *twitter = (MojitoServiceTwitter *)user_data;
   MojitoServiceTwitterPrivate *priv = twitter->priv;
-  const char *key = NULL, *secret = NULL;
 
   if (online) {
+#if TWITTER_USE_OAUTH
+    const char *key = NULL, *secret = NULL;
+
     mojito_keystore_get_key_secret ("twitter", &key, &secret);
-
     priv->proxy = oauth_proxy_new (key, secret, "http://twitter.com/", FALSE);
-
     mojito_keyfob_oauth ((OAuthProxy *)priv->proxy, got_tokens_cb, twitter);
+#else
+    if (priv->username && priv->password) {
+      char *url;
+      url = g_strdup_printf ("http://%s:%s@twitter.com/",
+                             priv->username, priv->password);
+      priv->proxy = rest_proxy_new (url, FALSE);
+      g_free (url);
+
+      got_tokens_cb (priv->proxy, TRUE, twitter);
+    } else {
+      mojito_service_emit_refreshed ((MojitoService *)service, NULL);
+    }
+#endif
   } else {
     if (priv->proxy) {
       g_object_unref (priv->proxy);
@@ -436,6 +495,8 @@ credentials_updated (MojitoService *service)
     online_notify (FALSE, service);
     online_notify (TRUE, service);
   }
+
+  mojito_service_emit_user_changed (service);
 }
 
 static const char *
@@ -461,6 +522,20 @@ mojito_service_twitter_constructed (GObject *object)
   priv->twitpic_re = g_regex_new ("http://twitpic.com/([A-Za-z0-9]+)", 0, 0, NULL);
   g_assert (priv->twitpic_re);
 
+#if ! TWITTER_USE_OAUTH
+  priv->gconf = gconf_client_get_default ();
+  gconf_client_add_dir (priv->gconf, KEY_BASE,
+                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
+  priv->gconf_notify_id[0] = gconf_client_notify_add (priv->gconf, KEY_USER,
+                                                      auth_changed_cb, twitter,
+                                                      NULL, NULL);
+  priv->gconf_notify_id[1] = gconf_client_notify_add (priv->gconf, KEY_PASS,
+                                                      auth_changed_cb, twitter,
+                                                      NULL, NULL);
+  gconf_client_notify (priv->gconf, KEY_USER);
+  gconf_client_notify (priv->gconf, KEY_PASS);
+#endif
+
   mojito_online_add_notify (online_notify, twitter);
   if (mojito_is_online ()) {
     online_notify (TRUE, twitter);
@@ -484,6 +559,15 @@ mojito_service_twitter_dispose (GObject *object)
     priv->twitpic_re = NULL;
   }
 
+#if ! TWITTER_USE_OAUTH
+  if (priv->gconf) {
+    gconf_client_notify_remove (priv->gconf, priv->gconf_notify_id[0]);
+    gconf_client_notify_remove (priv->gconf, priv->gconf_notify_id[1]);
+    g_object_unref (priv->gconf);
+    priv->gconf = NULL;
+  }
+#endif
+
   G_OBJECT_CLASS (mojito_service_twitter_parent_class)->dispose (object);
 }
 
@@ -494,6 +578,11 @@ mojito_service_twitter_finalize (GObject *object)
 
   g_free (priv->user_id);
   g_free (priv->image_url);
+
+#if ! TWITTER_USE_OAUTH
+  g_free (priv->username);
+  g_free (priv->password);
+#endif
 
   G_OBJECT_CLASS (mojito_service_twitter_parent_class)->finalize (object);
 }
