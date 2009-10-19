@@ -465,14 +465,14 @@ online_notify (gboolean online, gpointer user_data)
 #else
     if (priv->username && priv->password) {
       char *url;
-      url = g_strdup_printf ("http://%s:%s@twitter.com/",
+      url = g_strdup_printf ("https://%s:%s@twitter.com/",
                              priv->username, priv->password);
       priv->proxy = rest_proxy_new (url, FALSE);
       g_free (url);
 
       got_tokens_cb (priv->proxy, TRUE, twitter);
     } else {
-      mojito_service_emit_refreshed ((MojitoService *)service, NULL);
+      mojito_service_emit_refreshed ((MojitoService *)twitter, NULL);
     }
 #endif
   } else {
