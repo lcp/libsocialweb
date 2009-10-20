@@ -1,3 +1,13 @@
+Mojito 0.21.4
+===
+
+* Don't use OAuth for Twitter (MB#6884)
+* Fix Myspace dynamic caps
+* Update to match librest API
+* Add a Digg backend
+* Clean up twitpic tweets more (MB#5493)
+
+
 Mojito 0.21.3
 ===
 
