@@ -24,6 +24,7 @@
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-web.h>
+#include <mojito/mojito-call-list.h>
 #include <mojito-keystore/mojito-keystore.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
@@ -46,7 +47,7 @@ struct _MojitoServiceLastfmPrivate {
   char *user_id;
   guint gconf_notify_id;
   MojitoSet *set;
-  GList *pending_calls;
+  MojitoCallList *calls;
 };
 
 static RestXmlNode *
@@ -113,9 +114,8 @@ make_title (RestXmlNode *node)
   }
 }
 
-#if 0
-static char *
-get_image (RestXmlNode *node, const char *size)
+static const char *
+get_image_url (RestXmlNode *node, const char *size)
 {
   g_assert (node);
   g_assert (size);
@@ -126,7 +126,7 @@ get_image (RestXmlNode *node, const char *size)
       continue;
 
     if (node->content) {
-      return mojito_web_download_image (node->content);
+      return node->content;
     } else {
       /* TODO: should fetch another size instead */
       return NULL;
@@ -136,26 +136,75 @@ get_image (RestXmlNode *node, const char *size)
   return NULL;
 }
 
-static char *
-get_album_image (MojitoServiceLastfm *lastfm, RestXmlNode *track)
+static void
+emit_if_done (MojitoServiceLastfm *lastfm)
 {
-  char *url;
+  if (mojito_call_list_is_empty (lastfm->priv->calls)) {
+    mojito_service_emit_refreshed ((MojitoService *)lastfm, lastfm->priv->set);
+    mojito_set_empty (lastfm->priv->set);
+  }
+}
+
+static void
+get_artist_info_cb (RestProxyCall *call,
+                    const GError  *error,
+                    GObject       *weak_object,
+                    gpointer       user_data)
+{
+  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (weak_object);
+  MojitoItem *item = user_data;
+  RestXmlNode *root, *artist_node;
+  const char *url;
+
+  mojito_call_list_remove (lastfm->priv->calls, call);
+
+  if (error) {
+    g_message ("Error: %s", error->message);
+    /* TODO: cleanup or something */
+    return;
+  }
+
+  root = node_from_call (call);
+  if (!root)
+    return;
+
+  artist_node = rest_xml_node_find (root, "artist");
+  url = get_image_url (artist_node, "large");
+  if (url)
+    mojito_item_request_image_fetch (item, "thumbnail", url);
+
+  mojito_item_pop_pending (item);
+
+  emit_if_done (lastfm);
+}
+
+static void
+get_thumbnail (MojitoServiceLastfm *lastfm, MojitoItem *item, RestXmlNode *track_node)
+{
+  const char *url;
   RestProxyCall *call;
   RestXmlNode *artist;
   const char *mbid;
 
-  url = get_image (track, "large");
-  if (url)
-    return url;
+  url = get_image_url (track_node, "large");
+  if (url) {
+    mojito_item_request_image_fetch (item, "thumbnail", url);
+    return;
+  }
 
-  /* If we didn't find a track image, then try the artist image */
+  /* If we didn't find an album image, then try the artist image */
+
+  mojito_item_push_pending (item);
+
   call = rest_proxy_new_call (lastfm->priv->proxy);
+  mojito_call_list_add (lastfm->priv->calls, call);
+
   rest_proxy_call_add_params (call,
                               "method", "artist.getInfo",
                               "api_key", mojito_keystore_get_key ("lastfm"),
                               NULL);
 
-  artist = rest_xml_node_find (track, "artist");
+  artist = rest_xml_node_find (track_node, "artist");
   mbid = rest_xml_node_get_attr (artist, "mbid");
   if (mbid && mbid[0] != '\0') {
     rest_proxy_call_add_param (call, "mbid", mbid);
@@ -163,14 +212,8 @@ get_album_image (MojitoServiceLastfm *lastfm, RestXmlNode *track)
     rest_proxy_call_add_param (call, "artist", artist->content);
   }
 
-  if ((artist = lastfm_call (call)) == NULL)
-    return NULL;
-
-  url = get_image (artist, "large");
-  rest_xml_node_unref (artist);
-  return url;
+  rest_proxy_call_async (call, get_artist_info_cb, (GObject*)lastfm, item, NULL);
 }
-#endif
 
 static void
 start (MojitoService *service)
@@ -199,7 +242,7 @@ make_item (MojitoServiceLastfm *lastfm, RestXmlNode *user, RestXmlNode *track)
   mojito_item_take (item, "title", make_title (track));
   mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
 
-  //  mojito_item_take (item, "thumbnail", get_album_image (lastfm, track));
+  get_thumbnail (lastfm, item, track);
 
   date = rest_xml_node_find (track, "date");
   mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
@@ -212,7 +255,10 @@ make_item (MojitoServiceLastfm *lastfm, RestXmlNode *user, RestXmlNode *track)
   }
 
   mojito_item_put (item, "authorid", rest_xml_node_find (user, "name")->content);
-  //mojito_item_take (item, "authoricon", get_image (user, "medium"));
+
+  s = get_image_url (user, "medium");
+  if (s)
+    mojito_item_request_image_fetch (item, "authoricon", s);
 
   return item;
 }
@@ -227,7 +273,7 @@ get_tracks_cb (RestProxyCall *call,
   RestXmlNode *user_node = user_data;
   RestXmlNode *root, *track_node;
 
-  lastfm->priv->pending_calls = g_list_remove (lastfm->priv->pending_calls, call);
+  mojito_call_list_remove (lastfm->priv->calls, call);
 
   if (error) {
     g_message ("Error: %s", error->message);
@@ -244,16 +290,12 @@ get_tracks_cb (RestProxyCall *call,
     MojitoItem *item;
 
     item = make_item (lastfm, user_node, track_node);
-    mojito_item_dump (item);
     mojito_set_add (lastfm->priv->set, (GObject *)item);
   }
 
   rest_xml_node_unref (root);
 
-  if (lastfm->priv->pending_calls == NULL) {
-    mojito_service_emit_refreshed ((MojitoService *)lastfm, lastfm->priv->set);
-    mojito_set_empty (lastfm->priv->set);
-  }
+  emit_if_done (lastfm);
 }
 
 static void
@@ -276,7 +318,8 @@ get_friends_cb (RestProxyCall *call,
 
   for (node = rest_xml_node_find (root, "user"); node; node = node->next) {
     call = rest_proxy_new_call (lastfm->priv->proxy);
-    lastfm->priv->pending_calls = g_list_prepend (lastfm->priv->pending_calls, call);
+    mojito_call_list_add (lastfm->priv->calls, call);
+
     rest_proxy_call_add_params (call,
                                 "api_key", mojito_keystore_get_key ("lastfm"),
                                 "method", "user.getRecentTracks",
@@ -284,7 +327,6 @@ get_friends_cb (RestProxyCall *call,
                                 "limit", "1",
                                 NULL);
     rest_proxy_call_async (call, get_tracks_cb, (GObject*)lastfm, rest_xml_node_ref (node), NULL);
-    /* TODO: add call to queue or something so we can track when its done */
   }
   rest_xml_node_unref (root);
 }
@@ -392,6 +434,7 @@ mojito_service_lastfm_init (MojitoServiceLastfm *self)
   priv = self->priv = GET_PRIVATE (self);
 
   priv->set = mojito_item_set_new ();
+  priv->calls = mojito_call_list_new ();
 
   priv->running = FALSE;
 
