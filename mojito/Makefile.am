@@ -22,10 +22,10 @@ BUILT_SOURCES = \
 libmojito_ladir = $(pkgincludedir)/mojito
 
 libmojito_la_CFLAGS = -I$(top_srcdir) \
-		     $(DBUS_GLIB_CFLAGS) $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) $(NM_CFLAGS) $(GTK_CFLAGS) \
+		     $(DBUS_GLIB_CFLAGS) $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) $(NM_CFLAGS) $(GTK_CFLAGS) $(REST_CFLAGS) \
 		     -DMOJITO_SERVICES_MODULES_DIR=\"$(servicesdir)\"
 
-libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(NM_LIBS) $(GTK_LIBS)
+libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(NM_LIBS) $(GTK_LIBS) $(REST_LIBS)
 
 libmojito_la_SOURCES = mojito-types.h \
 		       mojito-debug.c mojito-debug.h \
@@ -39,6 +39,7 @@ libmojito_la_SOURCES = mojito-types.h \
 		       mojito-cache.c mojito-cache.h \
 		       mojito-online.c mojito-online.h \
 		       mojito-banned.c mojito-banned.h \
+		       mojito-call-list.c mojito-call-list.h \
 		       mojito-module.h \
 		       client-monitor.c client-monitor.h \
 		       $(BUILT_SOURCES)
