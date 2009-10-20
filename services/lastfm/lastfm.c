@@ -19,6 +19,7 @@
 #include <config.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib/gi18n.h>
 #include <mojito/mojito-service.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-utils.h>
@@ -97,11 +98,11 @@ make_title (RestXmlNode *node)
   artist = rest_xml_node_find (node, "artist")->content;
 
   if (track && artist) {
-    return g_strdup_printf ("%s by %s", track, artist);
+    return g_strdup_printf (_("%s by %s"), track, artist);
   } else if (track) {
     return g_strdup (track);
   } else {
-    return g_strdup ("Unknown");
+    return g_strdup (_("Unknown"));
   }
 }
 
