@@ -407,12 +407,24 @@ mojito_service_lastfm_dispose (GObject *object)
     priv->gconf = NULL;
   }
 
+  /* Do this here so only disposing if there are callbacks pending */
+  if (priv->calls) {
+    mojito_call_list_free (priv->calls);
+    priv->calls = NULL;
+  }
+
   G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->dispose (object);
 }
 
 static void
 mojito_service_lastfm_finalize (GObject *object)
 {
+  MojitoServiceLastfmPrivate *priv = ((MojitoServiceLastfm*)object)->priv;
+
+  g_free (priv->user_id);
+
+  mojito_set_unref (priv->set);
+
   G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->finalize (object);
 }
 
