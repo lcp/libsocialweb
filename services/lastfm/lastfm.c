@@ -344,6 +344,7 @@ refresh (MojitoService *service)
   }
 
   mojito_call_list_cancel_all (lastfm->priv->calls);
+  mojito_set_empty (lastfm->priv->set);
 
   call = rest_proxy_new_call (lastfm->priv->proxy);
   mojito_call_list_add (lastfm->priv->calls, call);
