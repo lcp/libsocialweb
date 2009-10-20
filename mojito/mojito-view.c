@@ -142,7 +142,7 @@ munge_items (MojitoView *view)
     if (!mojito_core_is_item_banned (priv->core, item)) {
 
       if (mojito_item_get_ready (item)) {
-        l = g_list_prepend (l, list->data);
+        l = g_list_prepend (l, item);
         MOJITO_DEBUG (VIEWS, "Item already ready: %s",
                       mojito_item_get (item, "id"));
       } else {
