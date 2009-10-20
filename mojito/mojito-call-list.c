@@ -69,7 +69,7 @@ mojito_call_list_remove (MojitoCallList *list, RestProxyCall *call)
 gboolean
 mojito_call_list_is_empty (MojitoCallList *list)
 {
-  return list->l != NULL;
+  return list->l == NULL;
 }
 
 void
