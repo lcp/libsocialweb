@@ -114,13 +114,14 @@ _item_ready_notify_cb (MojitoItem *item,
                        MojitoView *view)
 {
   /* TODO: Use a timeout to rate limit this */
-
-  MOJITO_DEBUG (VIEWS, "Item became ready: %s.",
-                mojito_item_get (item, "id"));
-  mojito_view_recalculate (view);
-  g_signal_handlers_disconnect_by_func (item,
-                                        _item_ready_notify_cb,
-                                        view);
+  if (mojito_item_get_ready (item)) {
+    MOJITO_DEBUG (VIEWS, "Item became ready: %s.",
+                  mojito_item_get (item, "id"));
+    mojito_view_recalculate (view);
+    g_signal_handlers_disconnect_by_func (item,
+                                          _item_ready_notify_cb,
+                                          view);
+  }
 }
 
 static MojitoSet *
