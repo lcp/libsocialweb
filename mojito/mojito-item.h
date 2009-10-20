@@ -80,6 +80,10 @@ GHashTable *mojito_item_peek_hash (MojitoItem *item);
 
 gboolean mojito_item_get_ready (MojitoItem *item);
 
+void mojito_item_push_pending (MojitoItem *item);
+void mojito_item_pop_pending (MojitoItem *item);
+
+
 /* Convenience function */
 MojitoSet * mojito_item_set_new (void);
 

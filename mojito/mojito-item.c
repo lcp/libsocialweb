@@ -253,6 +253,25 @@ mojito_item_get_ready (MojitoItem *item)
   return item->priv->ready;
 }
 
+void
+mojito_item_push_pending (MojitoItem *item)
+{
+  item->priv->ready = FALSE;
+  g_atomic_int_inc (&(item->priv->remaining_fetches));
+}
+
+void
+mojito_item_pop_pending (MojitoItem *item)
+{
+  if (g_atomic_int_dec_and_test (&(item->priv->remaining_fetches))) {
+    item->priv->ready = TRUE;
+    MOJITO_DEBUG (ITEM, "All outstanding fetches completed. Signalling ready: %s",
+                  mojito_item_get (item, "id"));
+    g_object_notify (G_OBJECT (item), "ready");
+  }
+}
+
+
 typedef struct {
   MojitoItem *item;
   const gchar *key;
@@ -268,13 +287,7 @@ _image_download_cb (const char               *url,
                     closure->key,
                     file);
 
-  if (g_atomic_int_dec_and_test (&(closure->item->priv->remaining_fetches)))
-  {
-    closure->item->priv->ready = TRUE;
-    MOJITO_DEBUG (ITEM, "All outstanding fetches completed. Signalling ready: %s",
-                  mojito_item_get (closure->item, "id"));
-    g_object_notify (G_OBJECT (closure->item), "ready");
-  }
+  mojito_item_pop_pending (closure->item);
 
   g_object_unref (closure->item);
   g_slice_free (RequestImageFetchClosure, closure);
@@ -285,12 +298,9 @@ mojito_item_request_image_fetch (MojitoItem  *item,
                                  const gchar *key,
                                  const gchar *url)
 {
-  MojitoItemPrivate *priv = item->priv;
   RequestImageFetchClosure *closure;
 
-  /* We are not ready now */
-  priv->ready = FALSE;
-  g_atomic_int_inc (&priv->remaining_fetches);
+  mojito_item_push_pending (item);
 
   closure = g_slice_new0 (RequestImageFetchClosure);
 
