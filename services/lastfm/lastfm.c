@@ -307,6 +307,8 @@ get_friends_cb (RestProxyCall *call,
   MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (weak_object);
   RestXmlNode *root, *node;
 
+  mojito_call_list_remove (lastfm->priv->calls, call);
+
   if (error) {
     g_message ("Error: %s", error->message);
     return;
@@ -341,7 +343,10 @@ refresh (MojitoService *service)
     return;
   }
 
+  mojito_call_list_cancel_all (lastfm->priv->calls);
+
   call = rest_proxy_new_call (lastfm->priv->proxy);
+  mojito_call_list_add (lastfm->priv->calls, call);
   rest_proxy_call_add_params (call,
                               "api_key", mojito_keystore_get_key ("lastfm"),
                               "user", lastfm->priv->user_id,
