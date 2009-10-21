@@ -31,7 +31,8 @@ mojito_debug_init (const char *string)
     { "main-loop", MOJITO_DEBUG_MAIN_LOOP },
     { "views", MOJITO_DEBUG_VIEWS },
     { "online", MOJITO_DEBUG_ONLINE },
-    { "item", MOJITO_DEBUG_ITEM }
+    { "item", MOJITO_DEBUG_ITEM },
+    { "twitter", MOJITO_DEBUG_TWITTER }
   };
 
   if (G_LIKELY (setup_done))
