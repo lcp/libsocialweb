@@ -31,7 +31,6 @@ struct _MojitoItemPrivate {
   MojitoService *service;
   GHashTable *hash;
   time_t cached_date;
-  gboolean ready;
   gint remaining_fetches;
 };
 
@@ -62,12 +61,11 @@ mojito_item_get_property (GObject    *object,
                           GParamSpec *pspec)
 {
   MojitoItem *item = MOJITO_ITEM (object);
-  MojitoItemPrivate *priv = item->priv;
 
   switch (property_id)
   {
     case PROP_READY:
-      g_value_set_boolean (value, priv->ready);
+      g_value_set_boolean (value, mojito_item_get_ready (item));
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -100,9 +98,6 @@ mojito_item_init (MojitoItem *self)
   self->priv = GET_PRIVATE (self);
 
   self->priv->hash = g_hash_table_new_full (NULL, NULL, NULL, g_free);
-
-  /* All items are ready for now */
-  self->priv->ready = TRUE;
 }
 
 MojitoItem*
@@ -250,13 +245,12 @@ mojito_item_peek_hash (MojitoItem *item)
 gboolean
 mojito_item_get_ready (MojitoItem *item)
 {
-  return item->priv->ready;
+  return (item->priv->remaining_fetches == 0);
 }
 
 void
 mojito_item_push_pending (MojitoItem *item)
 {
-  item->priv->ready = FALSE;
   g_atomic_int_inc (&(item->priv->remaining_fetches));
 }
 
@@ -264,7 +258,6 @@ void
 mojito_item_pop_pending (MojitoItem *item)
 {
   if (g_atomic_int_dec_and_test (&(item->priv->remaining_fetches))) {
-    item->priv->ready = TRUE;
     MOJITO_DEBUG (ITEM, "All outstanding fetches completed. Signalling ready: %s",
                   mojito_item_get (item, "id"));
     g_object_notify (G_OBJECT (item), "ready");
