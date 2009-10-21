@@ -108,22 +108,6 @@ send_removed (gpointer data, gpointer user_data)
                                        mojito_item_get (item, "id"));
 }
 
-static void
-_item_ready_notify_cb (MojitoItem *item,
-                       GParamSpec *pspec,
-                       MojitoView *view)
-{
-  /* TODO: Use a timeout to rate limit this */
-  if (mojito_item_get_ready (item)) {
-    MOJITO_DEBUG (VIEWS, "Item became ready: %s.",
-                  mojito_item_get (item, "id"));
-    mojito_view_recalculate (view);
-    g_signal_handlers_disconnect_by_func (item,
-                                          _item_ready_notify_cb,
-                                          view);
-  }
-}
-
 static MojitoSet *
 munge_items (MojitoView *view)
 {
@@ -143,15 +127,11 @@ munge_items (MojitoView *view)
 
       if (mojito_item_get_ready (item)) {
         l = g_list_prepend (l, item);
-        MOJITO_DEBUG (VIEWS, "Item already ready: %s",
+        MOJITO_DEBUG (VIEWS, "Item ready: %s",
                       mojito_item_get (item, "id"));
       } else {
-        MOJITO_DEBUG (VIEWS, "Item not ready. Listening for signal: %s",
+        MOJITO_DEBUG (VIEWS, "Item not ready. Skipping: %s",
                       mojito_item_get (item, "id"));
-        g_signal_connect (item,
-                          "notify::ready",
-                          (GCallback)_item_ready_notify_cb,
-                          view);
       }
     }
     list = g_list_delete_link (list, list);
@@ -260,6 +240,40 @@ mojito_view_recalculate (MojitoView *view)
 }
 
 static void
+_item_ready_notify_cb (MojitoItem *item,
+                       GParamSpec *pspec,
+                       MojitoView *view)
+{
+  /* TODO: Use a timeout to rate limit this */
+  if (mojito_item_get_ready (item)) {
+    MOJITO_DEBUG (VIEWS, "Item became ready: %s.",
+                  mojito_item_get (item, "id"));
+    mojito_view_recalculate (view);
+    g_signal_handlers_disconnect_by_func (item,
+                                          _item_ready_notify_cb,
+                                          view);
+  }
+}
+
+static void
+setup_ready_handler (gpointer object, gpointer user_data)
+{
+  MojitoItem *item = MOJITO_ITEM (object);
+  MojitoView *view = MOJITO_VIEW (user_data);
+
+  if (mojito_item_get_ready (item))
+    return;
+
+  MOJITO_DEBUG (VIEWS, "Item not ready. Setting up signal handler: %s.",
+                mojito_item_get (item, "id"));
+
+  g_signal_connect (item,
+                    "notify::ready",
+                    (GCallback)_item_ready_notify_cb,
+                    view);
+}
+
+static void
 service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
 {
   MojitoView *view = MOJITO_VIEW (user_data);
@@ -275,6 +289,7 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
   mojito_set_foreach_remove (priv->all_items, remove_service, service);
   if (set) {
     mojito_set_add_from (priv->all_items, set);
+    mojito_set_foreach (set, setup_ready_handler, view);
     mojito_set_unref (set);
   }
 
