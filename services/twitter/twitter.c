@@ -26,6 +26,7 @@
 #include <mojito/mojito-online.h>
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-web.h>
+#include <mojito/mojito-debug.h>
 #include <mojito-keyfob/mojito-keyfob.h>
 #include <mojito-keystore/mojito-keystore.h>
 #include <gconf/gconf-client.h>
@@ -256,6 +257,8 @@ tweets_cb (RestProxyCall *call,
 
   set = mojito_item_set_new ();
 
+  MOJITO_DEBUG (TWITTER, "Got tweets!");
+
   for (node = rest_xml_node_find (root, "status"); node; node = node->next) {
     MojitoItem *item;
     /* TODO: skip the user's own tweets */
@@ -280,6 +283,8 @@ get_status_updates (MojitoServiceTwitter *twitter)
 
   if (!priv->user_id || !priv->running)
     return;
+
+  MOJITO_DEBUG (TWITTER, "Got status updates");
 
   call = rest_proxy_new_call (priv->proxy);
   switch (priv->type) {
@@ -364,6 +369,8 @@ verify_cb (RestProxyCall *call,
     return;
   }
 
+  MOJITO_DEBUG (TWITTER, "Authentication verified");
+
   node = node_from_call (call);
   if (!node)
     return;
@@ -387,6 +394,7 @@ got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
   RestProxyCall *call;
 
   if (authorised) {
+    MOJITO_DEBUG (TWITTER, "Authorised");
     call = rest_proxy_new_call (priv->proxy);
     rest_proxy_call_set_function (call, "account/verify_credentials.xml");
     rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
@@ -487,6 +495,8 @@ online_notify (gboolean online, gpointer user_data)
   MojitoServiceTwitter *twitter = (MojitoServiceTwitter *)user_data;
   MojitoServiceTwitterPrivate *priv = twitter->priv;
 
+  MOJITO_DEBUG (TWITTER, "Online: %s", online ? "yes" : "no");
+
   if (online) {
 #if TWITTER_USE_OAUTH
     const char *key = NULL, *secret = NULL;
@@ -522,6 +532,8 @@ online_notify (gboolean online, gpointer user_data)
 static void
 credentials_updated (MojitoService *service)
 {
+  MOJITO_DEBUG (TWITTER, "Credentials updated");
+
   /* If we're online, force a reconnect to fetch new credentials */
   if (mojito_is_online ()) {
     online_notify (FALSE, service);
