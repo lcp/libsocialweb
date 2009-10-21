@@ -412,15 +412,18 @@ refresh (MojitoService *service)
   if (!priv->running)
     return;
 
+#if TWITTER_USE_OAUTH
   if (priv->user_id) {
     get_status_updates (twitter);
   } else {
-#if TWITTER_USE_OAUTH
     mojito_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
-#else
-    got_tokens_cb (priv->proxy, TRUE, twitter);
-#endif
   }
+#else
+  if (priv->username && priv->password && priv->proxy)
+  {
+    got_tokens_cb (priv->proxy, TRUE, twitter);
+  }
+#endif
 }
 
 static void
