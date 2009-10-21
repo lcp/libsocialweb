@@ -115,8 +115,6 @@ node_from_call (RestProxyCall *call)
                                           rest_proxy_call_get_payload (call),
                                           rest_proxy_call_get_payload_length (call));
 
-  g_object_unref (call);
-
   if (root == NULL) {
     g_message ("Error from Twitter: %s",
                rest_proxy_call_get_payload (call));
