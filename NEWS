@@ -1,3 +1,11 @@
+Mojito 0.21.5
+===
+
+* Add asynchronous delayed image fetching to backend-side MojitoItem
+* Switch backends to not block when downloading images
+* Make last.fm not block (MB#6813)
+* Fix twitter backend crash with no authentication details (MB#7118)
+
 Mojito 0.21.4
 ===
 
