@@ -505,8 +505,22 @@ online_notify (gboolean online, gpointer user_data)
 #else
     if (priv->username && priv->password) {
       char *url;
+      char *escaped_user;
+      char *escaped_password;
+
+      escaped_user = g_uri_escape_string (priv->username,
+                                          NULL,
+                                          FALSE);
+      escaped_password = g_uri_escape_string (priv->password,
+                                          NULL,
+                                          FALSE);
+
       url = g_strdup_printf ("https://%s:%s@twitter.com/",
-                             priv->username, priv->password);
+                             escaped_user, escaped_password);
+
+      g_free (escaped_user);
+      g_free (escaped_password);
+
       priv->proxy = rest_proxy_new (url, FALSE);
       g_free (url);
 
