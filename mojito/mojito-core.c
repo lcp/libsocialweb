@@ -521,3 +521,11 @@ mojito_core_dup_singleton (void)
 
   return core;
 }
+
+DBusGConnection *
+mojito_core_get_connection (MojitoCore *core)
+{
+  MojitoCorePrivate *priv = GET_PRIVATE (core);
+
+  return priv->connection;
+}

@@ -21,6 +21,7 @@
 
 #include <glib-object.h>
 #include <mojito/mojito-types.h>
+#include <dbus/dbus-glib-lowlevel.h>
 
 G_BEGIN_DECLS
 
@@ -61,6 +62,8 @@ void mojito_core_run (MojitoCore *core);
 gboolean mojito_core_is_item_banned (MojitoCore *core, MojitoItem *item);
 
 MojitoCore *mojito_core_dup_singleton (void);
+
+DBusGConnection *mojito_core_get_connection (MojitoCore *core);
 
 G_END_DECLS
 
