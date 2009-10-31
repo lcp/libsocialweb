@@ -83,7 +83,7 @@ main (int argc, char **argv)
 
   mojito_debug_init (debug_opts ? debug_opts : g_getenv ("MOJITO_DEBUG"));
 
-  core = mojito_core_new ();
+  core = mojito_core_dup_singleton ();
 
   if (MOJITO_DEBUG_ENABLED (MAIN_LOOP))
     poll_init ();
