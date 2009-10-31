@@ -507,3 +507,17 @@ mojito_core_is_item_banned (MojitoCore *core, MojitoItem *item)
 
   return g_hash_table_lookup (core->priv->banned_uids, id) != NULL;
 }
+
+MojitoCore *
+mojito_core_dup_singleton (void)
+{
+  static MojitoCore *core = NULL;
+
+  if (!core)
+  {
+    core = mojito_core_new ();
+    g_object_add_weak_pointer (G_OBJECT (core), (gpointer)&core);
+  }
+
+  return core;
+}
