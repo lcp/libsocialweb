@@ -1,8 +1,9 @@
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-05-30 14:47+0100\n"
+"POT-Creation-Date: 2009-10-16 11:27+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Tomás Galicia <tomas.galicia@intel.com>\n"
 "Language-Team: \n"
@@ -17,26 +18,13 @@ msgstr ""
 msgid "Last.fm"
 msgstr "Last.fm"
 
-#: ../services/lastfm/lastfm.keys.in.h:2
-msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm ist ein Internetradio-Service, der lernt was dir gefällt. Jeder gespielte Musiktitel sagt deinem Last.fm-Profil etwas über deinen Geschmack. Last.fm kann dich mit anderen Leuten, die einen ähnlichen Musikgeschmack haben, verbinden und dir Songs von ihren Sammlungen empfehlen."
-
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
 msgstr "Twitter"
 
-# "Twitter is a social network for friends, family and colleagues, which allows to communicate with one another by frequently sending short messages answering one simple question: What are you doing?"
-#: ../services/twitter/twitter.keys.in.h:2
-msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter ist ein soziales Netzwerk für Freunde, Familie und Kollegen, welches es ermöglicht, miteinander zu kommunizieren indem man häufig mit kurzen Nachrichten auf eine einfache Frage antwortet: Was machst du gerade?"
-
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
 msgstr "Flickr"
-
-#: ../services/flickr/flickr.keys.in.h:2
-msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr "Flickr ist nahezu ohne Zweifel die beste Anwendung in der Welt um Fotos online zu verwalten und mit anderen zu teilen."
 
 #: ../services/myspace/myspace.keys.in.h:1
 msgid "MySpace"
@@ -46,3 +34,17 @@ msgstr "MySpace"
 msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
 msgstr "MySpace ist ein führendes soziales Netzwerk, welches Menschen und Kulturen weltweit miteinander verbindet. Erstelle ein Profil, veröffentliche Fotos, professionelle und virale Videos, schreibe Blog-Einträge, chatte mit deinen Freunden und höre dir Musik in der größten Musikgemeinde der Welt an."
 
+#: ../services/lastfm/lastfm.keys.in.h:2
+msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
+msgstr "Last.fm ist ein Internetradio-Service, der lernt, was dir gefällt. Jeder gespielte Musiktitel sagt deinem Last.fm-Profil etwas über deinen Geschmack. Last.fm kann dich mit anderen Leuten, die einen ähnlichen Musikgeschmack haben, verbinden und dir Songs von ihren Sammlungen empfehlen."
+
+# "Twitter is a social network for friends, family and colleagues, which
+# allows to communicate with one another by frequently sending short messages
+# answering one simple question: What are you doing?"
+#: ../services/twitter/twitter.keys.in.h:2
+msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
+msgstr "Twitter ist ein soziales Netzwerk für Freunde, Familie und Kollegen, welches es ermöglicht, miteinander zu kommunizieren, indem man häufig mit kurzen Nachrichten auf eine einfache Frage antwortet: Was machst du gerade?"
+
+#: ../services/flickr/flickr.keys.in.h:2
+msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgstr "Flickr ist nahezu ohne Zweifel die beste Anwendung in der Welt, um Fotos online zu verwalten und mit anderen zu teilen."
