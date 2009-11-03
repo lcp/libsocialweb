@@ -187,6 +187,23 @@ mojito_set_add_from (MojitoSet *set, MojitoSet *from)
   g_hash_table_foreach (from->hash, add_to_set, set);
 }
 
+static void
+remove_from_set (gpointer key, gpointer value, gpointer user_data)
+{
+  MojitoSet *set = user_data;
+
+  mojito_set_remove (set, key);
+}
+
+void
+mojito_set_remove_from (MojitoSet *set, MojitoSet *from)
+{
+  g_return_if_fail (set);
+  g_return_if_fail (from);
+
+  g_hash_table_foreach (from->hash, remove_from_set, set);
+}
+
 GList *
 mojito_set_as_list (MojitoSet *set)
 {
