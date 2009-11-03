@@ -33,6 +33,7 @@ libmojito_la_SOURCES = mojito-types.h \
 		       mojito-core.c mojito-core.h \
 		       mojito-item.c mojito-item.h \
 		       mojito-view.c mojito-view.h \
+		       mojito-item-view.c mojito-item-view.h \
 		       mojito-service.c mojito-service.h \
 		       mojito-utils.c mojito-utils.h \
 		       mojito-web.c mojito-web.h \
