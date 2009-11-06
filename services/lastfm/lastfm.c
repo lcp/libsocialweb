@@ -33,7 +33,10 @@
 #include "lastfm.h"
 #include "lastfm-ginterface.h"
 
-G_DEFINE_TYPE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE)
+static void lastfm_iface_init (gpointer g_iface, gpointer iface_data);
+G_DEFINE_TYPE_WITH_CODE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_LASTFM_IFACE, lastfm_iface_init));
+
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_LASTFM, MojitoServiceLastfmPrivate))
@@ -96,6 +99,37 @@ node_from_call (RestProxyCall *call)
   }
 
   return node;
+}
+
+static void
+lastfm_now_playing (MojitoLastfmIface *self,
+                    const gchar *in_artist,
+                    const gchar *in_album,
+                    const gchar *in_track,
+                    guint in_length,
+                    guint in_tracknumber,
+                    const gchar *in_musicbrainz,
+                    DBusGMethodInvocation *context)
+{
+  /* TODO */
+  mojito_lastfm_iface_return_from_now_playing (context);
+}
+
+static void
+lastfm_submit_track (MojitoLastfmIface *self,
+                     const gchar *in_artist,
+                     const gchar *in_album,
+                     const gchar *in_track,
+                     gint64 in_time,
+                     const gchar *in_source,
+                     const gchar *in_rating,
+                     guint in_length,
+                     guint in_tracknumber,
+                     const gchar *in_musicbrainz,
+                     DBusGMethodInvocation *context)
+{
+  /* TODO */
+  mojito_lastfm_iface_return_from_submit_track (context);
 }
 
 static char *
@@ -427,6 +461,14 @@ mojito_service_lastfm_finalize (GObject *object)
   mojito_set_unref (priv->set);
 
   G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->finalize (object);
+}
+
+static void
+lastfm_iface_init (gpointer g_iface, gpointer iface_data)
+{
+  MojitoLastfmIfaceClass *klass = (MojitoLastfmIfaceClass *)g_iface;
+
+  mojito_lastfm_iface_implement_submit_track (klass, lastfm_submit_track);
 }
 
 static void
