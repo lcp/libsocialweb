@@ -31,6 +31,7 @@
 #include <gconf/gconf-client.h>
 
 #include "lastfm.h"
+#include "lastfm-ginterface.h"
 
 G_DEFINE_TYPE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE)
 
