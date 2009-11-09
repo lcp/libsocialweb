@@ -469,6 +469,7 @@ lastfm_iface_init (gpointer g_iface, gpointer iface_data)
   MojitoLastfmIfaceClass *klass = (MojitoLastfmIfaceClass *)g_iface;
 
   mojito_lastfm_iface_implement_submit_track (klass, lastfm_submit_track);
+  mojito_lastfm_iface_implement_now_playing (klass, lastfm_now_playing);
 }
 
 static void
