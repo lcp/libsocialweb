@@ -229,6 +229,10 @@ mojito_item_view_iface_init (gpointer g_iface,
   mojito_item_view_iface_implement_close (klass, mojito_item_view_close);
 }
 
+/*
+ * Construct a GValueArray from a MojitoItem. We use this to construct the
+ * data types that the wonderful dbus-glib needs to emit the signal
+ */
 static GValueArray *
 _mojito_item_to_value_array (MojitoItem *item)
 {
@@ -265,6 +269,14 @@ _mojito_item_to_value_array (MojitoItem *item)
   return value_array;
 }
 
+/**
+ * mojito_item_view_add_item
+ * @item_view: A #MojitoItemView
+ * @item: A #MojitoItem
+ *
+ * Add a single item in the #MojitoItemView. This will cause a signal to be
+ * emitted across the bus.
+ */
 void
 mojito_item_view_add_item (MojitoItemView *item_view,
                            MojitoItem     *item)
@@ -281,6 +293,14 @@ mojito_item_view_add_item (MojitoItemView *item_view,
                                            ptr_array);
 }
 
+/**
+ * mojito_item_view_update_item
+ * @item_view: A #MojitoItemView
+ * @item: A #MojitoItem
+ *
+ * Update a single item in the #MojitoItemView. This will cause a signal to be
+ * emitted across the bus.
+ */
 void
 mojito_item_view_update_item (MojitoItemView *item_view,
                               MojitoItem     *item)
@@ -297,6 +317,14 @@ mojito_item_view_update_item (MojitoItemView *item_view,
                                              ptr_array);
 }
 
+/**
+ * mojito_item_view_remove_item
+ * @item_view: A #MojitoItemView
+ * @item: A #MojitoItem
+ *
+ * Remove a single item to the #MojitoItemView. This will cause a signal to be
+ * emitted across the bus.
+ */
 void
 mojito_item_view_remove_item (MojitoItemView *item_view,
                               MojitoItem     *item)
@@ -438,6 +466,12 @@ mojito_item_view_get_object_path (MojitoItemView *item_view)
   return priv->object_path;
 }
 
+/**
+ * mojito_item_view_get_service
+ * @item_view: A #MojitoItemView
+ *
+ * Returns: The #MojitoService that #MojitoItemView is for
+ */
 MojitoService *
 mojito_item_view_get_service (MojitoItemView *item_view)
 {
