@@ -286,6 +286,18 @@ mojito_item_view_remove_item (MojitoItemView *item_view,
 
 }
 
+/**
+ * mojito_item_view_add_items
+ * @item_view: A #MojitoItemView
+ * @items: A list of #MojitoItem objects
+ *
+ * Add the items supplied in the list from the #MojitoItemView. In many
+ * cases what you actually want is mojito_item_view_remove_from_set() or
+ * mojito_item_view_set_from_set(). This will cause signal emissions over the
+ * bus.
+ *
+ * This is used in the implementation of mojito_item_view_remove_from_set()
+ */
 void
 mojito_item_view_add_items (MojitoItemView *item_view,
                             GList          *items)
@@ -306,9 +318,17 @@ mojito_item_view_add_items (MojitoItemView *item_view,
                                            ptr_array);
 }
 
+/**
+ * mojito_item_view_update_items
+ * @item_view: A #MojitoItemView
+ * @items: A list of #MojitoItem objects that need updating
+ *
+ * Update the items supplied in the list in the #MojitoItemView. This is
+ * will cause signal emissions over the bus.
+ */
 void
 mojito_item_view_update_items (MojitoItemView *item_view,
-                               GList       *items)
+                               GList          *items)
 {
   GValueArray *value_array;
   GPtrArray *ptr_array;
@@ -324,9 +344,20 @@ mojito_item_view_update_items (MojitoItemView *item_view,
 
   mojito_item_view_iface_emit_items_changed (item_view,
                                              ptr_array);
-
 }
 
+/**
+ * mojito_item_view_remove_items
+ * @item_view: A #MojitoItemView
+ * @items: A list of #MojitoItem objects
+ *
+ * Remove the items supplied in the list from the #MojitoItemView. In many
+ * cases what you actually want is mojito_item_view_remove_from_set() or
+ * mojito_item_view_set_from_set(). This will cause signal emissions over the
+ * bus.
+ *
+ * This is used in the implementation of mojito_item_view_remove_from_set()
+ */
 void
 mojito_item_view_remove_items (MojitoItemView *item_view,
                                GList          *items)
@@ -359,10 +390,19 @@ mojito_item_view_remove_items (MojitoItemView *item_view,
 
   mojito_item_view_iface_emit_items_removed (item_view,
                                              ptr_array);
-
 }
 
-
+/**
+ * mojito_item_view_get_object_path
+ * @item_view: A #MojitoItemView
+ *
+ * Since #MojitoItemView is responsible for constructing the object path and
+ * registering the object on the bus. This function is necessary for
+ * #MojitoCore to be able to return the object path as the result of a
+ * function to open a view.
+ *
+ * Returns: A string providing the object path.
+ */
 const gchar *
 mojito_item_view_get_object_path (MojitoItemView *item_view)
 {
@@ -379,6 +419,15 @@ mojito_item_view_get_service (MojitoItemView *item_view)
   return priv->service;
 }
 
+/**
+ * mojito_item_view_add_from_set
+ * @item_view: A #MojitoItemView
+ * @set: A #MojitoSet
+ *
+ * Add the items that are in the supplied set to the view.
+ *
+ * This is used in the implementation of mojito_item_view_set_from_set()
+ */
 void
 mojito_item_view_add_from_set (MojitoItemView *item_view,
                                MojitoSet      *set)
@@ -393,6 +442,15 @@ mojito_item_view_add_from_set (MojitoItemView *item_view,
   g_list_free (items);
 }
 
+/**
+ * mojito_item_view_remove_from_set
+ * @item_view: A #MojitoItemView
+ * @set: A #MojitoSet
+ *
+ * Remove the items that are in the supplied set from the view.
+ *
+ * This is used in the implementation of mojito_item_view_set_from_set()
+ */
 void
 mojito_item_view_remove_from_set (MojitoItemView *item_view,
                                   MojitoSet      *set)
@@ -408,6 +466,18 @@ mojito_item_view_remove_from_set (MojitoItemView *item_view,
   g_list_free (items);
 }
 
+/**
+ * mojito_item_view_set_from_set
+ * @item_view: A #MojitoItemView
+ * @set: A #MojitoSet
+ *
+ * Updates what the view contains based on the given #MojitoSet. Removed
+ * signals will be fired for any items that were in the view but that are not
+ * present in the supplied set. Conversely any items that are new will cause
+ * signals to be fired indicating their addition.
+ *
+ * This implemented by maintaining a set inside the #MojitoItemView
+ */
 void
 mojito_item_view_set_from_set (MojitoItemView *item_view,
                                MojitoSet      *set)
