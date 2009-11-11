@@ -105,7 +105,7 @@ mojito_item_view_finalize (GObject *object)
   G_OBJECT_CLASS (mojito_item_view_parent_class)->finalize (object);
 }
 
-gchar *
+static gchar *
 _make_object_path (MojitoItemView *item_view)
 {
   MojitoItemViewPrivate *priv = GET_PRIVATE (item_view);
