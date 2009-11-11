@@ -269,21 +269,48 @@ void
 mojito_item_view_add_item (MojitoItemView *item_view,
                            MojitoItem     *item)
 {
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
 
+  ptr_array = g_ptr_array_new ();
+
+  value_array = _mojito_item_to_value_array (item);
+  g_ptr_array_add (ptr_array, value_array);
+
+  mojito_item_view_iface_emit_items_added (item_view,
+                                           ptr_array);
 }
 
 void
 mojito_item_view_update_item (MojitoItemView *item_view,
                               MojitoItem     *item)
 {
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
 
+  ptr_array = g_ptr_array_new ();
+
+  value_array = _mojito_item_to_value_array (item);
+  g_ptr_array_add (ptr_array, value_array);
+
+  mojito_item_view_iface_emit_items_changed (item_view,
+                                             ptr_array);
 }
 
 void
 mojito_item_view_remove_item (MojitoItemView *item_view,
                               MojitoItem     *item)
 {
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
 
+  ptr_array = g_ptr_array_new ();
+
+  value_array = _mojito_item_to_value_array (item);
+  g_ptr_array_add (ptr_array, value_array);
+
+  mojito_item_view_iface_emit_items_removed (item_view,
+                                             ptr_array);
 }
 
 /**
