@@ -42,7 +42,8 @@ struct _MojitoItemViewPrivate {
 enum
 {
   PROP_0,
-  PROP_SERVICE
+  PROP_SERVICE,
+  PROP_OBJECT_PATH
 };
 
 static void
@@ -54,6 +55,9 @@ mojito_item_view_get_property (GObject *object, guint property_id,
   switch (property_id) {
     case PROP_SERVICE:
       g_value_set_object (value, priv->service);
+      break;
+    case PROP_OBJECT_PATH:
+      g_value_set_string (value, priv->object_path);
       break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -156,10 +160,17 @@ mojito_item_view_class_init (MojitoItemViewClass *klass)
 
   pspec = g_param_spec_object ("service",
                                "service",
-                               "service",
+                               "The service this view is using",
                                MOJITO_TYPE_SERVICE,
                                G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
   g_object_class_install_property (object_class, PROP_SERVICE, pspec);
+
+  pspec = g_param_spec_string ("object-path",
+                               "Object path",
+                               "The object path of this view",
+                               NULL,
+                               G_PARAM_READABLE);
+  g_object_class_install_property (object_class, PROP_OBJECT_PATH, pspec);
 }
 
 static void
