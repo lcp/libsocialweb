@@ -34,7 +34,17 @@
 #include <rest/rest-xml-parser.h>
 #include <libsoup/soup.h>
 
-G_DEFINE_TYPE (MojitoServiceTwitter, mojito_service_twitter, MOJITO_TYPE_SERVICE)
+#include <mojito/mojito-query-ginterface.h>
+
+#include "twitter-item-view.h"
+
+static void query_iface_init (gpointer g_iface, gpointer iface_data);
+
+G_DEFINE_TYPE_WITH_CODE (MojitoServiceTwitter,
+                         mojito_service_twitter,
+                         MOJITO_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_QUERY_IFACE,
+                                                query_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitterPrivate))
@@ -669,4 +679,33 @@ static void
 mojito_service_twitter_init (MojitoServiceTwitter *self)
 {
   self->priv = GET_PRIVATE (self);
+}
+
+static void
+_twitter_query_open_view (MojitoQueryIface      *self,
+                          GHashTable            *params,
+                          DBusGMethodInvocation *context)
+{
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (self);
+  MojitoItemView *item_view;
+  const gchar *object_path;
+
+  item_view = g_object_new (MOJITO_TYPE_TWITTER_ITEM_VIEW,
+                            "proxy", priv->proxy,
+                            "service", self,
+                            NULL);
+
+  object_path = mojito_item_view_get_object_path (item_view);
+  mojito_query_iface_return_from_open_view (context,
+                                            object_path);
+}
+
+static void
+query_iface_init (gpointer g_iface,
+                  gpointer iface_data)
+{
+  MojitoQueryIfaceClass *klass = (MojitoQueryIfaceClass*)g_iface;
+
+  mojito_query_iface_implement_open_view (klass,
+                                          _twitter_query_open_view);
 }
