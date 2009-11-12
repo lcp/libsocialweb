@@ -144,7 +144,7 @@ _cleanup_twitpic (char *string)
 
 static MojitoItem *
 _make_item (MojitoTwitterItemView *item_view,
-            RestXmlNode *node)
+            RestXmlNode           *node)
 {
   MojitoTwitterItemViewPrivate *priv = GET_PRIVATE (item_view);
   RestXmlNode *u_node, *n;
