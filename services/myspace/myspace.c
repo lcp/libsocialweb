@@ -29,16 +29,21 @@
 #include <rest/oauth-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <mojito/mojito-online.h>
+#include <mojito/mojito-debug.h>
 
 #include <mojito/mojito-avatar-ginterface.h>
+#include <mojito/mojito-status-update-ginterface.h>
 
 static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
+static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (MojitoServiceMySpace,
                          mojito_service_myspace,
                          MOJITO_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (MOJITO_TYPE_AVATAR_IFACE,
-                                                avatar_iface_init));
+                                                avatar_iface_init)
+                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_STATUS_UPDATE_IFACE,
+                                                status_update_iface_init));
 
 
 #define GET_PRIVATE(o) \
@@ -553,4 +558,60 @@ avatar_iface_init (gpointer g_iface,
   MojitoAvatarIfaceClass *klass = (MojitoAvatarIfaceClass *)g_iface;
 
   mojito_avatar_iface_implement_request_avatar (klass, _myspace_avatar_request_avatar);
+}
+
+/* Status Update interface */
+
+static void
+_update_status_cb (RestProxyCall *call,
+                   const GError  *error,
+                   GObject       *weak_object,
+                   gpointer       userdata)
+{
+  if (error)
+  {
+    g_critical (G_STRLOC ": Error updating status: %s",
+                error->message);
+    mojito_status_update_iface_emit_status_updated (weak_object, FALSE);
+  } else {
+    MOJITO_DEBUG (MYSPACE, G_STRLOC ": Status updated.");
+    mojito_status_update_iface_emit_status_updated (weak_object, FALSE);
+  }
+}
+
+static void
+_myspace_status_update_update_status (MojitoStatusUpdateIface *self,
+                                      const gchar             *msg,
+                                      DBusGMethodInvocation   *context)
+{
+  MojitoServiceMySpace *myspace = (MojitoServiceMySpace *)self;
+  MojitoServiceMySpacePrivate *priv = myspace->priv;
+  RestProxyCall *call;
+  gchar *function;
+
+  if (!priv->user_id)
+    return;
+
+  call = rest_proxy_new_call (priv->proxy);
+  rest_proxy_call_set_method (call, "PUT");
+  function = g_strdup_printf ("v1/users/%s/status", priv->user_id);
+  rest_proxy_call_set_function (call, function);
+  g_free (function);
+
+  rest_proxy_call_add_params (call,
+                              "userId", priv->user_id,
+                              "status", msg,
+                              NULL);
+  rest_proxy_call_async (call, _update_status_cb, (GObject *)self, NULL, NULL);
+  mojito_status_update_iface_return_from_update_status (context);
+}
+
+static void
+status_update_iface_init (gpointer g_iface,
+                          gpointer iface_data)
+{
+  MojitoStatusUpdateIfaceClass *klass = (MojitoStatusUpdateIfaceClass*)g_iface;
+
+  mojito_status_update_iface_implement_update_status (klass,
+                                                      _myspace_status_update_update_status);
 }
