@@ -36,11 +36,13 @@
 
 #include <mojito/mojito-query-ginterface.h>
 #include <mojito/mojito-avatar-ginterface.h>
+#include <mojito/mojito-status-update-ginterface.h>
 
 #include "twitter-item-view.h"
 
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
 static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
+static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (MojitoServiceTwitter,
                          mojito_service_twitter,
@@ -48,7 +50,9 @@ G_DEFINE_TYPE_WITH_CODE (MojitoServiceTwitter,
                          G_IMPLEMENT_INTERFACE (MOJITO_TYPE_QUERY_IFACE,
                                                 query_iface_init)
                          G_IMPLEMENT_INTERFACE (MOJITO_TYPE_AVATAR_IFACE,
-                                                avatar_iface_init));
+                                                avatar_iface_init)
+                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_STATUS_UPDATE_IFACE,
+                                                status_update_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitterPrivate))
@@ -752,5 +756,58 @@ avatar_iface_init (gpointer g_iface,
 
   mojito_avatar_iface_implement_request_avatar (klass,
                                                 _twitter_avatar_request_avatar);
+}
+
+/* Status Update interface */
+
+static void
+_update_status_cb (RestProxyCall *call,
+                   const GError  *error,
+                   GObject       *weak_object,
+                   gpointer       userdata)
+{
+  if (error)
+  {
+    g_critical (G_STRLOC ": Error updating status: %s",
+                error->message);
+    mojito_status_update_iface_emit_status_updated (weak_object, FALSE);
+  } else {
+    MOJITO_DEBUG (TWITTER, G_STRLOC ": Status updated.");
+    mojito_status_update_iface_emit_status_updated (weak_object, FALSE);
+  }
+}
+
+static void
+_twitter_status_update_update_status (MojitoStatusUpdateIface *self,
+                                      const gchar             *msg,
+                                      DBusGMethodInvocation   *context)
+{
+  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (self);
+  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  RestProxyCall *call;
+
+  if (!priv->user_id)
+    return;
+
+  call = rest_proxy_new_call (priv->proxy);
+  rest_proxy_call_set_method (call, "POST");
+  rest_proxy_call_set_function (call, "statuses/update.xml");
+
+  rest_proxy_call_add_params (call,
+                              "status", msg,
+                              NULL);
+
+  rest_proxy_call_async (call, _update_status_cb, (GObject *)self, NULL, NULL);
+  mojito_status_update_iface_return_from_update_status (context);
+}
+
+static void
+status_update_iface_init (gpointer g_iface,
+                          gpointer iface_data)
+{
+  MojitoStatusUpdateIfaceClass *klass = (MojitoStatusUpdateIfaceClass*)g_iface;
+
+  mojito_status_update_iface_implement_update_status (klass,
+                                                      _twitter_status_update_update_status);
 }
 
