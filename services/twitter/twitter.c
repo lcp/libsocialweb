@@ -35,16 +35,20 @@
 #include <libsoup/soup.h>
 
 #include <mojito/mojito-query-ginterface.h>
+#include <mojito/mojito-avatar-ginterface.h>
 
 #include "twitter-item-view.h"
 
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
+static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (MojitoServiceTwitter,
                          mojito_service_twitter,
                          MOJITO_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (MOJITO_TYPE_QUERY_IFACE,
-                                                query_iface_init));
+                                                query_iface_init)
+                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_AVATAR_IFACE,
+                                                avatar_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitterPrivate))
@@ -681,6 +685,8 @@ mojito_service_twitter_init (MojitoServiceTwitter *self)
   self->priv = GET_PRIVATE (self);
 }
 
+/* Query interface */
+
 static void
 _twitter_query_open_view (MojitoQueryIface      *self,
                           GHashTable            *params,
@@ -709,3 +715,42 @@ query_iface_init (gpointer g_iface,
   mojito_query_iface_implement_open_view (klass,
                                           _twitter_query_open_view);
 }
+
+/* Avatar interface */
+
+static void
+_requested_avatar_downloaded_cb (const gchar *uri,
+                                 gchar       *local_path,
+                                 gpointer     userdata)
+{
+  MojitoService *service = MOJITO_SERVICE (userdata);
+
+  mojito_avatar_iface_emit_avatar_retrieved (service, local_path);
+  g_free (local_path);
+}
+
+static void
+_twitter_avatar_request_avatar (MojitoAvatarIface     *self,
+                                DBusGMethodInvocation *context)
+{
+  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (self);
+
+  if (priv->image_url) {
+    mojito_web_download_image_async (priv->image_url,
+                                     _requested_avatar_downloaded_cb,
+                                     self);
+  }
+
+  mojito_avatar_iface_return_from_request_avatar (context);
+}
+
+static void
+avatar_iface_init (gpointer g_iface,
+                   gpointer iface_data)
+{
+  MojitoAvatarIfaceClass *klass = (MojitoAvatarIfaceClass*)g_iface;
+
+  mojito_avatar_iface_implement_request_avatar (klass,
+                                                _twitter_avatar_request_avatar);
+}
+
