@@ -12,7 +12,8 @@ lib_LTLIBRARIES = libmojito.la
 	$(QUIET_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
 
 EXTRA_DIST = mojito-marshals.list mojito-core.xml mojito-service.xml \
-	     mojito-view.xml mojito-item-view.xml mojito-query.xml
+	     mojito-view.xml mojito-item-view.xml mojito-query.xml \
+	     mojito-avatar.xml
 
 BUILT_SOURCES = \
 	mojito-marshals.c mojito-marshals.h \
@@ -20,7 +21,8 @@ BUILT_SOURCES = \
 	mojito-view-ginterface.c mojito-view-ginterface.h \
 	mojito-service-ginterface.c mojito-service-ginterface.h \
 	mojito-item-view-ginterface.c mojito-item-view-ginterface.h \
-	mojito-query-ginterface.c mojito-query-ginterface.h
+	mojito-query-ginterface.c mojito-query-ginterface.h \
+	mojito-avatar-ginterface.c mojito-avatar-ginterface.h
 
 libmojito_ladir = $(pkgincludedir)/mojito
 
