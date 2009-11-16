@@ -30,7 +30,16 @@
 #include <rest/rest-xml-parser.h>
 #include <mojito/mojito-online.h>
 
-G_DEFINE_TYPE (MojitoServiceMySpace, mojito_service_myspace, MOJITO_TYPE_SERVICE)
+#include <mojito/mojito-avatar-ginterface.h>
+
+static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
+
+G_DEFINE_TYPE_WITH_CODE (MojitoServiceMySpace,
+                         mojito_service_myspace,
+                         MOJITO_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_AVATAR_IFACE,
+                                                avatar_iface_init));
+
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_MYSPACE, MojitoServiceMySpacePrivate))
@@ -507,4 +516,41 @@ mojito_service_myspace_init (MojitoServiceMySpace *self)
   }
 
   mojito_online_add_notify (online_notify, self);
+}
+
+/* Avatar interface */
+
+static void
+_requested_avatar_downloaded_cb (const gchar *uri,
+                                 gchar       *local_path,
+                                 gpointer     userdata)
+{
+  MojitoService *service = MOJITO_SERVICE (userdata);
+
+  mojito_avatar_iface_emit_avatar_retrieved (service, local_path);
+  g_free (local_path);
+}
+
+static void
+_myspace_avatar_request_avatar (MojitoAvatarIface     *self,
+                                DBusGMethodInvocation *context)
+{
+  MojitoServiceMySpacePrivate *priv = GET_PRIVATE (self);
+
+  if (priv->image_url) {
+    mojito_web_download_image_async (priv->image_url,
+                                     _requested_avatar_downloaded_cb,
+                                     self);
+  }
+
+  mojito_avatar_iface_return_from_request_avatar (context);
+}
+
+static void
+avatar_iface_init (gpointer g_iface,
+                   gpointer iface_data)
+{
+  MojitoAvatarIfaceClass *klass = (MojitoAvatarIfaceClass *)g_iface;
+
+  mojito_avatar_iface_implement_request_avatar (klass, _myspace_avatar_request_avatar);
 }
