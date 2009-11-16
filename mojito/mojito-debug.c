@@ -32,7 +32,8 @@ mojito_debug_init (const char *string)
     { "views", MOJITO_DEBUG_VIEWS },
     { "online", MOJITO_DEBUG_ONLINE },
     { "item", MOJITO_DEBUG_ITEM },
-    { "twitter", MOJITO_DEBUG_TWITTER }
+    { "twitter", MOJITO_DEBUG_TWITTER },
+    { "myspace", MOJITO_DEBUG_MYSPACE }
   };
 
   if (G_LIKELY (setup_done))
