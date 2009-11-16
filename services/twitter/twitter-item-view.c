@@ -45,6 +45,7 @@ typedef struct _MojitoTwitterItemViewPrivate MojitoTwitterItemViewPrivate;
 struct _MojitoTwitterItemViewPrivate {
   RestProxy *proxy;
   GRegex *twitpic_re;
+  guint timeout_id;
 };
 
 enum
@@ -52,6 +53,8 @@ enum
   PROP_0,
   PROP_PROXY
 };
+
+#define UPDATE_TIMEOUT 5 * 60
 
 static void
 mojito_twitter_item_view_get_property (GObject *object, guint property_id,
@@ -96,6 +99,12 @@ mojito_twitter_item_view_dispose (GObject *object)
   {
     g_object_unref (priv->proxy);
     priv->proxy = NULL;
+  }
+
+  if (priv->timeout_id)
+  {
+    g_source_remove (priv->timeout_id);
+    priv->timeout_id = 0;
   }
 
   G_OBJECT_CLASS (mojito_twitter_item_view_parent_class)->dispose (object);
@@ -304,10 +313,31 @@ _get_status_updates (MojitoTwitterItemView *item_view)
                          NULL);
 }
 
+static gboolean
+_update_timeout_cb (gpointer data)
+{
+  MojitoTwitterItemView *item_view = MOJITO_TWITTER_ITEM_VIEW (data);
+
+  _get_status_updates (item_view);
+
+  return TRUE;
+}
+
 static void
 twitter_item_view_start (MojitoItemView *item_view)
 {
-  _get_status_updates ((MojitoTwitterItemView *)item_view);
+  MojitoTwitterItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  if (priv->timeout_id)
+  {
+    g_warning (G_STRLOC ": View already started.");
+  } else {
+    MOJITO_DEBUG (TWITTER, G_STRLOC ": Setting up the timeout");
+    priv->timeout_id = g_timeout_add_seconds (UPDATE_TIMEOUT,
+                                              (GSourceFunc)_update_timeout_cb,
+                                              item_view);
+    _get_status_updates ((MojitoTwitterItemView *)item_view);
+  }
 }
 
 static void
