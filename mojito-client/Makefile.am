@@ -2,7 +2,7 @@ QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
 
 lib_LTLIBRARIES = libmojito-client.la
 
-%-bindings.h: ../mojito/%.xml
+%-bindings.h: $(top_srcdir)/interfaces/%.xml
 	$(QUIET_GEN)dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
 
 %.c: %.list Makefile.am
