@@ -31,8 +31,8 @@
 #include <mojito/mojito-online.h>
 #include <mojito/mojito-debug.h>
 
-#include <mojito/mojito-avatar-ginterface.h>
-#include <mojito/mojito-status-update-ginterface.h>
+#include <interfaces/mojito-avatar-ginterface.h>
+#include <interfaces/mojito-status-update-ginterface.h>
 
 static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
 static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
