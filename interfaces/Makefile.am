@@ -1,6 +1,6 @@
 QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
 
-noinst_LTLIBRARIES = libmojito-ginterface.la
+noinst_LTLIBRARIES = libmojito-ginterfaces.la
 
 %.c: %.list Makefile.am
 	$(QUIET_GEN)glib-genmarshal --body --prefix=mojito_marshal $< > $@
@@ -29,9 +29,9 @@ DBUS_SPECS = mojito-core.xml mojito-service.xml \
 %-ginterface.h %-ginterface.c: %.xml Makefile.am
 	$(QUIET_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
 
-libmojito_ginterface_la_SOURCES = $(GINTERFACE_SOURCES) $(MARSHALS_SOURCES)
-libmojito_ginterface_la_LIBADD = $(DBUS_GLIB_LIBS)
-libmojito_ginterface_la_CFLAGS = $(DBUS_GLIB_CFLAGS)
+libmojito_ginterfaces_la_SOURCES = $(GINTERFACE_SOURCES) $(MARSHALS_SOURCES)
+libmojito_ginterfaces_la_LIBADD = $(DBUS_GLIB_LIBS)
+libmojito_ginterfaces_la_CFLAGS = $(DBUS_GLIB_CFLAGS)
 
 BUILT_SOURCES = $(GINTERFACE_SOURCES) $(MARSHALS_SOURCES)
 CLEANFILES = $(BUILT_SOURCES)

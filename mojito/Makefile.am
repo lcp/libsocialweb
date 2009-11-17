@@ -9,7 +9,7 @@ libmojito_la_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/interfaces \
 
 libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS) $(SOUP_GNOME_LIBS) \
 		      $(NM_LIBS) $(GTK_LIBS) $(REST_LIBS) \
-		      $(top_builddir)/interfaces/libmojito-ginterface.la
+		      $(top_builddir)/interfaces/libmojito-ginterfaces.la
 
 libmojito_la_SOURCES = mojito-types.h \
 		       mojito-debug.c mojito-debug.h \
