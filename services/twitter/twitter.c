@@ -34,9 +34,9 @@
 #include <rest/rest-xml-parser.h>
 #include <libsoup/soup.h>
 
-#include <mojito/mojito-query-ginterface.h>
-#include <mojito/mojito-avatar-ginterface.h>
-#include <mojito/mojito-status-update-ginterface.h>
+#include <interfaces/mojito-query-ginterface.h>
+#include <interfaces/mojito-avatar-ginterface.h>
+#include <interfaces/mojito-status-update-ginterface.h>
 
 #include "twitter-item-view.h"
 
