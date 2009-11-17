@@ -19,9 +19,10 @@
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
 
-#include "mojito-view-bindings.h"
 #include "mojito-client-view.h"
-#include "mojito-client-marshals.h"
+
+#include <interfaces/mojito-view-bindings.h>
+#include <interfaces/mojito-marshals.h>
 
 G_DEFINE_TYPE (MojitoClientView, mojito_client_view, G_TYPE_OBJECT)
 

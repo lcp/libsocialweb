@@ -18,9 +18,11 @@
 
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
+
 #include "mojito-client.h"
 #include "mojito-client-service-private.h"
-#include "mojito-core-bindings.h"
+
+#include <interfaces/mojito-core-bindings.h>
 
 G_DEFINE_TYPE (MojitoClient, mojito_client, G_TYPE_OBJECT)
 

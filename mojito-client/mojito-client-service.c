@@ -20,8 +20,9 @@
 #include <dbus/dbus-glib-lowlevel.h>
 
 #include "mojito-client-service.h"
-#include "mojito-service-bindings.h"
-#include "mojito-client-marshals.h"
+
+#include <interfaces/mojito-service-bindings.h>
+#include <interfaces/mojito-marshals.h>
 
 G_DEFINE_TYPE (MojitoClientService, mojito_client_service, G_TYPE_OBJECT)
 
