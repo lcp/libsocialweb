@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = mojito mojito-keyfob mojito-keystore mojito-client src services examples tests tools po
+SUBDIRS = interfaces mojito mojito-keyfob mojito-keystore mojito-client src services examples tests tools po
 
 pkgconfig_DATA = mojito-client.pc mojito-module.pc mojito-keystore.pc
 pkgconfigdir   = $(libdir)/pkgconfig

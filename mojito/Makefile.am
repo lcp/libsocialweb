@@ -1,37 +1,15 @@
-QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
-
 lib_LTLIBRARIES = libmojito.la
-
-%.c: %.list Makefile.am
-	$(QUIET_GEN)glib-genmarshal --body --prefix=mojito_marshal $< > $@
-
-%.h: %.list Makefile.am
-	$(QUIET_GEN)glib-genmarshal --header --prefix=mojito_marshal $< > $@
-
-%-ginterface.h %-ginterface.c: %.xml Makefile.am
-	$(QUIET_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
-
-EXTRA_DIST = mojito-marshals.list mojito-core.xml mojito-service.xml \
-	     mojito-view.xml mojito-item-view.xml mojito-query.xml \
-	     mojito-avatar.xml mojito-status-update.xml
-
-BUILT_SOURCES = \
-	mojito-marshals.c mojito-marshals.h \
-	mojito-core-ginterface.c mojito-core-ginterface.h \
-	mojito-view-ginterface.c mojito-view-ginterface.h \
-	mojito-service-ginterface.c mojito-service-ginterface.h \
-	mojito-item-view-ginterface.c mojito-item-view-ginterface.h \
-	mojito-query-ginterface.c mojito-query-ginterface.h \
-	mojito-avatar-ginterface.c mojito-avatar-ginterface.h \
-	mojito-status-update-ginterface.c mojito-status-update-ginterface.h
 
 libmojito_ladir = $(pkgincludedir)/mojito
 
-libmojito_la_CFLAGS = -I$(top_srcdir) \
-		     $(DBUS_GLIB_CFLAGS) $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) $(NM_CFLAGS) $(GTK_CFLAGS) $(REST_CFLAGS) \
+libmojito_la_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/interfaces \
+		     $(DBUS_GLIB_CFLAGS) $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) \
+		     $(NM_CFLAGS) $(GTK_CFLAGS) $(REST_CFLAGS) \
 		     -DMOJITO_SERVICES_MODULES_DIR=\"$(servicesdir)\"
 
-libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS) $(SOUP_GNOME_LIBS) $(NM_LIBS) $(GTK_LIBS) $(REST_LIBS)
+libmojito_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS) $(SOUP_GNOME_LIBS) \
+		      $(NM_LIBS) $(GTK_LIBS) $(REST_LIBS) \
+		      $(top_builddir)/interfaces/libmojito-ginterface.la
 
 libmojito_la_SOURCES = mojito-types.h \
 		       mojito-debug.c mojito-debug.h \
@@ -48,8 +26,7 @@ libmojito_la_SOURCES = mojito-types.h \
 		       mojito-banned.c mojito-banned.h \
 		       mojito-call-list.c mojito-call-list.h \
 		       mojito-module.h \
-		       client-monitor.c client-monitor.h \
-		       $(BUILT_SOURCES)
+		       client-monitor.c client-monitor.h
 
 libmojito_la_HEADERS = \
 	mojito-types.h \
@@ -59,8 +36,6 @@ libmojito_la_HEADERS = \
 	mojito-item.h \
 	mojito-module.h \
 	mojito-utils.h
-
-CLEANFILES = $(BUILT_SOURCES)
 
 # Test suite
 TESTS = test-runner

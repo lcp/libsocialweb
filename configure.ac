@@ -121,6 +121,7 @@ AC_OUTPUT([
         build-aux/shave-libtool:m4/shave-libtool.in
         Makefile
         mojito/Makefile
+        interfaces/Makefile
         mojito-keyfob/Makefile
         mojito-keystore/Makefile
         mojito-client/Makefile
