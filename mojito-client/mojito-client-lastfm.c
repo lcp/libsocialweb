@@ -31,49 +31,12 @@ G_DEFINE_TYPE (MojitoClientLastfm, mojito_client_lastfm, G_TYPE_OBJECT)
 typedef struct _MojitoClientLastfmPrivate MojitoClientLastfmPrivate;
 
 struct _MojitoClientLastfmPrivate {
-    gchar *object_path;
     DBusGConnection *connection;
     DBusGProxy *proxy;
 };
 
-enum
-{
-  PROP_0,
-  PROP_OBJECT_PATH
-};
-
 #define MOJITO_SERVICE_NAME "com.intel.Mojito"
 #define MOJITO_SERVICE_LASTFM_INTERFACE "com.intel.Mojito.Service.Lastfm"
-
-static void
-mojito_client_lastfm_get_property (GObject *object, guint property_id,
-                                   GValue *value, GParamSpec *pspec)
-{
-  MojitoClientLastfmPrivate *priv = GET_PRIVATE (object);
-
-  switch (property_id) {
-    case PROP_OBJECT_PATH:
-      g_value_set_string (value, priv->object_path);
-      break;
-  default:
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-  }
-}
-
-static void
-mojito_client_lastfm_set_property (GObject *object, guint property_id,
-                                   const GValue *value, GParamSpec *pspec)
-{
-  MojitoClientLastfmPrivate *priv = GET_PRIVATE (object);
-
-  switch (property_id) {
-    case PROP_OBJECT_PATH:
-      priv->object_path = g_value_dup_string (value);
-      break;
-  default:
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-  }
-}
 
 static void
 mojito_client_lastfm_dispose (GObject *object)
@@ -93,16 +56,6 @@ mojito_client_lastfm_dispose (GObject *object)
   }
 
   G_OBJECT_CLASS (mojito_client_lastfm_parent_class)->dispose (object);
-}
-
-static void
-mojito_client_lastfm_finalize (GObject *object)
-{
-  MojitoClientLastfmPrivate *priv = GET_PRIVATE (object);
-
-  g_free (priv->object_path);
-
-  G_OBJECT_CLASS (mojito_client_lastfm_parent_class)->finalize (object);
 }
 
 static void
@@ -139,7 +92,7 @@ mojito_client_lastfm_constructed (GObject *object)
 
   priv->proxy = dbus_g_proxy_new_for_name_owner (priv->connection,
                                                  MOJITO_SERVICE_NAME,
-                                                 priv->object_path,
+                                                 "/com/intel/Mojito/Service/twitter",
                                                  MOJITO_SERVICE_LASTFM_INTERFACE,
                                                  &error);
 
@@ -156,22 +109,11 @@ static void
 mojito_client_lastfm_class_init (MojitoClientLastfmClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  GParamSpec *pspec;
 
   g_type_class_add_private (klass, sizeof (MojitoClientLastfmPrivate));
 
-  object_class->get_property = mojito_client_lastfm_get_property;
-  object_class->set_property = mojito_client_lastfm_set_property;
   object_class->dispose = mojito_client_lastfm_dispose;
-  object_class->finalize = mojito_client_lastfm_finalize;
   object_class->constructed = mojito_client_lastfm_constructed;
-
-  pspec = g_param_spec_string ("object-path",
-                               "Object path",
-                               "DBUS path to the view's object",
-                               NULL,
-                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
-  g_object_class_install_property (object_class, PROP_OBJECT_PATH, pspec);
 }
 
 static void
@@ -180,11 +122,9 @@ mojito_client_lastfm_init (MojitoClientLastfm *self)
 }
 
 MojitoClientLastfm *
-mojito_client_lastfm_new_for_path (const gchar *lastfm_path)
+mojito_client_lastfm_new (void)
 {
-  return g_object_new (MOJITO_TYPE_CLIENT_LASTFM,
-                       "object-path", lastfm_path,
-                       NULL);
+  return g_object_new (MOJITO_TYPE_CLIENT_LASTFM, NULL);
 }
 
 static void

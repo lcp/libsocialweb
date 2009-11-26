@@ -50,7 +50,7 @@ typedef struct {
 
 GType mojito_client_lastfm_get_type (void);
 
-MojitoClientLastfm *mojito_client_lastfm_new_for_path (const gchar *lastfm_path);
+MojitoClientLastfm *mojito_client_lastfm_new (void);
 void mojito_client_lastfm_now_playing (MojitoClientLastfm *lastfm,
                                        const char         *artist,
                                        const char         *album,
