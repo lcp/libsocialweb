@@ -15,7 +15,8 @@ MARSHALS_LISTS = mojito-marshals.list
 
 DBUS_SPECS = mojito-core.xml mojito-service.xml \
 	     mojito-view.xml mojito-item-view.xml mojito-query.xml \
-	     mojito-avatar.xml mojito-status-update.xml
+	     mojito-avatar.xml mojito-status-update.xml \
+	     lastfm.xml
 
 %-ginterface.h %-ginterface.c: %.xml Makefile.am
 	$(QUIET_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_

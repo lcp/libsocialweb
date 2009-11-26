@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<node name="/Lastfm_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+  <interface name="com.intel.Mojito.Service.Lastfm">
+    <method name="NowPlaying" tp:name-for-bindings="Now_Playing">
+      <arg name="artist" type="s" direction="in"/>
+      <arg name="album" type="s" direction="in"/>
+      <arg name="track" type="s" direction="in"/>
+      <arg name="length" type="u" direction="in"/>
+      <arg name="tracknumber" type="u" direction="in"/>
+      <arg name="musicbrainz" type="s" direction="in"/>
+    </method>
+
+    <method name="SubmitTrack" tp:name-for-bindings="Submit_Track">
+      <arg name="artist" type="s" direction="in"/>
+      <arg name="album" type="s" direction="in"/>
+      <arg name="track" type="s" direction="in"/>
+      <arg name="time" type="x" direction="in"/>
+      <arg name="source" type="s" direction="in"/>
+      <arg name="rating" type="s" direction="in"/>
+      <arg name="length" type="u" direction="in"/>
+      <arg name="tracknumber" type="u" direction="in"/>
+      <arg name="musicbrainz" type="s" direction="in"/>
+    </method>
+  </interface>
+</node>
