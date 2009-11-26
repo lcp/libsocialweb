@@ -21,13 +21,8 @@ DBUS_SPECS = mojito-core.xml mojito-service.xml \
 	$(QUIET_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
 
 GINTERFACE_SOURCES = \
-	mojito-core-ginterface.c mojito-core-ginterface.h \
-	mojito-view-ginterface.c mojito-view-ginterface.h \
-	mojito-service-ginterface.c mojito-service-ginterface.h \
-	mojito-item-view-ginterface.c mojito-item-view-ginterface.h \
-	mojito-query-ginterface.c mojito-query-ginterface.h \
-	mojito-avatar-ginterface.c mojito-avatar-ginterface.h \
-	mojito-status-update-ginterface.c mojito-status-update-ginterface.h
+	$(DBUS_SPECS:.xml=-ginterface.h) \
+	$(DBUS_SPECS:.xml=-ginterface.c)
 
 libmojito_ginterfaces_la_SOURCES = $(GINTERFACE_SOURCES) $(MARSHALS_SOURCES)
 libmojito_ginterfaces_la_LIBADD = $(DBUS_GLIB_LIBS)
@@ -36,14 +31,7 @@ libmojito_ginterfaces_la_CFLAGS = $(DBUS_GLIB_CFLAGS)
 %-bindings.h: %.xml
 	$(QUIET_GEN)dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
 
-BINDINGS_SOURCES = \
-		   mojito-core-bindings.h \
-		   mojito-service-bindings.h \
-		   mojito-view-bindings.h \
-		   mojito-item-view-bindings.h \
-		   mojito-query-bindings.h \
-		   mojito-avatar-bindings.h \
-		   mojito-status-update-bindings.h
+BINDINGS_SOURCES = $(DBUS_SPECS:.xml=-bindings.h)
 
 libmojito_bindings_la_SOURCES = $(BINDINGS_SOURCES) $(MARSHALS_SOURCES)
 libmojito_bindings_la_LIBADD = $(DBUS_GLIB_LIBS)
