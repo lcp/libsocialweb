@@ -280,7 +280,12 @@ make_item (MojitoServiceLastfm *lastfm, RestXmlNode *user, RestXmlNode *track)
   get_thumbnail (lastfm, item, track);
 
   date = rest_xml_node_find (track, "date");
-  mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
+  if (date) {
+    mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
+  } else {
+    /* No date means it's a now-playing item, so use now at the timestamp */
+    mojito_item_take (item, "date", mojito_time_t_to_string (time (NULL)));
+  }
 
   s = rest_xml_node_find (user, "realname")->content;
   if (s) {
@@ -320,8 +325,9 @@ get_tracks_cb (RestProxyCall *call,
   if (!root)
     return;
 
-  track_node = rest_xml_node_find (root, "track");
-  if (track_node) {
+  /* Although we only asked for a single track, if there is now-playing data
+     then that is returned as well. */
+  for (track_node = rest_xml_node_find (root, "track"); track_node; track_node = track_node->next) {
     MojitoItem *item;
 
     item = make_item (lastfm, user_node, track_node);
