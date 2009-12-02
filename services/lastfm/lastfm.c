@@ -141,6 +141,7 @@ make_title (RestXmlNode *node)
   artist = rest_xml_node_find (node, "artist")->content;
 
   if (track && artist) {
+    /* Translators "[track title] by [artist]" */
     return g_strdup_printf (_("%s by %s"), track, artist);
   } else if (track) {
     return g_strdup (track);
