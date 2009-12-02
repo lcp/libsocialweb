@@ -1,40 +1,75 @@
 #
+# Cheng-Chia Tseng <pswo10680@gmail.com>, 2009.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-18 15:51+0000\n"
-"PO-Revision-Date: \n"
+"POT-Creation-Date: 2009-12-01 23:37+0000\n"
+"PO-Revision-Date: 2009-12-03 00:38+0800\n"
 "Last-Translator: Cheng-Chia Tseng <pswo10680@gmail.com>\n"
-"Language-Team: \n"
+"Language-Team: 正體中文 <>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: Chinese\n"
 "X-Poedit-SourceCharset: utf-8\n"
+"X-Generator: Lokalize 1.0\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "Digg"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - 可以分享新聞、影片以及圖片"
+
+#: ../services/lastfm/lastfm.c:144
+#, c-format
+msgid "%s by %s"
+msgstr "%s 由 %s 發表"
+
+#: ../services/lastfm/lastfm.c:148
+msgid "Unknown"
+msgstr "未知"
 
 #: ../services/lastfm/lastfm.keys.in.h:1
 msgid "Last.fm"
 msgstr "Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
-msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm 是個會學習你的音樂偏愛的音樂服務。當你每次播放歌曲時都會告訴 Last.fm，接著 Last.fm 會依此將你所偏愛的歌曲紀錄在個人檔案內。如此一來，Last.fm 就可以把你和其他音樂喜好相近的人們連接在一起 - 並且從他們的以及你的音樂收藏中推薦幾首你可能會喜歡的歌曲。"
+msgid ""
+"Last.fm is a music service that learns what you love. Every track you play "
+"will tell your Last.fm profile something about what you like. It can connect "
+"you to other people who like what you like - and recommend songs from their "
+"music collections and yours too."
+msgstr ""
+"Last.fm 是個會學習你的音樂偏愛的音樂服務。當你每次播放歌曲時都會告訴 Last."
+"fm，接著 Last.fm 會依此將你所偏愛的歌曲紀錄在個人檔案內。如此一來，Last.fm 就"
+"可以把你和其他音樂喜好相近的人們連接在一起 - 並且從他們的以及你的音樂收藏中推"
+"薦幾首你可能會喜歡的歌曲。"
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
 msgstr "Twitter"
 
 #: ../services/twitter/twitter.keys.in.h:2
-msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter 是個讓朋友、家人及工作同仁互相溝通並保持連絡的服務，透過快速、立即的簡單問答來彼此間交流。像是：你現在在幹麼啊？"
+msgid ""
+"Twitter is a service for friends, family, and co–workers to communicate and "
+"stay connected through the exchange of quick, frequent answers to one simple "
+"question: What are you doing?"
+msgstr ""
+"Twitter 是個讓朋友、家人及工作同仁互相溝通並保持連絡的服務，透過快速、立即的"
+"簡單問答來彼此間交流。像是：你現在在幹麼啊？"
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
 msgstr "Flickr"
 
 #: ../services/flickr/flickr.keys.in.h:2
-msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgid ""
+"Flickr - almost certainly the best online photo management and sharing "
+"application in the world."
 msgstr "Flickr - 幾乎絕對是世界上最棒的線上相片管理與分享的應用網站。"
 
 #: ../services/myspace/myspace.keys.in.h:1
@@ -42,6 +77,13 @@ msgid "MySpace"
 msgstr "MySpace"
 
 #: ../services/myspace/myspace.keys.in.h:2
-msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace 是個用來連繫來自世界各地的人們、內容和文化的領導性社交入口網站。建立個人檔案、分享照片、專業的與散佈性的影片、部落格、發給你朋友即時訊息，以及聆聽全世界最大的音樂社群內的音樂。"
+msgid ""
+"MySpace is a leading social portal for connecting people, content, and "
+"culture from around the world. Create a profile, share photos, professional "
+"and viral videos, blog, instant message your friends, and listen to music on "
+"the world’s largest music community."
+msgstr ""
+"MySpace 是個用來連繫來自世界各地的人們、內容和文化的領導性社交入口網站。建立"
+"個人檔案、分享照片、專業的與散佈性的影片、部落格、發給你朋友即時訊息，以及聆"
+"聽全世界最大的音樂社群內的音樂。"
 
