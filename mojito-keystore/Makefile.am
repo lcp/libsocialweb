@@ -3,8 +3,8 @@ QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
 lib_LTLIBRARIES = libmojito-keystore.la
 libmojito_keystore_ladir = $(pkgincludedir)/mojito-keystore
 
-libmojito_keystore_la_CFLAGS = -I$(top_srcdir) $(GLIB_CFLAGS) -DG_LOG_DOMAIN=\"Mojito-KeyStore\"
-libmojito_keystore_la_LIBADD = $(GLIB_LIBS)
+libmojito_keystore_la_CFLAGS = -I$(top_srcdir) $(GIO_CFLAGS) -DG_LOG_DOMAIN=\"Mojito-KeyStore\"
+libmojito_keystore_la_LIBADD = $(GIO_LIBS)
 
 libmojito_keystore_la_SOURCES = \
 	mojito-keystore.c mojito-keystore.h
