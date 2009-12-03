@@ -129,6 +129,17 @@ mojito_service_init (MojitoService *self)
 {
 }
 
+gboolean
+mojito_service_ready (MojitoServiceClass *klass)
+{
+  g_return_val_if_fail (MOJITO_IS_SERVICE_CLASS (klass), FALSE);
+
+  if (klass->ready)
+    return klass->ready (klass);
+  else
+    return TRUE;
+}
+
 const char *
 mojito_service_get_name (MojitoService *service)
 {

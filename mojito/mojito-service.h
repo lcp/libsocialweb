@@ -56,6 +56,8 @@ struct _MojitoServiceClass {
   void (*caps_changed) (MojitoService *service, char **caps);
 
   /* vfuncs */
+  /* Call before construction to see if this service can be used */
+  gboolean (*ready) (MojitoServiceClass *klass); /* TODO: rename */
   const char *(*get_name) (MojitoService *service);
   void (*start) (MojitoService *service);
   /* fires ::refreshed (MojitoSet *set) signal */
@@ -75,6 +77,8 @@ struct _MojitoServiceClass {
 #define CAN_REQUEST_AVATAR "can-request-avatar"
 
 GType mojito_service_get_type (void);
+
+gboolean mojito_service_ready (MojitoServiceClass *klass);
 
 const char *mojito_service_get_name (MojitoService *service);
 
