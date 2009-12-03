@@ -272,7 +272,7 @@ load_module (MojitoCore *core, const char *file)
   const gchar *service_name;
   GType service_type;
   gpointer sym;
-  MojitoServiceProxy *proxy;
+  MojitoService *proxy;
   gchar *path;
 
   service_module = g_module_open (file, G_MODULE_BIND_LOCAL);

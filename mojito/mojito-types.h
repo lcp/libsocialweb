@@ -27,8 +27,6 @@ typedef struct _MojitoService MojitoService;
 
 typedef struct _MojitoSet MojitoSet;
 
-typedef struct _MojitoServiceProxy MojitoServiceProxy;
-
 typedef struct _MojitoView MojitoView;
 
 typedef struct _MojitoItem MojitoItem;
