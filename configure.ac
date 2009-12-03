@@ -102,11 +102,11 @@ AS_IF(
 )
 
 
-MOJITO_API_KEY(Digg, digg, DIGG)
-MOJITO_OAUTH_KEYS(Flickr, flickr, FLICKR)
-MOJITO_API_KEY(Last.fm, lastfm, LASTFM)
-MOJITO_OAUTH_KEYS(MySpace, myspace, MYSPACE)
-MOJITO_OAUTH_KEYS(Twitter, twitter, TWITTER)
+MOJITO_ENABLE_SERVICE(Digg, digg, DIGG)
+MOJITO_ENABLE_SERVICE(Flickr, flickr, FLICKR)
+MOJITO_ENABLE_SERVICE(Last.fm, lastfm, LASTFM)
+MOJITO_ENABLE_SERVICE(MySpace, myspace, MYSPACE)
+MOJITO_ENABLE_SERVICE(Twitter, twitter, TWITTER)
 
 
 servicesdir='${libdir}'/mojito/services
