@@ -21,7 +21,7 @@
 
 #include <interfaces/lastfm-bindings.h>
 #include "mojito-client-lastfm.h"
-#include "mojito-client-marshals.h"
+
 
 G_DEFINE_TYPE (MojitoClientLastfm, mojito_client_lastfm, G_TYPE_OBJECT)
 
