@@ -20,6 +20,7 @@
 #include "mojito-marshals.h"
 #include "mojito-item.h"
 #include "mojito-service-ginterface.h"
+
 static void service_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE (MojitoService, mojito_service, G_TYPE_OBJECT,
                                   G_IMPLEMENT_INTERFACE (MOJITO_TYPE_SERVICE_IFACE,
@@ -45,6 +46,12 @@ enum {
 };
 
 static guint signals[N_SIGNALS] = {0};
+
+GQuark
+mojito_service_error_quark (void)
+{
+  return g_quark_from_static_string ("mojito-service-error-quark");
+}
 
 static void
 mojito_service_set_property (GObject      *object,

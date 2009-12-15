@@ -29,6 +29,13 @@ G_BEGIN_DECLS
 
 #define MOJITO_TYPE_SERVICE mojito_service_get_type()
 
+typedef enum {
+  MOJITO_SERVICE_ERROR_NO_KEYS
+} MojitoServiceError;
+
+#define MOJITO_SERVICE_ERROR mojito_service_error_quark ()
+GQuark mojito_service_error_quark (void);
+
 #define MOJITO_SERVICE(obj) \
   (G_TYPE_CHECK_INSTANCE_CAST ((obj), MOJITO_TYPE_SERVICE, MojitoService))
 
