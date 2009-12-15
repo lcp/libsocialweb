@@ -140,7 +140,7 @@ load_keys (gpointer data)
   }
   load_keys_from_dir (hash, g_get_user_config_dir (), TRUE);
 #else
-  load_keys_from_dir (hash, "test-keys", FALSE);
+  load_keys_from_dir (hash, SOURCE_DIR "/test-keys", FALSE);
 #endif
 
   return hash;

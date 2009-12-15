@@ -17,6 +17,14 @@ TESTS = test-suite
 check_PROGRAMS = test-suite
 
 test_suite_SOURCES = $(libmojito_keystore_la_SOURCES)
-test_suite_CFLAGS = -DBUILD_TESTS $(libmojito_keystore_la_CFLAGS)
+test_suite_CFLAGS = -DBUILD_TESTS -DSOURCE_DIR=\"$(abs_srcdir)\" $(libmojito_keystore_la_CFLAGS)
 test_suite_LDFLAGS = $(libmojito_keystore_la_LIBADD)
 # TODO: use gtester
+
+dist_check_DATA = \
+	test-keys/digg \
+	test-keys/facebook \
+	test-keys/flickr \
+	test-keys/lastfm \
+	test-keys/myspace \
+	test-keys/twitter
