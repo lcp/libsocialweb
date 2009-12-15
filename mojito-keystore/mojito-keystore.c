@@ -128,7 +128,9 @@ static gpointer
 load_keys (gpointer data)
 {
   GHashTable *hash;
+#if ! BUILD_TESTS
   const char * const *dirs;
+#endif
 
   hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, key_data_free);
 
