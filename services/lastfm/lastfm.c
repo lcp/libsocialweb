@@ -458,6 +458,11 @@ mojito_service_lastfm_dispose (GObject *object)
     priv->calls = NULL;
   }
 
+  if (priv->set) {
+    mojito_set_unref (priv->set);
+    priv->set = NULL;
+  }
+
   G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->dispose (object);
 }
 
@@ -467,8 +472,6 @@ mojito_service_lastfm_finalize (GObject *object)
   MojitoServiceLastfmPrivate *priv = ((MojitoServiceLastfm*)object)->priv;
 
   g_free (priv->user_id);
-
-  mojito_set_unref (priv->set);
 
   G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->finalize (object);
 }
