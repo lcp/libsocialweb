@@ -7,13 +7,31 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mojito\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-16 11:27+0000\n"
-"PO-Revision-Date: 2009-11-08 16:18+0100\n"
+"POT-Creation-Date: 2009-12-02 17:42+0000\n"
+"PO-Revision-Date: 2009-12-15 14:33+0100\n"
 "Last-Translator: Kris Thomsen <lakristho@gmail.com>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "Digg"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - del nyheder, videoer og billeder"
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm.c:145
+#, c-format
+msgid "%s by %s"
+msgstr "%s af %s"
+
+#: ../services/lastfm/lastfm.c:149
+msgid "Unknown"
+msgstr "Ukendt"
 
 #: ../services/lastfm/lastfm.keys.in.h:1
 msgid "Last.fm"
@@ -26,10 +44,10 @@ msgid ""
 "you to other people who like what you like - and recommend songs from their "
 "music collections and yours too."
 msgstr ""
-"Last.fm er en musiktjeneste som husker hvad du foretrækker. Hvert nummer du spiller "
-"vil fortælle din Last.fm-profil noget om hvad du kan lide. Den kan forbinde dig "
-"til andre mennesker som kan lide det samme som dig - og anbefale sange fra deres "
-"musiksamling og også fra din egen."
+"Last.fm er en musiktjeneste som husker hvad du foretrækker. Hvert nummer du "
+"spiller vil fortælle din Last.fm-profil noget om hvad du kan lide. Den kan "
+"forbinde dig til andre mennesker som kan lide det samme som dig - og "
+"anbefale sange fra deres musiksamling og også fra din egen."
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
@@ -41,9 +59,9 @@ msgid ""
 "stay connected through the exchange of quick, frequent answers to one simple "
 "question: What are you doing?"
 msgstr ""
-"Twitter er en tjeneste for venner, familie og medarbejdere til at kommunikere og "
-"holde kontakten gennem udveksling af hurtige, ofte svar til ét simpelt spørgsmål: "
-"Hvad laver du?"
+"Twitter er en tjeneste for venner, familie og medarbejdere til at "
+"kommunikere og holde kontakten gennem udveksling af hurtige, ofte svar til "
+"ét simpelt spørgsmål: Hvad laver du?"
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
@@ -69,6 +87,6 @@ msgid ""
 "the world’s largest music community."
 msgstr ""
 "MySpace er den førende sociale portal til at møde mennesker, indhold og "
-"kultur fra hele verden. Opret en profil, del fotos, professionelle og personlige "
-"videoer, blog, kvikchat med dine venner og lyt til musik i verdens største "
-"musikfællesskab."
+"kultur fra hele verden. Opret en profil, del fotos, professionelle og "
+"personlige videoer, blog, kvikchat med dine venner og lyt til musik i "
+"verdens største musikfællesskab."
