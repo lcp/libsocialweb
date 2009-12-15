@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib/gi18n.h>
+#include <gio/gio.h>
 #include <mojito/mojito-service.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-utils.h>
@@ -34,7 +35,9 @@
 #include "lastfm-ginterface.h"
 
 static void lastfm_iface_init (gpointer g_iface, gpointer iface_data);
+static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init)
                          G_IMPLEMENT_INTERFACE (MOJITO_TYPE_LASTFM_IFACE, lastfm_iface_init));
 
 
@@ -470,6 +473,51 @@ mojito_service_lastfm_finalize (GObject *object)
   G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->finalize (object);
 }
 
+static gboolean
+mojito_service_lastfm_initable (GInitable    *initable,
+                         GCancellable *cancellable,
+                         GError      **error)
+{
+  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (initable);
+  MojitoServiceLastfmPrivate *priv = lastfm->priv;
+
+  if (mojito_keystore_get_key ("lastfm") == NULL) {
+    g_set_error_literal (error,
+                         MOJITO_SERVICE_ERROR,
+                         MOJITO_SERVICE_ERROR_NO_KEYS,
+                         "No API key configured");
+    return FALSE;
+  }
+
+  if (priv->proxy)
+    return TRUE;
+
+  priv->set = mojito_item_set_new ();
+  priv->calls = mojito_call_list_new ();
+
+  priv->running = FALSE;
+
+  priv->proxy = rest_proxy_new ("http://ws.audioscrobbler.com/2.0/", FALSE);
+
+  priv->gconf = gconf_client_get_default ();
+  gconf_client_add_dir (priv->gconf, KEY_BASE,
+                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
+  priv->gconf_notify_id = gconf_client_notify_add (priv->gconf, KEY_USER,
+                                                   user_changed_cb, lastfm,
+                                                   NULL, NULL);
+  gconf_client_notify (priv->gconf, KEY_USER);
+
+  return TRUE;
+}
+
+static void
+initable_iface_init (gpointer g_iface, gpointer iface_data)
+{
+  GInitableIface *klass = (GInitableIface *)g_iface;
+
+  klass->init = mojito_service_lastfm_initable;
+}
+
 static void
 lastfm_iface_init (gpointer g_iface, gpointer iface_data)
 {
@@ -498,22 +546,5 @@ mojito_service_lastfm_class_init (MojitoServiceLastfmClass *klass)
 static void
 mojito_service_lastfm_init (MojitoServiceLastfm *self)
 {
-  MojitoServiceLastfmPrivate *priv;
-
-  priv = self->priv = GET_PRIVATE (self);
-
-  priv->set = mojito_item_set_new ();
-  priv->calls = mojito_call_list_new ();
-
-  priv->running = FALSE;
-
-  priv->proxy = rest_proxy_new ("http://ws.audioscrobbler.com/2.0/", FALSE);
-
-  priv->gconf = gconf_client_get_default ();
-  gconf_client_add_dir (priv->gconf, KEY_BASE,
-                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  priv->gconf_notify_id = gconf_client_notify_add (priv->gconf, KEY_USER,
-                                                   user_changed_cb, self,
-                                                   NULL, NULL);
-  gconf_client_notify (priv->gconf, KEY_USER);
+  self->priv = GET_PRIVATE (self);
 }
