@@ -168,10 +168,6 @@ mojito_keystore_get_key_secret (const char *service, const char **key, const cha
       *secret = data->secret;
     return TRUE;
   } else {
-#if ! BUILD_TESTS
-    /* Disable this for the tests because it gets in the way */
-    g_printerr ("Cannot find keys for service %s\n", service);
-#endif
     *key = NULL;
     if (secret)
       *secret = NULL;
