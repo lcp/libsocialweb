@@ -19,6 +19,7 @@
 #include <config.h>
 
 #include <stdlib.h>
+#include <gio/gio.h>
 #include "mojito-service-flickr.h"
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
@@ -29,7 +30,9 @@
 #include <rest-extras/flickr-proxy.h>
 #include <rest/rest-xml-parser.h>
 
-G_DEFINE_TYPE (MojitoServiceFlickr, mojito_service_flickr, MOJITO_TYPE_SERVICE)
+static void initable_iface_init (gpointer g_iface, gpointer iface_data);
+G_DEFINE_TYPE_WITH_CODE (MojitoServiceFlickr, mojito_service_flickr, MOJITO_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_FLICKR, MojitoServiceFlickrPrivate))
@@ -263,6 +266,43 @@ mojito_service_flickr_dispose (GObject *object)
   G_OBJECT_CLASS (mojito_service_flickr_parent_class)->dispose (object);
 }
 
+static gboolean
+mojito_service_flickr_initable (GInitable    *initable,
+                         GCancellable *cancellable,
+                         GError      **error)
+{
+  MojitoServiceFlickr *flickr = MOJITO_SERVICE_FLICKR (initable);
+  MojitoServiceFlickrPrivate *priv = flickr->priv;
+  const char *key = NULL, *secret = NULL;
+
+  mojito_keystore_get_key_secret ("flickr", &key, &secret);
+  if (key == NULL || secret == NULL) {
+    g_set_error_literal (error,
+                         MOJITO_SERVICE_ERROR,
+                         MOJITO_SERVICE_ERROR_NO_KEYS,
+                         "No API key configured");
+    return FALSE;
+  }
+
+  if (priv->proxy)
+    return TRUE;
+
+  priv->proxy = flickr_proxy_new (key, secret);
+
+  priv->set = mojito_item_set_new ();
+  priv->refreshing = FALSE;
+
+  return TRUE;
+}
+
+static void
+initable_iface_init (gpointer g_iface, gpointer iface_data)
+{
+  GInitableIface *klass = (GInitableIface *)g_iface;
+
+  klass->init = mojito_service_flickr_initable;
+}
+
 static void
 mojito_service_flickr_class_init (MojitoServiceFlickrClass *klass)
 {
@@ -281,14 +321,5 @@ mojito_service_flickr_class_init (MojitoServiceFlickrClass *klass)
 static void
 mojito_service_flickr_init (MojitoServiceFlickr *self)
 {
-  MojitoServiceFlickrPrivate *priv;
-  const char *key = NULL, *secret = NULL;
-
-  self->priv = priv = GET_PRIVATE (self);
-
-  mojito_keystore_get_key_secret ("flickr", &key, &secret);
-  priv->proxy = flickr_proxy_new (key, secret);
-
-  priv->set = mojito_item_set_new ();
-  priv->refreshing = FALSE;
+  self->priv = GET_PRIVATE (self);
 }
