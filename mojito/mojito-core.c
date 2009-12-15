@@ -272,8 +272,9 @@ load_module (MojitoCore *core, const char *file)
   const gchar *service_name;
   GType service_type;
   gpointer sym;
-  MojitoService *proxy;
+  MojitoService *service;
   gchar *path;
+  GError *error = NULL;
 
   service_module = g_module_open (file, G_MODULE_BIND_LOCAL);
   if (service_module == NULL) {
@@ -304,20 +305,30 @@ load_module (MojitoCore *core, const char *file)
   if (service_name && service_type) {
     g_module_make_resident (service_module);
 
+    /* Create an instance and add it to the bus */
+    service = g_object_new (service_type, NULL);
+
+    if (G_IS_INITABLE (service)) {
+      if (!g_initable_init (G_INITABLE (service), NULL, &error)) {
+        g_message ("Cannot import %s: %s", service_name, error->message);
+        g_error_free (error);
+        g_object_unref (service);
+        return;
+      }
+    }
+
     /* Add to the service name -> type hash */
     g_hash_table_insert (priv->service_types,
                          (char*)service_name,
                          GINT_TO_POINTER (service_type));
 
-    /* Create an instance and add it to the bus */
-    proxy = g_object_new (service_type, NULL);
     g_hash_table_insert (priv->bus_services,
                          (gchar *)service_name,
-                         proxy);
+                         service);
     path = g_strdup_printf ("/com/intel/Mojito/Service/%s", service_name);
     dbus_g_connection_register_g_object (priv->connection,
                                          path,
-                                         (GObject*)proxy);
+                                         (GObject*)service);
     g_free (path);
     g_message ("Imported module: %s", service_name);
   }
