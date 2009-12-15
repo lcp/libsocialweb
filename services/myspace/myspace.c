@@ -20,6 +20,7 @@
 #include <time.h>
 #include <string.h>
 #include "myspace.h"
+#include <gio/gio.h>
 #include <mojito/mojito-item.h>
 #include <mojito/mojito-set.h>
 #include <mojito/mojito-utils.h>
@@ -34,12 +35,15 @@
 #include <interfaces/mojito-avatar-ginterface.h>
 #include <interfaces/mojito-status-update-ginterface.h>
 
+static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
 static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (MojitoServiceMySpace,
                          mojito_service_myspace,
                          MOJITO_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                initable_iface_init)
                          G_IMPLEMENT_INTERFACE (MOJITO_TYPE_AVATAR_IFACE,
                                                 avatar_iface_init)
                          G_IMPLEMENT_INTERFACE (MOJITO_TYPE_STATUS_UPDATE_IFACE,
@@ -50,6 +54,7 @@ G_DEFINE_TYPE_WITH_CODE (MojitoServiceMySpace,
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_MYSPACE, MojitoServiceMySpacePrivate))
 
 struct _MojitoServiceMySpacePrivate {
+  gboolean inited;
   gboolean running;
   RestProxy *proxy;
   char *user_id;
@@ -515,12 +520,46 @@ static void
 mojito_service_myspace_init (MojitoServiceMySpace *self)
 {
   self->priv = GET_PRIVATE (self);
+  self->priv->inited = FALSE;
+}
 
-  if (mojito_is_online ()) {
-    online_notify (TRUE, self);
+/* Initable interface */
+
+static gboolean
+mojito_service_myspace_initable (GInitable    *initable,
+                                 GCancellable *cancellable,
+                                 GError      **error)
+{
+  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (initable);
+  MojitoServiceMySpacePrivate *priv = myspace->priv;
+  const char *key = NULL, *secret = NULL;
+
+  mojito_keystore_get_key_secret ("myspace", &key, &secret);
+  if (key == NULL || secret == NULL) {
+    g_set_error_literal (error,
+                         MOJITO_SERVICE_ERROR,
+                         MOJITO_SERVICE_ERROR_NO_KEYS,
+                         "No API key configured");
+    return FALSE;
   }
 
-  mojito_online_add_notify (online_notify, self);
+  if (priv->inited)
+    return TRUE;
+
+  if (mojito_is_online ()) {
+    online_notify (TRUE, myspace);
+  }
+  mojito_online_add_notify (online_notify, myspace);
+
+  return TRUE;
+}
+
+static void
+initable_iface_init (gpointer g_iface, gpointer iface_data)
+{
+  GInitableIface *klass = (GInitableIface *)g_iface;
+
+  klass->init = mojito_service_myspace_initable;
 }
 
 /* Avatar interface */
