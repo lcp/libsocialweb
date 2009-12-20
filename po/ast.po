@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-16 11:27+0000\n"
+"POT-Creation-Date: 2009-12-02 17:42+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: astur <malditoastur@gmail.com>\n"
 "Language-Team: \n"
@@ -11,6 +11,24 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: Asturian\n"
 "X-Poedit-SourceCharset: utf-8\n"
+
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "Digg"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - pa compartir noticies, videos y semeyes"
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm.c:145
+#, c-format
+msgid "%s by %s"
+msgstr "%s por %s"
+
+#: ../services/lastfm/lastfm.c:149
+msgid "Unknown"
+msgstr "Desconocíu"
 
 # <it's a proper name, not translatable>
 #: ../services/lastfm/lastfm.keys.in.h:1
