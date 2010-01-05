@@ -528,9 +528,11 @@ mojito_core_dup_singleton (void)
   {
     core = mojito_core_new ();
     g_object_add_weak_pointer (G_OBJECT (core), (gpointer)&core);
-  }
 
-  return core;
+    return core;
+  } else {
+    return g_object_ref (core);
+  }
 }
 
 DBusGConnection *
