@@ -18,8 +18,8 @@
 
 #ifndef _MOJITO_CLIENT_SERVICE_PRIVATE
 #define _MOJITO_CLIENT_SERVICE_PRIVATE
-gboolean _mojito_client_service_setup_proxy (MojitoClientService  *service,
-                                             const gchar          *service_name,
-                                             GError              **error_out);
+gboolean _mojito_client_service_setup (MojitoClientService  *service,
+                                       const gchar          *service_name,
+                                       GError              **error_out);
 #endif /* _MOJITO_CLIENT_SERVICE_PRIVATE */
 

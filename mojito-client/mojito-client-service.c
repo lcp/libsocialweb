@@ -31,12 +31,6 @@ G_DEFINE_TYPE (MojitoClientService, mojito_client_service, G_TYPE_OBJECT)
 
 typedef struct _MojitoClientServicePrivate MojitoClientServicePrivate;
 
-struct _MojitoClientServicePrivate {
-  char *name;
-  DBusGConnection *connection;
-  DBusGProxy *proxy;
-};
-
 enum
 {
   AVATAR_RETRIEVED_SIGNAL,
@@ -46,11 +40,33 @@ enum
   LAST_SIGNAL
 };
 
+struct _MojitoClientServicePrivate {
+  char *name;
+  DBusGConnection *connection;
+  DBusGProxy *proxies[LAST_SIGNAL];
+};
+
+/* We need to have one proxy per interface because dbus-glib is annoying */
+typedef enum
+{
+  SERVICE_IFACE,
+  AVATAR_IFACE,
+  QUERY_IFACE,
+  STATUS_UPDATE_IFACE,
+  LAST_IFACE
+} MojitoServiceIface;
+
+static const gchar *interface_names[LAST_IFACE] = {
+  "com.intel.Mojito.Service",
+  "com.intel.Mojito.Avatar",
+  "com.intel.Mojito.Query",
+  "com.intel.Mojito.StatusUpdate",
+};
+
 static guint signals[LAST_SIGNAL] = { 0 };
 
 #define MOJITO_CLIENT_SERVICE_NAME "com.intel.Mojito"
 #define MOJITO_CLIENT_SERVICE_OBJECT "/com/intel/Mojito/Service/%s"
-#define MOJITO_CLIENT_SERVICE_INTERFACE "com.intel.Mojito.Service"
 
 static void
 mojito_client_service_get_property (GObject *object, guint property_id,
@@ -76,6 +92,7 @@ static void
 mojito_client_service_dispose (GObject *object)
 {
   MojitoClientServicePrivate *priv = GET_PRIVATE (object);
+  gint i = 0;
 
   if (priv->connection)
   {
@@ -83,10 +100,10 @@ mojito_client_service_dispose (GObject *object)
     priv->connection = NULL;
   }
 
-  if (priv->proxy)
+  for (i = 0; i < LAST_IFACE; i++)
   {
-    g_object_unref (priv->proxy);
-    priv->proxy = NULL;
+    g_object_unref (priv->proxies[i]);
+    priv->proxies[i] = NULL;
   }
 
   G_OBJECT_CLASS (mojito_client_service_parent_class)->dispose (object);
@@ -202,9 +219,10 @@ _user_changed_cb (DBusGProxy *proxy,
 }
 
 gboolean
-_mojito_client_service_setup_proxy (MojitoClientService  *service,
-                                    const gchar          *service_name,
-                                    GError              **error_out)
+_mojito_client_service_setup_proxy_for_iface (MojitoClientService  *service,
+                                              const gchar          *service_name,
+                                              MojitoServiceIface    iface,
+                                              GError              **error_out)
 {
   MojitoClientServicePrivate *priv = GET_PRIVATE (service);
   GError *error = NULL;
@@ -223,14 +241,14 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
   priv->name = g_strdup (service_name);
 
   path = g_strdup_printf (MOJITO_CLIENT_SERVICE_OBJECT, service_name);
-  priv->proxy = dbus_g_proxy_new_for_name_owner (priv->connection,
-                                                 MOJITO_CLIENT_SERVICE_NAME,
-                                                 path,
-                                                 MOJITO_CLIENT_SERVICE_INTERFACE,
-                                                 &error);
+  priv->proxies[iface] = dbus_g_proxy_new_for_name_owner (priv->connection,
+                                                          MOJITO_CLIENT_SERVICE_NAME,
+                                                          path,
+                                                          interface_names[iface],
+                                                          &error);
   g_free (path);
 
-  if (!priv->proxy)
+  if (!priv->proxies[iface])
   {
     g_critical (G_STRLOC ": Error setting up proxy for remote object: %s",
                 error->message);
@@ -238,40 +256,60 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
     return FALSE;
   }
 
-  dbus_g_proxy_add_signal (priv->proxy,
+  return TRUE;
+}
+
+gboolean
+_mojito_client_service_setup (MojitoClientService  *service,
+                              const gchar          *service_name,
+                              GError              **error_out)
+{
+  MojitoClientServicePrivate *priv = GET_PRIVATE (service);
+  GError *error = NULL;
+
+  if (!_mojito_client_service_setup_proxy_for_iface (service,
+                                                service_name,
+                                                SERVICE_IFACE,
+                                                &error))
+  {
+    g_propagate_error (error_out, error);
+    return FALSE;
+  }
+
+  dbus_g_proxy_add_signal (priv->proxies[SERVICE_IFACE],
                            "AvatarRetrieved",
                            G_TYPE_STRING,
                            G_TYPE_INVALID);
-  dbus_g_proxy_connect_signal (priv->proxy,
+  dbus_g_proxy_connect_signal (priv->proxies[SERVICE_IFACE],
                                "AvatarRetrieved",
                                (GCallback)_avatar_retrieved_cb,
                                service,
                                NULL);
 
-  dbus_g_proxy_add_signal (priv->proxy,
+  dbus_g_proxy_add_signal (priv->proxies[SERVICE_IFACE],
                            "CapabilitiesChanged",
                            G_TYPE_STRV,
                            NULL);
-  dbus_g_proxy_connect_signal (priv->proxy,
+  dbus_g_proxy_connect_signal (priv->proxies[SERVICE_IFACE],
                                "CapabilitiesChanged",
                                (GCallback)_capabilities_changed_cb,
                                service,
                                NULL);
 
-  dbus_g_proxy_add_signal (priv->proxy,
+  dbus_g_proxy_add_signal (priv->proxies[SERVICE_IFACE],
                            "StatusUpdated",
                            G_TYPE_BOOLEAN,
                            G_TYPE_INVALID);
-  dbus_g_proxy_connect_signal (priv->proxy,
+  dbus_g_proxy_connect_signal (priv->proxies[SERVICE_IFACE],
                                "StatusUpdated",
                                (GCallback)_status_updated_cb,
                                service,
                                NULL);
 
-  dbus_g_proxy_add_signal (priv->proxy,
+  dbus_g_proxy_add_signal (priv->proxies[SERVICE_IFACE],
                            "UserChanged",
                            G_TYPE_INVALID);
-  dbus_g_proxy_connect_signal (priv->proxy,
+  dbus_g_proxy_connect_signal (priv->proxies[SERVICE_IFACE],
                                "UserChanged",
                                (GCallback)_user_changed_cb,
                                service,
@@ -279,6 +317,7 @@ _mojito_client_service_setup_proxy (MojitoClientService  *service,
 
   return TRUE;
 }
+
 
 /* Lets use the same closure structure for them all. Allocate using slicer */
 typedef struct
@@ -329,7 +368,7 @@ mojito_client_service_get_static_capabilities (MojitoClientService              
   closure->cb = (GCallback)cb;
   closure->userdata = userdata;
 
-  com_intel_Mojito_Service_get_static_capabilities_async (priv->proxy,
+  com_intel_Mojito_Service_get_static_capabilities_async (priv->proxies[SERVICE_IFACE],
                                                           _get_capabilities_cb,
                                                           closure);
 }
@@ -347,7 +386,7 @@ mojito_client_service_get_dynamic_capabilities (MojitoClientService             
   closure->cb = (GCallback)cb;
   closure->userdata = userdata;
 
-  com_intel_Mojito_Service_get_dynamic_capabilities_async (priv->proxy,
+  com_intel_Mojito_Service_get_dynamic_capabilities_async (priv->proxies[SERVICE_IFACE],
                                                            _get_capabilities_cb,
                                                            closure);
 }
@@ -394,7 +433,7 @@ mojito_client_service_update_status (MojitoClientService                    *ser
   closure->cb = (GCallback)cb;
   closure->userdata = userdata;
 
-  com_intel_Mojito_Service_update_status_async (priv->proxy,
+  com_intel_Mojito_Service_update_status_async (priv->proxies[SERVICE_IFACE],
                                                 status_msg,
                                                 _update_status_cb,
                                                 closure);
@@ -411,7 +450,7 @@ mojito_client_service_request_avatar (MojitoClientService *service)
 {
   MojitoClientServicePrivate *priv = GET_PRIVATE (service);
 
-  com_intel_Mojito_Service_request_avatar_async (priv->proxy, _request_avatar_cb, NULL);
+  com_intel_Mojito_Service_request_avatar_async (priv->proxies[SERVICE_IFACE], _request_avatar_cb, NULL);
 }
 
 const char *

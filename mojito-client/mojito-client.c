@@ -310,7 +310,7 @@ mojito_client_get_service (MojitoClient *client,
   GError *error = NULL;
   service = g_object_new (MOJITO_CLIENT_TYPE_SERVICE,
                           NULL);
-  if (!_mojito_client_service_setup_proxy (service, service_name, &error))
+  if (!_mojito_client_service_setup (service, service_name, &error))
   {
     g_warning (G_STRLOC ": Error setting up proxy: %s",
                error->message);
