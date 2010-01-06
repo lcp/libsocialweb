@@ -210,6 +210,55 @@ remove_service (GObject *object, gpointer user_data)
   return mojito_item_get_service (item) == service;
 }
 
+static void
+mojito_view_removed_items (MojitoView *view,
+                           MojitoSet  *removed_items)
+{
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
+  GList *items, *l;
+
+  items = mojito_set_as_list (removed_items);
+  ptr_array = g_ptr_array_new ();
+
+  for (l = items; l; l = l->next)
+  {
+    MojitoItem *item = (MojitoItem *)l->data;
+    value_array = _mojito_item_to_value_array (item);
+    g_ptr_array_add (ptr_array, value_array);
+  }
+
+  mojito_view_iface_emit_items_removed (view, ptr_array);
+
+  g_ptr_array_foreach (ptr_array, (GFunc)g_value_array_free, NULL);
+  g_ptr_array_free (ptr_array, TRUE);
+}
+
+static void
+mojito_view_added_items (MojitoView *view,
+                         MojitoSet  *added_items)
+{
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
+  GList *items, *l;
+
+  items = mojito_set_as_list (added_items);
+  ptr_array = g_ptr_array_new ();
+
+  for (l = items; l; l = l->next)
+  {
+    MojitoItem *item = (MojitoItem *)l->data;
+    value_array = _mojito_item_to_value_array (item);
+    g_ptr_array_add (ptr_array, value_array);
+  }
+
+  mojito_view_iface_emit_items_added (view,
+                                      ptr_array);
+
+  g_ptr_array_foreach (ptr_array, (GFunc)g_value_array_free, NULL);
+  g_ptr_array_free (ptr_array, TRUE);
+}
+
 void
 mojito_view_recalculate (MojitoView *view)
 {
@@ -231,6 +280,9 @@ mojito_view_recalculate (MojitoView *view)
 
   mojito_set_foreach (removed_items, (GFunc)send_removed, view);
   mojito_set_foreach (added_items, (GFunc)send_added, view);
+
+  mojito_view_removed_items (view, removed_items);
+  mojito_view_added_items (view, added_items);
 
   mojito_set_unref (removed_items);
   mojito_set_unref (added_items);
