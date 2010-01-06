@@ -28,5 +28,17 @@
       <arg name="item" type="a{ss}"/>
     </signal>
 
+    <signal name="ItemsAdded" tp:name-for-bindings="Items_Added">
+      <arg name="items" type="a(ssxa{ss})"/>
+    </signal>
+
+    <signal name="ItemsRemoved" tp:name-for-bindings="Items_Removed">
+      <arg name="items" type="a(ss)"/>
+    </signal>
+
+    <signal name="ItemsChanged"  tp:name-for-bindings="Items_Changed">
+      <arg name="items" type="a(ssxa{ss})"/>
+    </signal>
+
   </interface>
 </node>
