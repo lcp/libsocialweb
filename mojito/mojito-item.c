@@ -307,3 +307,45 @@ mojito_item_request_image_fetch (MojitoItem  *item,
                                    (ImageDownloadCallback)_image_download_cb,
                                    closure);
 }
+
+/*
+ * Construct a GValueArray from a MojitoItem. We use this to construct the
+ * data types that the wonderful dbus-glib needs to emit the signal
+ */
+GValueArray *
+_mojito_item_to_value_array (MojitoItem *item)
+{
+  GValueArray *value_array;
+  time_t time;
+
+  time = mojito_time_t_from_string (mojito_item_get (item, "date"));
+
+  value_array = g_value_array_new (4);
+
+  value_array = g_value_array_append (value_array, NULL);
+  g_value_init (g_value_array_get_nth (value_array, 0), G_TYPE_STRING);
+  g_value_set_string (g_value_array_get_nth (value_array, 0),
+                      mojito_service_get_name (mojito_item_get_service (item)));
+
+  value_array = g_value_array_append (value_array, NULL);
+  g_value_init (g_value_array_get_nth (value_array, 1), G_TYPE_STRING);
+  g_value_set_string (g_value_array_get_nth (value_array, 1),
+                      mojito_item_get (item, "id"));
+
+  value_array = g_value_array_append (value_array, NULL);
+  g_value_init (g_value_array_get_nth (value_array, 2), G_TYPE_INT64);
+  g_value_set_int64 (g_value_array_get_nth (value_array, 2),
+                     time);
+
+  value_array = g_value_array_append (value_array, NULL);
+  g_value_init (g_value_array_get_nth (value_array, 3),
+                dbus_g_type_get_map ("GHashTable",
+                                     G_TYPE_STRING,
+                                     G_TYPE_STRING));
+  g_value_set_boxed (g_value_array_get_nth (value_array, 3),
+                     mojito_item_peek_hash (item));
+
+  return value_array;
+}
+
+

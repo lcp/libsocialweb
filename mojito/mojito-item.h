@@ -85,7 +85,10 @@ void mojito_item_pop_pending (MojitoItem *item);
 
 
 /* Convenience function */
-MojitoSet * mojito_item_set_new (void);
+MojitoSet *mojito_item_set_new (void);
+
+/* Useful for emitting the signals */
+GValueArray *_mojito_item_to_value_array (MojitoItem *item);
 
 G_END_DECLS
 
