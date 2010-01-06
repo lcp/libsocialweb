@@ -178,7 +178,7 @@ mojito_item_view_init (MojitoItemView *self)
 {
   MojitoItemViewPrivate *priv = GET_PRIVATE (self);
 
-  priv->current_items_set = mojito_set_new ();
+  priv->current_items_set = mojito_item_set_new ();
 }
 
 static void
