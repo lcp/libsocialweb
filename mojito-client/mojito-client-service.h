@@ -21,6 +21,7 @@
 
 #include <glib-object.h>
 #include <mojito-client/mojito-item.h>
+#include <mojito-client/mojito-client-item-view.h>
 
 G_BEGIN_DECLS
 
@@ -88,7 +89,17 @@ mojito_client_service_update_status (MojitoClientService                    *ser
                                      const gchar                            *status_msg,
                                      gpointer                                userdata);
 
-const char * mojito_client_service_get_name (MojitoClientService *service);
+const char *mojito_client_service_get_name (MojitoClientService *service);
+
+typedef void (*MojitoClientServiceQueryOpenViewCallback) (MojitoClientService    *query,
+                                                          MojitoClientItemView *item_view,
+                                                          gpointer              userdata);
+
+void
+mojito_client_service_query_open_view (MojitoClientService                      *service,
+                                       GHashTable                               *params,
+                                       MojitoClientServiceQueryOpenViewCallback  cb,
+                                       gpointer                                  userdata);
 
 G_END_DECLS
 

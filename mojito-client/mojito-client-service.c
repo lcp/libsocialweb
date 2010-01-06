@@ -22,6 +22,7 @@
 #include "mojito-client-service.h"
 
 #include <interfaces/mojito-service-bindings.h>
+#include <interfaces/mojito-query-bindings.h>
 #include <interfaces/mojito-marshals.h>
 
 G_DEFINE_TYPE (MojitoClientService, mojito_client_service, G_TYPE_OBJECT)
@@ -271,9 +272,9 @@ _mojito_client_service_setup (MojitoClientService  *service,
   GError *error = NULL;
 
   if (!_mojito_client_service_setup_proxy_for_iface (service,
-                                                service_name,
-                                                SERVICE_IFACE,
-                                                &error))
+                                                     service_name,
+                                                     SERVICE_IFACE,
+                                                     &error))
   {
     g_propagate_error (error_out, error);
     return FALSE;
@@ -460,4 +461,76 @@ const char *
 mojito_client_service_get_name (MojitoClientService *service)
 {
   return GET_PRIVATE (service)->name;
+}
+
+static void
+_query_open_view_cb (DBusGProxy *proxy,
+                     gchar      *view_path,
+                     GError     *error,
+                     gpointer    userdata)
+{
+  MojitoClientItemView *item_view = NULL;
+  MojitoClientServiceQueryOpenViewCallback cb;
+  MojitoClientServiceCallClosure *closure = (MojitoClientServiceCallClosure *)userdata;
+
+  if (error)
+  {
+    g_warning (G_STRLOC ": Error callling OpenView: %s",
+               error->message);
+    g_error_free (error);
+  } else {
+    item_view = _mojito_client_item_view_new_for_path (view_path);
+    g_free (view_path);
+  }
+
+  cb = (MojitoClientServiceQueryOpenViewCallback)closure->cb;
+
+  cb (closure->service,
+      item_view,
+      closure->userdata);
+
+  g_object_unref (closure->service);
+  g_slice_free (MojitoClientServiceCallClosure, closure);
+}
+
+void
+mojito_client_service_query_open_view (MojitoClientService                      *service,
+                                       GHashTable                               *params,
+                                       MojitoClientServiceQueryOpenViewCallback  cb,
+                                       gpointer                                  userdata)
+{
+  MojitoClientServicePrivate *priv = GET_PRIVATE (service);
+  MojitoClientServiceCallClosure *closure;
+  GError *error = NULL;
+  GHashTable *tmp_params = NULL;
+
+  if (!_mojito_client_service_setup_proxy_for_iface (service,
+                                                     priv->name,
+                                                     QUERY_IFACE,
+                                                     &error))
+  {
+    g_critical (G_STRLOC ": Unable to setup proxy on Query interface: %s",
+                error->message);
+    g_clear_error (&error);
+    return;
+  }
+
+  closure = g_slice_new0 (MojitoClientServiceCallClosure);
+  closure->service = g_object_ref (service);
+  closure->cb = (GCallback)cb;
+  closure->userdata = userdata;
+
+  if (!params)
+  {
+    tmp_params = g_hash_table_new (g_str_hash, g_str_equal);
+    params = tmp_params;
+  }
+
+  com_intel_Mojito_Query_open_view_async (priv->proxies [QUERY_IFACE],
+                                          params,
+                                          _query_open_view_cb,
+                                          closure);
+
+  if (tmp_params)
+    g_hash_table_unref (tmp_params);
 }
