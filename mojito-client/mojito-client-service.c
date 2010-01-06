@@ -228,6 +228,9 @@ _mojito_client_service_setup_proxy_for_iface (MojitoClientService  *service,
   GError *error = NULL;
   gchar *path;
 
+  if (priv->proxies[iface])
+    return TRUE;
+
   priv->connection = dbus_g_bus_get (DBUS_BUS_STARTER, &error);
 
   if (!priv->connection)
