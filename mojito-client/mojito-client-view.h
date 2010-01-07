@@ -51,6 +51,9 @@ typedef struct {
   void (*item_added)(MojitoClientView *view, MojitoItem *item);
   void (*item_removed)(MojitoClientView *view, MojitoItem *item);
   void (*item_changed)(MojitoClientView *view, MojitoItem *item);
+  void (*items_added)(MojitoClientView *view, GList *items);
+  void (*items_removed)(MojitoClientView *view, GList *items);
+  void (*items_changed)(MojitoClientView *view, GList *items);
 } MojitoClientViewClass;
 
 GType mojito_client_view_get_type (void);
