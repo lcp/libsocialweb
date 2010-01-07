@@ -281,8 +281,11 @@ mojito_view_recalculate (MojitoView *view)
   mojito_set_foreach (removed_items, (GFunc)send_removed, view);
   mojito_set_foreach (added_items, (GFunc)send_added, view);
 
-  mojito_view_removed_items (view, removed_items);
-  mojito_view_added_items (view, added_items);
+  if (!mojito_set_is_empty (removed_items))
+    mojito_view_removed_items (view, removed_items);
+
+  if (!mojito_set_is_empty (added_items))
+    mojito_view_added_items (view, added_items);
 
   mojito_set_unref (removed_items);
   mojito_set_unref (added_items);
