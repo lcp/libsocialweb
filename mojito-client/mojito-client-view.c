@@ -32,10 +32,10 @@ G_DEFINE_TYPE (MojitoClientView, mojito_client_view, G_TYPE_OBJECT)
 typedef struct _MojitoClientViewPrivate MojitoClientViewPrivate;
 
 struct _MojitoClientViewPrivate {
-    gchar *object_path;
-    DBusGConnection *connection;
-    DBusGProxy *proxy;
-    GHashTable *uuid_to_items;
+  gchar *object_path;
+  DBusGConnection *connection;
+  DBusGProxy *proxy;
+  GHashTable *uuid_to_items;
 };
 
 enum
@@ -46,10 +46,6 @@ enum
 
 enum
 {
-  ITEM_ADDED_SIGNAL,
-  ITEM_CHANGED_SIGNAL,
-  ITEM_REMOVED_SIGNAL,
-
   ITEMS_ADDED_SIGNAL,
   ITEMS_CHANGED_SIGNAL,
   ITEMS_REMOVED_SIGNAL,
@@ -128,78 +124,6 @@ mojito_client_view_finalize (GObject *object)
   G_OBJECT_CLASS (mojito_client_view_parent_class)->finalize (object);
 }
 
-static void
-_proxy_item_added_cb (DBusGProxy  *proxy,
-                      const gchar *service,
-                      const gchar *uuid,
-                      gint64       date,
-                      GHashTable  *props,
-                      gpointer     userdata)
-{
-  MojitoClientView *view = MOJITO_CLIENT_VIEW (userdata);
-  MojitoClientViewPrivate *priv = GET_PRIVATE (userdata);
-  MojitoItem *item;
-
-  item = mojito_item_new ();
-  item->service = g_strdup (service);
-  item->uuid = g_strdup (uuid);
-  item->date.tv_sec = date;
-  item->props = g_hash_table_ref (props);
-
-  g_hash_table_insert (priv->uuid_to_items, g_strdup (uuid), item);
-
-  g_signal_emit (view, signals[ITEM_ADDED_SIGNAL], 0, item);
-}
-
-static void
-_proxy_item_changed_cb (DBusGProxy  *proxy,
-                        const gchar *service,
-                        const gchar *uuid,
-                        gint64       date,
-                        GHashTable  *props,
-                        gpointer     userdata)
-{
-  MojitoClientView *view = MOJITO_CLIENT_VIEW (userdata);
-  MojitoClientViewPrivate *priv = GET_PRIVATE (userdata);
-  MojitoItem *item = NULL;
-
-  item = g_hash_table_lookup (priv->uuid_to_items, uuid);
-
-  if (item)
-  {
-    g_hash_table_unref (item->props);
-    item->props = g_hash_table_ref (props);
-    g_signal_emit (view, signals[ITEM_ADDED_SIGNAL], 0, item);
-  } else {
-    g_critical (G_STRLOC ": Unknown changed item with uuid: %s.",
-                uuid);
-  }
-}
-
-static void
-_proxy_item_removed_cb (DBusGProxy  *proxy,
-                        const gchar *service,
-                        const gchar *uuid,
-                        gpointer     userdata)
-{
-  MojitoClientView *view = MOJITO_CLIENT_VIEW (userdata);
-  MojitoClientViewPrivate *priv = GET_PRIVATE (userdata);
-  MojitoItem *item = NULL;
-
-  item = g_hash_table_lookup (priv->uuid_to_items, uuid);
-
-  if (item)
-  {
-    mojito_item_ref (item);
-    g_hash_table_remove (priv->uuid_to_items, uuid);
-    g_signal_emit (view, signals[ITEM_REMOVED_SIGNAL], 0, item);
-    mojito_item_unref (item);
-  } else {
-    g_critical (G_STRLOC ": Asked to remove unknown item with uuid: %s",
-                uuid);
-  }
-}
-
 static MojitoItem *
 _mojito_item_from_value_array (GValueArray *varray)
 {
@@ -221,6 +145,7 @@ _proxy_items_added_cb (DBusGProxy *proxy,
                        gpointer    userdata)
 {
   MojitoClientView *view = MOJITO_CLIENT_VIEW (userdata);
+  MojitoClientViewPrivate *priv = GET_PRIVATE (view);
   gint i = 0;
   GList *items_list = NULL;
 
@@ -229,7 +154,13 @@ _proxy_items_added_cb (DBusGProxy *proxy,
     GValueArray *varray = (GValueArray *)g_ptr_array_index (items, i);
     MojitoItem *item;
 
+    /* First reference dropped when list freed */
     item = _mojito_item_from_value_array (varray);
+
+    g_hash_table_insert (priv->uuid_to_items,
+                         g_strdup (item->uuid),
+                         mojito_item_ref (item));
+
     items_list = g_list_append (items_list, item);
   }
 
@@ -246,6 +177,7 @@ _proxy_items_changed_cb (DBusGProxy *proxy,
                          gpointer    userdata)
 {
   MojitoClientView *view = MOJITO_CLIENT_VIEW (userdata);
+  MojitoClientViewPrivate *priv = GET_PRIVATE (view);
   gint i = 0;
   GList *items_list = NULL;
 
@@ -254,7 +186,13 @@ _proxy_items_changed_cb (DBusGProxy *proxy,
     GValueArray *varray = (GValueArray *)g_ptr_array_index (items, i);
     MojitoItem *item;
 
+    /* First reference dropped when list freed */
     item = _mojito_item_from_value_array (varray);
+
+    g_hash_table_insert (priv->uuid_to_items,
+                         g_strdup (item->uuid),
+                         mojito_item_ref (item));
+
     items_list = g_list_append (items_list, item);
   }
 
@@ -288,7 +226,9 @@ _proxy_items_removed_cb (DBusGProxy *proxy,
 
     if (item)
     {
+      /* Must ref up because g_hash_table_remove drops ref */
       items_list = g_list_append (items_list, mojito_item_ref (item));
+      g_hash_table_remove (priv->uuid_to_items, uid);
     }
   }
 
@@ -375,57 +315,6 @@ mojito_client_view_constructed (GObject *object)
     return;
   }
 
-  dbus_g_object_register_marshaller (mojito_marshal_VOID__STRING_STRING_INT64_BOXED,
-                                     G_TYPE_NONE,
-                                     G_TYPE_STRING,
-                                     G_TYPE_STRING,
-                                     G_TYPE_INT64,
-                                     DBUS_TYPE_G_STRING_STRING_HASHTABLE,
-                                     G_TYPE_INVALID);
-  dbus_g_object_register_marshaller (mojito_marshal_VOID__STRING_STRING,
-                                     G_TYPE_NONE,
-                                     G_TYPE_STRING,
-                                     G_TYPE_STRING,
-                                     G_TYPE_INVALID);
-
-  dbus_g_proxy_add_signal (priv->proxy,
-                           "ItemAdded",
-                           G_TYPE_STRING,
-                           G_TYPE_STRING,
-                           G_TYPE_INT64,
-                           DBUS_TYPE_G_STRING_STRING_HASHTABLE,
-                           NULL);
-  dbus_g_proxy_connect_signal (priv->proxy,
-                               "ItemAdded",
-                               (GCallback)_proxy_item_added_cb,
-                               object,
-                               NULL);
-
-  dbus_g_proxy_add_signal (priv->proxy,
-                           "ItemChanged",
-                           G_TYPE_STRING,
-                           G_TYPE_STRING,
-                           G_TYPE_INT64,
-                           G_TYPE_BOXED,
-                           NULL);
-  dbus_g_proxy_connect_signal (priv->proxy,
-                               "ItemChanged",
-                               (GCallback)_proxy_item_changed_cb,
-                               object,
-                               NULL);
-
-  dbus_g_proxy_add_signal (priv->proxy,
-                           "ItemRemoved",
-                           G_TYPE_STRING,
-                           G_TYPE_STRING,
-                           NULL);
-  dbus_g_proxy_connect_signal (priv->proxy,
-                               "ItemRemoved",
-                               (GCallback)_proxy_item_removed_cb,
-                               object,
-                               NULL);
-
-
   dbus_g_proxy_add_signal (priv->proxy,
                            "ItemsAdded",
                            _mojito_items_get_container_type (),
@@ -478,40 +367,6 @@ mojito_client_view_class_init (MojitoClientViewClass *klass)
                                G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
   g_object_class_install_property (object_class, PROP_OBJECT_PATH, pspec);
 
-  signals[ITEM_ADDED_SIGNAL] =
-    g_signal_new ("item-added",
-                  MOJITO_TYPE_CLIENT_VIEW,
-                  G_SIGNAL_RUN_FIRST,
-                  G_STRUCT_OFFSET (MojitoClientViewClass, item_added),
-                  NULL,
-                  NULL,
-                  mojito_marshal_VOID__POINTER,
-                  G_TYPE_NONE,
-                  1,
-                  G_TYPE_POINTER);
-  signals[ITEM_REMOVED_SIGNAL] =
-    g_signal_new ("item-removed",
-                  MOJITO_TYPE_CLIENT_VIEW,
-                  G_SIGNAL_RUN_FIRST,
-                  G_STRUCT_OFFSET (MojitoClientViewClass, item_removed),
-                  NULL,
-                  NULL,
-                  mojito_marshal_VOID__POINTER,
-                  G_TYPE_NONE,
-                  1,
-                  G_TYPE_POINTER);
-  signals[ITEM_CHANGED_SIGNAL] =
-    g_signal_new ("item-changed",
-                  MOJITO_TYPE_CLIENT_VIEW,
-                  G_SIGNAL_RUN_FIRST,
-                  G_STRUCT_OFFSET (MojitoClientViewClass, item_changed),
-                  NULL,
-                  NULL,
-                  mojito_marshal_VOID__STRING_STRING,
-                  G_TYPE_NONE,
-                  1,
-                  G_TYPE_POINTER);
-
   signals[ITEMS_ADDED_SIGNAL] =
     g_signal_new ("items-added",
                   MOJITO_TYPE_CLIENT_VIEW,
@@ -545,7 +400,6 @@ mojito_client_view_class_init (MojitoClientViewClass *klass)
                   G_TYPE_NONE,
                   1,
                   G_TYPE_POINTER);
-
 }
 
 static void
