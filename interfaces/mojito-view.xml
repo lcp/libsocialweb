@@ -33,7 +33,7 @@
     </signal>
 
     <signal name="ItemsRemoved" tp:name-for-bindings="Items_Removed">
-      <arg name="items" type="a(ssxa{ss})"/>
+      <arg name="items" type="a(ss)"/>
     </signal>
 
     <signal name="ItemsChanged"  tp:name-for-bindings="Items_Changed">
