@@ -84,14 +84,20 @@ load_keys_from_dir (GHashTable *hash, const char *base_dir, gboolean is_base)
 
     if (g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR ||
         g_file_info_get_is_backup (info))
+    {
+      g_object_unref (info);
       continue;
+    }
 
     name = g_file_info_get_name (info);
     file = g_file_get_child (dir, name);
 
     stream = g_file_read (file, NULL, &error);
     if (error)
+    {
+      g_object_unref (info);
       continue;
+    }
     dstream = g_data_input_stream_new ((GInputStream *)stream);
 
     data = g_new0 (KeyData, 1);
@@ -116,6 +122,7 @@ load_keys_from_dir (GHashTable *hash, const char *base_dir, gboolean is_base)
     if (stream)
       g_object_unref (stream);
     g_object_unref (file);
+    g_object_unref (info);
   }
 
  done:
