@@ -271,16 +271,25 @@ _proxy_items_removed_cb (DBusGProxy *proxy,
                          gpointer    userdata)
 {
   MojitoClientView *view = MOJITO_CLIENT_VIEW (userdata);
+  MojitoClientViewPrivate *priv = GET_PRIVATE (view);
   gint i = 0;
   GList *items_list = NULL;
 
   for (i = 0; i < items->len; i++)
   {
     GValueArray *varray = (GValueArray *)g_ptr_array_index (items, i);
+    const gchar *uid;
     MojitoItem *item;
 
-    item = _mojito_item_from_value_array (varray);
-    items_list = g_list_append (items_list, item);
+    uid = g_value_get_string (g_value_array_get_nth (varray, 1));
+
+    item = g_hash_table_lookup (priv->uuid_to_items,
+                                uid);
+
+    if (item)
+    {
+      items_list = g_list_append (items_list, mojito_item_ref (item));
+    }
   }
 
   /* If handler wants a ref then it should ref it up */
@@ -298,8 +307,8 @@ _mojito_item_get_struct_type (void)
                                  G_TYPE_STRING,
                                  G_TYPE_INT64,
                                  dbus_g_type_get_map ("GHashTable",
-                                     G_TYPE_STRING,
-                                     G_TYPE_STRING),
+                                                      G_TYPE_STRING,
+                                                      G_TYPE_STRING),
                                  G_TYPE_INVALID);
 }
 
@@ -310,6 +319,15 @@ _mojito_items_get_container_type (void)
                                     _mojito_item_get_struct_type ());
 }
 
+static GType
+_mojito_items_removed_get_container_type (void)
+{
+  return dbus_g_type_get_collection ("GPtrArray",
+                                     dbus_g_type_get_struct ("GValueArray",
+                                                             G_TYPE_STRING,
+                                                             G_TYPE_STRING,
+                                                             G_TYPE_INVALID));
+}
 
 static void
 mojito_client_view_constructed (GObject *object)
@@ -430,7 +448,7 @@ mojito_client_view_constructed (GObject *object)
 
   dbus_g_proxy_add_signal (priv->proxy,
                            "ItemsRemoved",
-                           _mojito_items_get_container_type (),
+                           _mojito_items_removed_get_container_type (),
                            NULL);
   dbus_g_proxy_connect_signal (priv->proxy,
                                "ItemsRemoved",
