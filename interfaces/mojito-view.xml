@@ -9,25 +9,6 @@
 
     <method name="Close" tp:name-for-bindings="Close"/>
 
-    <signal name="ItemAdded" tp:name-for-bindings="Item_Added">
-      <arg name="service" type="s"/>
-      <arg name="uuid" type="s"/>
-      <arg name="date" type="x"/>
-      <arg name="item" type="a{ss}"/>
-    </signal>
-
-    <signal name="ItemRemoved" tp:name-for-bindings="Item_Removed">
-      <arg name="service" type="s"/>
-      <arg name="uuid" type="s"/>
-    </signal>
-
-    <signal name="ItemChanged"  tp:name-for-bindings="Item_Changed">
-      <arg name="service" type="s"/>
-      <arg name="uuid" type="s"/>
-      <arg name="date" type="x"/>
-      <arg name="item" type="a{ss}"/>
-    </signal>
-
     <signal name="ItemsAdded" tp:name-for-bindings="Items_Added">
       <arg name="items" type="a(ssxa{ss})"/>
     </signal>

@@ -75,39 +75,6 @@ inc_service_count (GHashTable *hash, MojitoService *service)
   g_hash_table_insert (hash, service, GINT_TO_POINTER (count));
 }
 
-static void
-send_added (gpointer data, gpointer user_data)
-{
-  MojitoItem *item = data;
-  MojitoView *view = user_data;
-  MojitoService *service;
-  time_t time;
-
-  service = mojito_item_get_service (item);
-
-  time = mojito_time_t_from_string (mojito_item_get (item, "date"));
-
-  mojito_view_iface_emit_item_added (view,
-                                     mojito_service_get_name (service),
-                                     mojito_item_get (item, "id"),
-                                     time,
-                                     mojito_item_peek_hash (item));
-}
-
-static void
-send_removed (gpointer data, gpointer user_data)
-{
-  MojitoItem *item = data;
-  MojitoView *view = user_data;
-  MojitoService *service;
-
-  service = mojito_item_get_service (item);
-
-  mojito_view_iface_emit_item_removed (view,
-                                       mojito_service_get_name (service),
-                                       mojito_item_get (item, "id"));
-}
-
 static MojitoSet *
 munge_items (MojitoView *view)
 {
@@ -288,9 +255,6 @@ mojito_view_recalculate (MojitoView *view)
 
   removed_items = mojito_set_difference (old_items, new_items);
   added_items = mojito_set_difference (new_items, old_items);
-
-  mojito_set_foreach (removed_items, (GFunc)send_removed, view);
-  mojito_set_foreach (added_items, (GFunc)send_added, view);
 
   if (!mojito_set_is_empty (removed_items))
     mojito_view_removed_items (view, removed_items);
