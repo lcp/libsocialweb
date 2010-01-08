@@ -371,6 +371,8 @@ load_modules_from_dir (MojitoCore *core)
       load_module (core, module_path);
       g_free (module_path);
     }
+
+    g_object_unref (fi);
   }
 
   if (error)
