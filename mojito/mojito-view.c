@@ -224,7 +224,18 @@ mojito_view_removed_items (MojitoView *view,
   for (l = items; l; l = l->next)
   {
     MojitoItem *item = (MojitoItem *)l->data;
-    value_array = _mojito_item_to_value_array (item);
+    value_array = g_value_array_new (2);
+
+    value_array = g_value_array_append (value_array, NULL);
+    g_value_init (g_value_array_get_nth (value_array, 0), G_TYPE_STRING);
+    g_value_set_string (g_value_array_get_nth (value_array, 0),
+                        mojito_service_get_name (mojito_item_get_service (item)));
+
+    value_array = g_value_array_append (value_array, NULL);
+    g_value_init (g_value_array_get_nth (value_array, 1), G_TYPE_STRING);
+    g_value_set_string (g_value_array_get_nth (value_array, 1),
+                        mojito_item_get (item, "id"));
+
     g_ptr_array_add (ptr_array, value_array);
   }
 
