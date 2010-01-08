@@ -19,33 +19,36 @@
 #include <mojito-client/mojito-client.h>
 
 static void
-client_view_item_added_cb (MojitoClientView *view,
-                           MojitoItem       *item,
-                           gpointer          userdata)
+client_view_items_added_cb (MojitoClientView *view,
+                            GList            *items,
+                            gpointer          userdata)
 {
   GList *l;
-
-  g_print ("New item: service = %s uuid = %s\n",
-           item->service,
-           item->uuid);
-
-  g_print ("Current list looks like:\n");
-
-  for (l = mojito_client_view_get_sorted_items (view); l; l = l->next)
+  for (l = items; l; l = l->next)
   {
-    g_print ("%s %s\n",
-             ((MojitoItem *)l->data)->service,
-             ((MojitoItem *)l->data)->uuid);
+    GHashTableIter iter;
+    gpointer key, value;
+    MojitoItem *item = (MojitoItem *)l->data;
+
+    g_debug (G_STRLOC ": Got item with uuid: %s", item->uuid);
+
+    g_hash_table_iter_init (&iter, item->props);
+    while (g_hash_table_iter_next (&iter, &key, &value)) 
+    {
+      g_debug (G_STRLOC ":     %s = %s", (gchar *)key, (gchar *)value);
+    }
   }
 }
 
 static void
-client_open_view_cb (MojitoClient *client, 
-                     MojitoClientView   *view,
-                     gpointer      userdata)
+client_open_view_cb (MojitoClient     *client,
+                     MojitoClientView *view,
+                     gpointer          userdata)
 {
   mojito_client_view_start (view);
-  g_signal_connect (view, "item-added", G_CALLBACK (client_view_item_added_cb), NULL);
+  g_signal_connect (view, "items-added",
+                    G_CALLBACK (client_view_items_added_cb),
+                    NULL);
 }
 
 static void
@@ -60,7 +63,11 @@ client_get_services_cb (MojitoClient *client,
     g_print ("Told about service: %s\n", (char*)l->data);
   }
 
-  mojito_client_open_view (client, (GList*)services, 10, client_open_view_cb, NULL);
+  mojito_client_open_view (client,
+                           (GList*)services,
+                           10,
+                           client_open_view_cb,
+                           NULL);
 }
 
 int
