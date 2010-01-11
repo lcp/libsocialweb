@@ -158,7 +158,6 @@ _proxy_items_changed_cb (DBusGProxy *proxy,
                          GPtrArray  *items,
                          gpointer    userdata)
 {
-  MojitoClientItemView *item_view = MOJITO_CLIENT_ITEM_VIEW (userdata);
   gint i = 0;
   GList *items_list = NULL;
 
@@ -177,7 +176,6 @@ _proxy_items_removed_cb (DBusGProxy *proxy,
                          GPtrArray  *items,
                          gpointer    userdata)
 {
-  MojitoClientItemView *item_view = MOJITO_CLIENT_ITEM_VIEW (userdata);
   gint i= 0;
   GList *items_list = NULL;
 
