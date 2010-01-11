@@ -1,3 +1,11 @@
+Mojito 0.22.0
+===
+
+* Add scrobbling support for lastfm
+* Add initial (experimental) support for "client-side views"
+* Introduce split interfaces of stuff that is on MojitoService (avatar, etc.)
+* Switch to using plural signals for the signal emission on the views
+
 Mojito 0.21.6
 ===
 
