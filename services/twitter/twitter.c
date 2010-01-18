@@ -62,7 +62,8 @@ G_DEFINE_TYPE_WITH_CODE (MojitoServiceTwitter,
 struct _MojitoServiceTwitterPrivate {
   enum {
     OWN,
-    FRIENDS
+    FRIENDS,
+    BOTH
   } type;
   gboolean running;
   RestProxy *proxy;
@@ -191,7 +192,7 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
 
   user_id = rest_xml_node_find (u_node, "id")->content;
 
-  /* For friend feeds, ignore our own tweets */
+  /* For friend only feeds, ignore our own tweets */
   if (priv->type == FRIENDS &&
       user_id && g_str_equal (user_id, priv->user_id))
   {
@@ -312,9 +313,11 @@ get_status_updates (MojitoServiceTwitter *twitter)
     rest_proxy_call_set_function (call, "statuses/user_timeline.xml");
     break;
   case FRIENDS:
+  case BOTH:
     rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
     break;
   }
+
   rest_proxy_call_async (call, tweets_cb, (GObject*)twitter, NULL, NULL);
 }
 
@@ -591,10 +594,12 @@ mojito_service_twitter_constructed (GObject *object)
 
   priv = twitter->priv = GET_PRIVATE (twitter);
 
-  if (mojito_service_get_param ((MojitoService*)twitter, "own")) {
+  if (mojito_service_get_param ((MojitoService *)twitter, "own")) {
     priv->type = OWN;
-  } else {
+  } else if (mojito_service_get_param ((MojitoService *)twitter, "friends")){
     priv->type = FRIENDS;
+  } else {
+    priv->type = BOTH;
   }
 
   priv->twitpic_re = g_regex_new ("http://twitpic.com/([A-Za-z0-9]+)", 0, 0, NULL);
