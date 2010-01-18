@@ -189,11 +189,14 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
 
   u_node = rest_xml_node_find (node, "user");
 
-  user_id = rest_xml_node_find (u_node, "screen_name")->content;
+  user_id = rest_xml_node_find (u_node, "id")->content;
 
   /* For friend feeds, ignore our own tweets */
-  if (priv->type == FRIENDS && g_str_equal (user_id, priv->user_id))
+  if (priv->type == FRIENDS &&
+      user_id && g_str_equal (user_id, priv->user_id))
+  {
     return NULL;
+  }
 
   item = mojito_item_new ();
   mojito_item_set_service (item, (MojitoService *)twitter);
