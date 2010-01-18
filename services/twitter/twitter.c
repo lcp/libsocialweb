@@ -232,9 +232,10 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
     mojito_item_take (item, "url", url);
 
     g_free (twitpic_id);
-  } else {
-    mojito_item_put (item, "content", content);
   }
+
+  mojito_item_put (item, "content", content);
+
   g_match_info_free (match_info);
 
   date = rest_xml_node_find (node, "created_at")->content;
