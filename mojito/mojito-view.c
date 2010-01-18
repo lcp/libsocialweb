@@ -38,6 +38,9 @@ G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
 /* Refresh every 5 minutes */
 #define REFRESH_TIMEOUT (5 * 60)
 
+/* Wait 100ms between queued recalculates before recalculating */
+#define RECALCULATE_DELAY 200
+
 struct _MojitoViewPrivate {
   MojitoCore *core;
   /* List of MojitoService objects */
@@ -52,6 +55,8 @@ struct _MojitoViewPrivate {
   MojitoSet *current;
   /* Whether we're currently running */
   gboolean running;
+  /* For recalculate queue */
+  guint recalculate_timeout_id;
 };
 
 enum {
@@ -269,6 +274,33 @@ mojito_view_recalculate (MojitoView *view)
   priv->current = new_items;
 }
 
+static gboolean
+recalculate_timeout_cb (MojitoView *view)
+{
+  view->priv->refresh_timeout_id = 0;
+  mojito_view_recalculate (view);
+
+  return FALSE;
+}
+
+static void
+mojito_view_queue_recalculate (MojitoView *view)
+{
+  MojitoViewPrivate *priv;
+
+  priv = view->priv;
+
+  if (priv->recalculate_timeout_id)
+  {
+    g_source_remove (priv->recalculate_timeout_id);
+  }
+
+  priv->refresh_timeout_id =
+    g_timeout_add (RECALCULATE_DELAY,
+                   (GSourceFunc)recalculate_timeout_cb,
+                   view);
+}
+
 static void
 _item_ready_notify_cb (MojitoItem *item,
                        GParamSpec *pspec,
@@ -278,7 +310,7 @@ _item_ready_notify_cb (MojitoItem *item,
   if (mojito_item_get_ready (item)) {
     MOJITO_DEBUG (VIEWS, "Item became ready: %s.",
                   mojito_item_get (item, "id"));
-    mojito_view_recalculate (view);
+    mojito_view_queue_recalculate (view);
     g_signal_handlers_disconnect_by_func (item,
                                           _item_ready_notify_cb,
                                           view);
@@ -323,7 +355,7 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
     mojito_set_unref (set);
   }
 
-  mojito_view_recalculate (view);
+  mojito_view_queue_recalculate (view);
 }
 
 /*
@@ -505,6 +537,12 @@ mojito_view_dispose (GObject *object)
 {
   MojitoView *view = MOJITO_VIEW (object);
   MojitoViewPrivate *priv = view->priv;
+
+  if (priv->recalculate_timeout_id)
+  {
+    g_source_remove (priv->recalculate_timeout_id);
+    priv->recalculate_timeout_id = 0;
+  }
 
   if (priv->core) {
     g_object_unref (priv->core);
