@@ -1,12 +1,12 @@
 # Translation of mojito to Indonesian.
-# Copyright (C) 
+# Copyright (C)
 # This file is distributed under the same license as the PACKAGE package.
 # Andika Triwidada <andika@gmail.com>, 2009.
 msgid ""
 msgstr ""
 "Project-Id-Version: mojito master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-24 09:25+0000\n"
+"POT-Creation-Date: 2009-12-02 17:42+0000\n"
 "PO-Revision-Date: 2009-08-26 00:20+0700\n"
 "Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian <id@li.org>\n"
@@ -19,56 +19,47 @@ msgid "Last.fm"
 msgstr "Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
-msgid ""
-"Last.fm is a music service that learns what you love. Every track you play "
-"will tell your Last.fm profile something about what you like. It can connect "
-"you to other people who like what you like - and recommend songs from their "
-"music collections and yours too."
-msgstr ""
-"Last.fm adalah suatu layanan musik yang belajar apa yang anda cintai. Setiap "
-"trek yang anda mainkan akan memberi tahu profile Last.fm anda tentang "
-"sesuatu yang anda sukai. Ini dapat menghubungkan anda ke orang lain yang "
-"menyukai apa yang anda sukai - dan menyarankan lagu-lagu dari koleksi musik "
-"mereka ke anda juga."
+msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
+msgstr "Last.fm adalah suatu layanan musik yang belajar apa yang anda cintai. Setiap trek yang anda mainkan akan memberi tahu profile Last.fm anda tentang sesuatu yang anda sukai. Ini dapat menghubungkan anda ke orang lain yang menyukai apa yang anda sukai - dan menyarankan lagu-lagu dari koleksi musik mereka ke anda juga."
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
 msgstr "Twitter"
 
 #: ../services/twitter/twitter.keys.in.h:2
-msgid ""
-"Twitter is a service for friends, family, and co–workers to communicate and "
-"stay connected through the exchange of quick, frequent answers to one simple "
-"question: What are you doing?"
-msgstr ""
-"Twitter adalah suatu layanan baru teman-teman, keluarga, dan rekan sejawat "
-"untuk berkomunikasi dan tetap tersambung melalui pertukaran dari jawaban "
-"cepat dan sering atas satu pertanyaan sederhana: Engkau sedang apa?"
+msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
+msgstr "Twitter adalah suatu layanan baru teman-teman, keluarga, dan rekan sejawat untuk berkomunikasi dan tetap tersambung melalui pertukaran dari jawaban cepat dan sering atas satu pertanyaan sederhana: Engkau sedang apa?"
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
 msgstr "Flickr"
 
 #: ../services/flickr/flickr.keys.in.h:2
-msgid ""
-"Flickr - almost certainly the best online photo management and sharing "
-"application in the world."
-msgstr ""
-"Flickr - hampir pasti adalah aplikasi online untuk manajemen dan berbagi "
-"foto terbaik di dunia."
+msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgstr "Flickr - hampir pasti adalah aplikasi online untuk manajemen dan berbagi foto terbaik di dunia."
 
 #: ../services/myspace/myspace.keys.in.h:1
 msgid "MySpace"
 msgstr "MySpace"
 
 #: ../services/myspace/myspace.keys.in.h:2
-msgid ""
-"MySpace is a leading social portal for connecting people, content, and "
-"culture from around the world. Create a profile, share photos, professional "
-"and viral videos, blog, instant message your friends, and listen to music on "
-"the world’s largest music community."
-msgstr ""
-"MySpace adalah portal sosial terdepan untuk menyambungkan orang, isi, dan "
-"kultur dari seluruh dunia. Buat suatu profil, berbagi foto, video "
-"profesional dan viral, blog, pesan instan ke teman-teman anda, dan dengarkan "
-"musik di komunitas musik terbesar di dunia."
+msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
+msgstr "MySpace adalah portal sosial terdepan untuk menyambungkan orang, isi, dan kultur dari seluruh dunia. Buat suatu profil, berbagi foto, video profesional dan viral, blog, pesan instan ke teman-teman anda, dan dengarkan musik di komunitas musik terbesar di dunia."
+
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "Digg"
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm.c:145
+#, c-format
+msgid "%s by %s"
+msgstr "%s x %s"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - untuk berbagi berita, video, dan citra"
+
+#: ../services/lastfm/lastfm.c:149
+msgid "Unknown"
+msgstr "Tak dikenal"
