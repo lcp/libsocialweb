@@ -83,6 +83,8 @@ gboolean mojito_item_get_ready (MojitoItem *item);
 void mojito_item_push_pending (MojitoItem *item);
 void mojito_item_pop_pending (MojitoItem *item);
 
+void mojito_item_touch (MojitoItem *item);
+time_t mojito_item_get_mtime (MojitoItem *item);
 
 /* Convenience function */
 MojitoSet *mojito_item_set_new (void);

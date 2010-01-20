@@ -31,6 +31,7 @@ struct _MojitoItemPrivate {
   MojitoService *service;
   GHashTable *hash;
   time_t cached_date;
+  time_t mtime;
   gint remaining_fetches;
 };
 
@@ -134,6 +135,8 @@ mojito_item_put (MojitoItem *item, const char *key, const char *value)
     g_hash_table_insert (item->priv->hash, (gpointer)g_intern_string (key), g_strdup (value));
   else
     g_hash_table_remove (item->priv->hash, (gpointer)g_intern_string (key));
+
+  mojito_item_touch (item);
 }
 
 void
@@ -146,6 +149,8 @@ mojito_item_take (MojitoItem *item, const char *key, char *value)
     g_hash_table_insert (item->priv->hash, (gpointer)g_intern_string (key), value);
   else
     g_hash_table_remove (item->priv->hash, (gpointer)g_intern_string (key));
+
+  mojito_item_touch (item);
 }
 
 const char *
@@ -262,6 +267,8 @@ mojito_item_pop_pending (MojitoItem *item)
                   mojito_item_get (item, "id"));
     g_object_notify (G_OBJECT (item), "ready");
   }
+
+  mojito_item_touch (item);
 }
 
 
@@ -348,4 +355,14 @@ _mojito_item_to_value_array (MojitoItem *item)
   return value_array;
 }
 
+void
+mojito_item_touch (MojitoItem *item)
+{
+  item->priv->mtime = time (NULL);
+}
 
+time_t
+mojito_item_get_mtime (MojitoItem *item)
+{
+  return item->priv->mtime;
+}
