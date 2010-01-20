@@ -38,7 +38,7 @@ G_DEFINE_TYPE_WITH_CODE (MojitoView, mojito_view, G_TYPE_OBJECT,
 /* Refresh every 5 minutes */
 #define REFRESH_TIMEOUT (5 * 60)
 
-/* Wait 100ms between queued recalculates before recalculating */
+/* Wait 200ms between queued recalculates before recalculating */
 #define RECALCULATE_DELAY 200
 
 struct _MojitoViewPrivate {
