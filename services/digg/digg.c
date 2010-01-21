@@ -105,7 +105,7 @@ retrieve_thumbnail (MojitoItem *item, RestXmlNode *node)
   if (thumb == NULL)
     return;
 
-  mojito_item_request_image_fetch (item, "thumbnail", rest_xml_node_get_attr (thumb, "src"));
+  mojito_item_request_image_fetch (item, TRUE, "thumbnail", rest_xml_node_get_attr (thumb, "src"));
 }
 
 static void
@@ -152,7 +152,7 @@ assign_author (MojitoItem *item, RestXmlNode *author)
 {
   mojito_item_put (item, "author", rest_xml_node_get_attr (author, "fullname"));
   mojito_item_put (item, "authorid", rest_xml_node_get_attr (author, "name"));
-  mojito_item_request_image_fetch (item, "authoricon", rest_xml_node_get_attr (author, "icon"));
+  mojito_item_request_image_fetch (item, FALSE, "authoricon", rest_xml_node_get_attr (author, "icon"));
 }
 
 static void

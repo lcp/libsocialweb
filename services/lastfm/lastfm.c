@@ -210,7 +210,7 @@ get_artist_info_cb (RestProxyCall *call,
   artist_node = rest_xml_node_find (root, "artist");
   url = get_image_url (artist_node, "large");
   if (url)
-    mojito_item_request_image_fetch (item, "thumbnail", url);
+    mojito_item_request_image_fetch (item, TRUE, "thumbnail", url);
 
   mojito_item_pop_pending (item);
 
@@ -227,7 +227,7 @@ get_thumbnail (MojitoServiceLastfm *lastfm, MojitoItem *item, RestXmlNode *track
 
   url = get_image_url (track_node, "large");
   if (url) {
-    mojito_item_request_image_fetch (item, "thumbnail", url);
+    mojito_item_request_image_fetch (item, TRUE, "thumbnail", url);
     return;
   }
 
@@ -302,7 +302,7 @@ make_item (MojitoServiceLastfm *lastfm, RestXmlNode *user, RestXmlNode *track)
 
   s = get_image_url (user, "medium");
   if (s)
-    mojito_item_request_image_fetch (item, "authoricon", s);
+    mojito_item_request_image_fetch (item, FALSE, "authoricon", s);
 
   return item;
 }

@@ -219,7 +219,7 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
     /* Construct the thumbnail URL and download the image */
     twitpic_id = g_match_info_fetch (match_info, 1);
     url = g_strconcat ("http://twitpic.com/show/thumb/", twitpic_id, NULL);
-    mojito_item_request_image_fetch (item, "thumbnail", url);
+    mojito_item_request_image_fetch (item, FALSE, "thumbnail", url);
     g_free (url);
 
     /* Remove the URL from the tweet and use that as the title */
@@ -251,7 +251,7 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
 
   n = rest_xml_node_find (u_node, "profile_image_url");
   if (n && n->content)
-    mojito_item_request_image_fetch (item, "authoricon", n->content);
+    mojito_item_request_image_fetch (item, FALSE, "authoricon", n->content);
 
 
   return item;

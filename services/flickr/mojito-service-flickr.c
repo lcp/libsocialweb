@@ -173,11 +173,11 @@ flickr_callback (RestProxyCall *call,
     mojito_item_take (item, "date", mojito_time_t_to_string (date));
 
     url = construct_photo_url (node);
-    mojito_item_request_image_fetch (item, "thumbnail", url);
+    mojito_item_request_image_fetch (item, TRUE, "thumbnail", url);
     g_free (url);
 
     url = construct_buddy_icon_url (node);
-    mojito_item_request_image_fetch (item, "authoricon", url);
+    mojito_item_request_image_fetch (item, FALSE, "authoricon", url);
     g_free (url);
 
     mojito_set_add (service->priv->set, G_OBJECT (item));

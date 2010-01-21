@@ -275,6 +275,7 @@ mojito_item_pop_pending (MojitoItem *item)
 typedef struct {
   MojitoItem *item;
   const gchar *key;
+  gboolean delays_ready;
 } RequestImageFetchClosure;
 
 static void
@@ -287,7 +288,8 @@ _image_download_cb (const char               *url,
                     closure->key,
                     file);
 
-  mojito_item_pop_pending (closure->item);
+  if (closure->delays_ready)
+    mojito_item_pop_pending (closure->item);
 
   g_object_unref (closure->item);
   g_slice_free (RequestImageFetchClosure, closure);
@@ -295,17 +297,23 @@ _image_download_cb (const char               *url,
 
 void
 mojito_item_request_image_fetch (MojitoItem  *item,
+                                 gboolean     delays_ready,
                                  const gchar *key,
                                  const gchar *url)
 {
   RequestImageFetchClosure *closure;
 
-  mojito_item_push_pending (item);
+  /* If this URL fetch should delay the item being considered ready, or
+   * whether the item is useful without this key.
+   */
+  if (delays_ready)
+    mojito_item_push_pending (item);
 
   closure = g_slice_new0 (RequestImageFetchClosure);
 
   closure->key = g_intern_string (key);
   closure->item = g_object_ref (item);
+  closure->delays_ready = delays_ready;
 
   MOJITO_DEBUG (ITEM, "Scheduling fetch for %s on: %s",
                 url,
