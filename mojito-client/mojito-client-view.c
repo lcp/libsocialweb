@@ -212,15 +212,15 @@ _proxy_items_changed_cb (DBusGProxy *proxy,
   {
     GValueArray *varray = (GValueArray *)g_ptr_array_index (items, i);
     MojitoItem *item;
+    const gchar *uid;
 
-    /* First reference dropped when list freed */
-    item = _mojito_item_from_value_array (varray);
+    uid = g_value_get_string (g_value_array_get_nth (varray, 1));
 
-    g_hash_table_insert (priv->uuid_to_items,
-                         g_strdup (item->uuid),
-                         mojito_item_ref (item));
+    item = g_hash_table_lookup (priv->uuid_to_items,
+                                uid);
+    _mojito_item_update_from_value_array (item, varray);
 
-    items_list = g_list_append (items_list, item);
+    items_list = g_list_append (items_list, mojito_item_ref (item));
   }
 
   /* If handler wants a ref then it should ref it up */
