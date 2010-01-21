@@ -290,6 +290,33 @@ mojito_set_size (MojitoSet *set)
   return g_hash_table_size (set->hash);
 }
 
+MojitoSet *
+mojito_set_filter (MojitoSet           *set_in,
+                   MojitoSetFilterFunc  func,
+                   gpointer             user_data)
+{
+  GHashTableIter iter;
+  gpointer object;
+  MojitoSet *set = NULL;
+
+  g_return_val_if_fail (set_in, NULL);
+  g_return_val_if_fail (func, NULL);
+
+  set = mojito_set_new_full (set_in->hash_func,
+                             set_in->equal_func);
+
+  g_hash_table_iter_init (&iter, set_in->hash);
+  while (g_hash_table_iter_next (&iter, &object, NULL)) {
+
+    if (func (set_in, object, user_data))
+    {
+      add (set, object);
+    }
+  }
+
+  return set;
+}
+
 #if BUILD_TESTS
 
 #include "test-runner.h"

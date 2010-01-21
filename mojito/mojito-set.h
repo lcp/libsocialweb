@@ -64,6 +64,13 @@ guint mojito_set_foreach_remove (MojitoSet *set, MojitoSetForeachRemoveFunc func
 
 int mojito_set_size (MojitoSet *set);
 
+typedef gboolean (*MojitoSetFilterFunc) (MojitoSet *set,
+                                         GObject   *object,
+                                         gpointer   user_data);
+MojitoSet *mojito_set_filter (MojitoSet           *set,
+                              MojitoSetFilterFunc  func,
+                              gpointer             user_data);
+
 G_END_DECLS
 
 #endif /* _MOJITO_SET */
