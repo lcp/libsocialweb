@@ -39,18 +39,20 @@ view = dbus.Interface(view, "com.intel.Mojito.View")
 def now():
     return time.strftime("%T", time.localtime())
 
-def added(service, uuid, date, item):
-    print "[%s] Item %s added from %s" % (now(), uuid, service)
-    print "Timestamp: %s" % time.strftime("%c", time.gmtime(date))
-    for key in item:
-        print "  %s: %s" % (key, item[key])
-    print
-view.connect_to_signal("ItemAdded", added)
+def added(items):
+    for (service, uuid, date, item) in items:
+        print "[%s] Item %s added from %s" % (now(), uuid, service)
+        print "Timestamp: %s" % time.strftime("%c", time.gmtime(date))
+        for key in item:
+            print "  %s: %s" % (key, item[key])
+        print
+view.connect_to_signal("ItemsAdded", added)
 
-def removed(service, uuid):
-    print "[%s] Item %s removed from %s" % (now(), uuid, service)
-    print
-view.connect_to_signal("ItemRemoved", removed)
+def removed(items):
+    for (service, uuid) in items:
+        print "[%s] Item %s removed from %s" % (now(), uuid, service)
+        print
+view.connect_to_signal("ItemsRemoved", removed)
 
 view.Start()
 
