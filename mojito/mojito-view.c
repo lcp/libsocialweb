@@ -57,6 +57,8 @@ struct _MojitoViewPrivate {
   gboolean running;
   /* For recalculate queue */
   guint recalculate_timeout_id;
+  /* The last time we recalculated. Use for changed items. */
+  time_t last_recalculate_time;
 };
 
 enum {
@@ -96,15 +98,7 @@ munge_items (MojitoView *view)
   while (list) {
     item = (MojitoItem *)list->data;
     if (!mojito_core_is_item_banned (priv->core, item)) {
-
-      if (mojito_item_get_ready (item)) {
-        l = g_list_prepend (l, item);
-        MOJITO_DEBUG (VIEWS, "Item ready: %s",
-                      mojito_item_get (item, "id"));
-      } else {
-        MOJITO_DEBUG (VIEWS, "Item not ready. Skipping: %s",
-                      mojito_item_get (item, "id"));
-      }
+      l = g_list_prepend (l, item);
     }
     list = g_list_delete_link (list, list);
   }
@@ -242,12 +236,49 @@ mojito_view_added_items (MojitoView *view,
   g_ptr_array_free (ptr_array, TRUE);
 }
 
+
+static void
+mojito_view_changed_items (MojitoView *view,
+                           MojitoSet  *added_items)
+{
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
+  GList *items, *l;
+
+  items = mojito_set_as_list (added_items);
+  ptr_array = g_ptr_array_new ();
+
+  for (l = items; l; l = l->next)
+  {
+    MojitoItem *item = (MojitoItem *)l->data;
+    value_array = _mojito_item_to_value_array (item);
+    g_ptr_array_add (ptr_array, value_array);
+  }
+
+  mojito_view_iface_emit_items_changed (view,
+                                        ptr_array);
+
+  g_ptr_array_foreach (ptr_array, (GFunc)g_value_array_free, NULL);
+  g_ptr_array_free (ptr_array, TRUE);
+}
+
+static gboolean
+_filter_only_changed_cb (MojitoSet  *set,
+                         MojitoItem *item,
+                         MojitoView *view)
+{
+  if (mojito_item_get_mtime (item) >= view->priv->last_recalculate_time)
+    return TRUE;
+  else
+    return FALSE;
+}
+
 void
 mojito_view_recalculate (MojitoView *view)
 {
   MojitoViewPrivate *priv;
   MojitoSet *old_items, *new_items;
-  MojitoSet *removed_items, *added_items;
+  MojitoSet *removed_items, *added_items, *changed_items = NULL;
 
   g_return_if_fail (MOJITO_IS_VIEW (view));
 
@@ -261,17 +292,31 @@ mojito_view_recalculate (MojitoView *view)
   removed_items = mojito_set_difference (old_items, new_items);
   added_items = mojito_set_difference (new_items, old_items);
 
+  if (priv->last_recalculate_time != 0)
+  {
+    changed_items = mojito_set_filter (new_items,
+                                       (MojitoSetFilterFunc)_filter_only_changed_cb,
+                                       view);
+  }
+
   if (!mojito_set_is_empty (removed_items))
     mojito_view_removed_items (view, removed_items);
 
   if (!mojito_set_is_empty (added_items))
     mojito_view_added_items (view, added_items);
 
+  if (changed_items && !mojito_set_is_empty (changed_items))
+    mojito_view_changed_items (view, changed_items);
+
   mojito_set_unref (removed_items);
   mojito_set_unref (added_items);
 
+  if (changed_items)
+    mojito_set_unref (changed_items);
+
   mojito_set_unref (priv->current);
   priv->current = new_items;
+  priv->last_recalculate_time = time (NULL);
 }
 
 static gboolean
@@ -355,7 +400,7 @@ service_updated (MojitoService *service, MojitoSet *set, gpointer user_data)
     mojito_set_unref (set);
   }
 
-  mojito_view_queue_recalculate (view);
+  mojito_view_recalculate (view);
 }
 
 /*
