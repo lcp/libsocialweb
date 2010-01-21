@@ -124,17 +124,44 @@ mojito_client_view_finalize (GObject *object)
   G_OBJECT_CLASS (mojito_client_view_parent_class)->finalize (object);
 }
 
+static void
+_mojito_item_update_from_value_array (MojitoItem  *item,
+                                      GValueArray *varray)
+{
+  if (item->service)
+  {
+    g_free (item->service);
+    item->service = NULL;
+  }
+
+  item->service = g_value_dup_string (g_value_array_get_nth (varray, 0));
+
+  if (item->uuid)
+  {
+    g_free (item->uuid);
+    item->uuid = NULL;
+  }
+
+  item->uuid = g_value_dup_string (g_value_array_get_nth (varray, 1));
+
+  item->date.tv_sec = g_value_get_int64 (g_value_array_get_nth (varray, 2));
+
+  if (item->props)
+  {
+    g_hash_table_unref (item->props);
+    item->props = NULL;
+  }
+
+  item->props = g_value_dup_boxed (g_value_array_get_nth (varray, 3));
+}
+
 static MojitoItem *
 _mojito_item_from_value_array (GValueArray *varray)
 {
   MojitoItem *item;
 
   item = mojito_item_new ();
-
-  item->service = g_value_dup_string (g_value_array_get_nth (varray, 0));
-  item->uuid = g_value_dup_string (g_value_array_get_nth (varray, 1));
-  item->date.tv_sec = g_value_get_int64 (g_value_array_get_nth (varray, 2));
-  item->props = g_value_dup_boxed (g_value_array_get_nth (varray, 3));
+  _mojito_item_update_from_value_array (item, varray);
 
   return item;
 }
