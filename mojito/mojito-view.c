@@ -98,7 +98,14 @@ munge_items (MojitoView *view)
   while (list) {
     item = (MojitoItem *)list->data;
     if (!mojito_core_is_item_banned (priv->core, item)) {
-      l = g_list_prepend (l, item);
+      if (mojito_item_get_ready (item)) {
+        l = g_list_prepend (l, item);
+        MOJITO_DEBUG (VIEWS, "Item ready: %s",
+                      mojito_item_get (item, "id"));
+      } else {
+        MOJITO_DEBUG (VIEWS, "Item not ready. Skipping: %s",
+                      mojito_item_get (item, "id"));
+      }
     }
     list = g_list_delete_link (list, list);
   }
