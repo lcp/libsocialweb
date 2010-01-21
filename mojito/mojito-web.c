@@ -152,7 +152,7 @@ mojito_web_download_image_async (const char *url, ImageDownloadCallback callback
   g_return_if_fail (url);
   g_return_if_fail (callback);
 
-  g_once (&once, (GThreadFunc)mojito_web_make_sync_session, NULL);
+  g_once (&once, (GThreadFunc)mojito_web_make_async_session, NULL);
   session = once.retval;
 
   md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, url, -1);
