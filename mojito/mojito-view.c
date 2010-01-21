@@ -277,7 +277,7 @@ mojito_view_recalculate (MojitoView *view)
 static gboolean
 recalculate_timeout_cb (MojitoView *view)
 {
-  view->priv->refresh_timeout_id = 0;
+  view->priv->recalculate_timeout_id = 0;
   mojito_view_recalculate (view);
 
   return FALSE;
@@ -295,7 +295,7 @@ mojito_view_queue_recalculate (MojitoView *view)
     g_source_remove (priv->recalculate_timeout_id);
   }
 
-  priv->refresh_timeout_id =
+  priv->recalculate_timeout_id =
     g_timeout_add (RECALCULATE_DELAY,
                    (GSourceFunc)recalculate_timeout_cb,
                    view);
