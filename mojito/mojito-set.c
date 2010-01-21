@@ -23,6 +23,9 @@ struct _MojitoSet {
   volatile int ref_count;
   /* Hash of object pointer => pointer to the senitel value */
   GHashTable *hash;
+
+  GEqualFunc equal_func;
+  GHashFunc hash_func;
 };
 
 static const int sentinel = 0xDECAFBAD;
@@ -59,6 +62,8 @@ mojito_set_new_full (GHashFunc hash_func, GEqualFunc equal_func)
   set = g_slice_new0 (MojitoSet);
   set->ref_count = 1;
   set->hash = g_hash_table_new_full (hash_func, equal_func, g_object_unref, NULL);
+  set->hash_func = hash_func;
+  set->equal_func = equal_func;
 
   return set;
 }
