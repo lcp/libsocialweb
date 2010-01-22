@@ -400,7 +400,7 @@ refresh (MojitoService *service)
   MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
   RestProxyCall *call;
 
-  MOJITO_DEBUG (LASTFM, "Refresh requested for instance %x", service);
+  MOJITO_DEBUG (LASTFM, "Refresh requested for instance %p", service);
   if (!lastfm->priv->running || lastfm->priv->user_id == NULL) {
     MOJITO_DEBUG (LASTFM, "Refresh abandoned: running = %s, user_id = %s",
                   lastfm->priv->running ? "yes" : "no",
