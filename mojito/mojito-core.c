@@ -147,6 +147,7 @@ get_service (MojitoCore *core, const char *name, GHashTable *params)
   MojitoService *service;
   GType type;
   WeakServiceData *data;
+  GError *error = NULL;
 
   param_hash = mojito_hash_string_dict (params);
   key = g_strconcat (name, "-", param_hash, NULL);
@@ -163,6 +164,15 @@ get_service (MojitoCore *core, const char *name, GHashTable *params)
     return NULL;
 
   service = g_object_new (type, "params", params, NULL);
+  if (G_IS_INITABLE (service)) {
+    if (!g_initable_init (G_INITABLE (service), NULL, &error)) {
+      g_message ("Cannot construct %s: %s", name, error->message);
+      g_error_free (error);
+      g_object_unref (service);
+      return NULL;
+    }
+  }
+
   g_hash_table_insert (priv->active_services, key, service);
 
   data = g_slice_new0 (WeakServiceData);
