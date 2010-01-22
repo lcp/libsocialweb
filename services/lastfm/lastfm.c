@@ -26,6 +26,7 @@
 #include <mojito/mojito-utils.h>
 #include <mojito/mojito-web.h>
 #include <mojito/mojito-call-list.h>
+#include <mojito/mojito-debug.h>
 #include <mojito-keystore/mojito-keystore.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
@@ -179,8 +180,11 @@ static void
 emit_if_done (MojitoServiceLastfm *lastfm)
 {
   if (mojito_call_list_is_empty (lastfm->priv->calls)) {
+    MOJITO_DEBUG (LASTFM, "Call set is empty, emitting refreshed signal");
     mojito_service_emit_refreshed ((MojitoService *)lastfm, lastfm->priv->set);
     mojito_set_empty (lastfm->priv->set);
+  } else {
+    MOJITO_DEBUG (LASTFM, "Call set is not empty, still more work to do.");
   }
 }
 
@@ -259,6 +263,7 @@ start (MojitoService *service)
 {
   MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
 
+  MOJITO_DEBUG (LASTFM, "Service started");
   lastfm->priv->running = TRUE;
 }
 
@@ -325,9 +330,13 @@ get_tracks_cb (RestProxyCall *call,
     return;
   }
 
+  MOJITO_DEBUG (LASTFM, "Got results for getTracks call");
+
   root = node_from_call (call);
   if (!root)
     return;
+
+  MOJITO_DEBUG (LASTFM, "Parsed results for getTracks call");
 
   /* Although we only asked for a single track, if there is now-playing data
      then that is returned as well. */
@@ -359,13 +368,20 @@ get_friends_cb (RestProxyCall *call,
     return;
   }
 
+  MOJITO_DEBUG (LASTFM, "Got result of getFriends call");
+
   root = node_from_call (call);
   if (!root)
     return;
 
+  MOJITO_DEBUG (LASTFM, "Parsed results of getFriends call");
+
   for (node = rest_xml_node_find (root, "user"); node; node = node->next) {
     call = rest_proxy_new_call (lastfm->priv->proxy);
     mojito_call_list_add (lastfm->priv->calls, call);
+
+    MOJITO_DEBUG (LASTFM, "Making getRecentTracks call for %s",
+                  rest_xml_node_find (node, "name")->content);
 
     rest_proxy_call_add_params (call,
                                 "api_key", mojito_keystore_get_key ("lastfm"),
@@ -384,13 +400,18 @@ refresh (MojitoService *service)
   MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
   RestProxyCall *call;
 
+  MOJITO_DEBUG (LASTFM, "Refresh requested for instance %x", service);
   if (!lastfm->priv->running || lastfm->priv->user_id == NULL) {
+    MOJITO_DEBUG (LASTFM, "Refresh abandoned: running = %s, user_id = %s",
+                  lastfm->priv->running ? "yes" : "no",
+                  lastfm->priv->user_id);
     return;
   }
 
   mojito_call_list_cancel_all (lastfm->priv->calls);
   mojito_set_empty (lastfm->priv->set);
 
+  MOJITO_DEBUG (LASTFM, "Making getFriends call");
   call = rest_proxy_new_call (lastfm->priv->proxy);
   mojito_call_list_add (lastfm->priv->calls, call);
   rest_proxy_call_add_params (call,
@@ -409,6 +430,7 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
   MojitoServiceLastfmPrivate *priv = lastfm->priv;
   const char *new_user;
 
+  MOJITO_DEBUG (LASTFM, "User changed");
   if (entry->value) {
     new_user = gconf_value_get_string (entry->value);
     if (new_user && new_user[0] == '\0')
@@ -420,6 +442,8 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
   if (g_strcmp0 (new_user, priv->user_id) != 0) {
     g_free (priv->user_id);
     priv->user_id = g_strdup (new_user);
+
+    MOJITO_DEBUG (LASTFM, "User set to %s", priv->user_id);
 
     if (priv->user_id)
       refresh (service);
@@ -484,6 +508,7 @@ mojito_service_lastfm_initable (GInitable    *initable,
   MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (initable);
   MojitoServiceLastfmPrivate *priv = lastfm->priv;
 
+  MOJITO_DEBUG (LASTFM, "%s called", G_STRFUNC);
   if (mojito_keystore_get_key ("lastfm") == NULL) {
     g_set_error_literal (error,
                          MOJITO_SERVICE_ERROR,
