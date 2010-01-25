@@ -19,6 +19,7 @@ stamp-h1
 build-aux
 examples/test-client
 examples/monitor-caps
+examples/test-client-query
 src/mojito.service
 src/mojito-core
 mojito-keystore/test-suite
@@ -26,7 +27,7 @@ tests/test-online
 tests/test-client-online
 tests/test-download
 tests/test-download-async
-*-ginterface.[ch]
+interfaces/*-ginterface.[ch]
 *-bindings.h
 *-marshals.[ch]
 test-runner
