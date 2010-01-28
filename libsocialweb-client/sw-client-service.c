@@ -22,6 +22,7 @@
 #include "sw-client-service.h"
 
 #include <interfaces/sw-service-bindings.h>
+#include <interfaces/sw-status-update-bindings.h>
 #include <interfaces/sw-query-bindings.h>
 #include <interfaces/sw-marshals.h>
 
@@ -280,6 +281,15 @@ _sw_client_service_setup (SwClientService  *service,
     return FALSE;
   }
 
+  if (!_sw_client_service_setup_proxy_for_iface (service,
+                                                     service_name,
+                                                     STATUS_UPDATE_IFACE,
+                                                     &error))
+  {
+    g_propagate_error (error_out, error);
+    return FALSE;
+  }
+
   dbus_g_proxy_add_signal (priv->proxies[SERVICE_IFACE],
                            "AvatarRetrieved",
                            G_TYPE_STRING,
@@ -300,11 +310,11 @@ _sw_client_service_setup (SwClientService  *service,
                                service,
                                NULL);
 
-  dbus_g_proxy_add_signal (priv->proxies[SERVICE_IFACE],
+  dbus_g_proxy_add_signal (priv->proxies[STATUS_UPDATE_IFACE],
                            "StatusUpdated",
                            G_TYPE_BOOLEAN,
                            G_TYPE_INVALID);
-  dbus_g_proxy_connect_signal (priv->proxies[SERVICE_IFACE],
+  dbus_g_proxy_connect_signal (priv->proxies[STATUS_UPDATE_IFACE],
                                "StatusUpdated",
                                (GCallback)_status_updated_cb,
                                service,
@@ -437,7 +447,7 @@ sw_client_service_update_status (SwClientService                    *service,
   closure->cb = (GCallback)cb;
   closure->userdata = userdata;
 
-  org_moblin_libsocialweb_Service_update_status_async (priv->proxies[SERVICE_IFACE],
+  org_moblin_libsocialweb_StatusUpdate_update_status_async (priv->proxies[STATUS_UPDATE_IFACE],
                                                 status_msg,
                                                 _update_status_cb,
                                                 closure);
