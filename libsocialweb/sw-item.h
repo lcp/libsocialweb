@@ -62,14 +62,18 @@ void sw_item_set_service (SwItem *item, SwService *service);
 
 SwService * sw_item_get_service (SwItem *item);
 
-void sw_item_put (SwItem *item, const char *key, const char *value);
+void sw_item_put (SwItem     *item,
+                  const char *key,
+                  const char *value);
 
-void sw_item_take (SwItem *item, const char *key, char *value);
+void sw_item_take (SwItem     *item,
+                   const char *key,
+                   char       *value);
 
-void sw_item_request_image_fetch (SwItem  *item,
-                                      gboolean     delays_ready,
-                                      const gchar *key,
-                                      const gchar *url);
+void sw_item_request_image_fetch (SwItem      *item,
+                                  gboolean     delays_ready,
+                                  const gchar *key,
+                                  const gchar *url);
 
 const char * sw_item_get (SwItem *item, const char *key);
 

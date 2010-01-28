@@ -92,18 +92,22 @@ void sw_service_start (SwService *service);
 
 void sw_service_refresh (SwService *service);
 
-void sw_service_emit_refreshed (SwService *service, SwSet *set);
+void sw_service_emit_refreshed (SwService *service,
+                                SwSet     *set);
 
-void sw_service_emit_capabilities_changed (SwService *service, const char **caps);
+void sw_service_emit_capabilities_changed (SwService   *service,
+                                           const char **caps);
 
-void sw_service_emit_status_updated (SwService *service, gboolean success);
+void sw_service_emit_status_updated (SwService *service,
+                                     gboolean   success);
 
-void sw_service_emit_avatar_retrieved (SwService *service,
-                                           const gchar   *path);
+void sw_service_emit_avatar_retrieved (SwService   *service,
+                                       const gchar *path);
 
 void sw_service_emit_user_changed (SwService *service);
 
-const char * sw_service_get_param (SwService *service, const char *key);
+const char * sw_service_get_param (SwService  *service,
+                                   const char *key);
 
 G_END_DECLS
 

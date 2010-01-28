@@ -27,9 +27,11 @@ gboolean sw_is_online (void);
 
 typedef void (*SwOnlineNotify) (gboolean online, gpointer user_data);
 
-void sw_online_add_notify (SwOnlineNotify callback, gpointer user_data);
+void sw_online_add_notify (SwOnlineNotify callback,
+                           gpointer       user_data);
 
-void sw_online_remove_notify (SwOnlineNotify callback, gpointer user_data);
+void sw_online_remove_notify (SwOnlineNotify callback,
+                              gpointer       user_data);
 
 G_END_DECLS
 

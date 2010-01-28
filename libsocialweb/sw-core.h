@@ -59,7 +59,8 @@ SwCore* sw_core_new (void);
 
 void sw_core_run (SwCore *core);
 
-gboolean sw_core_is_item_banned (SwCore *core, SwItem *item);
+gboolean sw_core_is_item_banned (SwCore *core,
+                                 SwItem *item);
 
 SwCore *sw_core_dup_singleton (void);
 

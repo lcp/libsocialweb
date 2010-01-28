@@ -59,17 +59,20 @@ SwSet * sw_set_from_list (GList *list);
 
 void sw_set_foreach (SwSet *set, GFunc func, gpointer user_data);
 
-typedef gboolean (*SwSetForeachRemoveFunc) (GObject *object, gpointer user_data);
-guint sw_set_foreach_remove (SwSet *set, SwSetForeachRemoveFunc func, gpointer user_data);
+typedef gboolean (*SwSetForeachRemoveFunc) (GObject  *object,
+                                            gpointer  user_data);
+guint sw_set_foreach_remove (SwSet                  *set,
+                             SwSetForeachRemoveFunc  func,
+                             gpointer                user_data);
 
 int sw_set_size (SwSet *set);
 
-typedef gboolean (*SwSetFilterFunc) (SwSet *set,
-                                         GObject   *object,
-                                         gpointer   user_data);
+typedef gboolean (*SwSetFilterFunc) (SwSet    *set,
+                                     GObject  *object,
+                                     gpointer  user_data);
 SwSet *sw_set_filter (SwSet           *set,
-                              SwSetFilterFunc  func,
-                              gpointer             user_data);
+                      SwSetFilterFunc  func,
+                      gpointer         user_data);
 
 G_END_DECLS
 

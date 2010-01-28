@@ -100,7 +100,10 @@ sw_web_download_image (const char *url)
     soup_session_send_message (session, msg);
     if (msg->status_code == SOUP_STATUS_OK) {
       /* TODO: GError */
-      g_file_set_contents (filename, msg->response_body->data, msg->response_body->length, NULL);
+      g_file_set_contents (filename,
+                           msg->response_body->data,
+                           msg->response_body->length,
+                           NULL);
     } else {
       g_message ("Cannot download %s: %s", url, msg->reason_phrase);
       g_free (filename);
@@ -123,12 +126,17 @@ typedef struct {
 } AsyncData;
 
 static void
-async_download_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
+async_download_cb (SoupSession *session,
+                   SoupMessage *msg,
+                   gpointer     user_data)
 {
   AsyncData *data = user_data;
 
   if (msg->status_code == SOUP_STATUS_OK) {
-    g_file_set_contents (data->filename, msg->response_body->data, msg->response_body->length, NULL);
+    g_file_set_contents (data->filename,
+                         msg->response_body->data,
+                         msg->response_body->length,
+                         NULL);
   } else {
     g_message ("Cannot download %s: %s", data->url, msg->reason_phrase);
     g_free (data->filename);
@@ -143,7 +151,9 @@ async_download_cb (SoupSession *session, SoupMessage *msg, gpointer user_data)
 }
 
 void
-sw_web_download_image_async (const char *url, ImageDownloadCallback callback, gpointer user_data)
+sw_web_download_image_async (const char            *url,
+                             ImageDownloadCallback  callback,
+                             gpointer               user_data)
 {
   static GOnce once = G_ONCE_INIT;
   SoupSession *session;

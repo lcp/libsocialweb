@@ -57,7 +57,9 @@ GType sw_view_get_type (void);
 
 SwView * sw_view_new (SwCore *core, guint count);
 
-void sw_view_add_service (SwView *view, SwService *service, GHashTable *params);
+void sw_view_add_service (SwView     *view,
+                          SwService  *service,
+                          GHashTable *params);
 
 void sw_view_recalculate (SwView *view);
 

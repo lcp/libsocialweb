@@ -58,21 +58,21 @@ typedef struct {
 GType sw_item_view_get_type (void);
 
 void sw_item_view_add_item (SwItemView *item_view,
-                                SwItem     *item);
+                            SwItem     *item);
 void sw_item_view_update_item (SwItemView *item_view,
-                                   SwItem     *item);
+                               SwItem     *item);
 void sw_item_view_remove_item (SwItemView *item_view,
-                                   SwItem     *item);
+                               SwItem     *item);
 
 void sw_item_view_add_items (SwItemView *item_view,
-                                 GList          *items);
+                             GList          *items);
 void sw_item_view_update_items (SwItemView *item_view,
-                                    GList       *items);
+                                GList       *items);
 void sw_item_view_remove_items (SwItemView *item_view,
-                                    GList          *items);
+                                GList          *items);
 
 void sw_item_view_set_from_set (SwItemView *item_view,
-                                    SwSet      *set);
+                                SwSet      *set);
 
 const gchar *sw_item_view_get_object_path (SwItemView *item_view);
 SwService *sw_item_view_get_service (SwItemView *item_view);

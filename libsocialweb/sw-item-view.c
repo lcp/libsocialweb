@@ -26,7 +26,8 @@
 
 static void sw_item_view_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (SwItemView, sw_item_view, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (SW_TYPE_ITEM_VIEW_IFACE, sw_item_view_iface_init));
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_ITEM_VIEW_IFACE,
+                                                sw_item_view_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_ITEM_VIEW, SwItemViewPrivate))
@@ -47,8 +48,10 @@ enum
 };
 
 static void
-sw_item_view_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
+sw_item_view_get_property (GObject    *object,
+                           guint       property_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
 {
   SwItemViewPrivate *priv = GET_PRIVATE (object);
 
@@ -65,8 +68,10 @@ sw_item_view_get_property (GObject *object, guint property_id,
 }
 
 static void
-sw_item_view_set_property (GObject *object, guint property_id,
-                              const GValue *value, GParamSpec *pspec)
+sw_item_view_set_property (GObject      *object,
+                           guint         property_id,
+                           const GValue *value,
+                           GParamSpec   *pspec)
 {
   SwItemViewPrivate *priv = GET_PRIVATE (object);
 
@@ -182,8 +187,8 @@ sw_item_view_init (SwItemView *self)
 }
 
 static void
-sw_item_view_start (SwItemViewIface   *iface,
-                        DBusGMethodInvocation *context)
+sw_item_view_start (SwItemViewIface       *iface,
+                    DBusGMethodInvocation *context)
 {
   SwItemView *item_view = SW_ITEM_VIEW (iface);
 
@@ -194,8 +199,8 @@ sw_item_view_start (SwItemViewIface   *iface,
 }
 
 static void
-sw_item_view_refresh (SwItemViewIface   *iface,
-                          DBusGMethodInvocation *context)
+sw_item_view_refresh (SwItemViewIface       *iface,
+                      DBusGMethodInvocation *context)
 {
   SwItemView *item_view = SW_ITEM_VIEW (iface);
 
@@ -206,8 +211,8 @@ sw_item_view_refresh (SwItemViewIface   *iface,
 }
 
 static void
-sw_item_view_stop (SwItemViewIface   *iface,
-                       DBusGMethodInvocation *context)
+sw_item_view_stop (SwItemViewIface       *iface,
+                   DBusGMethodInvocation *context)
 {
   SwItemView *item_view = SW_ITEM_VIEW (iface);
 
@@ -218,8 +223,8 @@ sw_item_view_stop (SwItemViewIface   *iface,
 }
 
 static void
-sw_item_view_close (SwItemViewIface   *iface,
-                        DBusGMethodInvocation *context)
+sw_item_view_close (SwItemViewIface       *iface,
+                    DBusGMethodInvocation *context)
 {
   SwItemView *item_view = SW_ITEM_VIEW (iface);
 
@@ -231,7 +236,7 @@ sw_item_view_close (SwItemViewIface   *iface,
 
 static void
 sw_item_view_iface_init (gpointer g_iface,
-                             gpointer iface_data)
+                         gpointer iface_data)
 {
   SwItemViewIfaceClass *klass = (SwItemViewIfaceClass*)g_iface;
   sw_item_view_iface_implement_start (klass, sw_item_view_start);
@@ -250,7 +255,7 @@ sw_item_view_iface_init (gpointer g_iface,
  */
 void
 sw_item_view_add_item (SwItemView *item_view,
-                           SwItem     *item)
+                       SwItem     *item)
 {
   GValueArray *value_array;
   GPtrArray *ptr_array;
@@ -261,7 +266,7 @@ sw_item_view_add_item (SwItemView *item_view,
   g_ptr_array_add (ptr_array, value_array);
 
   sw_item_view_iface_emit_items_added (item_view,
-                                           ptr_array);
+                                       ptr_array);
 }
 
 /**
@@ -274,7 +279,7 @@ sw_item_view_add_item (SwItemView *item_view,
  */
 void
 sw_item_view_update_item (SwItemView *item_view,
-                              SwItem     *item)
+                          SwItem     *item)
 {
   GValueArray *value_array;
   GPtrArray *ptr_array;
@@ -285,7 +290,7 @@ sw_item_view_update_item (SwItemView *item_view,
   g_ptr_array_add (ptr_array, value_array);
 
   sw_item_view_iface_emit_items_changed (item_view,
-                                             ptr_array);
+                                         ptr_array);
 }
 
 /**
@@ -298,7 +303,7 @@ sw_item_view_update_item (SwItemView *item_view,
  */
 void
 sw_item_view_remove_item (SwItemView *item_view,
-                              SwItem     *item)
+                          SwItem     *item)
 {
   GValueArray *value_array;
   GPtrArray *ptr_array;
@@ -309,7 +314,7 @@ sw_item_view_remove_item (SwItemView *item_view,
   g_ptr_array_add (ptr_array, value_array);
 
   sw_item_view_iface_emit_items_removed (item_view,
-                                             ptr_array);
+                                         ptr_array);
 }
 
 /**
@@ -326,7 +331,7 @@ sw_item_view_remove_item (SwItemView *item_view,
  */
 void
 sw_item_view_add_items (SwItemView *item_view,
-                            GList          *items)
+                        GList      *items)
 {
   GValueArray *value_array;
   GPtrArray *ptr_array;
@@ -341,7 +346,7 @@ sw_item_view_add_items (SwItemView *item_view,
   }
 
   sw_item_view_iface_emit_items_added (item_view,
-                                           ptr_array);
+                                       ptr_array);
 }
 
 /**
@@ -354,7 +359,7 @@ sw_item_view_add_items (SwItemView *item_view,
  */
 void
 sw_item_view_update_items (SwItemView *item_view,
-                               GList          *items)
+                           GList      *items)
 {
   GValueArray *value_array;
   GPtrArray *ptr_array;
@@ -369,7 +374,7 @@ sw_item_view_update_items (SwItemView *item_view,
   }
 
   sw_item_view_iface_emit_items_changed (item_view,
-                                             ptr_array);
+                                         ptr_array);
 }
 
 /**
@@ -386,7 +391,7 @@ sw_item_view_update_items (SwItemView *item_view,
  */
 void
 sw_item_view_remove_items (SwItemView *item_view,
-                               GList          *items)
+                           GList      *items)
 {
   GValueArray *value_array;
   GPtrArray *ptr_array;
@@ -415,7 +420,7 @@ sw_item_view_remove_items (SwItemView *item_view,
   }
 
   sw_item_view_iface_emit_items_removed (item_view,
-                                             ptr_array);
+                                         ptr_array);
 }
 
 /**
@@ -462,7 +467,7 @@ sw_item_view_get_service (SwItemView *item_view)
  */
 void
 sw_item_view_add_from_set (SwItemView *item_view,
-                               SwSet      *set)
+                           SwSet      *set)
 {
   SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   GList *items;
@@ -485,7 +490,7 @@ sw_item_view_add_from_set (SwItemView *item_view,
  */
 void
 sw_item_view_remove_from_set (SwItemView *item_view,
-                                  SwSet      *set)
+                              SwSet      *set)
 {
   SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   GList *items;
@@ -512,7 +517,7 @@ sw_item_view_remove_from_set (SwItemView *item_view,
  */
 void
 sw_item_view_set_from_set (SwItemView *item_view,
-                               SwSet      *set)
+                           SwSet      *set)
 {
   SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   SwSet *added_items, *removed_items;

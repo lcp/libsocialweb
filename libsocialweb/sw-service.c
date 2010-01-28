@@ -55,9 +55,9 @@ sw_service_error_quark (void)
 
 static void
 sw_service_set_property (GObject      *object,
-                             guint         property_id,
-                             const GValue *value,
-                             GParamSpec   *pspec)
+                         guint         property_id,
+                         const GValue *value,
+                         GParamSpec   *pspec)
 {
   SwServicePrivate *priv = GET_PRIVATE (object);
 
@@ -74,9 +74,9 @@ sw_service_set_property (GObject      *object,
 
 static void
 sw_service_get_property (GObject    *object,
-                             guint       property_id,
-                             GValue     *value,
-                             GParamSpec *pspec)
+                         guint       property_id,
+                         GValue     *value,
+                         GParamSpec *pspec)
 {
   SwServicePrivate *priv = GET_PRIVATE (object);
 
@@ -178,7 +178,8 @@ sw_service_refresh (SwService *service)
 }
 
 void
-sw_service_emit_refreshed (SwService *service, SwSet *set)
+sw_service_emit_refreshed (SwService *service,
+                           SwSet     *set)
 {
   g_return_if_fail (SW_IS_SERVICE (service));
 
@@ -186,7 +187,8 @@ sw_service_emit_refreshed (SwService *service, SwSet *set)
 }
 
 void
-sw_service_emit_capabilities_changed (SwService *service, const char **caps)
+sw_service_emit_capabilities_changed (SwService   *service,
+                                      const char **caps)
 {
   g_return_if_fail (SW_IS_SERVICE (service));
 
@@ -194,8 +196,8 @@ sw_service_emit_capabilities_changed (SwService *service, const char **caps)
 }
 
 void
-sw_service_emit_avatar_retrieved (SwService *service,
-                                      const gchar   *path)
+sw_service_emit_avatar_retrieved (SwService   *service,
+                                  const gchar *path)
 {
   g_return_if_fail (SW_IS_SERVICE (service));
 
@@ -212,7 +214,7 @@ sw_service_emit_user_changed (SwService *service)
 
 
 static void
-service_request_avatar (SwServiceIface    *self,
+service_request_avatar (SwServiceIface        *self,
                         DBusGMethodInvocation *context)
 {
   SwServiceClass *service_class;
@@ -228,7 +230,8 @@ service_request_avatar (SwServiceIface    *self,
 }
 
 static void
-service_get_static_caps (SwServiceIface *self, DBusGMethodInvocation *context)
+service_get_static_caps (SwServiceIface        *self,
+                         DBusGMethodInvocation *context)
 {
   SwServiceClass *service_class;
   const char **caps = NULL;
@@ -242,7 +245,8 @@ service_get_static_caps (SwServiceIface *self, DBusGMethodInvocation *context)
 }
 
 static void
-service_get_dynamic_caps (SwServiceIface *self, DBusGMethodInvocation *context)
+service_get_dynamic_caps (SwServiceIface        *self,
+                          DBusGMethodInvocation *context)
 {
   SwServiceClass *service_class;
   const char **caps = NULL;
@@ -256,7 +260,8 @@ service_get_dynamic_caps (SwServiceIface *self, DBusGMethodInvocation *context)
 }
 
 static void
-service_credentials_updated (SwServiceIface *self, DBusGMethodInvocation *context)
+service_credentials_updated (SwServiceIface        *self,
+                             DBusGMethodInvocation *context)
 {
   SwServiceClass *service_class;
 
@@ -272,7 +277,8 @@ service_credentials_updated (SwServiceIface *self, DBusGMethodInvocation *contex
  * Convenience function for subclasses to lookup a paramter
  */
 const char *
-sw_service_get_param (SwService *service, const char *key)
+sw_service_get_param (SwService  *service,
+                      const char *key)
 {
   SwServicePrivate *priv;
 
@@ -294,11 +300,11 @@ service_iface_init (gpointer g_iface,
   SwServiceIfaceClass *klass = (SwServiceIfaceClass *)g_iface;
 
   sw_service_iface_implement_get_static_capabilities (klass,
-                                                   service_get_static_caps);
+                                                      service_get_static_caps);
   sw_service_iface_implement_get_dynamic_capabilities (klass,
-                                                   service_get_dynamic_caps);
+                                                       service_get_dynamic_caps);
   sw_service_iface_implement_request_avatar (klass,
-                                                 service_request_avatar);
+                                             service_request_avatar);
   sw_service_iface_implement_credentials_updated (klass,
-                                                      service_credentials_updated);
+                                                  service_credentials_updated);
 }

@@ -85,7 +85,8 @@ make_path (void)
 }
 
 static void
-view_weak_notify (gpointer data, GObject *old_view)
+view_weak_notify (gpointer  data,
+                  GObject  *old_view)
 {
   char *sender = data;
 
@@ -140,7 +141,9 @@ service_destroy_notify (gpointer user_data, GObject *dead_service)
 
 /* For the given name and parameters, return reference to a SwService. */
 static SwService *
-get_service (SwCore *core, const char *name, GHashTable *params)
+get_service (SwCore     *core,
+             const char *name,
+             GHashTable *params)
 {
   SwCorePrivate *priv = core->priv;
   char *param_hash, *key;
@@ -184,7 +187,8 @@ get_service (SwCore *core, const char *name, GHashTable *params)
 }
 
 static void
-view_weak_notify_list (gpointer data, GObject *old_view)
+view_weak_notify_list (gpointer  data,
+                       GObject  *old_view)
 {
   SwCore *core = data;
 
@@ -194,7 +198,10 @@ view_weak_notify_list (gpointer data, GObject *old_view)
 }
 
 static void
-open_view (SwCoreIface *self, const char **services, guint count, DBusGMethodInvocation *context)
+open_view (SwCoreIface            *self,
+           const char            **services,
+           guint                   count,
+           DBusGMethodInvocation  *context)
 {
   SwCore *core = SW_CORE (self);
   SwCorePrivate *priv = core->priv;
@@ -234,7 +241,9 @@ open_view (SwCoreIface *self, const char **services, guint count, DBusGMethodInv
 
   /* TODO: move this into the view? */
   client_monitor_add (dbus_g_method_get_sender (context), (GObject*)view);
-  g_object_weak_ref ((GObject*)view, view_weak_notify, dbus_g_method_get_sender (context));
+  g_object_weak_ref ((GObject*)view,
+                     view_weak_notify,
+                     dbus_g_method_get_sender (context));
 
   g_object_weak_ref ((GObject*)view, view_weak_notify_list, core);
   priv->views = g_list_prepend (priv->views, view);
@@ -245,11 +254,15 @@ open_view (SwCoreIface *self, const char **services, guint count, DBusGMethodInv
 }
 
 static void
-core_hide_item (SwCoreIface *iface, const gchar *uid, DBusGMethodInvocation *context)
+core_hide_item (SwCoreIface           *iface,
+                const gchar           *uid,
+                DBusGMethodInvocation *context)
 {
   SwCore *core = SW_CORE (iface);
 
-  g_hash_table_insert (core->priv->banned_uids, g_strdup (uid), GINT_TO_POINTER (42));
+  g_hash_table_insert (core->priv->banned_uids,
+                       g_strdup (uid),
+                       GINT_TO_POINTER (42));
 
   g_list_foreach (core->priv->views, (GFunc)sw_view_recalculate, NULL);
 
@@ -335,7 +348,8 @@ load_module (SwCore *core, const char *file)
     g_hash_table_insert (priv->bus_services,
                          (gchar *)service_name,
                          service);
-    path = g_strdup_printf ("/org/moblin/libsocialweb/Service/%s", service_name);
+    path = g_strdup_printf ("/org/moblin/libsocialweb/Service/%s",
+                            service_name);
     dbus_g_connection_register_g_object (priv->connection,
                                          path,
                                          (GObject*)service);
@@ -433,7 +447,9 @@ sw_core_constructed (GObject *object)
     g_error_free (error);
   }
 
-  dbus_g_connection_register_g_object (priv->connection, "/org/moblin/libsocialweb", object);
+  dbus_g_connection_register_g_object (priv->connection,
+                                       "/org/moblin/libsocialweb",
+                                       object);
 
   client_monitor_init (priv->connection);
 
@@ -519,7 +535,8 @@ sw_core_run (SwCore *core)
 }
 
 gboolean
-sw_core_is_item_banned (SwCore *core, SwItem *item)
+sw_core_is_item_banned (SwCore *core,
+                        SwItem *item)
 {
   const char *id;
 

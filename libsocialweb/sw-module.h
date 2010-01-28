@@ -18,6 +18,6 @@
 
 #include <glib-object.h>
 
-const gchar * sw_module_get_name (void);
+const gchar *sw_module_get_name (void);
 
 const GType sw_module_get_type (void);

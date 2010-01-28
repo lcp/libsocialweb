@@ -132,9 +132,12 @@ sw_item_put (SwItem *item, const char *key, const char *value)
   g_return_if_fail (key);
 
   if (value)
-    g_hash_table_insert (item->priv->hash, (gpointer)g_intern_string (key), g_strdup (value));
+    g_hash_table_insert (item->priv->hash,
+                         (gpointer)g_intern_string (key),
+                         g_strdup (value));
   else
-    g_hash_table_remove (item->priv->hash, (gpointer)g_intern_string (key));
+    g_hash_table_remove (item->priv->hash,
+                         (gpointer)g_intern_string (key));
 
   sw_item_touch (item);
 }
@@ -146,9 +149,12 @@ sw_item_take (SwItem *item, const char *key, char *value)
   g_return_if_fail (key);
 
   if (value)
-    g_hash_table_insert (item->priv->hash, (gpointer)g_intern_string (key), value);
+    g_hash_table_insert (item->priv->hash,
+                         (gpointer)g_intern_string (key),
+                         value);
   else
-    g_hash_table_remove (item->priv->hash, (gpointer)g_intern_string (key));
+    g_hash_table_remove (item->priv->hash,
+                         (gpointer)g_intern_string (key));
 
   sw_item_touch (item);
 }
@@ -211,7 +217,9 @@ sw_item_dump (SwItem *item)
 
   g_printerr ("SwItem %p\n", item);
   g_hash_table_iter_init (&iter, item->priv->hash);
-  while (g_hash_table_iter_next (&iter, (gpointer)&key, (gpointer)&value)) {
+  while (g_hash_table_iter_next (&iter,
+                                 (gpointer)&key,
+                                 (gpointer)&value)) {
     g_printerr (" %s=%s\n", key, value);
   }
 }
@@ -220,7 +228,8 @@ static guint
 item_hash (gconstpointer key)
 {
   const SwItem *item = key;
-  return g_str_hash (g_hash_table_lookup (item->priv->hash, g_intern_string ("id")));
+  return g_str_hash (g_hash_table_lookup (item->priv->hash,
+                                          g_intern_string ("id")));
 }
 
 gboolean
@@ -229,8 +238,10 @@ item_equal (gconstpointer a, gconstpointer b)
   const SwItem *item_a = a;
   const SwItem *item_b = b;
 
-  return g_str_equal (g_hash_table_lookup (item_a->priv->hash, g_intern_string ("id")),
-                      g_hash_table_lookup (item_b->priv->hash, g_intern_string ("id")));
+  return g_str_equal (g_hash_table_lookup (item_a->priv->hash,
+                                           g_intern_string ("id")),
+                      g_hash_table_lookup (item_b->priv->hash,
+                                           g_intern_string ("id")));
 }
 
 SwSet *
@@ -296,10 +307,10 @@ _image_download_cb (const char               *url,
 }
 
 void
-sw_item_request_image_fetch (SwItem  *item,
-                                 gboolean     delays_ready,
-                                 const gchar *key,
-                                 const gchar *url)
+sw_item_request_image_fetch (SwItem      *item,
+                             gboolean     delays_ready,
+                             const gchar *key,
+                             const gchar *url)
 {
   RequestImageFetchClosure *closure;
 
@@ -316,11 +327,11 @@ sw_item_request_image_fetch (SwItem  *item,
   closure->delays_ready = delays_ready;
 
   SW_DEBUG (ITEM, "Scheduling fetch for %s on: %s",
-                url,
-                sw_item_get (closure->item, "id"));
+            url,
+            sw_item_get (closure->item, "id"));
   sw_web_download_image_async (url,
-                                   (ImageDownloadCallback)_image_download_cb,
-                                   closure);
+                               (ImageDownloadCallback)_image_download_cb,
+                               closure);
 }
 
 /*

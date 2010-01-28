@@ -55,13 +55,17 @@ sw_set_new (void)
 }
 
 SwSet *
-sw_set_new_full (GHashFunc hash_func, GEqualFunc equal_func)
+sw_set_new_full (GHashFunc  hash_func,
+                 GEqualFunc equal_func)
 {
   SwSet *set;
 
   set = g_slice_new0 (SwSet);
   set->ref_count = 1;
-  set->hash = g_hash_table_new_full (hash_func, equal_func, g_object_unref, NULL);
+  set->hash = g_hash_table_new_full (hash_func,
+                                     equal_func,
+                                     g_object_unref,
+                                     NULL);
   set->hash_func = hash_func;
   set->equal_func = equal_func;
 
@@ -92,7 +96,8 @@ sw_set_unref (SwSet *set)
 }
 
 void
-sw_set_add (SwSet *set, GObject *item)
+sw_set_add (SwSet   *set,
+            GObject *item)
 {
   g_return_if_fail (set);
   g_return_if_fail (G_IS_OBJECT (item));
@@ -101,7 +106,8 @@ sw_set_add (SwSet *set, GObject *item)
 }
 
 void
-sw_set_remove (SwSet *set, GObject *item)
+sw_set_remove (SwSet   *set,
+               GObject *item)
 {
   g_return_if_fail (set);
   g_return_if_fail (G_IS_OBJECT (item));
@@ -110,7 +116,8 @@ sw_set_remove (SwSet *set, GObject *item)
 }
 
 gboolean
-sw_set_has (SwSet *set, GObject *item)
+sw_set_has (SwSet   *set,
+            GObject *item)
 {
   g_return_val_if_fail (set, FALSE);
   g_return_val_if_fail (G_IS_OBJECT (item), FALSE);
@@ -136,7 +143,9 @@ sw_set_empty (SwSet *set)
 
 
 static void
-add_to_set (gpointer key, gpointer value, gpointer user_data)
+add_to_set (gpointer key,
+            gpointer value,
+            gpointer user_data)
 {
   GObject *object = key;
   SwSet *set = user_data;
@@ -145,7 +154,8 @@ add_to_set (gpointer key, gpointer value, gpointer user_data)
 }
 
 SwSet *
-sw_set_union (SwSet *set_a, SwSet *set_b)
+sw_set_union (SwSet *set_a,
+              SwSet *set_b)
 {
   SwSet *set;
 
@@ -162,7 +172,8 @@ sw_set_union (SwSet *set_a, SwSet *set_b)
 
 /* new set with elements in a but not in b */
 SwSet *
-sw_set_difference (SwSet *set_a, SwSet *set_b)
+sw_set_difference (SwSet *set_a,
+                   SwSet *set_b)
 {
   SwSet *set;
   GHashTableIter iter;
@@ -184,7 +195,8 @@ sw_set_difference (SwSet *set_a, SwSet *set_b)
 }
 
 void
-sw_set_add_from (SwSet *set, SwSet *from)
+sw_set_add_from (SwSet *set,
+                 SwSet *from)
 {
   g_return_if_fail (set);
   g_return_if_fail (from);
@@ -193,7 +205,9 @@ sw_set_add_from (SwSet *set, SwSet *from)
 }
 
 static void
-remove_from_set (gpointer key, gpointer value, gpointer user_data)
+remove_from_set (gpointer key,
+                 gpointer value,
+                 gpointer user_data)
 {
   SwSet *set = user_data;
 
@@ -201,7 +215,8 @@ remove_from_set (gpointer key, gpointer value, gpointer user_data)
 }
 
 void
-sw_set_remove_from (SwSet *set, SwSet *from)
+sw_set_remove_from (SwSet *set,
+                    SwSet *from)
 {
   g_return_if_fail (set);
   g_return_if_fail (from);
@@ -238,7 +253,9 @@ sw_set_from_list (GList *list)
 }
 
 void
-sw_set_foreach (SwSet *set, GFunc func, gpointer user_data)
+sw_set_foreach (SwSet    *set,
+                GFunc     func,
+                gpointer  user_data)
 {
   GHashTableIter iter;
   gpointer key;
@@ -258,16 +275,18 @@ typedef struct {
 } RemoveData;
 
 static gboolean
-foreach_remove (gpointer key, gpointer value, gpointer user_data)
+foreach_remove (gpointer key,
+                gpointer value,
+                gpointer user_data)
 {
   RemoveData *data = user_data;
   return data->func (key, data->user_data);
 }
 
 guint
-sw_set_foreach_remove (SwSet *set,
-                           SwSetForeachRemoveFunc func,
-                           gpointer user_data)
+sw_set_foreach_remove (SwSet                  *set,
+                       SwSetForeachRemoveFunc  func,
+                       gpointer                user_data)
 {
   RemoveData data;
 
@@ -292,8 +311,8 @@ sw_set_size (SwSet *set)
 
 SwSet *
 sw_set_filter (SwSet           *set_in,
-                   SwSetFilterFunc  func,
-                   gpointer             user_data)
+               SwSetFilterFunc  func,
+               gpointer         user_data)
 {
   GHashTableIter iter;
   gpointer object;

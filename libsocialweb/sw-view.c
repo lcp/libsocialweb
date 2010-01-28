@@ -30,7 +30,8 @@
 
 static void view_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (SwView, sw_view, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (SW_TYPE_VIEW_IFACE, view_iface_init));
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_VIEW_IFACE,
+                                                view_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_VIEW, SwViewPrivate))
@@ -68,13 +69,15 @@ enum {
 };
 
 static int
-get_service_count (GHashTable *hash, SwService *service)
+get_service_count (GHashTable *hash,
+                   SwService  *service)
 {
   return GPOINTER_TO_INT (g_hash_table_lookup (hash, service));
 }
 
 static void
-inc_service_count (GHashTable *hash, SwService *service)
+inc_service_count (GHashTable *hash,
+                   SwService  *service)
 {
   int count;
   count = GPOINTER_TO_INT (g_hash_table_lookup (hash, service));
@@ -175,7 +178,8 @@ munge_items (SwView *view)
 }
 
 static gboolean
-remove_service (GObject *object, gpointer user_data)
+remove_service (GObject  *object,
+                gpointer  user_data)
 {
   SwItem *item = SW_ITEM (object);
   SwService *service = SW_SERVICE (user_data);
@@ -185,7 +189,7 @@ remove_service (GObject *object, gpointer user_data)
 
 static void
 sw_view_removed_items (SwView *view,
-                           SwSet  *removed_items)
+                       SwSet  *removed_items)
 {
   GValueArray *value_array;
   GPtrArray *ptr_array;
@@ -220,7 +224,7 @@ sw_view_removed_items (SwView *view,
 
 static void
 sw_view_added_items (SwView *view,
-                         SwSet  *added_items)
+                     SwSet  *added_items)
 {
   GValueArray *value_array;
   GPtrArray *ptr_array;
@@ -236,8 +240,7 @@ sw_view_added_items (SwView *view,
     g_ptr_array_add (ptr_array, value_array);
   }
 
-  sw_view_iface_emit_items_added (view,
-                                      ptr_array);
+  sw_view_iface_emit_items_added (view, ptr_array);
 
   g_ptr_array_foreach (ptr_array, (GFunc)g_value_array_free, NULL);
   g_ptr_array_free (ptr_array, TRUE);
@@ -246,7 +249,7 @@ sw_view_added_items (SwView *view,
 
 static void
 sw_view_changed_items (SwView *view,
-                           SwSet  *added_items)
+                       SwSet  *added_items)
 {
   GValueArray *value_array;
   GPtrArray *ptr_array;
@@ -262,8 +265,7 @@ sw_view_changed_items (SwView *view,
     g_ptr_array_add (ptr_array, value_array);
   }
 
-  sw_view_iface_emit_items_changed (view,
-                                        ptr_array);
+  sw_view_iface_emit_items_changed (view, ptr_array);
 
   g_ptr_array_foreach (ptr_array, (GFunc)g_value_array_free, NULL);
   g_ptr_array_free (ptr_array, TRUE);
@@ -302,8 +304,8 @@ sw_view_recalculate (SwView *view)
   if (priv->last_recalculate_time != 0)
   {
     changed_items = sw_set_filter (new_items,
-                                       (SwSetFilterFunc)_filter_only_changed_cb,
-                                       view);
+                                   (SwSetFilterFunc)_filter_only_changed_cb,
+                                   view);
   }
 
   if (!sw_set_is_empty (removed_items))
@@ -354,9 +356,9 @@ sw_view_queue_recalculate (SwView *view)
 }
 
 static void
-_item_ready_notify_cb (SwItem *item,
+_item_ready_notify_cb (SwItem     *item,
                        GParamSpec *pspec,
-                       SwView *view)
+                       SwView     *view)
 {
   /* TODO: Use a timeout to rate limit this */
   if (sw_item_get_ready (item)) {
@@ -388,7 +390,9 @@ setup_ready_handler (gpointer object, gpointer user_data)
 }
 
 static void
-service_updated (SwService *service, SwSet *set, gpointer user_data)
+service_updated (SwService *service,
+                 SwSet     *set,
+                 gpointer   user_data)
 {
   SwView *view = SW_VIEW (user_data);
   SwViewPrivate *priv = view->priv;
@@ -422,8 +426,8 @@ start_refresh (SwView *view)
   for (l = priv->services; l; l = l->next) {
     SwService *service = l->data;
     SW_DEBUG (VIEWS, "Refreshing %s on view %p",
-                  sw_service_get_name (service),
-                  view);
+              sw_service_get_name (service),
+              view);
     sw_service_refresh (service);
   }
 
@@ -446,7 +450,9 @@ static void
 install_refresh_timeout (SwView *view)
 {
   if (view->priv->refresh_timeout_id == 0)
-    view->priv->refresh_timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT, (GSourceFunc)start_refresh, view);
+    view->priv->refresh_timeout_id = g_timeout_add_seconds (REFRESH_TIMEOUT,
+                                                            (GSourceFunc)start_refresh,
+                                                            view);
 }
 
 static void
@@ -459,7 +465,8 @@ remove_refresh_timeout (SwView *view)
 }
 
 static void
-online_notify (gboolean online, gpointer user_data)
+online_notify (gboolean online,
+               gpointer user_data)
 {
   SwView *view = user_data;
 
@@ -475,7 +482,8 @@ online_notify (gboolean online, gpointer user_data)
 }
 
 static void
-view_start (SwViewIface *iface, DBusGMethodInvocation *context)
+view_start (SwViewIface           *iface,
+            DBusGMethodInvocation *context)
 {
   SwView *view = SW_VIEW (iface);
   GList *l;
@@ -500,7 +508,8 @@ view_start (SwViewIface *iface, DBusGMethodInvocation *context)
 }
 
 static void
-view_refresh (SwViewIface *iface, DBusGMethodInvocation *context)
+view_refresh (SwViewIface           *iface,
+              DBusGMethodInvocation *context)
 {
   SwView *view = SW_VIEW (iface);
 
@@ -522,7 +531,8 @@ stop (SwView *view)
 }
 
 static void
-view_stop (SwViewIface *iface, DBusGMethodInvocation *context)
+view_stop (SwViewIface           *iface,
+           DBusGMethodInvocation *context)
 {
   SwView *view = SW_VIEW (iface);
 
@@ -532,7 +542,8 @@ view_stop (SwViewIface *iface, DBusGMethodInvocation *context)
 }
 
 static void
-view_close (SwViewIface *iface, DBusGMethodInvocation *context)
+view_close (SwViewIface           *iface,
+            DBusGMethodInvocation *context)
 {
   SwView *view = SW_VIEW (iface);
 
@@ -546,9 +557,9 @@ view_close (SwViewIface *iface, DBusGMethodInvocation *context)
 
 static void
 sw_view_get_property (GObject    *object,
-                            guint       property_id,
-                            GValue     *value,
-                            GParamSpec *pspec)
+                      guint       property_id,
+                      GValue     *value,
+                      GParamSpec *pspec)
 {
   SwViewPrivate *priv = SW_VIEW (object)->priv;
 
@@ -566,9 +577,9 @@ sw_view_get_property (GObject    *object,
 
 static void
 sw_view_set_property (GObject      *object,
-                            guint         property_id,
-                            const GValue *value,
-                            GParamSpec   *pspec)
+                      guint         property_id,
+                      const GValue *value,
+                      GParamSpec   *pspec)
 {
   SwViewPrivate *priv = SW_VIEW (object)->priv;
 
@@ -691,7 +702,9 @@ sw_view_new (SwCore *core, guint count)
 
 /* This adopts the reference passed */
 void
-sw_view_add_service (SwView *view, SwService *service, GHashTable *params)
+sw_view_add_service (SwView     *view,
+                     SwService  *service,
+                     GHashTable *params)
 {
   SwViewPrivate *priv = view->priv;
 

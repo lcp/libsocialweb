@@ -29,6 +29,10 @@ char * sw_web_download_image (const char *url);
  * @url: the URL you requested
  * @file: the local file if the download was successful, otherwise NULL
  */
-typedef void (*ImageDownloadCallback) (const char *url, char *file, gpointer user_data);
+typedef void (*ImageDownloadCallback) (const char *url,
+                                       char       *file,
+                                       gpointer    user_data);
 
-void sw_web_download_image_async (const char *url, ImageDownloadCallback callback, gpointer user_data);
+void sw_web_download_image_async (const char            *url,
+                                  ImageDownloadCallback  callback,
+                                  gpointer               user_data);

@@ -34,7 +34,8 @@ static GList *listeners = NULL;
 static gboolean online_init (void);
 
 void
-sw_online_add_notify (SwOnlineNotify callback, gpointer user_data)
+sw_online_add_notify (SwOnlineNotify callback,
+                      gpointer       user_data)
 {
   ListenerData *data;
 
@@ -49,7 +50,8 @@ sw_online_add_notify (SwOnlineNotify callback, gpointer user_data)
 }
 
 void
-sw_online_remove_notify (SwOnlineNotify callback, gpointer user_data)
+sw_online_remove_notify (SwOnlineNotify callback,
+                         gpointer       user_data)
 {
   GList *l = listeners;
 
@@ -118,9 +120,9 @@ we_are_online (gpointer user_data)
 }
 
 static void
-state_changed (NMClient        *client,
-	       const GParamSpec *pspec,
-	       gpointer          data)
+state_changed (NMClient         *client,
+               const GParamSpec *pspec,
+               gpointer          data)
 {
   if (sw_is_online()) {
     /* NM is notifying us too early - workaround that */
@@ -135,8 +137,10 @@ online_init (void)
 {
   if (!client) {
     client = nm_client_new();
-    g_signal_connect (client, "notify::" NM_CLIENT_STATE,
-		      G_CALLBACK (state_changed), NULL);
+    g_signal_connect (client,
+                      "notify::" NM_CLIENT_STATE,
+		      G_CALLBACK (state_changed),
+                      NULL);
   }
   return TRUE;
 }
@@ -176,7 +180,10 @@ static gboolean current_state;
 #define STRING_VARIANT_HASHTABLE (dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_VALUE))
 
 static void
-prop_changed (DBusGProxy *proxy, const char *key, GValue *v, gpointer user_data)
+prop_changed (DBusGProxy *proxy,
+              const char *key,
+              GValue     *v,
+              gpointer    user_data)
 {
   const char *s;
 
@@ -191,14 +198,21 @@ prop_changed (DBusGProxy *proxy, const char *key, GValue *v, gpointer user_data)
 }
 
 static void
-got_props_cb (DBusGProxy *proxy, DBusGProxyCall *call, void *user_data)
+got_props_cb (DBusGProxy     *proxy,
+              DBusGProxyCall *call,
+              void           *user_data)
 {
   GHashTable *hash;
   GError *error = NULL;
   const GValue *value;
   const char *s;
 
-  if (!dbus_g_proxy_end_call (proxy, call, &error, STRING_VARIANT_HASHTABLE, &hash, G_TYPE_INVALID)) {
+  if (!dbus_g_proxy_end_call (proxy,
+                              call,
+                              &error,
+                              STRING_VARIANT_HASHTABLE,
+                              &hash,
+                              G_TYPE_INVALID)) {
     g_printerr ("Cannot get current online state: %s", error->message);
     g_error_free (error);
     return;
@@ -228,24 +242,35 @@ online_init (void)
     return FALSE;
   }
 
-  proxy = dbus_g_proxy_new_for_name (conn, "org.moblin.connman",
-                                     "/", "org.moblin.connman.Manager");
+  proxy = dbus_g_proxy_new_for_name (conn,
+                                     "org.moblin.connman",
+                                     "/",
+                                     "org.moblin.connman.Manager");
 
   dbus_g_object_register_marshaller (sw_marshal_VOID__STRING_BOXED,
                                      G_TYPE_NONE,
                                      G_TYPE_STRING,
                                      G_TYPE_BOXED,
                                      G_TYPE_INVALID);
-  dbus_g_proxy_add_signal (proxy, "PropertyChanged",
-                           G_TYPE_STRING, G_TYPE_VALUE, NULL);
-  dbus_g_proxy_connect_signal (proxy, "PropertyChanged",
-                               (GCallback)prop_changed, NULL, NULL);
+  dbus_g_proxy_add_signal (proxy,
+                           "PropertyChanged",
+                           G_TYPE_STRING,
+                           G_TYPE_VALUE,
+                           NULL);
+  dbus_g_proxy_connect_signal (proxy,
+                               "PropertyChanged",
+                               (GCallback)prop_changed,
+                               NULL,
+                               NULL);
 
   current_state = FALSE;
 
   /* Get the current state */
-  dbus_g_proxy_begin_call (proxy, "GetProperties",
-                           got_props_cb, NULL, NULL,
+  dbus_g_proxy_begin_call (proxy,
+                           "GetProperties",
+                           got_props_cb,
+                           NULL,
+                           NULL,
                            G_TYPE_INVALID);
 
   return TRUE;
