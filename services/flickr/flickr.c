@@ -207,7 +207,9 @@ get_photos (SwServiceFlickr *flickr)
 }
 
 static void
-got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
+got_tokens_cb (RestProxy *proxy,
+               gboolean   authorised,
+               gpointer   user_data)
 {
   SwServiceFlickr *flickr = SW_SERVICE_FLICKR (user_data);
 
@@ -296,7 +298,8 @@ sw_service_flickr_initable (GInitable    *initable,
 }
 
 static void
-initable_iface_init (gpointer g_iface, gpointer iface_data)
+initable_iface_init (gpointer g_iface,
+                     gpointer iface_data)
 {
   GInitableIface *klass = (GInitableIface *)g_iface;
 

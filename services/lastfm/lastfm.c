@@ -155,7 +155,8 @@ make_title (RestXmlNode *node)
 }
 
 static const char *
-get_image_url (RestXmlNode *node, const char *size)
+get_image_url (RestXmlNode *node,
+               const char  *size)
 {
   g_assert (node);
   g_assert (size);
@@ -222,7 +223,9 @@ get_artist_info_cb (RestProxyCall *call,
 }
 
 static void
-get_thumbnail (SwServiceLastfm *lastfm, SwItem *item, RestXmlNode *track_node)
+get_thumbnail (SwServiceLastfm *lastfm,
+               SwItem          *item,
+               RestXmlNode     *track_node)
 {
   const char *url;
   RestProxyCall *call;
@@ -423,7 +426,10 @@ refresh (SwService *service)
 }
 
 static void
-user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
+user_changed_cb (GConfClient *client,
+                 guint        cnxn_id,
+                 GConfEntry  *entry,
+                 gpointer     user_data)
 {
   SwService *service = SW_SERVICE (user_data);
   SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (service);
@@ -501,9 +507,9 @@ sw_service_lastfm_finalize (GObject *object)
 }
 
 static gboolean
-sw_service_lastfm_initable (GInitable    *initable,
-                         GCancellable *cancellable,
-                         GError      **error)
+sw_service_lastfm_initable (GInitable     *initable,
+                            GCancellable  *cancellable,
+                            GError       **error)
 {
   SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (initable);
   SwServiceLastfmPrivate *priv = lastfm->priv;
@@ -539,7 +545,8 @@ sw_service_lastfm_initable (GInitable    *initable,
 }
 
 static void
-initable_iface_init (gpointer g_iface, gpointer iface_data)
+initable_iface_init (gpointer g_iface,
+                     gpointer iface_data)
 {
   GInitableIface *klass = (GInitableIface *)g_iface;
 
@@ -547,7 +554,8 @@ initable_iface_init (gpointer g_iface, gpointer iface_data)
 }
 
 static void
-lastfm_iface_init (gpointer g_iface, gpointer iface_data)
+lastfm_iface_init (gpointer g_iface,
+                   gpointer iface_data)
 {
   SwLastfmIfaceClass *klass = (SwLastfmIfaceClass *)g_iface;
 

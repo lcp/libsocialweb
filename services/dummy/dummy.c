@@ -69,8 +69,10 @@ refresh (SwService *service)
 }
 
 static void
-sw_service_dummy_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
+sw_service_dummy_get_property (GObject    *object,
+                               guint       property_id,
+                               GValue     *value,
+                               GParamSpec *pspec)
 {
   switch (property_id) {
   default:
@@ -79,8 +81,10 @@ sw_service_dummy_get_property (GObject *object, guint property_id,
 }
 
 static void
-sw_service_dummy_set_property (GObject *object, guint property_id,
-                              const GValue *value, GParamSpec *pspec)
+sw_service_dummy_set_property (GObject      *object,
+                               guint         property_id,
+                               const GValue *value,
+                               GParamSpec   *pspec)
 {
   switch (property_id) {
   default:

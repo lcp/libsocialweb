@@ -51,7 +51,8 @@ struct _SwServiceDiggPrivate {
  * different ways, just the raw result is returned
  */
 static RestXmlNode *
-digg_call (SwServiceDigg *digg, gchar *subrequest)
+digg_call (SwServiceDigg *digg,
+           gchar         *subrequest)
 {
   GError *error = NULL;
   RestProxyCall *call;
@@ -97,7 +98,8 @@ digg_call (SwServiceDigg *digg, gchar *subrequest)
 }
 
 static void
-retrieve_thumbnail (SwItem *item, RestXmlNode *node)
+retrieve_thumbnail (SwItem      *item,
+                    RestXmlNode *node)
 {
   RestXmlNode *thumb;
 
@@ -105,7 +107,10 @@ retrieve_thumbnail (SwItem *item, RestXmlNode *node)
   if (thumb == NULL)
     return;
 
-  sw_item_request_image_fetch (item, TRUE, "thumbnail", rest_xml_node_get_attr (thumb, "src"));
+  sw_item_request_image_fetch (item,
+                               TRUE,
+                               "thumbnail",
+                               rest_xml_node_get_attr (thumb, "src"));
 }
 
 static void
@@ -117,7 +122,9 @@ start (SwService *service)
 }
 
 static SwItem *
-init_item (SwServiceDigg *digg, RestXmlNode *node, gchar *id_prefix)
+init_item (SwServiceDigg *digg,
+           RestXmlNode   *node,
+           gchar         *id_prefix)
 {
   SwItem *item;
   char *id;
@@ -138,7 +145,10 @@ init_item (SwServiceDigg *digg, RestXmlNode *node, gchar *id_prefix)
   sw_item_put (item, "title", rest_xml_node_find (node, "title")->content);
   sw_item_put (item, "content", rest_xml_node_find (node, "description")->content);
   retrieve_thumbnail (item, node);
-  sw_item_take (item, "date", sw_time_t_to_string (atoi (rest_xml_node_get_attr (node, "submit_date"))));
+  sw_item_take (item,
+                "date",
+                sw_time_t_to_string (atoi (rest_xml_node_get_attr (node,
+                                                                   "submit_date"))));
 
   /*
    * "author" is assigned case by case
@@ -148,15 +158,22 @@ init_item (SwServiceDigg *digg, RestXmlNode *node, gchar *id_prefix)
 }
 
 static void
-assign_author (SwItem *item, RestXmlNode *author)
+assign_author (SwItem      *item,
+               RestXmlNode *author)
 {
   sw_item_put (item, "author", rest_xml_node_get_attr (author, "fullname"));
   sw_item_put (item, "authorid", rest_xml_node_get_attr (author, "name"));
-  sw_item_request_image_fetch (item, FALSE, "authoricon", rest_xml_node_get_attr (author, "icon"));
+  sw_item_request_image_fetch (item,
+                               FALSE,
+                               "authoricon",
+                               rest_xml_node_get_attr (author, "icon"));
 }
 
 static void
-collect_with_friends (SwServiceDigg *digg, RestXmlNode *node, SwSet *set, gchar *prefix)
+collect_with_friends (SwServiceDigg *digg,
+                      RestXmlNode   *node,
+                      SwSet         *set,
+                      gchar         *prefix)
 {
   gchar *complete_prefix;
   RestXmlNode *friends, *author;
@@ -165,7 +182,8 @@ collect_with_friends (SwServiceDigg *digg, RestXmlNode *node, SwSet *set, gchar 
   friends = rest_xml_node_find (node, "friends");
 
   for (author = rest_xml_node_find (friends, "user"); author; author = author->next) {
-    complete_prefix = g_strdup_printf ("%s_%s", prefix, rest_xml_node_get_attr (author, "name"));
+    complete_prefix = g_strdup_printf ("%s_%s", prefix,
+                                       rest_xml_node_get_attr (author, "name"));
     item = init_item (digg, node, complete_prefix);
     g_free (complete_prefix);
     assign_author (item, author);
@@ -190,7 +208,9 @@ refresh (SwService *service)
 
   root_node = digg_call (digg, "submissions");
   if (root_node != NULL) {
-    for (user_node = rest_xml_node_find (root_node, "story"); user_node; user_node = user_node->next) {
+    for (user_node = rest_xml_node_find (root_node, "story");
+         user_node;
+         user_node = user_node->next) {
       item = init_item (digg, user_node, NULL);
       assign_author (item, rest_xml_node_find (user_node, "user"));
       sw_set_add (set, (GObject*)item);
@@ -201,14 +221,18 @@ refresh (SwService *service)
 
   root_node = digg_call (digg, "commented");
   if (root_node != NULL) {
-    for (user_node = rest_xml_node_find (root_node, "story"); user_node; user_node = user_node->next)
+    for (user_node = rest_xml_node_find (root_node, "story");
+         user_node;
+         user_node = user_node->next)
       collect_with_friends (digg, user_node, set, "comment");
     rest_xml_node_unref (root_node);
   }
 
   root_node = digg_call (digg, "dugg");
   if (root_node != NULL) {
-    for (user_node = rest_xml_node_find (root_node, "story"); user_node; user_node = user_node->next)
+    for (user_node = rest_xml_node_find (root_node, "story");
+         user_node;
+         user_node = user_node->next)
       collect_with_friends (digg, user_node, set, "digg");
     rest_xml_node_unref (root_node);
   }
@@ -217,7 +241,10 @@ refresh (SwService *service)
 }
 
 static void
-user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
+user_changed_cb (GConfClient *client,
+                 guint        cnxn_id,
+                 GConfEntry  *entry,
+                 gpointer     user_data)
 {
   SwService *service = SW_SERVICE (user_data);
   SwServiceDigg *digg = SW_SERVICE_DIGG (service);
@@ -312,8 +339,11 @@ sw_service_digg_init (SwServiceDigg *self)
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_BASE,
                         GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  priv->gconf_notify_id = gconf_client_notify_add (priv->gconf, KEY_USER,
-                                                   user_changed_cb, self,
-                                                   NULL, NULL);
+  priv->gconf_notify_id = gconf_client_notify_add (priv->gconf,
+                                                   KEY_USER,
+                                                   user_changed_cb,
+                                                   self,
+                                                   NULL,
+                                                   NULL);
   gconf_client_notify (priv->gconf, KEY_USER);
 }
