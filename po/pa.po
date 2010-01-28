@@ -4,7 +4,7 @@
 # A S Alam <aalam@users.sf.net>, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: mojito.Moblin2.mojito\n"
+"Project-Id-Version: libsocialweb.Moblin2.libsocialweb\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-08-05 09:16+0000\n"
 "PO-Revision-Date: 2009-08-07 07:04+0530\n"

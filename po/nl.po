@@ -1,13 +1,13 @@
-# Dutch translation of mojito.
-# Copyright (C) 2009 THE mojito'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the mojito package.
+# Dutch translation of libsocialweb.
+# Copyright (C) 2009 THE libsocialweb'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the libsocialweb package.
 # Auke Kok <auke-jan.h.kok@intel.com>, 2009.
 # , fuzzy
 #
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: mojito moblin2\n"
+"Project-Id-Version: libsocialweb moblin2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-08-05 09:16+0000\n"
 "PO-Revision-Date: 2009-08-05 14:38-0800\n"

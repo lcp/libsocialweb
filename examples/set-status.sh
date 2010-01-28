@@ -12,7 +12,7 @@ shift
 MESSAGE="$@"
 
 dbus-send --session --print-reply \
-    --dest=com.intel.Mojito \
-    /com/intel/Mojito/Service/$SERVICE \
-    com.intel.Mojito.Service.UpdateStatus \
+    --dest=org.moblin.libsocialweb \
+    /org/moblin/libsocialweb/Service/$SERVICE \
+    org.moblin.libsocialweb.Service.UpdateStatus \
     string:"$MESSAGE"

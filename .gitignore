@@ -20,9 +20,9 @@ build-aux
 examples/test-client
 examples/monitor-caps
 examples/test-client-query
-src/mojito.service
-src/mojito-core
-mojito-keystore/test-suite
+src/libsocialweb.service
+src/libsocialweb-core
+libsocialweb-keystore/test-suite
 tests/test-online
 tests/test-client-online
 tests/test-download
@@ -35,7 +35,7 @@ intltool-*
 po/POTFILES
 po/stamp-it
 po/*.gmo
-po/mojito.pot
+po/libsocialweb.pot
 m4/intltool.m4
 m4/libtool.m4
 m4/lt*.m4

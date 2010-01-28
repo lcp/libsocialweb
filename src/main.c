@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,8 +19,8 @@
 #include <config.h>
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-bindings.h>
-#include <mojito/mojito-core.h>
-#include <mojito/mojito-debug.h>
+#include <libsocialweb/sw-core.h>
+#include <libsocialweb/sw-debug.h>
 #include "poll.h"
 
 static char *debug_opts = NULL;
@@ -51,7 +51,7 @@ request_name (void)
                                      DBUS_PATH_DBUS,
                                      DBUS_INTERFACE_DBUS);
 
-  if (!org_freedesktop_DBus_request_name (proxy, "com.intel.Mojito",
+  if (!org_freedesktop_DBus_request_name (proxy, "org.moblin.libsocialweb",
                                           DBUS_NAME_FLAG_DO_NOT_QUEUE, &request_status,
                                           &error)) {
     g_printerr ("Failed to request name: %s\n", error->message);
@@ -67,12 +67,12 @@ main (int argc, char **argv)
 {
   GOptionContext *context;
   GError *error = NULL;
-  MojitoCore *core;
+  SwCore *core;
 
   g_thread_init (NULL);
   g_type_init ();
-  g_set_prgname ("mojito");
-  g_set_application_name ("Mojito");
+  g_set_prgname (PACKAGE);
+  g_set_application_name (PACKAGE);
 
   context = g_option_context_new (NULL);
   g_option_context_add_main_entries (context, entries, GETTEXT_PACKAGE);
@@ -81,17 +81,17 @@ main (int argc, char **argv)
     return 1;
   }
 
-  mojito_debug_init (debug_opts ? debug_opts : g_getenv ("MOJITO_DEBUG"));
+  sw_debug_init (debug_opts ? debug_opts : g_getenv ("SW_DEBUG"));
 
-  core = mojito_core_dup_singleton ();
+  core = sw_core_dup_singleton ();
 
-  if (MOJITO_DEBUG_ENABLED (MAIN_LOOP))
+  if (SW_DEBUG_ENABLED (MAIN_LOOP))
     poll_init ();
 
   if (!request_name ())
     return 0;
 
-  mojito_core_run (core);
+  sw_core_run (core);
 
   g_object_unref (core);
 

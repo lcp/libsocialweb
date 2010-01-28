@@ -1,8 +1,8 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = interfaces mojito mojito-keyfob mojito-keystore mojito-client src services examples tests tools po
+SUBDIRS = interfaces libsocialweb libsocialweb-keyfob libsocialweb-keystore libsocialweb-client src services examples tests tools po
 
-pkgconfig_DATA = mojito-client.pc mojito-module.pc mojito-keystore.pc
+pkgconfig_DATA = libsocialweb-client.pc libsocialweb-module.pc libsocialweb-keystore.pc
 pkgconfigdir   = $(libdir)/pkgconfig
 
 DISTCHECK_CONFIGURE_FLAGS = \

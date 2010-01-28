@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Mojito - social data store
+# libsocialweb - social data store
 # Copyright (C) 2008 - 2009 Intel Corporation.
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -23,18 +23,18 @@ from dbus.mainloop.glib import DBusGMainLoop
 DBusGMainLoop(set_as_default=True)
 
 bus = dbus.SessionBus()
-bus.start_service_by_name("com.intel.Mojito")
+bus.start_service_by_name("org.moblin.libsocialweb")
 
-mojito = bus.get_object("com.intel.Mojito", "/com/intel/Mojito")
-mojito = dbus.Interface(mojito, "com.intel.Mojito")
+sw = bus.get_object("org.moblin.libsocialweb", "/org/moblin/libsocialweb")
+sw = dbus.Interface(sw, "org.moblin.libsocialweb")
 
 services = sys.argv[1:]
 if not services:
-    services = mojito.GetServices()
+    services = sw.GetServices()
 
-path = mojito.OpenView(services, 10)
-view = bus.get_object("com.intel.Mojito", path)
-view = dbus.Interface(view, "com.intel.Mojito.View")
+path = sw.OpenView(services, 10)
+view = bus.get_object("org.moblin.libsocialweb", path)
+view = dbus.Interface(view, "org.moblin.libsocialweb.View")
 
 def now():
     return time.strftime("%T", time.localtime())

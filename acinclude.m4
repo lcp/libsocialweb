@@ -1,5 +1,5 @@
-# MOJITO_ENABLE_SERVICE(DisplayName,optionname,VARNAME)
-AC_DEFUN([MOJITO_ENABLE_SERVICE],
+# SOCIALWEB_ENABLE_SERVICE(DisplayName,optionname,VARNAME)
+AC_DEFUN([SOCIALWEB_ENABLE_SERVICE],
 [AC_MSG_CHECKING([whether to enable $1])
 AC_ARG_ENABLE([$2], [AS_HELP_STRING([--enable-$2], [Enable $1 support])],
                             [], [enable_$2=no])

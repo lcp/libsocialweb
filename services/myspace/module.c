@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,17 +16,17 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <mojito/mojito-module.h>
+#include <libsocialweb/sw-module.h>
 #include "myspace.h"
 
 const gchar *
-mojito_module_get_name (void)
+sw_module_get_name (void)
 {
   return "myspace";
 }
 
 const GType
-mojito_module_get_type (void)
+sw_module_get_type (void)
 {
-  return MOJITO_TYPE_SERVICE_MYSPACE;
+  return SW_TYPE_SERVICE_MYSPACE;
 }

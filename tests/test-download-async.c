@@ -1,5 +1,5 @@
 #include <glib-object.h>
-#include <mojito/mojito-web.h>
+#include <libsocialweb/sw-web.h>
 
 static GMainLoop *loop;
 
@@ -34,7 +34,7 @@ main (int argc, char **argv)
 
   loop = g_main_loop_new (NULL, TRUE);
 
-  mojito_web_download_image_async (argv[1], callback, NULL);
+  sw_web_download_image_async (argv[1], callback, NULL);
 
   /* If the file was cached then we didn't need to enter the main loop, so check
      that it still exists before running it. */

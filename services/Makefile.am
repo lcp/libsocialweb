@@ -1,4 +1,4 @@
-SUBDIRS = dummy skeleton
+SUBDIRS = dummy
 
 if WITH_FLICKR
 SUBDIRS += flickr

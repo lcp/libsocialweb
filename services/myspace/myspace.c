@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,39 +21,39 @@
 #include <string.h>
 #include "myspace.h"
 #include <gio/gio.h>
-#include <mojito/mojito-item.h>
-#include <mojito/mojito-set.h>
-#include <mojito/mojito-utils.h>
-#include <mojito/mojito-web.h>
-#include <mojito-keyfob/mojito-keyfob.h>
-#include <mojito-keystore/mojito-keystore.h>
+#include <libsocialweb/sw-item.h>
+#include <libsocialweb/sw-set.h>
+#include <libsocialweb/sw-utils.h>
+#include <libsocialweb/sw-web.h>
+#include <libsocialweb-keyfob/sw-keyfob.h>
+#include <libsocialweb-keystore/sw-keystore.h>
 #include <rest/oauth-proxy.h>
 #include <rest/rest-xml-parser.h>
-#include <mojito/mojito-online.h>
-#include <mojito/mojito-debug.h>
+#include <libsocialweb/sw-online.h>
+#include <libsocialweb/sw-debug.h>
 
-#include <interfaces/mojito-avatar-ginterface.h>
-#include <interfaces/mojito-status-update-ginterface.h>
+#include <interfaces/sw-avatar-ginterface.h>
+#include <interfaces/sw-status-update-ginterface.h>
 
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
 static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
 
-G_DEFINE_TYPE_WITH_CODE (MojitoServiceMySpace,
-                         mojito_service_myspace,
-                         MOJITO_TYPE_SERVICE,
+G_DEFINE_TYPE_WITH_CODE (SwServiceMySpace,
+                         sw_service_myspace,
+                         SW_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 initable_iface_init)
-                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_AVATAR_IFACE,
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_AVATAR_IFACE,
                                                 avatar_iface_init)
-                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_STATUS_UPDATE_IFACE,
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_STATUS_UPDATE_IFACE,
                                                 status_update_iface_init));
 
 
 #define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_MYSPACE, MojitoServiceMySpacePrivate))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_MYSPACE, SwServiceMySpacePrivate))
 
-struct _MojitoServiceMySpacePrivate {
+struct _SwServiceMySpacePrivate {
   gboolean inited;
   gboolean running;
   RestProxy *proxy;
@@ -122,7 +122,7 @@ get_utc_date (const char *s)
   /* TODO: This is a very bad timezone correction */
   t += (8 * 60 * 60); /* 8 hours */
 
-  return mojito_time_t_to_string (t);
+  return sw_time_t_to_string (t);
 }
 
 static void
@@ -131,10 +131,10 @@ got_status_cb (RestProxyCall *call,
                GObject       *weak_object,
                gpointer       userdata)
 {
-  MojitoService *service = MOJITO_SERVICE (weak_object);
-  MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (service)->priv;
+  SwService *service = SW_SERVICE (weak_object);
+  SwServiceMySpacePrivate *priv = SW_SERVICE_MYSPACE (service)->priv;
   RestXmlNode *root, *node;
-  MojitoSet *set;
+  SwSet *set;
 
   if (error) {
     g_message ("Error: %s", error->message);
@@ -145,7 +145,7 @@ got_status_cb (RestProxyCall *call,
   if (!root)
     return;
 
-  set = mojito_item_set_new ();
+  set = sw_item_set_new ();
 
   /*
    * The result of /status is a <user> node, whereas /friends/status is
@@ -171,44 +171,44 @@ got_status_cb (RestProxyCall *call,
       <status>haha, Ross has myspace</status>
       </user>
     */
-    MojitoItem *item;
+    SwItem *item;
     char *id;
     RestXmlNode *subnode;
 
-    item = mojito_item_new ();
-    mojito_item_set_service (item, service);
+    item = sw_item_new ();
+    sw_item_set_service (item, service);
 
     id = g_strconcat ("myspace-",
                       rest_xml_node_find (node, "userid")->content,
                       "-",
                       rest_xml_node_find (node, "moodlastupdated")->content,
                       NULL);
-    mojito_item_take (item, "id", id);
+    sw_item_take (item, "id", id);
 
-    mojito_item_take (item, "date",
+    sw_item_take (item, "date",
                       get_utc_date (rest_xml_node_find (node, "moodlastupdated")->content));
 
-    mojito_item_put (item, "authorid", rest_xml_node_find (node, "userid")->content);
+    sw_item_put (item, "authorid", rest_xml_node_find (node, "userid")->content);
     subnode = rest_xml_node_find (node, "name");
     if (subnode && subnode->content)
-      mojito_item_put (item, "author", subnode->content);
+      sw_item_put (item, "author", subnode->content);
     else
-      mojito_item_put (item, "author", priv->display_name);
+      sw_item_put (item, "author", priv->display_name);
 
     subnode = rest_xml_node_find (node, "imageurl");
     if (subnode && subnode->content)
-      mojito_item_request_image_fetch (item, FALSE, "authoricon", subnode->content);
+      sw_item_request_image_fetch (item, FALSE, "authoricon", subnode->content);
 
-    mojito_item_put (item, "content", rest_xml_node_find (node, "status")->content);
+    sw_item_put (item, "content", rest_xml_node_find (node, "status")->content);
     /* TODO: if mood is not "(none)" then append that to the status message */
 
     subnode = rest_xml_node_find (node, "profileurl");
     if (subnode && subnode->content)
-      mojito_item_put (item, "url", subnode->content);
+      sw_item_put (item, "url", subnode->content);
     else
-      mojito_item_put (item, "url", priv->profile_url);
+      sw_item_put (item, "url", priv->profile_url);
 
-    mojito_set_add (set, G_OBJECT (item));
+    sw_set_add (set, G_OBJECT (item));
     g_object_unref (item);
 
     node = node->next;
@@ -216,16 +216,16 @@ got_status_cb (RestProxyCall *call,
 
   rest_xml_node_unref (root);
 
-  if (!mojito_set_is_empty (set))
-    mojito_service_emit_refreshed (service, set);
+  if (!sw_set_is_empty (set))
+    sw_service_emit_refreshed (service, set);
 
-  mojito_set_unref (set);
+  sw_set_unref (set);
 }
 
 static void
-get_status_updates (MojitoServiceMySpace *service)
+get_status_updates (SwServiceMySpace *service)
 {
-  MojitoServiceMySpacePrivate *priv = service->priv;
+  SwServiceMySpacePrivate *priv = service->priv;
   char *function;
   RestProxyCall *call;
   GHashTable *params = NULL;
@@ -276,7 +276,7 @@ get_child_node_value (RestXmlNode *node, const char *name)
 }
 
 static const char **
-get_static_caps (MojitoService *service)
+get_static_caps (SwService *service)
 {
   static const char * caps[] = {
     CAN_UPDATE_STATUS,
@@ -288,9 +288,9 @@ get_static_caps (MojitoService *service)
 }
 
 static const char **
-get_dynamic_caps (MojitoService *service)
+get_dynamic_caps (SwService *service)
 {
-  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
+  SwServiceMySpace *myspace = SW_SERVICE_MYSPACE (service);
   static const char * caps[] = {
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
@@ -310,9 +310,9 @@ got_user_cb (RestProxyCall *call,
              GObject       *weak_object,
              gpointer       userdata)
 {
-  MojitoService *service = MOJITO_SERVICE (weak_object);
-  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
-  MojitoServiceMySpacePrivate *priv = myspace->priv;
+  SwService *service = SW_SERVICE (weak_object);
+  SwServiceMySpace *myspace = SW_SERVICE_MYSPACE (service);
+  SwServiceMySpacePrivate *priv = myspace->priv;
   RestXmlNode *node;
 
   if (error) {
@@ -331,7 +331,7 @@ got_user_cb (RestProxyCall *call,
 
   rest_xml_node_unref (node);
 
-  mojito_service_emit_capabilities_changed
+  sw_service_emit_capabilities_changed
     (service, get_dynamic_caps (service));
 
   if (priv->running)
@@ -341,8 +341,8 @@ got_user_cb (RestProxyCall *call,
 static void
 got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
 {
-  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (user_data);
-  MojitoServiceMySpacePrivate *priv = myspace->priv;
+  SwServiceMySpace *myspace = SW_SERVICE_MYSPACE (user_data);
+  SwServiceMySpacePrivate *priv = myspace->priv;
   RestProxyCall *call;
 
   if (authorised) {
@@ -350,29 +350,29 @@ got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
     rest_proxy_call_set_function (call, "v1/user");
     rest_proxy_call_async (call, got_user_cb, (GObject*)myspace, NULL, NULL);
   } else {
-    mojito_service_emit_refreshed ((MojitoService *)myspace, NULL);
+    sw_service_emit_refreshed ((SwService *)myspace, NULL);
   }
 }
 
 static void
-start (MojitoService *service)
+start (SwService *service)
 {
-  MojitoServiceMySpace *myspace = (MojitoServiceMySpace*)service;
+  SwServiceMySpace *myspace = (SwServiceMySpace*)service;
 
   myspace->priv->running = TRUE;
 }
 
 static void
-refresh (MojitoService *service)
+refresh (SwService *service)
 {
-  MojitoServiceMySpace *myspace = (MojitoServiceMySpace*)service;
-  MojitoServiceMySpacePrivate *priv = myspace->priv;
+  SwServiceMySpace *myspace = (SwServiceMySpace*)service;
+  SwServiceMySpacePrivate *priv = myspace->priv;
 
   if (!priv->running)
     return;
 
   if (priv->user_id == NULL) {
-    mojito_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
+    sw_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
   } else {
     get_status_updates (myspace);
   }
@@ -383,24 +383,24 @@ _avatar_downloaded_cb (const gchar *uri,
                        gchar       *local_path,
                        gpointer     userdata)
 {
-  MojitoService *service = MOJITO_SERVICE (userdata);
+  SwService *service = SW_SERVICE (userdata);
 
-  mojito_service_emit_avatar_retrieved (service, local_path);
+  sw_service_emit_avatar_retrieved (service, local_path);
   g_free (local_path);
 }
 
 static void
-request_avatar (MojitoService *service)
+request_avatar (SwService *service)
 {
-  MojitoServiceMySpacePrivate *priv = GET_PRIVATE (service);
+  SwServiceMySpacePrivate *priv = GET_PRIVATE (service);
 
   if (priv->image_url)
   {
-    mojito_web_download_image_async (priv->image_url,
+    sw_web_download_image_async (priv->image_url,
                                      _avatar_downloaded_cb,
                                      service);
   } else {
-    mojito_service_emit_avatar_retrieved (service, NULL);
+    sw_service_emit_avatar_retrieved (service, NULL);
   }
 }
 
@@ -410,16 +410,16 @@ _status_updated_cb (RestProxyCall *call,
                     GObject       *weak_object,
                     gpointer       userdata)
 {
-  MojitoService *service = MOJITO_SERVICE (weak_object);
+  SwService *service = SW_SERVICE (weak_object);
 
-  mojito_service_emit_status_updated (service, error == NULL);
+  sw_service_emit_status_updated (service, error == NULL);
 }
 
 static void
-update_status (MojitoService *service, const char *msg)
+update_status (SwService *service, const char *msg)
 {
-  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (service);
-  MojitoServiceMySpacePrivate *priv = myspace->priv;
+  SwServiceMySpace *myspace = SW_SERVICE_MYSPACE (service);
+  SwServiceMySpacePrivate *priv = myspace->priv;
   RestProxyCall *call;
   char *function;
 
@@ -441,7 +441,7 @@ update_status (MojitoService *service, const char *msg)
 }
 
 static const char *
-mojito_service_myspace_get_name (MojitoService *service)
+sw_service_myspace_get_name (SwService *service)
 {
   return "myspace";
 }
@@ -449,16 +449,16 @@ mojito_service_myspace_get_name (MojitoService *service)
 static void
 online_notify (gboolean online, gpointer user_data)
 {
-  MojitoServiceMySpace *service = (MojitoServiceMySpace *) user_data;
-  MojitoServiceMySpacePrivate *priv = service->priv;
+  SwServiceMySpace *service = (SwServiceMySpace *) user_data;
+  SwServiceMySpacePrivate *priv = service->priv;
 
   if (online) {
     const char *key = NULL, *secret = NULL;
-    mojito_keystore_get_key_secret ("myspace", &key, &secret);
+    sw_keystore_get_key_secret ("myspace", &key, &secret);
     priv->proxy = oauth_proxy_new (key, secret, "http://api.myspace.com/", FALSE);
-    mojito_keyfob_oauth ((OAuthProxy *)priv->proxy, got_tokens_cb, service);
+    sw_keyfob_oauth ((OAuthProxy *)priv->proxy, got_tokens_cb, service);
   } else {
-    mojito_service_emit_capabilities_changed ((MojitoService *)service, NULL);
+    sw_service_emit_capabilities_changed ((SwService *)service, NULL);
 
     if (priv->proxy) {
       g_object_unref (priv->proxy);
@@ -471,42 +471,42 @@ online_notify (gboolean online, gpointer user_data)
 }
 
 static void
-mojito_service_myspace_dispose (GObject *object)
+sw_service_myspace_dispose (GObject *object)
 {
-  MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (object)->priv;
+  SwServiceMySpacePrivate *priv = SW_SERVICE_MYSPACE (object)->priv;
 
-  mojito_online_remove_notify (online_notify, object);
+  sw_online_remove_notify (online_notify, object);
 
   if (priv->proxy) {
     g_object_unref (priv->proxy);
     priv->proxy = NULL;
   }
 
-  G_OBJECT_CLASS (mojito_service_myspace_parent_class)->dispose (object);
+  G_OBJECT_CLASS (sw_service_myspace_parent_class)->dispose (object);
 }
 
 static void
-mojito_service_myspace_finalize (GObject *object)
+sw_service_myspace_finalize (GObject *object)
 {
-  MojitoServiceMySpacePrivate *priv = MOJITO_SERVICE_MYSPACE (object)->priv;
+  SwServiceMySpacePrivate *priv = SW_SERVICE_MYSPACE (object)->priv;
 
   g_free (priv->user_id);
 
-  G_OBJECT_CLASS (mojito_service_myspace_parent_class)->finalize (object);
+  G_OBJECT_CLASS (sw_service_myspace_parent_class)->finalize (object);
 }
 
 static void
-mojito_service_myspace_class_init (MojitoServiceMySpaceClass *klass)
+sw_service_myspace_class_init (SwServiceMySpaceClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  MojitoServiceClass *service_class = MOJITO_SERVICE_CLASS (klass);
+  SwServiceClass *service_class = SW_SERVICE_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (MojitoServiceMySpacePrivate));
+  g_type_class_add_private (klass, sizeof (SwServiceMySpacePrivate));
 
-  object_class->dispose = mojito_service_myspace_dispose;
-  object_class->finalize = mojito_service_myspace_finalize;
+  object_class->dispose = sw_service_myspace_dispose;
+  object_class->finalize = sw_service_myspace_finalize;
 
-  service_class->get_name = mojito_service_myspace_get_name;
+  service_class->get_name = sw_service_myspace_get_name;
   service_class->get_static_caps = get_static_caps;
   service_class->get_dynamic_caps = get_dynamic_caps;
   service_class->update_status = update_status;
@@ -516,7 +516,7 @@ mojito_service_myspace_class_init (MojitoServiceMySpaceClass *klass)
 }
 
 static void
-mojito_service_myspace_init (MojitoServiceMySpace *self)
+sw_service_myspace_init (SwServiceMySpace *self)
 {
   self->priv = GET_PRIVATE (self);
   self->priv->inited = FALSE;
@@ -525,19 +525,19 @@ mojito_service_myspace_init (MojitoServiceMySpace *self)
 /* Initable interface */
 
 static gboolean
-mojito_service_myspace_initable (GInitable    *initable,
+sw_service_myspace_initable (GInitable    *initable,
                                  GCancellable *cancellable,
                                  GError      **error)
 {
-  MojitoServiceMySpace *myspace = MOJITO_SERVICE_MYSPACE (initable);
-  MojitoServiceMySpacePrivate *priv = myspace->priv;
+  SwServiceMySpace *myspace = SW_SERVICE_MYSPACE (initable);
+  SwServiceMySpacePrivate *priv = myspace->priv;
   const char *key = NULL, *secret = NULL;
 
-  mojito_keystore_get_key_secret ("myspace", &key, &secret);
+  sw_keystore_get_key_secret ("myspace", &key, &secret);
   if (key == NULL || secret == NULL) {
     g_set_error_literal (error,
-                         MOJITO_SERVICE_ERROR,
-                         MOJITO_SERVICE_ERROR_NO_KEYS,
+                         SW_SERVICE_ERROR,
+                         SW_SERVICE_ERROR_NO_KEYS,
                          "No API key configured");
     return FALSE;
   }
@@ -545,10 +545,10 @@ mojito_service_myspace_initable (GInitable    *initable,
   if (priv->inited)
     return TRUE;
 
-  if (mojito_is_online ()) {
+  if (sw_is_online ()) {
     online_notify (TRUE, myspace);
   }
-  mojito_online_add_notify (online_notify, myspace);
+  sw_online_add_notify (online_notify, myspace);
 
   return TRUE;
 }
@@ -558,7 +558,7 @@ initable_iface_init (gpointer g_iface, gpointer iface_data)
 {
   GInitableIface *klass = (GInitableIface *)g_iface;
 
-  klass->init = mojito_service_myspace_initable;
+  klass->init = sw_service_myspace_initable;
 }
 
 /* Avatar interface */
@@ -568,34 +568,34 @@ _requested_avatar_downloaded_cb (const gchar *uri,
                                  gchar       *local_path,
                                  gpointer     userdata)
 {
-  MojitoService *service = MOJITO_SERVICE (userdata);
+  SwService *service = SW_SERVICE (userdata);
 
-  mojito_avatar_iface_emit_avatar_retrieved (service, local_path);
+  sw_avatar_iface_emit_avatar_retrieved (service, local_path);
   g_free (local_path);
 }
 
 static void
-_myspace_avatar_request_avatar (MojitoAvatarIface     *self,
+_myspace_avatar_request_avatar (SwAvatarIface     *self,
                                 DBusGMethodInvocation *context)
 {
-  MojitoServiceMySpacePrivate *priv = GET_PRIVATE (self);
+  SwServiceMySpacePrivate *priv = GET_PRIVATE (self);
 
   if (priv->image_url) {
-    mojito_web_download_image_async (priv->image_url,
+    sw_web_download_image_async (priv->image_url,
                                      _requested_avatar_downloaded_cb,
                                      self);
   }
 
-  mojito_avatar_iface_return_from_request_avatar (context);
+  sw_avatar_iface_return_from_request_avatar (context);
 }
 
 static void
 avatar_iface_init (gpointer g_iface,
                    gpointer iface_data)
 {
-  MojitoAvatarIfaceClass *klass = (MojitoAvatarIfaceClass *)g_iface;
+  SwAvatarIfaceClass *klass = (SwAvatarIfaceClass *)g_iface;
 
-  mojito_avatar_iface_implement_request_avatar (klass, _myspace_avatar_request_avatar);
+  sw_avatar_iface_implement_request_avatar (klass, _myspace_avatar_request_avatar);
 }
 
 /* Status Update interface */
@@ -610,20 +610,20 @@ _update_status_cb (RestProxyCall *call,
   {
     g_critical (G_STRLOC ": Error updating status: %s",
                 error->message);
-    mojito_status_update_iface_emit_status_updated (weak_object, FALSE);
+    sw_status_update_iface_emit_status_updated (weak_object, FALSE);
   } else {
-    MOJITO_DEBUG (MYSPACE, G_STRLOC ": Status updated.");
-    mojito_status_update_iface_emit_status_updated (weak_object, FALSE);
+    SW_DEBUG (MYSPACE, G_STRLOC ": Status updated.");
+    sw_status_update_iface_emit_status_updated (weak_object, FALSE);
   }
 }
 
 static void
-_myspace_status_update_update_status (MojitoStatusUpdateIface *self,
+_myspace_status_update_update_status (SwStatusUpdateIface *self,
                                       const gchar             *msg,
                                       DBusGMethodInvocation   *context)
 {
-  MojitoServiceMySpace *myspace = (MojitoServiceMySpace *)self;
-  MojitoServiceMySpacePrivate *priv = myspace->priv;
+  SwServiceMySpace *myspace = (SwServiceMySpace *)self;
+  SwServiceMySpacePrivate *priv = myspace->priv;
   RestProxyCall *call;
   gchar *function;
 
@@ -641,15 +641,15 @@ _myspace_status_update_update_status (MojitoStatusUpdateIface *self,
                               "status", msg,
                               NULL);
   rest_proxy_call_async (call, _update_status_cb, (GObject *)self, NULL, NULL);
-  mojito_status_update_iface_return_from_update_status (context);
+  sw_status_update_iface_return_from_update_status (context);
 }
 
 static void
 status_update_iface_init (gpointer g_iface,
                           gpointer iface_data)
 {
-  MojitoStatusUpdateIfaceClass *klass = (MojitoStatusUpdateIfaceClass*)g_iface;
+  SwStatusUpdateIfaceClass *klass = (SwStatusUpdateIfaceClass*)g_iface;
 
-  mojito_status_update_iface_implement_update_status (klass,
+  sw_status_update_iface_implement_update_status (klass,
                                                       _myspace_status_update_update_status);
 }

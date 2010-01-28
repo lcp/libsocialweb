@@ -1,5 +1,5 @@
 AC_PREREQ(2.53)
-AC_INIT(mojito, 0.22.2)
+AC_INIT(libsocialweb, 0.22.2)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -19,28 +19,28 @@ AM_PROG_CC_C_O
 
 AS_ALL_LINGUAS
 IT_PROG_INTLTOOL([0.40], [no-xml])
-GETTEXT_PACKAGE=mojito
+GETTEXT_PACKAGE=libsocialweb
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [The name of the gettext package.])
 AC_SUBST(GETTEXT_PACKAGE)
 AM_GLIB_GNU_GETTEXT
 
 AC_PATH_PROG([GLIB_GENMARSHAL], [glib-genmarshal])
 
-INTLTOOL_MOJITO_KEYS='%.keys: %.keys.in $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; LC_ALL=C $(INTLTOOL_MERGE) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@'
-AC_SUBST(INTLTOOL_MOJITO_KEYS)
+INTLTOOL_SOCIALWEB_KEYS='%.keys: %.keys.in $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; LC_ALL=C $(INTLTOOL_MERGE) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@'
+AC_SUBST(INTLTOOL_SOCIALWEB_KEYS)
 
 # TODO: bit nasty, should we use gnome-common?
 CFLAGS="$CFLAGS -Wall"
 
 # Libtool versioning
 # See for details: http://bit.ly/Y5oX
-LIBMOJITO_CLIENT_CURRENT=1
-LIBMOJITO_CLIENT_REVISION=0
-LIBMOJITO_CLIENT_AGE=0
+LIBSOCIALWEB_CLIENT_CURRENT=1
+LIBSOCIALWEB_CLIENT_REVISION=0
+LIBSOCIALWEB_CLIENT_AGE=0
 
-AC_SUBST(LIBMOJITO_CLIENT_CURRENT)
-AC_SUBST(LIBMOJITO_CLIENT_REVISION)
-AC_SUBST(LIBMOJITO_CLIENT_AGE)
+AC_SUBST(LIBSOCIALWEB_CLIENT_CURRENT)
+AC_SUBST(LIBSOCIALWEB_CLIENT_REVISION)
+AC_SUBST(LIBSOCIALWEB_CLIENT_AGE)
 
 PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.14)
 PKG_CHECK_MODULES(GIO, gio-2.0)
@@ -102,14 +102,14 @@ AS_IF(
 )
 
 
-MOJITO_ENABLE_SERVICE(Digg, digg, DIGG)
-MOJITO_ENABLE_SERVICE(Flickr, flickr, FLICKR)
-MOJITO_ENABLE_SERVICE(Last.fm, lastfm, LASTFM)
-MOJITO_ENABLE_SERVICE(MySpace, myspace, MYSPACE)
-MOJITO_ENABLE_SERVICE(Twitter, twitter, TWITTER)
+SOCIALWEB_ENABLE_SERVICE(Digg, digg, DIGG)
+SOCIALWEB_ENABLE_SERVICE(Flickr, flickr, FLICKR)
+SOCIALWEB_ENABLE_SERVICE(Last.fm, lastfm, LASTFM)
+SOCIALWEB_ENABLE_SERVICE(MySpace, myspace, MYSPACE)
+SOCIALWEB_ENABLE_SERVICE(Twitter, twitter, TWITTER)
 
 
-servicesdir='${libdir}'/mojito/services
+servicesdir='${libdir}'/libsocialweb/services
 AC_SUBST(servicesdir)
 
 servicesdatadir='${pkgdatadir}'/services
@@ -121,14 +121,13 @@ AC_OUTPUT([
         build-aux/shave:m4/shave.in
         build-aux/shave-libtool:m4/shave-libtool.in
         Makefile
-        mojito/Makefile
+        libsocialweb/Makefile
         interfaces/Makefile
-        mojito-keyfob/Makefile
-        mojito-keystore/Makefile
-        mojito-client/Makefile
+        libsocialweb-keyfob/Makefile
+        libsocialweb-keystore/Makefile
+        libsocialweb-client/Makefile
         src/Makefile
         services/Makefile
-        services/skeleton/Makefile
         services/dummy/Makefile
         services/flickr/Makefile
         services/lastfm/Makefile
@@ -139,7 +138,7 @@ AC_OUTPUT([
         tools/Makefile
         examples/Makefile
         po/Makefile.in
-        mojito-client.pc
-        mojito-module.pc
-        mojito-keystore.pc
+        libsocialweb-client.pc
+        libsocialweb-module.pc
+        libsocialweb-keystore.pc
 ])

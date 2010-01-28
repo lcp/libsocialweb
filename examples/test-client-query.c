@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,14 +16,14 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <mojito-client/mojito-client.h>
-#include <mojito-client/mojito-client-service.h>
+#include <libsocialweb-client/sw-client.h>
+#include <libsocialweb-client/sw-client-service.h>
 
-static MojitoClient *client = NULL;
-static MojitoClientService *service = NULL;
+static SwClient *client = NULL;
+static SwClientService *service = NULL;
 
 static void
-_view_items_added_cb (MojitoClientItemView *item_view,
+_view_items_added_cb (SwClientItemView *item_view,
                       GList                *items,
                       gpointer              userdata)
 {
@@ -33,7 +33,7 @@ _view_items_added_cb (MojitoClientItemView *item_view,
   {
     GHashTableIter iter;
     gpointer key, value;
-    MojitoItem *item = (MojitoItem *)l->data;
+    SwItem *item = (SwItem *)l->data;
 
     g_debug (G_STRLOC ": Got item with uuid: %s", item->uuid);
 
@@ -46,15 +46,15 @@ _view_items_added_cb (MojitoClientItemView *item_view,
 }
 
 static void
-_query_open_view_cb (MojitoClientService  *service,
-                     MojitoClientItemView *item_view,
+_query_open_view_cb (SwClientService  *service,
+                     SwClientItemView *item_view,
                      gpointer              userdata)
 {
   g_signal_connect (item_view,
                     "items-added",
                     (GCallback)_view_items_added_cb,
                     NULL);
-  mojito_client_item_view_start (item_view);
+  sw_client_item_view_start (item_view);
 }
 
 int
@@ -65,9 +65,9 @@ main (int    argc,
 
   g_type_init ();
 
-  client = mojito_client_new ();
-  service = mojito_client_get_service (client, "twitter");
-  mojito_client_service_query_open_view (service,
+  client = sw_client_new ();
+  service = sw_client_get_service (client, "twitter");
+  sw_client_service_query_open_view (service,
                                          NULL,
                                          _query_open_view_cb,
                                          NULL);

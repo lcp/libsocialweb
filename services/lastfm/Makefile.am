@@ -1,7 +1,7 @@
 services_LTLIBRARIES = liblastfm.la
 liblastfm_la_SOURCES = module.c lastfm.c lastfm.h
 liblastfm_la_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/interfaces $(REST_CFLAGS) $(GCONF_CFLAGS) $(DBUS_GLIB_CFLAGS) -DG_LOG_DOMAIN=\"LastFM\"
-liblastfm_la_LIBADD = $(top_builddir)/mojito/libmojito.la $(top_builddir)/mojito-keystore/libmojito-keystore.la $(top_builddir)/interfaces/libmojito-ginterfaces.la $(REST_LIBS) $(GCONF_LIBS) $(DBUS_GLIB_LIBS)
+liblastfm_la_LIBADD = $(top_builddir)/libsocialweb/libsocialweb.la $(top_builddir)/libsocialweb-keystore/libsocialweb-keystore.la $(top_builddir)/interfaces/libsocialweb-ginterfaces.la $(REST_LIBS) $(GCONF_LIBS) $(DBUS_GLIB_LIBS)
 liblastfm_la_LDFLAGS = -module -avoid-version
 
 dist_servicesdata_DATA = lastfm.png
@@ -9,4 +9,4 @@ dist_servicesdata_DATA = lastfm.png
 servicesdata_DATA = lastfm.keys
 CLEANFILES = lastfm.keys
 EXTRA_DIST = lastfm.keys.in
-@INTLTOOL_MOJITO_KEYS@
+@INTLTOOL_SOCIALWEB_KEYS@

@@ -1,11 +1,11 @@
-# Romanian translations for mojito package.
-# Copyright (C) 2009 The mojito copyright holder
-# This file is distributed under the same license as the mojito package.
+# Romanian translations for libsocialweb package.
+# Copyright (C) 2009 The libsocialweb copyright holder
+# This file is distributed under the same license as the libsocialweb package.
 # Cosmin Bordeianu <elloxar@gmail.com>, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: mojito\n"
+"Project-Id-Version: libsocialweb\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-08-24 09:25+0000\n"
 "PO-Revision-Date: 2009-09-14 14:17+0200\n"

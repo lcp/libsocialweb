@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,22 +21,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include "twitter.h"
-#include <mojito/mojito-item.h>
-#include <mojito/mojito-set.h>
-#include <mojito/mojito-online.h>
-#include <mojito/mojito-utils.h>
-#include <mojito/mojito-web.h>
-#include <mojito/mojito-debug.h>
-#include <mojito-keyfob/mojito-keyfob.h>
-#include <mojito-keystore/mojito-keystore.h>
+#include <libsocialweb/sw-item.h>
+#include <libsocialweb/sw-set.h>
+#include <libsocialweb/sw-online.h>
+#include <libsocialweb/sw-utils.h>
+#include <libsocialweb/sw-web.h>
+#include <libsocialweb/sw-debug.h>
+#include <libsocialweb-keyfob/sw-keyfob.h>
+#include <libsocialweb-keystore/sw-keystore.h>
 #include <gconf/gconf-client.h>
 #include <rest/oauth-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <libsoup/soup.h>
 
-#include <interfaces/mojito-query-ginterface.h>
-#include <interfaces/mojito-avatar-ginterface.h>
-#include <interfaces/mojito-status-update-ginterface.h>
+#include <interfaces/sw-query-ginterface.h>
+#include <interfaces/sw-avatar-ginterface.h>
+#include <interfaces/sw-status-update-ginterface.h>
 
 #include "twitter-item-view.h"
 
@@ -44,22 +44,22 @@ static void query_iface_init (gpointer g_iface, gpointer iface_data);
 static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
 static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
 
-G_DEFINE_TYPE_WITH_CODE (MojitoServiceTwitter,
-                         mojito_service_twitter,
-                         MOJITO_TYPE_SERVICE,
-                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_QUERY_IFACE,
+G_DEFINE_TYPE_WITH_CODE (SwServiceTwitter,
+                         sw_service_twitter,
+                         SW_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE,
                                                 query_iface_init)
-                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_AVATAR_IFACE,
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_AVATAR_IFACE,
                                                 avatar_iface_init)
-                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_STATUS_UPDATE_IFACE,
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_STATUS_UPDATE_IFACE,
                                                 status_update_iface_init));
 
 #define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitterPrivate))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_TWITTER, SwServiceTwitterPrivate))
 
 #define TWITTER_USE_OAUTH 0
 
-struct _MojitoServiceTwitterPrivate {
+struct _SwServiceTwitterPrivate {
   enum {
     OWN,
     FRIENDS,
@@ -77,20 +77,20 @@ struct _MojitoServiceTwitterPrivate {
 #endif
 };
 
-#define KEY_BASE "/apps/mojito/services/twitter"
+#define KEY_BASE "/apps/libsocialweb/services/twitter"
 #define KEY_USER KEY_BASE "/user"
 #define KEY_PASS KEY_BASE "/password"
 
 #if ! TWITTER_USE_OAUTH
 static void online_notify (gboolean online, gpointer user_data);
-static void credentials_updated (MojitoService *service);
+static void credentials_updated (SwService *service);
 
 static void
 auth_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
-  MojitoService *service = MOJITO_SERVICE (user_data);
-  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (service);
-  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  SwService *service = SW_SERVICE (user_data);
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
+  SwServiceTwitterPrivate *priv = twitter->priv;
   const char *username = NULL, *password = NULL;
 
   if (g_str_equal (entry->key, KEY_USER)) {
@@ -148,7 +148,7 @@ make_date (const char *s)
 {
   struct tm tm;
   strptime (s, "%a %b %d %T %z %Y", &tm);
-  return mojito_time_t_to_string (timegm (&tm));
+  return sw_time_t_to_string (timegm (&tm));
 }
 
 /*
@@ -178,11 +178,11 @@ cleanup_twitpic (char *string)
   }
 }
 
-static MojitoItem *
-make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
+static SwItem *
+make_item (SwServiceTwitter *twitter, RestXmlNode *node)
 {
-  MojitoServiceTwitterPrivate *priv = twitter->priv;
-  MojitoItem *item;
+  SwServiceTwitterPrivate *priv = twitter->priv;
+  SwItem *item;
   RestXmlNode *u_node, *n;
   const char *post_id, *user_id, *user_name, *date, *content;
   char *url;
@@ -199,18 +199,18 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
     return NULL;
   }
 
-  item = mojito_item_new ();
-  mojito_item_set_service (item, (MojitoService *)twitter);
+  item = sw_item_new ();
+  sw_item_set_service (item, (SwService *)twitter);
 
   post_id = rest_xml_node_find (node, "id")->content;
-  mojito_item_put (item, "authorid", user_id);
+  sw_item_put (item, "authorid", user_id);
 
   url = g_strdup_printf ("http://twitter.com/%s/statuses/%s", user_id, post_id);
-  mojito_item_put (item, "id", url);
-  mojito_item_take (item, "url", url);
+  sw_item_put (item, "id", url);
+  sw_item_take (item, "url", url);
 
   user_name = rest_xml_node_find (node, "name")->content;
-  mojito_item_put (item, "author", user_name);
+  sw_item_put (item, "author", user_name);
 
   content = rest_xml_node_find (node, "text")->content;
   if (g_regex_match (priv->twitpic_re, content, 0, &match_info)) {
@@ -219,7 +219,7 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
     /* Construct the thumbnail URL and download the image */
     twitpic_id = g_match_info_fetch (match_info, 1);
     url = g_strconcat ("http://twitpic.com/show/thumb/", twitpic_id, NULL);
-    mojito_item_request_image_fetch (item, FALSE, "thumbnail", url);
+    sw_item_request_image_fetch (item, FALSE, "thumbnail", url);
     g_free (url);
 
     /* Remove the URL from the tweet and use that as the title */
@@ -229,29 +229,29 @@ make_item (MojitoServiceTwitter *twitter, RestXmlNode *node)
 
     cleanup_twitpic (new_content);
 
-    mojito_item_take (item, "title", new_content);
+    sw_item_take (item, "title", new_content);
 
     /* Update the URL to point at twitpic */
     url = g_strconcat ("http://twitpic.com/", twitpic_id, NULL);
-    mojito_item_take (item, "url", url);
+    sw_item_take (item, "url", url);
 
     g_free (twitpic_id);
   }
 
-  mojito_item_put (item, "content", content);
+  sw_item_put (item, "content", content);
 
   g_match_info_free (match_info);
 
   date = rest_xml_node_find (node, "created_at")->content;
-  mojito_item_take (item, "date", make_date (date));
+  sw_item_take (item, "date", make_date (date));
 
   n = rest_xml_node_find (u_node, "location");
   if (n && n->content)
-    mojito_item_put (item, "location", n->content);
+    sw_item_put (item, "location", n->content);
 
   n = rest_xml_node_find (u_node, "profile_image_url");
   if (n && n->content)
-    mojito_item_request_image_fetch (item, FALSE, "authoricon", n->content);
+    sw_item_request_image_fetch (item, FALSE, "authoricon", n->content);
 
 
   return item;
@@ -263,9 +263,9 @@ tweets_cb (RestProxyCall *call,
            GObject       *weak_object,
            gpointer       userdata)
 {
-  MojitoServiceTwitter *service = MOJITO_SERVICE_TWITTER (weak_object);
+  SwServiceTwitter *service = SW_SERVICE_TWITTER (weak_object);
   RestXmlNode *root, *node;
-  MojitoSet *set;
+  SwSet *set;
 
   if (error) {
     g_message ("Error: %s", error->message);
@@ -276,20 +276,20 @@ tweets_cb (RestProxyCall *call,
   if (!root)
     return;
 
-  set = mojito_item_set_new ();
+  set = sw_item_set_new ();
 
-  MOJITO_DEBUG (TWITTER, "Got tweets!");
+  SW_DEBUG (TWITTER, "Got tweets!");
 
   for (node = rest_xml_node_find (root, "status"); node; node = node->next) {
-    MojitoItem *item;
+    SwItem *item;
     /* TODO: skip the user's own tweets */
 
     item = make_item (service, node);
     if (item)
-      mojito_set_add (set, (GObject *)item);
+      sw_set_add (set, (GObject *)item);
   }
 
-  mojito_service_emit_refreshed ((MojitoService *)service, set);
+  sw_service_emit_refreshed ((SwService *)service, set);
 
   /* TODO cleanup */
 
@@ -297,15 +297,15 @@ tweets_cb (RestProxyCall *call,
 }
 
 static void
-get_status_updates (MojitoServiceTwitter *twitter)
+get_status_updates (SwServiceTwitter *twitter)
 {
-  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  SwServiceTwitterPrivate *priv = twitter->priv;
   RestProxyCall *call;
 
   if (!priv->user_id || !priv->running)
     return;
 
-  MOJITO_DEBUG (TWITTER, "Got status updates");
+  SW_DEBUG (TWITTER, "Got status updates");
 
   call = rest_proxy_new_call (priv->proxy);
   switch (priv->type) {
@@ -322,7 +322,7 @@ get_status_updates (MojitoServiceTwitter *twitter)
 }
 
 static const char **
-get_static_caps (MojitoService *service)
+get_static_caps (SwService *service)
 {
   static const char * caps[] = {
     CAN_UPDATE_STATUS,
@@ -334,9 +334,9 @@ get_static_caps (MojitoService *service)
 }
 
 static const char **
-get_dynamic_caps (MojitoService *service)
+get_dynamic_caps (SwService *service)
 {
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+  SwServiceTwitterPrivate *priv = GET_PRIVATE (service);
   static const char * caps[] = {
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
@@ -382,8 +382,8 @@ verify_cb (RestProxyCall *call,
            GObject       *weak_object,
            gpointer       userdata)
 {
-  MojitoService *service = MOJITO_SERVICE (weak_object);
-  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (service);
+  SwService *service = SW_SERVICE (weak_object);
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
   RestXmlNode *node;
 
   if (error) {
@@ -392,7 +392,7 @@ verify_cb (RestProxyCall *call,
     return;
   }
 
-  MOJITO_DEBUG (TWITTER, "Authentication verified");
+  SW_DEBUG (TWITTER, "Authentication verified");
 
   node = node_from_call (call);
   if (!node)
@@ -403,7 +403,7 @@ verify_cb (RestProxyCall *call,
 
   rest_xml_node_unref (node);
 
-  mojito_service_emit_capabilities_changed (service, get_dynamic_caps (service));
+  sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
 
   if (twitter->priv->running)
     get_status_updates (twitter);
@@ -412,33 +412,33 @@ verify_cb (RestProxyCall *call,
 static void
 got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
 {
-  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (user_data);
-  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (user_data);
+  SwServiceTwitterPrivate *priv = twitter->priv;
   RestProxyCall *call;
 
   if (authorised) {
-    MOJITO_DEBUG (TWITTER, "Authorised");
+    SW_DEBUG (TWITTER, "Authorised");
     call = rest_proxy_new_call (priv->proxy);
     rest_proxy_call_set_function (call, "account/verify_credentials.xml");
     rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
   } else {
-    mojito_service_emit_refreshed ((MojitoService *)twitter, NULL);
+    sw_service_emit_refreshed ((SwService *)twitter, NULL);
   }
 }
 
 static void
-start (MojitoService *service)
+start (SwService *service)
 {
-  MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
+  SwServiceTwitter *twitter = (SwServiceTwitter*)service;
 
   twitter->priv->running = TRUE;
 }
 
 static void
-refresh (MojitoService *service)
+refresh (SwService *service)
 {
-  MojitoServiceTwitter *twitter = (MojitoServiceTwitter*)service;
-  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  SwServiceTwitter *twitter = (SwServiceTwitter*)service;
+  SwServiceTwitterPrivate *priv = twitter->priv;
 
   if (!priv->running)
     return;
@@ -447,7 +447,7 @@ refresh (MojitoService *service)
   if (priv->user_id) {
     get_status_updates (twitter);
   } else {
-    mojito_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
+    sw_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
   }
 #else
   if (priv->username && priv->password && priv->proxy)
@@ -463,16 +463,16 @@ _status_updated_cb (RestProxyCall *call,
                     GObject       *weak_object,
                     gpointer       userdata)
 {
-  MojitoService *service = MOJITO_SERVICE (weak_object);
+  SwService *service = SW_SERVICE (weak_object);
 
-  mojito_service_emit_status_updated (service, error == NULL);
+  sw_service_emit_status_updated (service, error == NULL);
 }
 
 static void
-update_status (MojitoService *service, const char *msg)
+update_status (SwService *service, const char *msg)
 {
-  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (service);
-  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
+  SwServiceTwitterPrivate *priv = twitter->priv;
   RestProxyCall *call;
 
   if (!priv->user_id)
@@ -494,19 +494,19 @@ avatar_downloaded_cb (const gchar *uri,
                        gchar       *local_path,
                        gpointer     userdata)
 {
-  MojitoService *service = MOJITO_SERVICE (userdata);
+  SwService *service = SW_SERVICE (userdata);
 
-  mojito_service_emit_avatar_retrieved (service, local_path);
+  sw_service_emit_avatar_retrieved (service, local_path);
   g_free (local_path);
 }
 
 static void
-request_avatar (MojitoService *service)
+request_avatar (SwService *service)
 {
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (service);
+  SwServiceTwitterPrivate *priv = GET_PRIVATE (service);
 
   if (priv->image_url) {
-    mojito_web_download_image_async (priv->image_url,
+    sw_web_download_image_async (priv->image_url,
                                      avatar_downloaded_cb,
                                      service);
   }
@@ -515,18 +515,18 @@ request_avatar (MojitoService *service)
 static void
 online_notify (gboolean online, gpointer user_data)
 {
-  MojitoServiceTwitter *twitter = (MojitoServiceTwitter *)user_data;
-  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  SwServiceTwitter *twitter = (SwServiceTwitter *)user_data;
+  SwServiceTwitterPrivate *priv = twitter->priv;
 
-  MOJITO_DEBUG (TWITTER, "Online: %s", online ? "yes" : "no");
+  SW_DEBUG (TWITTER, "Online: %s", online ? "yes" : "no");
 
   if (online) {
 #if TWITTER_USE_OAUTH
     const char *key = NULL, *secret = NULL;
 
-    mojito_keystore_get_key_secret ("twitter", &key, &secret);
+    sw_keystore_get_key_secret ("twitter", &key, &secret);
     priv->proxy = oauth_proxy_new (key, secret, "http://twitter.com/", FALSE);
-    mojito_keyfob_oauth ((OAuthProxy *)priv->proxy, got_tokens_cb, twitter);
+    sw_keyfob_oauth ((OAuthProxy *)priv->proxy, got_tokens_cb, twitter);
 #else
     if (priv->username && priv->password) {
       char *url;
@@ -551,7 +551,7 @@ online_notify (gboolean online, gpointer user_data)
 
       got_tokens_cb (priv->proxy, TRUE, twitter);
     } else {
-      mojito_service_emit_refreshed ((MojitoService *)twitter, NULL);
+      sw_service_emit_refreshed ((SwService *)twitter, NULL);
     }
 #endif
   } else {
@@ -562,41 +562,41 @@ online_notify (gboolean online, gpointer user_data)
     g_free (priv->user_id);
     priv->user_id = NULL;
 
-    mojito_service_emit_capabilities_changed ((MojitoService *)twitter, NULL);
+    sw_service_emit_capabilities_changed ((SwService *)twitter, NULL);
   }
 }
 
 static void
-credentials_updated (MojitoService *service)
+credentials_updated (SwService *service)
 {
-  MOJITO_DEBUG (TWITTER, "Credentials updated");
+  SW_DEBUG (TWITTER, "Credentials updated");
 
   /* If we're online, force a reconnect to fetch new credentials */
-  if (mojito_is_online ()) {
+  if (sw_is_online ()) {
     online_notify (FALSE, service);
     online_notify (TRUE, service);
   }
 
-  mojito_service_emit_user_changed (service);
+  sw_service_emit_user_changed (service);
 }
 
 static const char *
-mojito_service_twitter_get_name (MojitoService *service)
+sw_service_twitter_get_name (SwService *service)
 {
   return "twitter";
 }
 
 static void
-mojito_service_twitter_constructed (GObject *object)
+sw_service_twitter_constructed (GObject *object)
 {
-  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (object);
-  MojitoServiceTwitterPrivate *priv;
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (object);
+  SwServiceTwitterPrivate *priv;
 
   priv = twitter->priv = GET_PRIVATE (twitter);
 
-  if (mojito_service_get_param ((MojitoService *)twitter, "own")) {
+  if (sw_service_get_param ((SwService *)twitter, "own")) {
     priv->type = OWN;
-  } else if (mojito_service_get_param ((MojitoService *)twitter, "friends")){
+  } else if (sw_service_get_param ((SwService *)twitter, "friends")){
     priv->type = FRIENDS;
   } else {
     priv->type = BOTH;
@@ -619,18 +619,18 @@ mojito_service_twitter_constructed (GObject *object)
   gconf_client_notify (priv->gconf, KEY_PASS);
 #endif
 
-  mojito_online_add_notify (online_notify, twitter);
-  if (mojito_is_online ()) {
+  sw_online_add_notify (online_notify, twitter);
+  if (sw_is_online ()) {
     online_notify (TRUE, twitter);
   }
 }
 
 static void
-mojito_service_twitter_dispose (GObject *object)
+sw_service_twitter_dispose (GObject *object)
 {
-  MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
+  SwServiceTwitterPrivate *priv = SW_SERVICE_TWITTER (object)->priv;
 
-  mojito_online_remove_notify (online_notify, object);
+  sw_online_remove_notify (online_notify, object);
 
   if (priv->proxy) {
     g_object_unref (priv->proxy);
@@ -651,13 +651,13 @@ mojito_service_twitter_dispose (GObject *object)
   }
 #endif
 
-  G_OBJECT_CLASS (mojito_service_twitter_parent_class)->dispose (object);
+  G_OBJECT_CLASS (sw_service_twitter_parent_class)->dispose (object);
 }
 
 static void
-mojito_service_twitter_finalize (GObject *object)
+sw_service_twitter_finalize (GObject *object)
 {
-  MojitoServiceTwitterPrivate *priv = MOJITO_SERVICE_TWITTER (object)->priv;
+  SwServiceTwitterPrivate *priv = SW_SERVICE_TWITTER (object)->priv;
 
   g_free (priv->user_id);
   g_free (priv->image_url);
@@ -667,22 +667,22 @@ mojito_service_twitter_finalize (GObject *object)
   g_free (priv->password);
 #endif
 
-  G_OBJECT_CLASS (mojito_service_twitter_parent_class)->finalize (object);
+  G_OBJECT_CLASS (sw_service_twitter_parent_class)->finalize (object);
 }
 
 static void
-mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
+sw_service_twitter_class_init (SwServiceTwitterClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  MojitoServiceClass *service_class = MOJITO_SERVICE_CLASS (klass);
+  SwServiceClass *service_class = SW_SERVICE_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (MojitoServiceTwitterPrivate));
+  g_type_class_add_private (klass, sizeof (SwServiceTwitterPrivate));
 
-  object_class->constructed = mojito_service_twitter_constructed;
-  object_class->dispose = mojito_service_twitter_dispose;
-  object_class->finalize = mojito_service_twitter_finalize;
+  object_class->constructed = sw_service_twitter_constructed;
+  object_class->dispose = sw_service_twitter_dispose;
+  object_class->finalize = sw_service_twitter_finalize;
 
-  service_class->get_name = mojito_service_twitter_get_name;
+  service_class->get_name = sw_service_twitter_get_name;
   service_class->start = start;
   service_class->refresh = refresh;
   service_class->get_static_caps = get_static_caps;
@@ -693,7 +693,7 @@ mojito_service_twitter_class_init (MojitoServiceTwitterClass *klass)
 }
 
 static void
-mojito_service_twitter_init (MojitoServiceTwitter *self)
+sw_service_twitter_init (SwServiceTwitter *self)
 {
   self->priv = GET_PRIVATE (self);
 }
@@ -701,21 +701,21 @@ mojito_service_twitter_init (MojitoServiceTwitter *self)
 /* Query interface */
 
 static void
-_twitter_query_open_view (MojitoQueryIface      *self,
+_twitter_query_open_view (SwQueryIface      *self,
                           GHashTable            *params,
                           DBusGMethodInvocation *context)
 {
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (self);
-  MojitoItemView *item_view;
+  SwServiceTwitterPrivate *priv = GET_PRIVATE (self);
+  SwItemView *item_view;
   const gchar *object_path;
 
-  item_view = g_object_new (MOJITO_TYPE_TWITTER_ITEM_VIEW,
+  item_view = g_object_new (SW_TYPE_TWITTER_ITEM_VIEW,
                             "proxy", priv->proxy,
                             "service", self,
                             NULL);
 
-  object_path = mojito_item_view_get_object_path (item_view);
-  mojito_query_iface_return_from_open_view (context,
+  object_path = sw_item_view_get_object_path (item_view);
+  sw_query_iface_return_from_open_view (context,
                                             object_path);
 }
 
@@ -723,9 +723,9 @@ static void
 query_iface_init (gpointer g_iface,
                   gpointer iface_data)
 {
-  MojitoQueryIfaceClass *klass = (MojitoQueryIfaceClass*)g_iface;
+  SwQueryIfaceClass *klass = (SwQueryIfaceClass*)g_iface;
 
-  mojito_query_iface_implement_open_view (klass,
+  sw_query_iface_implement_open_view (klass,
                                           _twitter_query_open_view);
 }
 
@@ -736,34 +736,34 @@ _requested_avatar_downloaded_cb (const gchar *uri,
                                  gchar       *local_path,
                                  gpointer     userdata)
 {
-  MojitoService *service = MOJITO_SERVICE (userdata);
+  SwService *service = SW_SERVICE (userdata);
 
-  mojito_avatar_iface_emit_avatar_retrieved (service, local_path);
+  sw_avatar_iface_emit_avatar_retrieved (service, local_path);
   g_free (local_path);
 }
 
 static void
-_twitter_avatar_request_avatar (MojitoAvatarIface     *self,
+_twitter_avatar_request_avatar (SwAvatarIface     *self,
                                 DBusGMethodInvocation *context)
 {
-  MojitoServiceTwitterPrivate *priv = GET_PRIVATE (self);
+  SwServiceTwitterPrivate *priv = GET_PRIVATE (self);
 
   if (priv->image_url) {
-    mojito_web_download_image_async (priv->image_url,
+    sw_web_download_image_async (priv->image_url,
                                      _requested_avatar_downloaded_cb,
                                      self);
   }
 
-  mojito_avatar_iface_return_from_request_avatar (context);
+  sw_avatar_iface_return_from_request_avatar (context);
 }
 
 static void
 avatar_iface_init (gpointer g_iface,
                    gpointer iface_data)
 {
-  MojitoAvatarIfaceClass *klass = (MojitoAvatarIfaceClass*)g_iface;
+  SwAvatarIfaceClass *klass = (SwAvatarIfaceClass*)g_iface;
 
-  mojito_avatar_iface_implement_request_avatar (klass,
+  sw_avatar_iface_implement_request_avatar (klass,
                                                 _twitter_avatar_request_avatar);
 }
 
@@ -779,20 +779,20 @@ _update_status_cb (RestProxyCall *call,
   {
     g_critical (G_STRLOC ": Error updating status: %s",
                 error->message);
-    mojito_status_update_iface_emit_status_updated (weak_object, FALSE);
+    sw_status_update_iface_emit_status_updated (weak_object, FALSE);
   } else {
-    MOJITO_DEBUG (TWITTER, G_STRLOC ": Status updated.");
-    mojito_status_update_iface_emit_status_updated (weak_object, FALSE);
+    SW_DEBUG (TWITTER, G_STRLOC ": Status updated.");
+    sw_status_update_iface_emit_status_updated (weak_object, FALSE);
   }
 }
 
 static void
-_twitter_status_update_update_status (MojitoStatusUpdateIface *self,
+_twitter_status_update_update_status (SwStatusUpdateIface *self,
                                       const gchar             *msg,
                                       DBusGMethodInvocation   *context)
 {
-  MojitoServiceTwitter *twitter = MOJITO_SERVICE_TWITTER (self);
-  MojitoServiceTwitterPrivate *priv = twitter->priv;
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (self);
+  SwServiceTwitterPrivate *priv = twitter->priv;
   RestProxyCall *call;
 
   if (!priv->user_id)
@@ -807,16 +807,16 @@ _twitter_status_update_update_status (MojitoStatusUpdateIface *self,
                               NULL);
 
   rest_proxy_call_async (call, _update_status_cb, (GObject *)self, NULL, NULL);
-  mojito_status_update_iface_return_from_update_status (context);
+  sw_status_update_iface_return_from_update_status (context);
 }
 
 static void
 status_update_iface_init (gpointer g_iface,
                           gpointer iface_data)
 {
-  MojitoStatusUpdateIfaceClass *klass = (MojitoStatusUpdateIfaceClass*)g_iface;
+  SwStatusUpdateIfaceClass *klass = (SwStatusUpdateIfaceClass*)g_iface;
 
-  mojito_status_update_iface_implement_update_status (klass,
+  sw_status_update_iface_implement_update_status (klass,
                                                       _twitter_status_update_update_status);
 }
 

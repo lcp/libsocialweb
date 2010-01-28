@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -21,13 +21,13 @@
 #include <string.h>
 #include <glib/gi18n.h>
 #include <gio/gio.h>
-#include <mojito/mojito-service.h>
-#include <mojito/mojito-item.h>
-#include <mojito/mojito-utils.h>
-#include <mojito/mojito-web.h>
-#include <mojito/mojito-call-list.h>
-#include <mojito/mojito-debug.h>
-#include <mojito-keystore/mojito-keystore.h>
+#include <libsocialweb/sw-service.h>
+#include <libsocialweb/sw-item.h>
+#include <libsocialweb/sw-utils.h>
+#include <libsocialweb/sw-web.h>
+#include <libsocialweb/sw-call-list.h>
+#include <libsocialweb/sw-debug.h>
+#include <libsocialweb-keystore/sw-keystore.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <gconf/gconf-client.h>
@@ -37,25 +37,25 @@
 
 static void lastfm_iface_init (gpointer g_iface, gpointer iface_data);
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
-G_DEFINE_TYPE_WITH_CODE (MojitoServiceLastfm, mojito_service_lastfm, MOJITO_TYPE_SERVICE,
+G_DEFINE_TYPE_WITH_CODE (SwServiceLastfm, sw_service_lastfm, SW_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init)
-                         G_IMPLEMENT_INTERFACE (MOJITO_TYPE_LASTFM_IFACE, lastfm_iface_init));
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_LASTFM_IFACE, lastfm_iface_init));
 
 
 #define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_LASTFM, MojitoServiceLastfmPrivate))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_LASTFM, SwServiceLastfmPrivate))
 
-#define KEY_BASE "/apps/mojito/services/lastfm"
+#define KEY_BASE "/apps/libsocialweb/services/lastfm"
 #define KEY_USER KEY_BASE "/user"
 
-struct _MojitoServiceLastfmPrivate {
+struct _SwServiceLastfmPrivate {
   gboolean running;
   RestProxy *proxy;
   GConfClient *gconf;
   char *user_id;
   guint gconf_notify_id;
-  MojitoSet *set;
-  MojitoCallList *calls;
+  SwSet *set;
+  SwCallList *calls;
 };
 
 static RestXmlNode *
@@ -106,7 +106,7 @@ node_from_call (RestProxyCall *call)
 }
 
 static void
-lastfm_now_playing (MojitoLastfmIface *self,
+lastfm_now_playing (SwLastfmIface *self,
                     const gchar *in_artist,
                     const gchar *in_album,
                     const gchar *in_track,
@@ -116,11 +116,11 @@ lastfm_now_playing (MojitoLastfmIface *self,
                     DBusGMethodInvocation *context)
 {
   /* TODO */
-  mojito_lastfm_iface_return_from_now_playing (context);
+  sw_lastfm_iface_return_from_now_playing (context);
 }
 
 static void
-lastfm_submit_track (MojitoLastfmIface *self,
+lastfm_submit_track (SwLastfmIface *self,
                      const gchar *in_artist,
                      const gchar *in_album,
                      const gchar *in_track,
@@ -133,7 +133,7 @@ lastfm_submit_track (MojitoLastfmIface *self,
                      DBusGMethodInvocation *context)
 {
   /* TODO */
-  mojito_lastfm_iface_return_from_submit_track (context);
+  sw_lastfm_iface_return_from_submit_track (context);
 }
 
 static char *
@@ -177,14 +177,14 @@ get_image_url (RestXmlNode *node, const char *size)
 }
 
 static void
-emit_if_done (MojitoServiceLastfm *lastfm)
+emit_if_done (SwServiceLastfm *lastfm)
 {
-  if (mojito_call_list_is_empty (lastfm->priv->calls)) {
-    MOJITO_DEBUG (LASTFM, "Call set is empty, emitting refreshed signal");
-    mojito_service_emit_refreshed ((MojitoService *)lastfm, lastfm->priv->set);
-    mojito_set_empty (lastfm->priv->set);
+  if (sw_call_list_is_empty (lastfm->priv->calls)) {
+    SW_DEBUG (LASTFM, "Call set is empty, emitting refreshed signal");
+    sw_service_emit_refreshed ((SwService *)lastfm, lastfm->priv->set);
+    sw_set_empty (lastfm->priv->set);
   } else {
-    MOJITO_DEBUG (LASTFM, "Call set is not empty, still more work to do.");
+    SW_DEBUG (LASTFM, "Call set is not empty, still more work to do.");
   }
 }
 
@@ -194,12 +194,12 @@ get_artist_info_cb (RestProxyCall *call,
                     GObject       *weak_object,
                     gpointer       user_data)
 {
-  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (weak_object);
-  MojitoItem *item = user_data;
+  SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (weak_object);
+  SwItem *item = user_data;
   RestXmlNode *root, *artist_node;
   const char *url;
 
-  mojito_call_list_remove (lastfm->priv->calls, call);
+  sw_call_list_remove (lastfm->priv->calls, call);
 
   if (error) {
     g_message ("Error: %s", error->message);
@@ -214,15 +214,15 @@ get_artist_info_cb (RestProxyCall *call,
   artist_node = rest_xml_node_find (root, "artist");
   url = get_image_url (artist_node, "large");
   if (url)
-    mojito_item_request_image_fetch (item, TRUE, "thumbnail", url);
+    sw_item_request_image_fetch (item, TRUE, "thumbnail", url);
 
-  mojito_item_pop_pending (item);
+  sw_item_pop_pending (item);
 
   emit_if_done (lastfm);
 }
 
 static void
-get_thumbnail (MojitoServiceLastfm *lastfm, MojitoItem *item, RestXmlNode *track_node)
+get_thumbnail (SwServiceLastfm *lastfm, SwItem *item, RestXmlNode *track_node)
 {
   const char *url;
   RestProxyCall *call;
@@ -231,20 +231,20 @@ get_thumbnail (MojitoServiceLastfm *lastfm, MojitoItem *item, RestXmlNode *track
 
   url = get_image_url (track_node, "large");
   if (url) {
-    mojito_item_request_image_fetch (item, TRUE, "thumbnail", url);
+    sw_item_request_image_fetch (item, TRUE, "thumbnail", url);
     return;
   }
 
   /* If we didn't find an album image, then try the artist image */
 
-  mojito_item_push_pending (item);
+  sw_item_push_pending (item);
 
   call = rest_proxy_new_call (lastfm->priv->proxy);
-  mojito_call_list_add (lastfm->priv->calls, call);
+  sw_call_list_add (lastfm->priv->calls, call);
 
   rest_proxy_call_add_params (call,
                               "method", "artist.getInfo",
-                              "api_key", mojito_keystore_get_key ("lastfm"),
+                              "api_key", sw_keystore_get_key ("lastfm"),
                               NULL);
 
   artist = rest_xml_node_find (track_node, "artist");
@@ -259,55 +259,55 @@ get_thumbnail (MojitoServiceLastfm *lastfm, MojitoItem *item, RestXmlNode *track
 }
 
 static void
-start (MojitoService *service)
+start (SwService *service)
 {
-  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
+  SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (service);
 
-  MOJITO_DEBUG (LASTFM, "Service started");
+  SW_DEBUG (LASTFM, "Service started");
   lastfm->priv->running = TRUE;
 }
 
-static MojitoItem *
-make_item (MojitoServiceLastfm *lastfm, RestXmlNode *user, RestXmlNode *track)
+static SwItem *
+make_item (SwServiceLastfm *lastfm, RestXmlNode *user, RestXmlNode *track)
 {
   RestXmlNode *date;
-  MojitoItem *item;
+  SwItem *item;
   const char *s;
   char *id;
 
-  item = mojito_item_new ();
-  mojito_item_set_service (item, (MojitoService *)lastfm);
+  item = sw_item_new ();
+  sw_item_set_service (item, (SwService *)lastfm);
 
   id = g_strdup_printf ("%s %s",
                         rest_xml_node_find (track, "url")->content,
                         rest_xml_node_find (user, "name")->content);
-  mojito_item_take (item, "id", id);
-  mojito_item_put (item, "url", rest_xml_node_find (track, "url")->content);
-  mojito_item_take (item, "title", make_title (track));
-  mojito_item_put (item, "album", rest_xml_node_find (track, "album")->content);
+  sw_item_take (item, "id", id);
+  sw_item_put (item, "url", rest_xml_node_find (track, "url")->content);
+  sw_item_take (item, "title", make_title (track));
+  sw_item_put (item, "album", rest_xml_node_find (track, "album")->content);
 
   get_thumbnail (lastfm, item, track);
 
   date = rest_xml_node_find (track, "date");
   if (date) {
-    mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
+    sw_item_take (item, "date", sw_time_t_to_string (atoi (rest_xml_node_get_attr (date, "uts"))));
   } else {
     /* No date means it's a now-playing item, so use now at the timestamp */
-    mojito_item_take (item, "date", mojito_time_t_to_string (time (NULL)));
+    sw_item_take (item, "date", sw_time_t_to_string (time (NULL)));
   }
 
   s = rest_xml_node_find (user, "realname")->content;
   if (s) {
-    mojito_item_put (item, "author", s);
+    sw_item_put (item, "author", s);
   } else {
-    mojito_item_put (item, "author", rest_xml_node_find (user, "name")->content);
+    sw_item_put (item, "author", rest_xml_node_find (user, "name")->content);
   }
 
-  mojito_item_put (item, "authorid", rest_xml_node_find (user, "name")->content);
+  sw_item_put (item, "authorid", rest_xml_node_find (user, "name")->content);
 
   s = get_image_url (user, "medium");
   if (s)
-    mojito_item_request_image_fetch (item, FALSE, "authoricon", s);
+    sw_item_request_image_fetch (item, FALSE, "authoricon", s);
 
   return item;
 }
@@ -318,11 +318,11 @@ get_tracks_cb (RestProxyCall *call,
                GObject       *weak_object,
                gpointer       user_data)
 {
-  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (weak_object);
+  SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (weak_object);
   RestXmlNode *user_node = user_data;
   RestXmlNode *root, *track_node;
 
-  mojito_call_list_remove (lastfm->priv->calls, call);
+  sw_call_list_remove (lastfm->priv->calls, call);
 
   if (error) {
     g_message ("Error: %s", error->message);
@@ -330,21 +330,21 @@ get_tracks_cb (RestProxyCall *call,
     return;
   }
 
-  MOJITO_DEBUG (LASTFM, "Got results for getTracks call");
+  SW_DEBUG (LASTFM, "Got results for getTracks call");
 
   root = node_from_call (call);
   if (!root)
     return;
 
-  MOJITO_DEBUG (LASTFM, "Parsed results for getTracks call");
+  SW_DEBUG (LASTFM, "Parsed results for getTracks call");
 
   /* Although we only asked for a single track, if there is now-playing data
      then that is returned as well. */
   for (track_node = rest_xml_node_find (root, "track"); track_node; track_node = track_node->next) {
-    MojitoItem *item;
+    SwItem *item;
 
     item = make_item (lastfm, user_node, track_node);
-    mojito_set_add (lastfm->priv->set, (GObject *)item);
+    sw_set_add (lastfm->priv->set, (GObject *)item);
   }
 
   rest_xml_node_unref (root);
@@ -358,33 +358,33 @@ get_friends_cb (RestProxyCall *call,
                 GObject       *weak_object,
                 gpointer       user_data)
 {
-  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (weak_object);
+  SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (weak_object);
   RestXmlNode *root, *node;
 
-  mojito_call_list_remove (lastfm->priv->calls, call);
+  sw_call_list_remove (lastfm->priv->calls, call);
 
   if (error) {
     g_message ("Error: %s", error->message);
     return;
   }
 
-  MOJITO_DEBUG (LASTFM, "Got result of getFriends call");
+  SW_DEBUG (LASTFM, "Got result of getFriends call");
 
   root = node_from_call (call);
   if (!root)
     return;
 
-  MOJITO_DEBUG (LASTFM, "Parsed results of getFriends call");
+  SW_DEBUG (LASTFM, "Parsed results of getFriends call");
 
   for (node = rest_xml_node_find (root, "user"); node; node = node->next) {
     call = rest_proxy_new_call (lastfm->priv->proxy);
-    mojito_call_list_add (lastfm->priv->calls, call);
+    sw_call_list_add (lastfm->priv->calls, call);
 
-    MOJITO_DEBUG (LASTFM, "Making getRecentTracks call for %s",
+    SW_DEBUG (LASTFM, "Making getRecentTracks call for %s",
                   rest_xml_node_find (node, "name")->content);
 
     rest_proxy_call_add_params (call,
-                                "api_key", mojito_keystore_get_key ("lastfm"),
+                                "api_key", sw_keystore_get_key ("lastfm"),
                                 "method", "user.getRecentTracks",
                                 "user", rest_xml_node_find (node, "name")->content,
                                 "limit", "1",
@@ -395,27 +395,27 @@ get_friends_cb (RestProxyCall *call,
 }
 
 static void
-refresh (MojitoService *service)
+refresh (SwService *service)
 {
-  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
+  SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (service);
   RestProxyCall *call;
 
-  MOJITO_DEBUG (LASTFM, "Refresh requested for instance %p", service);
+  SW_DEBUG (LASTFM, "Refresh requested for instance %p", service);
   if (!lastfm->priv->running || lastfm->priv->user_id == NULL) {
-    MOJITO_DEBUG (LASTFM, "Refresh abandoned: running = %s, user_id = %s",
+    SW_DEBUG (LASTFM, "Refresh abandoned: running = %s, user_id = %s",
                   lastfm->priv->running ? "yes" : "no",
                   lastfm->priv->user_id);
     return;
   }
 
-  mojito_call_list_cancel_all (lastfm->priv->calls);
-  mojito_set_empty (lastfm->priv->set);
+  sw_call_list_cancel_all (lastfm->priv->calls);
+  sw_set_empty (lastfm->priv->set);
 
-  MOJITO_DEBUG (LASTFM, "Making getFriends call");
+  SW_DEBUG (LASTFM, "Making getFriends call");
   call = rest_proxy_new_call (lastfm->priv->proxy);
-  mojito_call_list_add (lastfm->priv->calls, call);
+  sw_call_list_add (lastfm->priv->calls, call);
   rest_proxy_call_add_params (call,
-                              "api_key", mojito_keystore_get_key ("lastfm"),
+                              "api_key", sw_keystore_get_key ("lastfm"),
                               "user", lastfm->priv->user_id,
                               "method", "user.getFriends",
                               NULL);
@@ -425,12 +425,12 @@ refresh (MojitoService *service)
 static void
 user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
-  MojitoService *service = MOJITO_SERVICE (user_data);
-  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (service);
-  MojitoServiceLastfmPrivate *priv = lastfm->priv;
+  SwService *service = SW_SERVICE (user_data);
+  SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (service);
+  SwServiceLastfmPrivate *priv = lastfm->priv;
   const char *new_user;
 
-  MOJITO_DEBUG (LASTFM, "User changed");
+  SW_DEBUG (LASTFM, "User changed");
   if (entry->value) {
     new_user = gconf_value_get_string (entry->value);
     if (new_user && new_user[0] == '\0')
@@ -443,25 +443,25 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
     g_free (priv->user_id);
     priv->user_id = g_strdup (new_user);
 
-    MOJITO_DEBUG (LASTFM, "User set to %s", priv->user_id);
+    SW_DEBUG (LASTFM, "User set to %s", priv->user_id);
 
     if (priv->user_id)
       refresh (service);
     else
-      mojito_service_emit_refreshed (service, NULL);
+      sw_service_emit_refreshed (service, NULL);
   }
 }
 
 static const char *
-get_name (MojitoService *service)
+get_name (SwService *service)
 {
   return "lastfm";
 }
 
 static void
-mojito_service_lastfm_dispose (GObject *object)
+sw_service_lastfm_dispose (GObject *object)
 {
-  MojitoServiceLastfmPrivate *priv = ((MojitoServiceLastfm*)object)->priv;
+  SwServiceLastfmPrivate *priv = ((SwServiceLastfm*)object)->priv;
 
   if (priv->proxy) {
     g_object_unref (priv->proxy);
@@ -478,41 +478,41 @@ mojito_service_lastfm_dispose (GObject *object)
 
   /* Do this here so only disposing if there are callbacks pending */
   if (priv->calls) {
-    mojito_call_list_free (priv->calls);
+    sw_call_list_free (priv->calls);
     priv->calls = NULL;
   }
 
   if (priv->set) {
-    mojito_set_unref (priv->set);
+    sw_set_unref (priv->set);
     priv->set = NULL;
   }
 
-  G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->dispose (object);
+  G_OBJECT_CLASS (sw_service_lastfm_parent_class)->dispose (object);
 }
 
 static void
-mojito_service_lastfm_finalize (GObject *object)
+sw_service_lastfm_finalize (GObject *object)
 {
-  MojitoServiceLastfmPrivate *priv = ((MojitoServiceLastfm*)object)->priv;
+  SwServiceLastfmPrivate *priv = ((SwServiceLastfm*)object)->priv;
 
   g_free (priv->user_id);
 
-  G_OBJECT_CLASS (mojito_service_lastfm_parent_class)->finalize (object);
+  G_OBJECT_CLASS (sw_service_lastfm_parent_class)->finalize (object);
 }
 
 static gboolean
-mojito_service_lastfm_initable (GInitable    *initable,
+sw_service_lastfm_initable (GInitable    *initable,
                          GCancellable *cancellable,
                          GError      **error)
 {
-  MojitoServiceLastfm *lastfm = MOJITO_SERVICE_LASTFM (initable);
-  MojitoServiceLastfmPrivate *priv = lastfm->priv;
+  SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (initable);
+  SwServiceLastfmPrivate *priv = lastfm->priv;
 
-  MOJITO_DEBUG (LASTFM, "%s called", G_STRFUNC);
-  if (mojito_keystore_get_key ("lastfm") == NULL) {
+  SW_DEBUG (LASTFM, "%s called", G_STRFUNC);
+  if (sw_keystore_get_key ("lastfm") == NULL) {
     g_set_error_literal (error,
-                         MOJITO_SERVICE_ERROR,
-                         MOJITO_SERVICE_ERROR_NO_KEYS,
+                         SW_SERVICE_ERROR,
+                         SW_SERVICE_ERROR_NO_KEYS,
                          "No API key configured");
     return FALSE;
   }
@@ -520,8 +520,8 @@ mojito_service_lastfm_initable (GInitable    *initable,
   if (priv->proxy)
     return TRUE;
 
-  priv->set = mojito_item_set_new ();
-  priv->calls = mojito_call_list_new ();
+  priv->set = sw_item_set_new ();
+  priv->calls = sw_call_list_new ();
 
   priv->running = FALSE;
 
@@ -543,28 +543,28 @@ initable_iface_init (gpointer g_iface, gpointer iface_data)
 {
   GInitableIface *klass = (GInitableIface *)g_iface;
 
-  klass->init = mojito_service_lastfm_initable;
+  klass->init = sw_service_lastfm_initable;
 }
 
 static void
 lastfm_iface_init (gpointer g_iface, gpointer iface_data)
 {
-  MojitoLastfmIfaceClass *klass = (MojitoLastfmIfaceClass *)g_iface;
+  SwLastfmIfaceClass *klass = (SwLastfmIfaceClass *)g_iface;
 
-  mojito_lastfm_iface_implement_submit_track (klass, lastfm_submit_track);
-  mojito_lastfm_iface_implement_now_playing (klass, lastfm_now_playing);
+  sw_lastfm_iface_implement_submit_track (klass, lastfm_submit_track);
+  sw_lastfm_iface_implement_now_playing (klass, lastfm_now_playing);
 }
 
 static void
-mojito_service_lastfm_class_init (MojitoServiceLastfmClass *klass)
+sw_service_lastfm_class_init (SwServiceLastfmClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  MojitoServiceClass *service_class = MOJITO_SERVICE_CLASS (klass);
+  SwServiceClass *service_class = SW_SERVICE_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (MojitoServiceLastfmPrivate));
+  g_type_class_add_private (klass, sizeof (SwServiceLastfmPrivate));
 
-  object_class->dispose = mojito_service_lastfm_dispose;
-  object_class->finalize = mojito_service_lastfm_finalize;
+  object_class->dispose = sw_service_lastfm_dispose;
+  object_class->finalize = sw_service_lastfm_finalize;
 
   service_class->get_name = get_name;
   service_class->start = start;
@@ -572,7 +572,7 @@ mojito_service_lastfm_class_init (MojitoServiceLastfmClass *klass)
 }
 
 static void
-mojito_service_lastfm_init (MojitoServiceLastfm *self)
+sw_service_lastfm_init (SwServiceLastfm *self)
 {
   self->priv = GET_PRIVATE (self);
 }

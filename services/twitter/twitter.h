@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,43 +16,43 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _MOJITO_SERVICE_TWITTER
-#define _MOJITO_SERVICE_TWITTER
+#ifndef _SW_SERVICE_TWITTER
+#define _SW_SERVICE_TWITTER
 
-#include <mojito/mojito-service.h>
+#include <libsocialweb/sw-service.h>
 
 G_BEGIN_DECLS
 
-#define MOJITO_TYPE_SERVICE_TWITTER mojito_service_twitter_get_type()
+#define SW_TYPE_SERVICE_TWITTER sw_service_twitter_get_type()
 
-#define MOJITO_SERVICE_TWITTER(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitter))
+#define SW_SERVICE_TWITTER(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), SW_TYPE_SERVICE_TWITTER, SwServiceTwitter))
 
-#define MOJITO_SERVICE_TWITTER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitterClass))
+#define SW_SERVICE_TWITTER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), SW_TYPE_SERVICE_TWITTER, SwServiceTwitterClass))
 
-#define MOJITO_IS_SERVICE_TWITTER(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOJITO_TYPE_SERVICE_TWITTER))
+#define SW_IS_SERVICE_TWITTER(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SW_TYPE_SERVICE_TWITTER))
 
-#define MOJITO_IS_SERVICE_TWITTER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), MOJITO_TYPE_SERVICE_TWITTER))
+#define SW_IS_SERVICE_TWITTER_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), SW_TYPE_SERVICE_TWITTER))
 
-#define MOJITO_SERVICE_TWITTER_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), MOJITO_TYPE_SERVICE_TWITTER, MojitoServiceTwitterClass))
+#define SW_SERVICE_TWITTER_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), SW_TYPE_SERVICE_TWITTER, SwServiceTwitterClass))
 
-typedef struct _MojitoServiceTwitterPrivate MojitoServiceTwitterPrivate;
-
-typedef struct {
-  MojitoService parent;
-  MojitoServiceTwitterPrivate *priv;
-} MojitoServiceTwitter;
+typedef struct _SwServiceTwitterPrivate SwServiceTwitterPrivate;
 
 typedef struct {
-  MojitoServiceClass parent_class;
-} MojitoServiceTwitterClass;
+  SwService parent;
+  SwServiceTwitterPrivate *priv;
+} SwServiceTwitter;
 
-GType mojito_service_twitter_get_type (void);
+typedef struct {
+  SwServiceClass parent_class;
+} SwServiceTwitterClass;
+
+GType sw_service_twitter_get_type (void);
 
 G_END_DECLS
 
-#endif /* _MOJITO_SERVICE_TWITTER */
+#endif /* _SW_SERVICE_TWITTER */

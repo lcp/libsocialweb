@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,32 +16,32 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <mojito-client/mojito-client.h>
+#include <libsocialweb-client/sw-client.h>
 
 static void
-is_online_cb (MojitoClient *client, gboolean online, gpointer user_data)
+is_online_cb (SwClient *client, gboolean online, gpointer user_data)
 {
   g_print ("IsOnline returned %s\n", online ? "online" : "offline");
 }
 
 static void
-online_cb (MojitoClient *client, gboolean online, gpointer user_data)
+online_cb (SwClient *client, gboolean online, gpointer user_data)
 {
   g_print ("OnlineChanged notified %s\n", online ? "online" : "offline");}
 
 int
 main (int argc, char **argv)
 {
-  MojitoClient *client;
+  SwClient *client;
   GMainLoop *loop;
 
   g_type_init ();
 
-  client = mojito_client_new ();
+  client = sw_client_new ();
 
   g_signal_connect (client, "online-changed", G_CALLBACK (online_cb), NULL);
 
-  mojito_client_is_online (client, is_online_cb, NULL);
+  sw_client_is_online (client, is_online_cb, NULL);
 
   loop = g_main_loop_new (NULL, FALSE);
 

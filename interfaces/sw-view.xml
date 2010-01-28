@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<node name="/View_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">>
+  <interface name="org.moblin.libsocialweb.View">
+    <method name="Start" tp:name-for-bindings="Start"/>
+
+    <method name="Refresh"  tp:name-for-bindings="Refresh"/>
+
+    <method name="Stop"  tp:name-for-bindings="Stop"/>
+
+    <method name="Close" tp:name-for-bindings="Close"/>
+
+    <signal name="ItemsAdded" tp:name-for-bindings="Items_Added">
+      <arg name="items" type="a(ssxa{ss})"/>
+    </signal>
+
+    <signal name="ItemsRemoved" tp:name-for-bindings="Items_Removed">
+      <arg name="items" type="a(ss)"/>
+    </signal>
+
+    <signal name="ItemsChanged"  tp:name-for-bindings="Items_Changed">
+      <arg name="items" type="a(ssxa{ss})"/>
+    </signal>
+
+  </interface>
+</node>

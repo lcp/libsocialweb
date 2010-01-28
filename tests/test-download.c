@@ -1,5 +1,5 @@
 #include <glib-object.h>
-#include <mojito/mojito-web.h>
+#include <libsocialweb/sw-web.h>
 
 int
 main (int argc, char **argv)
@@ -14,7 +14,7 @@ main (int argc, char **argv)
   g_thread_init (NULL);
   g_type_init ();
 
-  file = mojito_web_download_image (argv[1]);
+  file = sw_web_download_image (argv[1]);
   g_print ("Got local file %s\n", file);
 
   return 0;

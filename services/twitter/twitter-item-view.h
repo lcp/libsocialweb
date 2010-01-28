@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
  *
  * Author: Rob Bradford <rob@linux.intel.com>
@@ -18,42 +18,42 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _MOJITO_TWITTER_ITEM_VIEW
-#define _MOJITO_TWITTER_ITEM_VIEW
+#ifndef _SW_TWITTER_ITEM_VIEW
+#define _SW_TWITTER_ITEM_VIEW
 
 #include <glib-object.h>
-#include <mojito/mojito-item-view.h>
+#include <libsocialweb/sw-item-view.h>
 
 G_BEGIN_DECLS
 
-#define MOJITO_TYPE_TWITTER_ITEM_VIEW mojito_twitter_item_view_get_type()
+#define SW_TYPE_TWITTER_ITEM_VIEW sw_twitter_item_view_get_type()
 
-#define MOJITO_TWITTER_ITEM_VIEW(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), MOJITO_TYPE_TWITTER_ITEM_VIEW, MojitoTwitterItemView))
+#define SW_TWITTER_ITEM_VIEW(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), SW_TYPE_TWITTER_ITEM_VIEW, SwTwitterItemView))
 
-#define MOJITO_TWITTER_ITEM_VIEW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), MOJITO_TYPE_TWITTER_ITEM_VIEW, MojitoTwitterItemViewClass))
+#define SW_TWITTER_ITEM_VIEW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), SW_TYPE_TWITTER_ITEM_VIEW, SwTwitterItemViewClass))
 
-#define MOJITO_IS_TWITTER_ITEM_VIEW(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOJITO_TYPE_TWITTER_ITEM_VIEW))
+#define SW_IS_TWITTER_ITEM_VIEW(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SW_TYPE_TWITTER_ITEM_VIEW))
 
-#define MOJITO_IS_TWITTER_ITEM_VIEW_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), MOJITO_TYPE_TWITTER_ITEM_VIEW))
+#define SW_IS_TWITTER_ITEM_VIEW_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), SW_TYPE_TWITTER_ITEM_VIEW))
 
-#define MOJITO_TWITTER_ITEM_VIEW_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), MOJITO_TYPE_TWITTER_ITEM_VIEW, MojitoTwitterItemViewClass))
-
-typedef struct {
-  MojitoItemView parent;
-} MojitoTwitterItemView;
+#define SW_TWITTER_ITEM_VIEW_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), SW_TYPE_TWITTER_ITEM_VIEW, SwTwitterItemViewClass))
 
 typedef struct {
-  MojitoItemViewClass parent_class;
-} MojitoTwitterItemViewClass;
+  SwItemView parent;
+} SwTwitterItemView;
 
-GType mojito_twitter_item_view_get_type (void);
+typedef struct {
+  SwItemViewClass parent_class;
+} SwTwitterItemViewClass;
+
+GType sw_twitter_item_view_get_type (void);
 
 G_END_DECLS
 
-#endif /* _MOJITO_TWITTER_ITEM_VIEW */
+#endif /* _SW_TWITTER_ITEM_VIEW */
 

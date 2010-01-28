@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,10 +16,10 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <mojito-client/mojito-client.h>
+#include <libsocialweb-client/sw-client.h>
 
 static void
-client_view_items_added_cb (MojitoClientView *view,
+client_view_items_added_cb (SwClientView *view,
                             GList            *items,
                             gpointer          userdata)
 {
@@ -28,7 +28,7 @@ client_view_items_added_cb (MojitoClientView *view,
   {
     GHashTableIter iter;
     gpointer key, value;
-    MojitoItem *item = (MojitoItem *)l->data;
+    SwItem *item = (SwItem *)l->data;
 
     g_debug (G_STRLOC ": Got item with uuid: %s", item->uuid);
 
@@ -41,18 +41,18 @@ client_view_items_added_cb (MojitoClientView *view,
 }
 
 static void
-client_open_view_cb (MojitoClient     *client,
-                     MojitoClientView *view,
+client_open_view_cb (SwClient     *client,
+                     SwClientView *view,
                      gpointer          userdata)
 {
-  mojito_client_view_start (view);
+  sw_client_view_start (view);
   g_signal_connect (view, "items-added",
                     G_CALLBACK (client_view_items_added_cb),
                     NULL);
 }
 
 static void
-client_get_services_cb (MojitoClient *client,
+client_get_services_cb (SwClient *client,
                        const GList        *services,
                        gpointer      userdata)
 {
@@ -63,7 +63,7 @@ client_get_services_cb (MojitoClient *client,
     g_print ("Told about service: %s\n", (char*)l->data);
   }
 
-  mojito_client_open_view (client,
+  sw_client_open_view (client,
                            (GList*)services,
                            10,
                            client_open_view_cb,
@@ -74,13 +74,13 @@ int
 main (int    argc,
       char **argv)
 {
-  MojitoClient *client;
+  SwClient *client;
   GMainLoop *loop;
 
   g_type_init ();
 
-  client = mojito_client_new ();
-  mojito_client_get_services (client, client_get_services_cb, NULL);
+  client = sw_client_new ();
+  sw_client_get_services (client, client_get_services_cb, NULL);
 
   loop = g_main_loop_new (NULL, FALSE);
 

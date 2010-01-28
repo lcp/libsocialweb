@@ -1,10 +1,10 @@
-# Translation of mojito to Indonesian.
+# Translation of libsocialweb to Indonesian.
 # Copyright (C)
 # This file is distributed under the same license as the PACKAGE package.
 # Andika Triwidada <andika@gmail.com>, 2009.
 msgid ""
 msgstr ""
-"Project-Id-Version: mojito master\n"
+"Project-Id-Version: libsocialweb master\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-12-02 17:42+0000\n"
 "PO-Revision-Date: 2009-08-26 00:20+0700\n"

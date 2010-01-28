@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,44 +16,44 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _MOJITO_SERVICE_LASTFM
-#define _MOJITO_SERVICE_LASTFM
+#ifndef _SW_SERVICE_LASTFM
+#define _SW_SERVICE_LASTFM
 
 #include <glib-object.h>
-#include <mojito/mojito-service.h>
+#include <libsocialweb/sw-service.h>
 
 G_BEGIN_DECLS
 
-#define MOJITO_TYPE_SERVICE_LASTFM mojito_service_lastfm_get_type()
+#define SW_TYPE_SERVICE_LASTFM sw_service_lastfm_get_type()
 
-#define MOJITO_SERVICE_LASTFM(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), MOJITO_TYPE_SERVICE_LASTFM, MojitoServiceLastfm))
+#define SW_SERVICE_LASTFM(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), SW_TYPE_SERVICE_LASTFM, SwServiceLastfm))
 
-#define MOJITO_SERVICE_LASTFM_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), MOJITO_TYPE_SERVICE_LASTFM, MojitoServiceLastfmClass))
+#define SW_SERVICE_LASTFM_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), SW_TYPE_SERVICE_LASTFM, SwServiceLastfmClass))
 
-#define MOJITO_IS_SERVICE_LASTFM(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOJITO_TYPE_SERVICE_LASTFM))
+#define SW_IS_SERVICE_LASTFM(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SW_TYPE_SERVICE_LASTFM))
 
-#define MOJITO_IS_SERVICE_LASTFM_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), MOJITO_TYPE_SERVICE_LASTFM))
+#define SW_IS_SERVICE_LASTFM_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), SW_TYPE_SERVICE_LASTFM))
 
-#define MOJITO_SERVICE_LASTFM_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), MOJITO_TYPE_SERVICE_LASTFM, MojitoServiceLastfmClass))
+#define SW_SERVICE_LASTFM_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), SW_TYPE_SERVICE_LASTFM, SwServiceLastfmClass))
 
-typedef struct _MojitoServiceLastfmPrivate MojitoServiceLastfmPrivate;
-
-typedef struct {
-  MojitoService parent;
-  MojitoServiceLastfmPrivate *priv;
-} MojitoServiceLastfm;
+typedef struct _SwServiceLastfmPrivate SwServiceLastfmPrivate;
 
 typedef struct {
-  MojitoServiceClass parent_class;
-} MojitoServiceLastfmClass;
+  SwService parent;
+  SwServiceLastfmPrivate *priv;
+} SwServiceLastfm;
 
-GType mojito_service_lastfm_get_type (void);
+typedef struct {
+  SwServiceClass parent_class;
+} SwServiceLastfmClass;
+
+GType sw_service_lastfm_get_type (void);
 
 G_END_DECLS
 
-#endif /* _MOJITO_SERVICE_LASTFM */
+#endif /* _SW_SERVICE_LASTFM */

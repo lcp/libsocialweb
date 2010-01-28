@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE node SYSTEM "dbus.dtd">
+
+<node name="/Core_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+  <interface name="org.moblin.libsocialweb">
+    <method name="GetServices" tp:name-for-bindings="Get_Services">
+      <arg name="services" type="as" direction="out"/>
+    </method>
+    <method name="OpenView" tp:name-for-bindings="Open_View">
+      <arg name="services" type="as" direction="in"/>
+      <arg name="count" type="u" direction="in"/>
+      <arg name="view" type="o" direction="out"/>
+    </method>
+
+    <method name="HideItem" tp:name-for-bindings="Hide_Item">
+      <arg name="uid" type="s" direction="in"/>
+    </method>
+
+    <method name="IsOnline" tp:name-for-bindings="Is_Online">
+      <arg name="online" type="b" direction="out"/>
+    </method>
+    <signal name="OnlineChanged"  tp:name-for-bindings="Online_Changed">
+      <arg name="online" type="b"/>
+    </signal>
+
+  </interface>
+</node>

@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it

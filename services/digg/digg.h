@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,44 +16,44 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _MOJITO_SERVICE_DIGG
-#define _MOJITO_SERVICE_DIGG
+#ifndef _SW_SERVICE_DIGG
+#define _SW_SERVICE_DIGG
 
 #include <glib-object.h>
-#include <mojito/mojito-service.h>
+#include <libsocialweb/sw-service.h>
 
 G_BEGIN_DECLS
 
-#define MOJITO_TYPE_SERVICE_DIGG mojito_service_digg_get_type()
+#define SW_TYPE_SERVICE_DIGG sw_service_digg_get_type()
 
-#define MOJITO_SERVICE_DIGG(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), MOJITO_TYPE_SERVICE_DIGG, MojitoServiceDigg))
+#define SW_SERVICE_DIGG(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), SW_TYPE_SERVICE_DIGG, SwServiceDigg))
 
-#define MOJITO_SERVICE_DIGG_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), MOJITO_TYPE_SERVICE_DIGG, MojitoServiceDiggClass))
+#define SW_SERVICE_DIGG_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), SW_TYPE_SERVICE_DIGG, SwServiceDiggClass))
 
-#define MOJITO_IS_SERVICE_DIGG(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOJITO_TYPE_SERVICE_DIGG))
+#define SW_IS_SERVICE_DIGG(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SW_TYPE_SERVICE_DIGG))
 
-#define MOJITO_IS_SERVICE_DIGG_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), MOJITO_TYPE_SERVICE_DIGG))
+#define SW_IS_SERVICE_DIGG_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), SW_TYPE_SERVICE_DIGG))
 
-#define MOJITO_SERVICE_DIGG_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), MOJITO_TYPE_SERVICE_DIGG, MojitoServiceDiggClass))
+#define SW_SERVICE_DIGG_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), SW_TYPE_SERVICE_DIGG, SwServiceDiggClass))
 
-typedef struct _MojitoServiceDiggPrivate MojitoServiceDiggPrivate;
-
-typedef struct {
-  MojitoService parent;
-  MojitoServiceDiggPrivate *priv;
-} MojitoServiceDigg;
+typedef struct _SwServiceDiggPrivate SwServiceDiggPrivate;
 
 typedef struct {
-  MojitoServiceClass parent_class;
-} MojitoServiceDiggClass;
+  SwService parent;
+  SwServiceDiggPrivate *priv;
+} SwServiceDigg;
 
-GType mojito_service_digg_get_type (void);
+typedef struct {
+  SwServiceClass parent_class;
+} SwServiceDiggClass;
+
+GType sw_service_digg_get_type (void);
 
 G_END_DECLS
 
-#endif /* _MOJITO_SERVICE_DIGG */
+#endif /* _SW_SERVICE_DIGG */

@@ -1,42 +1,42 @@
 QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
 
-noinst_LTLIBRARIES = libmojito-ginterfaces.la libmojito-bindings.la
+noinst_LTLIBRARIES = libsocialweb-ginterfaces.la libsocialweb-bindings.la
 
 %.c: %.list Makefile.am
-	$(QUIET_GEN)glib-genmarshal --body --prefix=mojito_marshal $< > $@
+	$(QUIET_GEN)glib-genmarshal --body --prefix=sw_marshal $< > $@
 
 %.h: %.list Makefile.am
-	$(QUIET_GEN)glib-genmarshal --header --prefix=mojito_marshal $< > $@
+	$(QUIET_GEN)glib-genmarshal --header --prefix=sw_marshal $< > $@
 
 MARSHALS_SOURCES = \
-	mojito-marshals.c mojito-marshals.h
+	sw-marshals.c sw-marshals.h
 
-MARSHALS_LISTS = mojito-marshals.list
+MARSHALS_LISTS = sw-marshals.list
 
-DBUS_SPECS = mojito-core.xml mojito-service.xml \
-	     mojito-view.xml mojito-item-view.xml mojito-query.xml \
-	     mojito-avatar.xml mojito-status-update.xml \
+DBUS_SPECS = sw-core.xml sw-service.xml \
+	     sw-view.xml sw-item-view.xml sw-query.xml \
+	     sw-avatar.xml sw-status-update.xml \
 	     lastfm.xml
 
 %-ginterface.h %-ginterface.c: %.xml Makefile.am
-	$(QUIET_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"mojito-marshals.h"' --filename=$(basename $@) $< Mojito_
+	$(QUIET_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"sw-marshals.h"' --filename=$(basename $@) $< Sw_
 
 GINTERFACE_SOURCES = \
 	$(DBUS_SPECS:.xml=-ginterface.h) \
 	$(DBUS_SPECS:.xml=-ginterface.c)
 
-libmojito_ginterfaces_la_SOURCES = $(GINTERFACE_SOURCES) $(MARSHALS_SOURCES)
-libmojito_ginterfaces_la_LIBADD = $(DBUS_GLIB_LIBS)
-libmojito_ginterfaces_la_CFLAGS = $(DBUS_GLIB_CFLAGS)
+libsocialweb_ginterfaces_la_SOURCES = $(GINTERFACE_SOURCES) $(MARSHALS_SOURCES)
+libsocialweb_ginterfaces_la_LIBADD = $(DBUS_GLIB_LIBS)
+libsocialweb_ginterfaces_la_CFLAGS = $(DBUS_GLIB_CFLAGS)
 
 %-bindings.h: %.xml
 	$(QUIET_GEN)dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
 
 BINDINGS_SOURCES = $(DBUS_SPECS:.xml=-bindings.h)
 
-libmojito_bindings_la_SOURCES = $(BINDINGS_SOURCES) $(MARSHALS_SOURCES)
-libmojito_bindings_la_LIBADD = $(DBUS_GLIB_LIBS)
-libmojito_bindings_la_CFLAGS = $(DBUS_GLIB_CFLAGS)
+libsocialweb_bindings_la_SOURCES = $(BINDINGS_SOURCES) $(MARSHALS_SOURCES)
+libsocialweb_bindings_la_LIBADD = $(DBUS_GLIB_LIBS)
+libsocialweb_bindings_la_CFLAGS = $(DBUS_GLIB_CFLAGS)
 
 BUILT_SOURCES = $(GINTERFACE_SOURCES) $(BINDINGS_SOURCES) $(MARSHALS_SOURCES)
 CLEANFILES = $(BUILT_SOURCES)

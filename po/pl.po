@@ -1,6 +1,6 @@
 # pl locale
 # Copyright (C) 2009 Intel Corporation
-# This file is distributed under the same license as the mojito package.
+# This file is distributed under the same license as the libsocialweb package.
 # Andrzej Zaborowski <andrew.zaborowski@intel.com>, 2009.
 #
 msgid ""

@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -19,26 +19,26 @@
 #include <config.h>
 #include <stdlib.h>
 #include <string.h>
-#include <mojito/mojito-service.h>
-#include <mojito/mojito-item.h>
-#include <mojito/mojito-utils.h>
-#include <mojito/mojito-web.h>
-#include <mojito-keystore/mojito-keystore.h>
+#include <libsocialweb/sw-service.h>
+#include <libsocialweb/sw-item.h>
+#include <libsocialweb/sw-utils.h>
+#include <libsocialweb/sw-web.h>
+#include <libsocialweb-keystore/sw-keystore.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <gconf/gconf-client.h>
 
 #include "digg.h"
 
-G_DEFINE_TYPE (MojitoServiceDigg, mojito_service_digg, MOJITO_TYPE_SERVICE)
+G_DEFINE_TYPE (SwServiceDigg, sw_service_digg, SW_TYPE_SERVICE)
 
 #define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), MOJITO_TYPE_SERVICE_DIGG, MojitoServiceDiggPrivate))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_DIGG, SwServiceDiggPrivate))
 
-#define KEY_BASE "/apps/mojito/services/digg"
+#define KEY_BASE "/apps/libsocialweb/services/digg"
 #define KEY_USER KEY_BASE "/user"
 
-struct _MojitoServiceDiggPrivate {
+struct _SwServiceDiggPrivate {
   gboolean running;
   RestProxy *proxy;
   GConfClient *gconf;
@@ -51,7 +51,7 @@ struct _MojitoServiceDiggPrivate {
  * different ways, just the raw result is returned
  */
 static RestXmlNode *
-digg_call (MojitoServiceDigg *digg, gchar *subrequest)
+digg_call (SwServiceDigg *digg, gchar *subrequest)
 {
   GError *error = NULL;
   RestProxyCall *call;
@@ -69,7 +69,7 @@ digg_call (MojitoServiceDigg *digg, gchar *subrequest)
    */
   call = rest_proxy_new_call (digg->priv->proxy);
   rest_proxy_call_add_params (call,
-                              "appkey", mojito_keystore_get_key ("digg"),
+                              "appkey", sw_keystore_get_key ("digg"),
                               "count", "5",
                               NULL);
 
@@ -97,7 +97,7 @@ digg_call (MojitoServiceDigg *digg, gchar *subrequest)
 }
 
 static void
-retrieve_thumbnail (MojitoItem *item, RestXmlNode *node)
+retrieve_thumbnail (SwItem *item, RestXmlNode *node)
 {
   RestXmlNode *thumb;
 
@@ -105,25 +105,25 @@ retrieve_thumbnail (MojitoItem *item, RestXmlNode *node)
   if (thumb == NULL)
     return;
 
-  mojito_item_request_image_fetch (item, TRUE, "thumbnail", rest_xml_node_get_attr (thumb, "src"));
+  sw_item_request_image_fetch (item, TRUE, "thumbnail", rest_xml_node_get_attr (thumb, "src"));
 }
 
 static void
-start (MojitoService *service)
+start (SwService *service)
 {
-  MojitoServiceDigg *digg = MOJITO_SERVICE_DIGG (service);
+  SwServiceDigg *digg = SW_SERVICE_DIGG (service);
 
   digg->priv->running = TRUE;
 }
 
-static MojitoItem *
-init_item (MojitoServiceDigg *digg, RestXmlNode *node, gchar *id_prefix)
+static SwItem *
+init_item (SwServiceDigg *digg, RestXmlNode *node, gchar *id_prefix)
 {
-  MojitoItem *item;
+  SwItem *item;
   char *id;
 
-  item = mojito_item_new ();
-  mojito_item_set_service (item, (MojitoService *)digg);
+  item = sw_item_new ();
+  sw_item_set_service (item, (SwService *)digg);
 
   if (id_prefix != NULL)
     id = g_strdup_printf ("%s_%s",
@@ -132,13 +132,13 @@ init_item (MojitoServiceDigg *digg, RestXmlNode *node, gchar *id_prefix)
   else
     id = g_strdup (rest_xml_node_get_attr (node, "id"));
 
-  mojito_item_take (item, "id", id);
+  sw_item_take (item, "id", id);
 
-  mojito_item_put (item, "url", rest_xml_node_get_attr (node, "link"));
-  mojito_item_put (item, "title", rest_xml_node_find (node, "title")->content);
-  mojito_item_put (item, "content", rest_xml_node_find (node, "description")->content);
+  sw_item_put (item, "url", rest_xml_node_get_attr (node, "link"));
+  sw_item_put (item, "title", rest_xml_node_find (node, "title")->content);
+  sw_item_put (item, "content", rest_xml_node_find (node, "description")->content);
   retrieve_thumbnail (item, node);
-  mojito_item_take (item, "date", mojito_time_t_to_string (atoi (rest_xml_node_get_attr (node, "submit_date"))));
+  sw_item_take (item, "date", sw_time_t_to_string (atoi (rest_xml_node_get_attr (node, "submit_date"))));
 
   /*
    * "author" is assigned case by case
@@ -148,19 +148,19 @@ init_item (MojitoServiceDigg *digg, RestXmlNode *node, gchar *id_prefix)
 }
 
 static void
-assign_author (MojitoItem *item, RestXmlNode *author)
+assign_author (SwItem *item, RestXmlNode *author)
 {
-  mojito_item_put (item, "author", rest_xml_node_get_attr (author, "fullname"));
-  mojito_item_put (item, "authorid", rest_xml_node_get_attr (author, "name"));
-  mojito_item_request_image_fetch (item, FALSE, "authoricon", rest_xml_node_get_attr (author, "icon"));
+  sw_item_put (item, "author", rest_xml_node_get_attr (author, "fullname"));
+  sw_item_put (item, "authorid", rest_xml_node_get_attr (author, "name"));
+  sw_item_request_image_fetch (item, FALSE, "authoricon", rest_xml_node_get_attr (author, "icon"));
 }
 
 static void
-collect_with_friends (MojitoServiceDigg *digg, RestXmlNode *node, MojitoSet *set, gchar *prefix)
+collect_with_friends (SwServiceDigg *digg, RestXmlNode *node, SwSet *set, gchar *prefix)
 {
   gchar *complete_prefix;
   RestXmlNode *friends, *author;
-  MojitoItem *item;
+  SwItem *item;
 
   friends = rest_xml_node_find (node, "friends");
 
@@ -169,31 +169,31 @@ collect_with_friends (MojitoServiceDigg *digg, RestXmlNode *node, MojitoSet *set
     item = init_item (digg, node, complete_prefix);
     g_free (complete_prefix);
     assign_author (item, author);
-    mojito_set_add (set, (GObject*)item);
+    sw_set_add (set, (GObject*)item);
   }
 }
 
 /* TODO: this is one huge main loop blockage and should be rewritten */
 static void
-refresh (MojitoService *service)
+refresh (SwService *service)
 {
-  MojitoServiceDigg *digg = MOJITO_SERVICE_DIGG (service);
+  SwServiceDigg *digg = SW_SERVICE_DIGG (service);
   RestXmlNode *root_node, *user_node;
-  MojitoSet *set;
-  MojitoItem *item;
+  SwSet *set;
+  SwItem *item;
 
   if (!digg->priv->running || digg->priv->user_id == NULL) {
     return;
   }
 
-  set = mojito_item_set_new ();
+  set = sw_item_set_new ();
 
   root_node = digg_call (digg, "submissions");
   if (root_node != NULL) {
     for (user_node = rest_xml_node_find (root_node, "story"); user_node; user_node = user_node->next) {
       item = init_item (digg, user_node, NULL);
       assign_author (item, rest_xml_node_find (user_node, "user"));
-      mojito_set_add (set, (GObject*)item);
+      sw_set_add (set, (GObject*)item);
     }
 
     rest_xml_node_unref (root_node);
@@ -213,15 +213,15 @@ refresh (MojitoService *service)
     rest_xml_node_unref (root_node);
   }
 
-  mojito_service_emit_refreshed (service, set);
+  sw_service_emit_refreshed (service, set);
 }
 
 static void
 user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
 {
-  MojitoService *service = MOJITO_SERVICE (user_data);
-  MojitoServiceDigg *digg = MOJITO_SERVICE_DIGG (service);
-  MojitoServiceDiggPrivate *priv = digg->priv;
+  SwService *service = SW_SERVICE (user_data);
+  SwServiceDigg *digg = SW_SERVICE_DIGG (service);
+  SwServiceDiggPrivate *priv = digg->priv;
   const char *new_user;
 
   if (entry->value) {
@@ -239,20 +239,20 @@ user_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
     if (priv->user_id)
       refresh (service);
     else
-      mojito_service_emit_refreshed (service, NULL);
+      sw_service_emit_refreshed (service, NULL);
   }
 }
 
 static const char *
-get_name (MojitoService *service)
+get_name (SwService *service)
 {
   return "digg";
 }
 
 static void
-mojito_service_digg_dispose (GObject *object)
+sw_service_digg_dispose (GObject *object)
 {
-  MojitoServiceDiggPrivate *priv = ((MojitoServiceDigg*)object)->priv;
+  SwServiceDiggPrivate *priv = ((SwServiceDigg*)object)->priv;
 
   if (priv->proxy) {
     g_object_unref (priv->proxy);
@@ -267,25 +267,25 @@ mojito_service_digg_dispose (GObject *object)
     priv->gconf = NULL;
   }
 
-  G_OBJECT_CLASS (mojito_service_digg_parent_class)->dispose (object);
+  G_OBJECT_CLASS (sw_service_digg_parent_class)->dispose (object);
 }
 
 static void
-mojito_service_digg_finalize (GObject *object)
+sw_service_digg_finalize (GObject *object)
 {
-  G_OBJECT_CLASS (mojito_service_digg_parent_class)->finalize (object);
+  G_OBJECT_CLASS (sw_service_digg_parent_class)->finalize (object);
 }
 
 static void
-mojito_service_digg_class_init (MojitoServiceDiggClass *klass)
+sw_service_digg_class_init (SwServiceDiggClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  MojitoServiceClass *service_class = MOJITO_SERVICE_CLASS (klass);
+  SwServiceClass *service_class = SW_SERVICE_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (MojitoServiceDiggPrivate));
+  g_type_class_add_private (klass, sizeof (SwServiceDiggPrivate));
 
-  object_class->dispose = mojito_service_digg_dispose;
-  object_class->finalize = mojito_service_digg_finalize;
+  object_class->dispose = sw_service_digg_dispose;
+  object_class->finalize = sw_service_digg_finalize;
 
   service_class->get_name = get_name;
   service_class->start = start;
@@ -293,9 +293,9 @@ mojito_service_digg_class_init (MojitoServiceDiggClass *klass)
 }
 
 static void
-mojito_service_digg_init (MojitoServiceDigg *self)
+sw_service_digg_init (SwServiceDigg *self)
 {
-  MojitoServiceDiggPrivate *priv;
+  SwServiceDiggPrivate *priv;
 
   priv = self->priv = GET_PRIVATE (self);
 
@@ -307,7 +307,7 @@ mojito_service_digg_init (MojitoServiceDigg *self)
    * Digg webservice doesn't responses at all if no User-agent is set in requests
    * http://apidoc.digg.com/BasicConcepts#UserAgents
    */
-  rest_proxy_set_user_agent (priv->proxy, "Mojito");
+  rest_proxy_set_user_agent (priv->proxy, "Sw");
 
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_BASE,

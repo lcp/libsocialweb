@@ -1,5 +1,5 @@
 /*
- * Mojito - social data store
+ * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -16,43 +16,43 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _MOJITO_SERVICE_MYSPACE
-#define _MOJITO_SERVICE_MYSPACE
+#ifndef _SW_SERVICE_MYSPACE
+#define _SW_SERVICE_MYSPACE
 
-#include <mojito/mojito-service.h>
+#include <libsocialweb/sw-service.h>
 
 G_BEGIN_DECLS
 
-#define MOJITO_TYPE_SERVICE_MYSPACE mojito_service_myspace_get_type()
+#define SW_TYPE_SERVICE_MYSPACE sw_service_myspace_get_type()
 
-#define MOJITO_SERVICE_MYSPACE(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST ((obj), MOJITO_TYPE_SERVICE_MYSPACE, MojitoServiceMySpace))
+#define SW_SERVICE_MYSPACE(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST ((obj), SW_TYPE_SERVICE_MYSPACE, SwServiceMySpace))
 
-#define MOJITO_SERVICE_MYSPACE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST ((klass), MOJITO_TYPE_SERVICE_MYSPACE, MojitoServiceMySpaceClass))
+#define SW_SERVICE_MYSPACE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST ((klass), SW_TYPE_SERVICE_MYSPACE, SwServiceMySpaceClass))
 
-#define MOJITO_IS_SERVICE_MYSPACE(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MOJITO_TYPE_SERVICE_MYSPACE))
+#define SW_IS_SERVICE_MYSPACE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SW_TYPE_SERVICE_MYSPACE))
 
-#define MOJITO_IS_SERVICE_MYSPACE_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE ((klass), MOJITO_TYPE_SERVICE_MYSPACE))
+#define SW_IS_SERVICE_MYSPACE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE ((klass), SW_TYPE_SERVICE_MYSPACE))
 
-#define MOJITO_SERVICE_MYSPACE_GET_CLASS(obj) \
-  (G_TYPE_INSTANCE_GET_CLASS ((obj), MOJITO_TYPE_SERVICE_MYSPACE, MojitoServiceMySpaceClass))
+#define SW_SERVICE_MYSPACE_GET_CLASS(obj) \
+  (G_TYPE_INSTANCE_GET_CLASS ((obj), SW_TYPE_SERVICE_MYSPACE, SwServiceMySpaceClass))
 
-typedef struct _MojitoServiceMySpacePrivate MojitoServiceMySpacePrivate;
-
-typedef struct {
-  MojitoService parent;
-  MojitoServiceMySpacePrivate *priv;
-} MojitoServiceMySpace;
+typedef struct _SwServiceMySpacePrivate SwServiceMySpacePrivate;
 
 typedef struct {
-  MojitoServiceClass parent_class;
-} MojitoServiceMySpaceClass;
+  SwService parent;
+  SwServiceMySpacePrivate *priv;
+} SwServiceMySpace;
 
-GType mojito_service_myspace_get_type (void);
+typedef struct {
+  SwServiceClass parent_class;
+} SwServiceMySpaceClass;
+
+GType sw_service_myspace_get_type (void);
 
 G_END_DECLS
 
-#endif /* _MOJITO_SERVICE_MYSPACE */
+#endif /* _SW_SERVICE_MYSPACE */
