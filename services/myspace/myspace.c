@@ -404,42 +404,6 @@ request_avatar (SwService *service)
   }
 }
 
-static void
-_status_updated_cb (RestProxyCall *call,
-                    const GError  *error,
-                    GObject       *weak_object,
-                    gpointer       userdata)
-{
-  SwService *service = SW_SERVICE (weak_object);
-
-  sw_service_emit_status_updated (service, error == NULL);
-}
-
-static void
-update_status (SwService *service, const char *msg)
-{
-  SwServiceMySpace *myspace = SW_SERVICE_MYSPACE (service);
-  SwServiceMySpacePrivate *priv = myspace->priv;
-  RestProxyCall *call;
-  char *function;
-
-  if (!priv->proxy)
-    return;
-
-  call = rest_proxy_new_call (priv->proxy);
-  rest_proxy_call_set_method (call, "PUT");
-  function = g_strdup_printf ("v1/users/%s/status", priv->user_id);
-  rest_proxy_call_set_function (call, function);
-  g_free (function);
-
-  rest_proxy_call_add_params (call,
-                              "userId", priv->user_id,
-                              "status", msg,
-                              NULL);
-
-  rest_proxy_call_async (call, _status_updated_cb, (GObject *)service, NULL, NULL);
-}
-
 static const char *
 sw_service_myspace_get_name (SwService *service)
 {
@@ -509,7 +473,6 @@ sw_service_myspace_class_init (SwServiceMySpaceClass *klass)
   service_class->get_name = sw_service_myspace_get_name;
   service_class->get_static_caps = get_static_caps;
   service_class->get_dynamic_caps = get_dynamic_caps;
-  service_class->update_status = update_status;
   service_class->start = start;
   service_class->refresh = refresh;
   service_class->request_avatar = request_avatar;
@@ -613,7 +576,7 @@ _update_status_cb (RestProxyCall *call,
     sw_status_update_iface_emit_status_updated (weak_object, FALSE);
   } else {
     SW_DEBUG (MYSPACE, G_STRLOC ": Status updated.");
-    sw_status_update_iface_emit_status_updated (weak_object, FALSE);
+    sw_status_update_iface_emit_status_updated (weak_object, TRUE);
   }
 }
 
