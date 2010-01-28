@@ -458,38 +458,6 @@ refresh (SwService *service)
 }
 
 static void
-_status_updated_cb (RestProxyCall *call,
-                    const GError  *error,
-                    GObject       *weak_object,
-                    gpointer       userdata)
-{
-  SwService *service = SW_SERVICE (weak_object);
-
-  sw_service_emit_status_updated (service, error == NULL);
-}
-
-static void
-update_status (SwService *service, const char *msg)
-{
-  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
-  SwServiceTwitterPrivate *priv = twitter->priv;
-  RestProxyCall *call;
-
-  if (!priv->user_id)
-    return;
-
-  call = rest_proxy_new_call (priv->proxy);
-  rest_proxy_call_set_method (call, "POST");
-  rest_proxy_call_set_function (call, "statuses/update.xml");
-
-  rest_proxy_call_add_params (call,
-                              "status", msg,
-                              NULL);
-
-  rest_proxy_call_async (call, _status_updated_cb, (GObject *)service, NULL, NULL);
-}
-
-static void
 avatar_downloaded_cb (const gchar *uri,
                        gchar       *local_path,
                        gpointer     userdata)
@@ -687,7 +655,6 @@ sw_service_twitter_class_init (SwServiceTwitterClass *klass)
   service_class->refresh = refresh;
   service_class->get_static_caps = get_static_caps;
   service_class->get_dynamic_caps = get_dynamic_caps;
-  service_class->update_status = update_status;
   service_class->request_avatar = request_avatar;
   service_class->credentials_updated = credentials_updated;
 }
