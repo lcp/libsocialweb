@@ -194,14 +194,6 @@ sw_service_emit_capabilities_changed (SwService *service, const char **caps)
 }
 
 void
-sw_service_emit_status_updated (SwService *service, gboolean success)
-{
-  g_return_if_fail (SW_IS_SERVICE (service));
-
-  sw_service_iface_emit_status_updated (service, success);
-}
-
-void
 sw_service_emit_avatar_retrieved (SwService *service,
                                       const gchar   *path)
 {
@@ -233,23 +225,6 @@ service_request_avatar (SwServiceIface    *self,
   }
 
   sw_service_iface_return_from_request_avatar (context);
-}
-
-static void
-service_update_status (SwServiceIface    *self,
-                       const gchar           *status_message,
-                       DBusGMethodInvocation *context)
-{
-  SwServiceClass *service_class;
-
-  service_class = SW_SERVICE_GET_CLASS (self);
-
-  if (service_class->update_status)
-  {
-    service_class->update_status ((SwService *)self, status_message);
-  }
-
-  sw_service_iface_return_from_update_status (context);
 }
 
 static void
@@ -318,8 +293,6 @@ service_iface_init (gpointer g_iface,
 {
   SwServiceIfaceClass *klass = (SwServiceIfaceClass *)g_iface;
 
-  sw_service_iface_implement_update_status (klass,
-                                                service_update_status);
   sw_service_iface_implement_get_static_capabilities (klass,
                                                    service_get_static_caps);
   sw_service_iface_implement_get_dynamic_capabilities (klass,

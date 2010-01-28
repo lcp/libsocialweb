@@ -70,7 +70,6 @@ struct _SwServiceClass {
   /* fires ::refreshed (SwSet *set) signal */
   void (*refresh) (SwService *service);
   SwItem *(*get_last_item) (SwService *service);
-  void (*update_status) (SwService *service, const gchar *status_message);
 
   const gchar ** (*get_static_caps) (SwService *service);
   const gchar ** (*get_dynamic_caps) (SwService *service);
