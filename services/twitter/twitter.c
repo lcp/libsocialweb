@@ -782,7 +782,7 @@ _update_status_cb (RestProxyCall *call,
     sw_status_update_iface_emit_status_updated (weak_object, FALSE);
   } else {
     SW_DEBUG (TWITTER, G_STRLOC ": Status updated.");
-    sw_status_update_iface_emit_status_updated (weak_object, FALSE);
+    sw_status_update_iface_emit_status_updated (weak_object, TRUE);
   }
 }
 
