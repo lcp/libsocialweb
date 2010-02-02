@@ -30,7 +30,7 @@
 #include <libsocialweb-keyfob/sw-keyfob.h>
 #include <libsocialweb-keystore/sw-keystore.h>
 #include <gconf/gconf-client.h>
-#include <rest/oauth-proxy.h>
+#include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <libsoup/soup.h>
 
@@ -57,8 +57,6 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceTwitter,
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_TWITTER, SwServiceTwitterPrivate))
 
-#define TWITTER_USE_OAUTH 0
-
 struct _SwServiceTwitterPrivate {
   enum {
     OWN,
@@ -70,18 +68,15 @@ struct _SwServiceTwitterPrivate {
   char *user_id;
   char *image_url;
   GRegex *twitpic_re;
-#if ! TWITTER_USE_OAUTH
   GConfClient *gconf;
   guint gconf_notify_id[2];
   char *username, *password;
-#endif
 };
 
 #define KEY_BASE "/apps/libsocialweb/services/twitter"
 #define KEY_USER KEY_BASE "/user"
 #define KEY_PASS KEY_BASE "/password"
 
-#if ! TWITTER_USE_OAUTH
 static void online_notify (gboolean online, gpointer user_data);
 static void credentials_updated (SwService *service);
 
@@ -92,24 +87,33 @@ auth_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer
   SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
   SwServiceTwitterPrivate *priv = twitter->priv;
   const char *username = NULL, *password = NULL;
+  gboolean updated = FALSE;
 
   if (g_str_equal (entry->key, KEY_USER)) {
     if (entry->value)
       username = gconf_value_get_string (entry->value);
     if (username && username[0] == '\0')
       username = NULL;
-    priv->username = g_strdup (username);
+
+    if (g_strcmp0 (priv->username, username) != 0) {
+      priv->username = g_strdup (username);
+      updated = TRUE;
+    }
   } else if (g_str_equal (entry->key, KEY_PASS)) {
     if (entry->value)
       password = gconf_value_get_string (entry->value);
     if (password && password[0] == '\0')
       password = NULL;
-    priv->password = g_strdup (password);
+
+    if (g_strcmp0 (priv->password, password) != 0) {
+      priv->password = g_strdup (password);
+      updated = TRUE;
+    }
   }
 
-  credentials_updated (service);
+  if (updated)
+    credentials_updated (service);
 }
-#endif
 
 RestXmlNode *
 node_from_call (RestProxyCall *call)
@@ -410,23 +414,6 @@ verify_cb (RestProxyCall *call,
 }
 
 static void
-got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
-{
-  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (user_data);
-  SwServiceTwitterPrivate *priv = twitter->priv;
-  RestProxyCall *call;
-
-  if (authorised) {
-    SW_DEBUG (TWITTER, "Authorised");
-    call = rest_proxy_new_call (priv->proxy);
-    rest_proxy_call_set_function (call, "account/verify_credentials.xml");
-    rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
-  } else {
-    sw_service_emit_refreshed ((SwService *)twitter, NULL);
-  }
-}
-
-static void
 start (SwService *service)
 {
   SwServiceTwitter *twitter = (SwServiceTwitter*)service;
@@ -440,21 +427,9 @@ refresh (SwService *service)
   SwServiceTwitter *twitter = (SwServiceTwitter*)service;
   SwServiceTwitterPrivate *priv = twitter->priv;
 
-  if (!priv->running)
-    return;
-
-#if TWITTER_USE_OAUTH
-  if (priv->user_id) {
+  if (priv->running && priv->username && priv->password && priv->proxy) {
     get_status_updates (twitter);
-  } else {
-    sw_keyfob_oauth ((OAuthProxy*)priv->proxy, got_tokens_cb, service);
   }
-#else
-  if (priv->username && priv->password && priv->proxy)
-  {
-    got_tokens_cb (priv->proxy, TRUE, twitter);
-  }
-#endif
 }
 
 static void
@@ -489,17 +464,11 @@ online_notify (gboolean online, gpointer user_data)
   SW_DEBUG (TWITTER, "Online: %s", online ? "yes" : "no");
 
   if (online) {
-#if TWITTER_USE_OAUTH
-    const char *key = NULL, *secret = NULL;
-
-    sw_keystore_get_key_secret ("twitter", &key, &secret);
-    priv->proxy = oauth_proxy_new (key, secret, "http://twitter.com/", FALSE);
-    sw_keyfob_oauth ((OAuthProxy *)priv->proxy, got_tokens_cb, twitter);
-#else
     if (priv->username && priv->password) {
       char *url;
       char *escaped_user;
       char *escaped_password;
+      RestProxyCall *call;
 
       escaped_user = g_uri_escape_string (priv->username,
                                           NULL,
@@ -517,11 +486,13 @@ online_notify (gboolean online, gpointer user_data)
       priv->proxy = rest_proxy_new (url, FALSE);
       g_free (url);
 
-      got_tokens_cb (priv->proxy, TRUE, twitter);
+      SW_DEBUG (TWITTER, "Verifying credentials");
+      call = rest_proxy_new_call (priv->proxy);
+      rest_proxy_call_set_function (call, "account/verify_credentials.xml");
+      rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
     } else {
       sw_service_emit_refreshed ((SwService *)twitter, NULL);
     }
-#endif
   } else {
     if (priv->proxy) {
       g_object_unref (priv->proxy);
@@ -573,7 +544,6 @@ sw_service_twitter_constructed (GObject *object)
   priv->twitpic_re = g_regex_new ("http://twitpic.com/([A-Za-z0-9]+)", 0, 0, NULL);
   g_assert (priv->twitpic_re);
 
-#if ! TWITTER_USE_OAUTH
   priv->gconf = gconf_client_get_default ();
   gconf_client_add_dir (priv->gconf, KEY_BASE,
                         GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
@@ -585,12 +555,8 @@ sw_service_twitter_constructed (GObject *object)
                                                       NULL, NULL);
   gconf_client_notify (priv->gconf, KEY_USER);
   gconf_client_notify (priv->gconf, KEY_PASS);
-#endif
 
   sw_online_add_notify (online_notify, twitter);
-  if (sw_is_online ()) {
-    online_notify (TRUE, twitter);
-  }
 }
 
 static void
@@ -610,14 +576,12 @@ sw_service_twitter_dispose (GObject *object)
     priv->twitpic_re = NULL;
   }
 
-#if ! TWITTER_USE_OAUTH
   if (priv->gconf) {
     gconf_client_notify_remove (priv->gconf, priv->gconf_notify_id[0]);
     gconf_client_notify_remove (priv->gconf, priv->gconf_notify_id[1]);
     g_object_unref (priv->gconf);
     priv->gconf = NULL;
   }
-#endif
 
   G_OBJECT_CLASS (sw_service_twitter_parent_class)->dispose (object);
 }
@@ -630,10 +594,8 @@ sw_service_twitter_finalize (GObject *object)
   g_free (priv->user_id);
   g_free (priv->image_url);
 
-#if ! TWITTER_USE_OAUTH
   g_free (priv->username);
   g_free (priv->password);
-#endif
 
   G_OBJECT_CLASS (sw_service_twitter_parent_class)->finalize (object);
 }
@@ -662,6 +624,7 @@ sw_service_twitter_class_init (SwServiceTwitterClass *klass)
 static void
 sw_service_twitter_init (SwServiceTwitter *self)
 {
+  SW_DEBUG (TWITTER, "new instance");
   self->priv = GET_PRIVATE (self);
 }
 
