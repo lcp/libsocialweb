@@ -246,20 +246,11 @@ _sw_client_service_setup_proxy_for_iface (SwClientService  *service,
   priv->name = g_strdup (service_name);
 
   path = g_strdup_printf (SW_CLIENT_SERVICE_OBJECT, service_name);
-  priv->proxies[iface] = dbus_g_proxy_new_for_name_owner (priv->connection,
-                                                          SW_CLIENT_SERVICE_NAME,
-                                                          path,
-                                                          interface_names[iface],
-                                                          &error);
+  priv->proxies[iface] = dbus_g_proxy_new_for_name (priv->connection,
+                                                    SW_CLIENT_SERVICE_NAME,
+                                                    path,
+                                                    interface_names[iface]);
   g_free (path);
-
-  if (!priv->proxies[iface])
-  {
-    g_critical (G_STRLOC ": Error setting up proxy for remote object: %s",
-                error->message);
-    g_propagate_error (error_out, error);
-    return FALSE;
-  }
 
   return TRUE;
 }
