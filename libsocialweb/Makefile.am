@@ -41,7 +41,7 @@ libsocialweb_la_HEADERS = \
 TESTS = test-runner
 check_PROGRAMS = test-runner
 
-test_runner_SOURCES = test-runner.c test-runner.h $(libsocialweb_la_SOURCES) $(top_srcdir)/services/dummy/sw-service-dummy.c
+test_runner_SOURCES = test-runner.c test-runner.h $(libsocialweb_la_SOURCES) $(top_srcdir)/services/dummy/dummy.c
 test_runner_CFLAGS = -DBUILD_TESTS $(libsocialweb_la_CFLAGS)
 test_runner_LDFLAGS = $(libsocialweb_la_LIBADD)
 

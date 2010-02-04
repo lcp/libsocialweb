@@ -716,7 +716,7 @@ sw_view_add_service (SwView     *view,
 
 #if BUILD_TESTS
 
-#include <services/dummy/sw-service-dummy.h>
+#include <services/dummy/dummy.h>
 
 void
 test_view_new (void)
