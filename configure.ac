@@ -3,7 +3,7 @@ AC_INIT(libsocialweb, 0.23.0)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign -Wno-portability])
 AM_CONFIG_HEADER(config.h)
 
 AC_CANONICAL_HOST
