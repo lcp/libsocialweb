@@ -212,10 +212,12 @@ make_item (SwServiceTwitter *twitter, RestXmlNode *node)
   if (rest_xml_node_find (u_node, "screen_name"))
   {
     screen_name = rest_xml_node_find (u_node, "screen_name")->content;
+    sw_item_put (item, "screen_name", screen_name);
 
     url = g_strdup_printf ("http://twitter.com/%s/statuses/%s",
                            screen_name,
                            post_id);
+
   } else {
     url = g_strdup_printf ("http://twitter.com/%s/statuses/%s",
                            user_id,
