@@ -1,3 +1,11 @@
+libsocialweb 0.23.0
+===
+
+* Rename to libsocialweb
+* Remove deprecated status update support
+* twitter: remove OAuth support
+
+
 Mojito 0.22.1
 ===
 
