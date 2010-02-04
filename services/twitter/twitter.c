@@ -355,15 +355,22 @@ static const char **
 get_dynamic_caps (SwService *service)
 {
   SwServiceTwitterPrivate *priv = GET_PRIVATE (service);
-  static const char * caps[] = {
+  static const char *full_caps[] = {
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
+    IS_CONFIGURED,
+    NULL
+  };
+  static const char *configured_caps[] = {
+    IS_CONFIGURED,
     NULL
   };
   static const char * no_caps[] = { NULL };
 
   if (priv->user_id)
-    return caps;
+    return full_caps;
+  else if (priv->username && priv->password)
+    return configured_caps;
   else
     return no_caps;
 }
@@ -515,7 +522,8 @@ online_notify (gboolean online, gpointer user_data)
     g_free (priv->user_id);
     priv->user_id = NULL;
 
-    sw_service_emit_capabilities_changed ((SwService *)twitter, NULL);
+    sw_service_emit_capabilities_changed ((SwService *)twitter,
+                                          get_dynamic_caps ((SwService *)twitter));
   }
 }
 
@@ -531,6 +539,8 @@ credentials_updated (SwService *service)
   }
 
   sw_service_emit_user_changed (service);
+  sw_service_emit_capabilities_changed ((SwService *)service,
+                                        get_dynamic_caps (service));
 }
 
 static const char *
