@@ -81,6 +81,7 @@ struct _SwServiceClass {
 
 #define CAN_UPDATE_STATUS "can-update-status"
 #define CAN_REQUEST_AVATAR "can-request-avatar"
+#define IS_CONFIGURED "is-configured"
 
 GType sw_service_get_type (void);
 
