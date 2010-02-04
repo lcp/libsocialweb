@@ -188,7 +188,7 @@ make_item (SwServiceTwitter *twitter, RestXmlNode *node)
   SwServiceTwitterPrivate *priv = twitter->priv;
   SwItem *item;
   RestXmlNode *u_node, *n;
-  const char *post_id, *user_id, *user_name, *date, *content;
+  const char *post_id, *user_id, *user_name, *date, *content, *screen_name;
   char *url;
   GMatchInfo *match_info;
 
@@ -209,7 +209,19 @@ make_item (SwServiceTwitter *twitter, RestXmlNode *node)
   post_id = rest_xml_node_find (node, "id")->content;
   sw_item_put (item, "authorid", user_id);
 
-  url = g_strdup_printf ("http://twitter.com/%s/statuses/%s", user_id, post_id);
+  if (rest_xml_node_find (u_node, "screen_name"))
+  {
+    screen_name = rest_xml_node_find (u_node, "screen_name")->content;
+
+    url = g_strdup_printf ("http://twitter.com/%s/statuses/%s",
+                           screen_name,
+                           post_id);
+  } else {
+    url = g_strdup_printf ("http://twitter.com/%s/statuses/%s",
+                           user_id,
+                           post_id);
+  }
+
   sw_item_put (item, "id", url);
   sw_item_take (item, "url", url);
 
