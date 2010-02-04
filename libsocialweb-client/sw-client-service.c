@@ -152,7 +152,7 @@ sw_client_service_class_init (SwClientServiceClass *klass)
                   G_STRUCT_OFFSET (SwClientServiceClass, capabilities_changed),
                   NULL,
                   NULL,
-                  g_cclosure_marshal_VOID__POINTER,
+                  g_cclosure_marshal_VOID__BOXED,
                   G_TYPE_NONE,
                   1,
                   G_TYPE_STRV);
