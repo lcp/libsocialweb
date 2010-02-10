@@ -53,4 +53,10 @@ Set if the item was retrieved from the local cache.
 Bonus extra keys
 ==
 
-location on Twitter, free-form location string
+location
+
+Free-form location string.
+
+latitude, longitude
+
+Accurate location, in decimal coordinates.
