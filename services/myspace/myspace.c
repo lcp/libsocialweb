@@ -581,9 +581,10 @@ _update_status_cb (RestProxyCall *call,
 }
 
 static void
-_myspace_status_update_update_status (SwStatusUpdateIface *self,
-                                      const gchar             *msg,
-                                      DBusGMethodInvocation   *context)
+_myspace_status_update_update_status (SwStatusUpdateIface   *self,
+                                      const gchar           *msg,
+                                      GHashTable            *fields,
+                                      DBusGMethodInvocation *context)
 {
   SwServiceMySpace *myspace = (SwServiceMySpace *)self;
   SwServiceMySpacePrivate *priv = myspace->priv;

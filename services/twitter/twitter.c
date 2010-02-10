@@ -722,7 +722,6 @@ avatar_iface_init (gpointer g_iface,
 }
 
 /* Status Update interface */
-
 static void
 _update_status_cb (RestProxyCall *call,
                    const GError  *error,
@@ -741,9 +740,10 @@ _update_status_cb (RestProxyCall *call,
 }
 
 static void
-_twitter_status_update_update_status (SwStatusUpdateIface *self,
-                                      const gchar             *msg,
-                                      DBusGMethodInvocation   *context)
+_twitter_status_update_update_status (SwStatusUpdateIface   *self,
+                                      const gchar           *msg,
+                                      GHashTable            *fields,
+                                      DBusGMethodInvocation *context)
 {
   SwServiceTwitter *twitter = SW_SERVICE_TWITTER (self);
   SwServiceTwitterPrivate *priv = twitter->priv;
@@ -760,6 +760,31 @@ _twitter_status_update_update_status (SwStatusUpdateIface *self,
                               "status", msg,
                               NULL);
 
+  if (fields)
+  {
+    const gchar *latitude, *longitude, *twitter_reply_to;
+
+    latitude = g_hash_table_lookup (fields, "latitude");
+    longitude = g_hash_table_lookup (fields, "longitude");
+
+    if (latitude && longitude)
+    {
+      rest_proxy_call_add_params (call,
+                                  "lat", latitude,
+                                  "long", longitude,
+                                  NULL);
+    }
+
+    twitter_reply_to = g_hash_table_lookup (fields, "x-twitter-reply-to");
+
+    if (twitter_reply_to)
+    {
+      rest_proxy_call_add_params (call,
+                                  "in_reply_to_status_id", twitter_reply_to,
+                                  NULL);
+    }
+  }
+
   rest_proxy_call_async (call, _update_status_cb, (GObject *)self, NULL, NULL);
   sw_status_update_iface_return_from_update_status (context);
 }
@@ -771,6 +796,6 @@ status_update_iface_init (gpointer g_iface,
   SwStatusUpdateIfaceClass *klass = (SwStatusUpdateIfaceClass*)g_iface;
 
   sw_status_update_iface_implement_update_status (klass,
-                                                      _twitter_status_update_update_status);
+                                                  _twitter_status_update_update_status);
 }
 
