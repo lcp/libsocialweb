@@ -267,6 +267,28 @@ make_item (SwServiceTwitter *twitter, RestXmlNode *node)
   if (n && n->content)
     sw_item_put (item, "location", n->content);
 
+  n = rest_xml_node_find (node, "geo");
+
+  if (n)
+  {
+    n = rest_xml_node_find (n, "georss:point");
+
+    if (n && n->content)
+    {
+      gchar **split_str;
+
+      split_str = g_strsplit (n->content, " ", 2);
+
+      if (split_str[0] && split_str[1])
+      {
+        sw_item_put (item, "latitude", split_str[0]);
+        sw_item_put (item, "longitude", split_str[1]);
+      }
+
+      g_strfreev (split_str);
+    }
+  }
+
   n = rest_xml_node_find (u_node, "profile_image_url");
   if (n && n->content)
     sw_item_request_image_fetch (item, FALSE, "authoricon", n->content);
