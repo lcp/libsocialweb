@@ -129,6 +129,29 @@ refresh_done (SwServiceFlickr *service)
 }
 
 static void
+extract_location (RestXmlNode *node, SwItem *item)
+{
+  const char *acc, *lon, *lat;
+
+  g_assert (node);
+  g_assert (SW_IS_ITEM (item));
+
+  acc = rest_xml_node_get_attr (node, "accuracy");
+  if (acc == NULL || atoi (acc) == 0)
+    return;
+
+  lat = rest_xml_node_get_attr (node, "latitude");
+  lon = rest_xml_node_get_attr (node, "longitude");
+
+  if (lat == NULL || lat[0] == '\0' ||
+      lon == NULL || lon[0] == '\0')
+    return;
+
+  sw_item_put (item, "latitude", lat);
+  sw_item_put (item, "longitude", lon);
+}
+
+static void
 flickr_callback (RestProxyCall *call,
                  const GError  *error,
                  GObject       *weak_object,
@@ -180,6 +203,8 @@ flickr_callback (RestProxyCall *call,
     sw_item_request_image_fetch (item, FALSE, "authoricon", url);
     g_free (url);
 
+    extract_location (node, item);
+
     sw_set_add (service->priv->set, G_OBJECT (item));
     g_object_unref (item);
   }
@@ -198,7 +223,7 @@ get_photos (SwServiceFlickr *flickr)
 
   call = rest_proxy_new_call (flickr->priv->proxy);
   rest_proxy_call_set_function (call, "flickr.photos.getContactsPhotos");
-  rest_proxy_call_add_param (call, "extras", "date_upload,icon_server");
+  rest_proxy_call_add_param (call, "extras", "date_upload,icon_server,geo");
 
   if (!rest_proxy_call_async (call, flickr_callback, (GObject*)flickr, NULL, &error)) {
     g_warning ("Cannot get photos: %s", error->message);
