@@ -104,7 +104,8 @@ sw_client_service_dispose (GObject *object)
 
   for (i = 0; i < LAST_IFACE; i++)
   {
-    g_object_unref (priv->proxies[i]);
+    if (priv->proxies[i])
+      g_object_unref (priv->proxies[i]);
     priv->proxies[i] = NULL;
   }
 
