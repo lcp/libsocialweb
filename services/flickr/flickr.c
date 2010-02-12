@@ -224,6 +224,7 @@ get_photos (SwServiceFlickr *flickr)
   call = rest_proxy_new_call (flickr->priv->proxy);
   rest_proxy_call_set_function (call, "flickr.photos.getContactsPhotos");
   rest_proxy_call_add_param (call, "extras", "date_upload,icon_server,geo");
+  rest_proxy_call_add_param (call, "count", "50");
 
   if (!rest_proxy_call_async (call, flickr_callback, (GObject*)flickr, NULL, &error)) {
     g_warning ("Cannot get photos: %s", error->message);
