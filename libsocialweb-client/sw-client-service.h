@@ -89,6 +89,12 @@ sw_client_service_update_status (SwClientService                     *service,
                                  SwClientServiceUpdateStatusCallback  cb,
                                  const gchar                         *status_msg,
                                  gpointer                             userdata);
+void
+sw_client_service_update_status_with_fields (SwClientService                     *service,
+                                             SwClientServiceUpdateStatusCallback  cb,
+                                             const gchar                         *status_msg,
+                                             GHashTable                          *fields,
+                                             gpointer                             userdata);
 
 const char *sw_client_service_get_name (SwClientService *service);
 

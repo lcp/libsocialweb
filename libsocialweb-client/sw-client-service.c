@@ -435,26 +435,46 @@ sw_client_service_update_status (SwClientService                     *service,
                                  const gchar                         *status_msg,
                                  gpointer                             userdata)
 {
+  GHashTable *fields;
+
+  fields = g_hash_table_new (g_str_hash, g_str_equal);
+
+  sw_client_service_update_status_with_fields (service,
+                                               cb,
+                                               status_msg,
+                                               fields,
+                                               userdata);
+
+  g_hash_table_unref (fields);
+}
+
+void
+sw_client_service_update_status_with_fields (SwClientService                     *service,
+                                             SwClientServiceUpdateStatusCallback  cb,
+                                             const gchar                         *status_msg,
+                                             GHashTable                          *fields,
+                                             gpointer                             userdata)
+{
   SwClientServicePrivate *priv = GET_PRIVATE (service);
   SwClientServiceCallClosure *closure;
-  GHashTable *fields;
 
   closure = g_slice_new0 (SwClientServiceCallClosure);
   closure->service = g_object_ref (service);
   closure->cb = (GCallback)cb;
   closure->userdata = userdata;
 
-  fields = g_hash_table_new (g_str_hash, g_str_equal);
   org_moblin_libsocialweb_StatusUpdate_update_status_async (priv->proxies[STATUS_UPDATE_IFACE],
                                                             status_msg,
                                                             fields,
                                                             _update_status_cb,
                                                             closure);
-  g_hash_table_unref (fields);
 }
 
+
 static void
-_request_avatar_cb (DBusGProxy *proxy, GError *error, gpointer userdata)
+_request_avatar_cb (DBusGProxy *proxy,
+                    GError     *error,
+                    gpointer    userdata)
 {
   /* TODO: print the error to the console? */
 }
