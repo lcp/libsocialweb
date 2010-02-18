@@ -520,7 +520,7 @@ online_notify (gboolean online, gpointer user_data)
                                           NULL,
                                           FALSE);
 
-      url = g_strdup_printf ("https://%s:%s@twitter.com/",
+      url = g_strdup_printf ("https://%s:%s@api.twitter.com/1/",
                              escaped_user, escaped_password);
 
       g_free (escaped_user);
