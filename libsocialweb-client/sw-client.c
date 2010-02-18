@@ -49,7 +49,9 @@ static guint signals[LAST_SIGNAL] = { 0 };
 #define SW_SERVICE_CORE_INTERFACE "org.moblin.libsocialweb"
 
 static void
-_online_changed_cb (DBusGProxy *proxy, gboolean online, gpointer user_data)
+_online_changed_cb (DBusGProxy *proxy,
+                    gboolean    online,
+                    gpointer    user_data)
 {
   SwClient *client = SW_CLIENT (user_data);
 
@@ -153,9 +155,9 @@ typedef struct
 
 static void
 _sw_client_open_view_cb (DBusGProxy *proxy,
-                             gchar      *view_path,
-                             GError     *error,
-                             gpointer    userdata)
+                         gchar      *view_path,
+                         GError     *error,
+                         gpointer    userdata)
 {
   OpenViewClosure *closure = (OpenViewClosure *)userdata;
   SwClient *client = closure->client;
@@ -178,11 +180,11 @@ _sw_client_open_view_cb (DBusGProxy *proxy,
 }
 
 void
-sw_client_open_view (SwClient                *client,
-                         GList                       *services,
-                         guint                        count,
-                         SwClientOpenViewCallback cb,
-                         gpointer                     userdata)
+sw_client_open_view (SwClient                 *client,
+                     GList                    *services,
+                     guint                     count,
+                     SwClientOpenViewCallback  cb,
+                     gpointer                  userdata)
 {
   SwClientPrivate *priv = GET_PRIVATE (client);
   GPtrArray *services_array;
@@ -204,20 +206,20 @@ sw_client_open_view (SwClient                *client,
   closure->userdata = userdata;
 
   org_moblin_libsocialweb_open_view_async (priv->proxy,
-                                    (const gchar **)services_array->pdata,
-                                    count,
-                                    _sw_client_open_view_cb,
-                                    closure);
+                                           (const gchar **)services_array->pdata,
+                                           count,
+                                           _sw_client_open_view_cb,
+                                           closure);
 
   g_ptr_array_free (services_array, TRUE);
 }
 
 void
 sw_client_open_view_for_service (SwClient                 *client,
-                                     const gchar                  *service_name,
-                                     guint                         count,
-                                     SwClientOpenViewCallback  cb,
-                                     gpointer                      userdata)
+                                 const gchar              *service_name,
+                                 guint                     count,
+                                 SwClientOpenViewCallback  cb,
+                                 gpointer                  userdata)
 {
   SwClientPrivate *priv = GET_PRIVATE (client);
   GPtrArray *services_array;
@@ -234,10 +236,10 @@ sw_client_open_view_for_service (SwClient                 *client,
   closure->userdata = userdata;
 
   org_moblin_libsocialweb_open_view_async (priv->proxy,
-                                    (const gchar **)services_array->pdata,
-                                    count,
-                                    _sw_client_open_view_cb,
-                                    closure);
+                                           (const gchar **)services_array->pdata,
+                                           count,
+                                           _sw_client_open_view_cb,
+                                           closure);
 
   g_ptr_array_free (services_array, TRUE);
 }
@@ -250,10 +252,10 @@ typedef struct
 } GetServicesClosure;
 
 static void
-_sw_client_get_services_cb (DBusGProxy *proxy,
-                                gchar     **services,
-                                GError     *error,
-                                gpointer    userdata)
+_sw_client_get_services_cb (DBusGProxy  *proxy,
+                            gchar      **services,
+                            GError      *error,
+                            gpointer     userdata)
 {
   GetServicesClosure *closure = (GetServicesClosure *)userdata;
   SwClient *client = closure->client;
@@ -285,9 +287,9 @@ _sw_client_get_services_cb (DBusGProxy *proxy,
 }
 
 void
-sw_client_get_services (SwClient                   *client,
-                            SwClientGetServicesCallback cb,
-                            gpointer                        userdata)
+sw_client_get_services (SwClient                    *client,
+                        SwClientGetServicesCallback  cb,
+                        gpointer                     userdata)
 {
   SwClientPrivate *priv = GET_PRIVATE (client);
   GetServicesClosure *closure;
@@ -298,13 +300,13 @@ sw_client_get_services (SwClient                   *client,
   closure->userdata = userdata;
 
   org_moblin_libsocialweb_get_services_async (priv->proxy,
-                                       _sw_client_get_services_cb,
-                                       closure);
+                                              _sw_client_get_services_cb,
+                                              closure);
 }
 
 SwClientService *
-sw_client_get_service (SwClient *client,
-                           const gchar  *service_name)
+sw_client_get_service (SwClient    *client,
+                       const gchar *service_name)
 {
   SwClientService *service;
   GError *error = NULL;
@@ -333,9 +335,9 @@ typedef struct
 
 static void
 _sw_client_is_online_cb (DBusGProxy *proxy,
-                             gboolean online,
-                             GError *error,
-                             gpointer userdata)
+                         gboolean    online,
+                         GError     *error,
+                         gpointer    userdata)
 {
   IsOnlineClosure *closure = userdata;
   SwClient *client = closure->client;
@@ -355,9 +357,9 @@ _sw_client_is_online_cb (DBusGProxy *proxy,
 
 
 void
-sw_client_is_online (SwClient *client,
-                         SwClientIsOnlineCallback cb,
-                         gpointer userdata)
+sw_client_is_online (SwClient                 *client,
+                     SwClientIsOnlineCallback  cb,
+                     gpointer                  userdata)
 {
   SwClientPrivate *priv = GET_PRIVATE (client);
   IsOnlineClosure *closure;
@@ -382,7 +384,7 @@ _hide_item_cb (DBusGProxy *proxy,
 
 void
 sw_client_hide_item (SwClient *client,
-                         SwItem   *item)
+                     SwItem   *item)
 {
   SwClientPrivate *priv;
 

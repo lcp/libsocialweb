@@ -59,8 +59,10 @@ static guint signals[LAST_SIGNAL] = { 0 };
 #define SW_SERVICE_VIEW_INTERFACE "org.moblin.libsocialweb.View"
 
 static void
-sw_client_view_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
+sw_client_view_get_property (GObject    *object,
+                             guint       property_id,
+                             GValue     *value,
+                             GParamSpec *pspec)
 {
   SwClientViewPrivate *priv = GET_PRIVATE (object);
 
@@ -74,8 +76,10 @@ sw_client_view_get_property (GObject *object, guint property_id,
 }
 
 static void
-sw_client_view_set_property (GObject *object, guint property_id,
-                              const GValue *value, GParamSpec *pspec)
+sw_client_view_set_property (GObject      *object,
+                             guint         property_id,
+                             const GValue *value,
+                             GParamSpec   *pspec)
 {
   SwClientViewPrivate *priv = GET_PRIVATE (object);
 
@@ -125,8 +129,8 @@ sw_client_view_finalize (GObject *object)
 }
 
 static void
-_sw_item_update_from_value_array (SwItem  *item,
-                                      GValueArray *varray)
+_sw_item_update_from_value_array (SwItem      *item,
+                                  GValueArray *varray)
 {
   if (item->service)
   {
@@ -449,9 +453,9 @@ _sw_client_view_new_for_path (const gchar *view_path)
 }
 
 static void
-_sw_client_view_start_cb (DBusGProxy     *proxy,
-                              GError         *error,
-                              gpointer        userdata)
+_sw_client_view_start_cb (DBusGProxy *proxy,
+                          GError     *error,
+                          gpointer    userdata)
 {
   if (error)
   {
@@ -467,15 +471,15 @@ sw_client_view_start (SwClientView *view)
   SwClientViewPrivate *priv = GET_PRIVATE (view);
 
   org_moblin_libsocialweb_View_start_async (priv->proxy,
-                                     _sw_client_view_start_cb,
-                                     NULL);
+                                            _sw_client_view_start_cb,
+                                            NULL);
 }
 
 
 static void
-_sw_client_view_refresh_cb (DBusGProxy     *proxy,
-                                GError         *error,
-                                gpointer        userdata)
+_sw_client_view_refresh_cb (DBusGProxy *proxy,
+                            GError     *error,
+                            gpointer    userdata)
 {
   if (error)
   {
@@ -491,8 +495,8 @@ sw_client_view_refresh (SwClientView *view)
   SwClientViewPrivate *priv = GET_PRIVATE (view);
 
   org_moblin_libsocialweb_View_refresh_async (priv->proxy,
-                                       _sw_client_view_refresh_cb,
-                                       NULL);
+                                              _sw_client_view_refresh_cb,
+                                              NULL);
 }
 
 

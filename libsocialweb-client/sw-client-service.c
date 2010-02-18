@@ -71,8 +71,10 @@ static guint signals[LAST_SIGNAL] = { 0 };
 #define SW_CLIENT_SERVICE_OBJECT "/org/moblin/libsocialweb/Service/%s"
 
 static void
-sw_client_service_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
+sw_client_service_get_property (GObject    *object,
+                                guint       property_id,
+                                GValue     *value,
+                                GParamSpec *pspec)
 {
   switch (property_id) {
   default:
@@ -81,8 +83,10 @@ sw_client_service_get_property (GObject *object, guint property_id,
 }
 
 static void
-sw_client_service_set_property (GObject *object, guint property_id,
-                              const GValue *value, GParamSpec *pspec)
+sw_client_service_set_property (GObject      *object,
+                                guint         property_id,
+                                const GValue *value,
+                                GParamSpec   *pspec)
 {
   switch (property_id) {
   default:
@@ -223,9 +227,9 @@ _user_changed_cb (DBusGProxy *proxy,
 
 gboolean
 _sw_client_service_setup_proxy_for_iface (SwClientService  *service,
-                                              const gchar          *service_name,
-                                              SwServiceIface    iface,
-                                              GError              **error_out)
+                                          const gchar      *service_name,
+                                          SwServiceIface    iface,
+                                          GError          **error_out)
 {
   SwClientServicePrivate *priv = GET_PRIVATE (service);
   GError *error = NULL;
@@ -258,25 +262,25 @@ _sw_client_service_setup_proxy_for_iface (SwClientService  *service,
 
 gboolean
 _sw_client_service_setup (SwClientService  *service,
-                              const gchar          *service_name,
-                              GError              **error_out)
+                          const gchar      *service_name,
+                          GError          **error_out)
 {
   SwClientServicePrivate *priv = GET_PRIVATE (service);
   GError *error = NULL;
 
   if (!_sw_client_service_setup_proxy_for_iface (service,
-                                                     service_name,
-                                                     SERVICE_IFACE,
-                                                     &error))
+                                                 service_name,
+                                                 SERVICE_IFACE,
+                                                 &error))
   {
     g_propagate_error (error_out, error);
     return FALSE;
   }
 
   if (!_sw_client_service_setup_proxy_for_iface (service,
-                                                     service_name,
-                                                     STATUS_UPDATE_IFACE,
-                                                     &error))
+                                                 service_name,
+                                                 STATUS_UPDATE_IFACE,
+                                                 &error))
   {
     g_propagate_error (error_out, error);
     return FALSE;
@@ -362,9 +366,9 @@ _get_capabilities_cb (DBusGProxy *proxy,
 }
 
 void
-sw_client_service_get_static_capabilities (SwClientService                       *service,
-                                               SwClientServiceGetCapabilitiesCallback cb,
-                                               gpointer                                   userdata)
+sw_client_service_get_static_capabilities (SwClientService                        *service,
+                                           SwClientServiceGetCapabilitiesCallback  cb,
+                                           gpointer                                userdata)
 {
   SwClientServicePrivate *priv = GET_PRIVATE (service);
   SwClientServiceCallClosure *closure;
@@ -375,14 +379,14 @@ sw_client_service_get_static_capabilities (SwClientService                      
   closure->userdata = userdata;
 
   org_moblin_libsocialweb_Service_get_static_capabilities_async (priv->proxies[SERVICE_IFACE],
-                                                          _get_capabilities_cb,
-                                                          closure);
+                                                                 _get_capabilities_cb,
+                                                                 closure);
 }
 
 void
-sw_client_service_get_dynamic_capabilities (SwClientService                       *service,
-                                                SwClientServiceGetCapabilitiesCallback cb,
-                                                gpointer                                   userdata)
+sw_client_service_get_dynamic_capabilities (SwClientService                        *service,
+                                            SwClientServiceGetCapabilitiesCallback  cb,
+                                            gpointer                                userdata)
 {
   SwClientServicePrivate *priv = GET_PRIVATE (service);
   SwClientServiceCallClosure *closure;
@@ -393,8 +397,8 @@ sw_client_service_get_dynamic_capabilities (SwClientService                     
   closure->userdata = userdata;
 
   org_moblin_libsocialweb_Service_get_dynamic_capabilities_async (priv->proxies[SERVICE_IFACE],
-                                                           _get_capabilities_cb,
-                                                           closure);
+                                                                  _get_capabilities_cb,
+                                                                  closure);
 }
 
 static void
@@ -460,7 +464,9 @@ sw_client_service_request_avatar (SwClientService *service)
 {
   SwClientServicePrivate *priv = GET_PRIVATE (service);
 
-  org_moblin_libsocialweb_Service_request_avatar_async (priv->proxies[SERVICE_IFACE], _request_avatar_cb, NULL);
+  org_moblin_libsocialweb_Service_request_avatar_async (priv->proxies[SERVICE_IFACE],
+                                                        _request_avatar_cb,
+                                                        NULL);
 }
 
 const char *
@@ -501,9 +507,9 @@ _query_open_view_cb (DBusGProxy *proxy,
 
 void
 sw_client_service_query_open_view (SwClientService                      *service,
-                                       GHashTable                               *params,
-                                       SwClientServiceQueryOpenViewCallback  cb,
-                                       gpointer                                  userdata)
+                                   GHashTable                           *params,
+                                   SwClientServiceQueryOpenViewCallback  cb,
+                                   gpointer                              userdata)
 {
   SwClientServicePrivate *priv = GET_PRIVATE (service);
   SwClientServiceCallClosure *closure;
@@ -511,9 +517,9 @@ sw_client_service_query_open_view (SwClientService                      *service
   GHashTable *tmp_params = NULL;
 
   if (!_sw_client_service_setup_proxy_for_iface (service,
-                                                     priv->name,
-                                                     QUERY_IFACE,
-                                                     &error))
+                                                 priv->name,
+                                                 QUERY_IFACE,
+                                                 &error))
   {
     g_critical (G_STRLOC ": Unable to setup proxy on Query interface: %s",
                 error->message);
@@ -533,9 +539,9 @@ sw_client_service_query_open_view (SwClientService                      *service
   }
 
   org_moblin_libsocialweb_Query_open_view_async (priv->proxies [QUERY_IFACE],
-                                          params,
-                                          _query_open_view_cb,
-                                          closure);
+                                                 params,
+                                                 _query_open_view_cb,
+                                                 closure);
 
   if (tmp_params)
     g_hash_table_unref (tmp_params);

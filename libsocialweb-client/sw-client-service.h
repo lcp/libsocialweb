@@ -61,46 +61,46 @@ GType sw_client_service_get_type (void);
 #define IS_CONFIGURED "is-configured"
 
 typedef void
-(*SwClientServiceGetCapabilitiesCallback) (SwClientService *service,
-                                               const char         **caps,
-                                               const GError        *error,
-                                               gpointer             userdata);
+(*SwClientServiceGetCapabilitiesCallback) (SwClientService  *service,
+                                           const char      **caps,
+                                           const GError     *error,
+                                           gpointer          userdata);
 
 void
-sw_client_service_get_static_capabilities (SwClientService                       *service,
-                                               SwClientServiceGetCapabilitiesCallback cb,
-                                               gpointer                                   userdata);
+sw_client_service_get_static_capabilities (SwClientService                        *service,
+                                           SwClientServiceGetCapabilitiesCallback  cb,
+                                           gpointer                                userdata);
 
 void
-sw_client_service_get_dynamic_capabilities (SwClientService                       *service,
-                                                SwClientServiceGetCapabilitiesCallback cb,
-                                                gpointer                                   userdata);
+sw_client_service_get_dynamic_capabilities (SwClientService                        *service,
+                                            SwClientServiceGetCapabilitiesCallback  cb,
+                                            gpointer                                userdata);
 
 void
 sw_client_service_request_avatar (SwClientService *service);
 
 typedef void
 (*SwClientServiceUpdateStatusCallback) (SwClientService *service,
-                                            const GError        *error,
-                                            gpointer             userdata);
+                                        const GError    *error,
+                                        gpointer         userdata);
 
 void
-sw_client_service_update_status (SwClientService                    *service,
-                                     SwClientServiceUpdateStatusCallback cb,
-                                     const gchar                            *status_msg,
-                                     gpointer                                userdata);
+sw_client_service_update_status (SwClientService                     *service,
+                                 SwClientServiceUpdateStatusCallback  cb,
+                                 const gchar                         *status_msg,
+                                 gpointer                             userdata);
 
 const char *sw_client_service_get_name (SwClientService *service);
 
-typedef void (*SwClientServiceQueryOpenViewCallback) (SwClientService    *query,
-                                                          SwClientItemView *item_view,
-                                                          gpointer              userdata);
+typedef void (*SwClientServiceQueryOpenViewCallback) (SwClientService  *query,
+                                                      SwClientItemView *item_view,
+                                                      gpointer          userdata);
 
 void
 sw_client_service_query_open_view (SwClientService                      *service,
-                                       GHashTable                               *params,
-                                       SwClientServiceQueryOpenViewCallback  cb,
-                                       gpointer                                  userdata);
+                                   GHashTable                           *params,
+                                   SwClientServiceQueryOpenViewCallback  cb,
+                                   gpointer                              userdata);
 
 G_END_DECLS
 

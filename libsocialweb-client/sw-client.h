@@ -56,39 +56,39 @@ GType sw_client_get_type (void);
 SwClient *sw_client_new (void);
 
 typedef void (*SwClientOpenViewCallback) (SwClient     *client,
-                                              SwClientView *view,
-                                              gpointer          userdata);
+                                          SwClientView *view,
+                                          gpointer      userdata);
 
 typedef void (*SwClientIsOnlineCallback) (SwClient *client,
-                                              gboolean      online,
-                                              gpointer      userdata);
+                                          gboolean  online,
+                                          gpointer  userdata);
 
-void sw_client_open_view (SwClient                *client,
-                              GList                       *services,
-                              guint                        count,
-                              SwClientOpenViewCallback cb,
-                              gpointer                     userdata);
+void sw_client_open_view (SwClient                 *client,
+                          GList                    *services,
+                          guint                     count,
+                          SwClientOpenViewCallback  cb,
+                          gpointer                  userdata);
 
 void sw_client_open_view_for_service (SwClient                 *client,
-                                          const gchar                  *service_name,
-                                          guint                         count,
-                                          SwClientOpenViewCallback  cb,
-                                          gpointer                      userdata);
+                                      const gchar              *service_name,
+                                      guint                     count,
+                                      SwClientOpenViewCallback  cb,
+                                      gpointer                  userdata);
 
-typedef void (*SwClientGetServicesCallback) (SwClient *client,
-                                                 const GList  *services,
-                                                 gpointer      userdata);
+typedef void (*SwClientGetServicesCallback) (SwClient    *client,
+                                             const GList *services,
+                                             gpointer     userdata);
 
-void sw_client_get_services (SwClient                  *client,
-                                 SwClientGetServicesCallback cb,
-                                 gpointer                       userdata);
+void sw_client_get_services (SwClient                    *client,
+                             SwClientGetServicesCallback  cb,
+                             gpointer                     userdata);
 
-SwClientService *sw_client_get_service (SwClient *client,
-                                                const gchar  *service_name);
+SwClientService *sw_client_get_service (SwClient    *client,
+                                        const gchar *service_name);
 
-void sw_client_is_online (SwClient *client,
-                              SwClientIsOnlineCallback cb,
-                              gpointer userdata);
+void sw_client_is_online (SwClient                 *client,
+                          SwClientIsOnlineCallback  cb,
+                          gpointer                  userdata);
 
 void sw_client_hide_item (SwClient *client, SwItem *item);
 
