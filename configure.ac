@@ -1,5 +1,5 @@
 AC_PREREQ(2.53)
-AC_INIT(libsocialweb, 0.23.2)
+AC_INIT(libsocialweb, 0.24.0)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
