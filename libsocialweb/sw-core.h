@@ -21,7 +21,7 @@
 
 #include <glib-object.h>
 #include <libsocialweb/sw-types.h>
-#include <dbus/dbus-glib-lowlevel.h>
+#include <dbus/dbus-glib.h>
 
 G_BEGIN_DECLS
 
