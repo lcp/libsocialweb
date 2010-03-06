@@ -1,52 +1,70 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# Alexander Mineev <alexander.g.mineev@intel.com>, 2009.
-# 
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-16 11:27+0000\n"
-"PO-Revision-Date: 2009-11-24 11:42+0300\n"
-"Last-Translator: Alexander Mineev <alexander.g.mineev@intel.com>\n"
+"POT-Creation-Date: 2010-03-04 15:06+0000\n"
+"PO-Revision-Date: 2010-03-06 21:09+0200\n"
+"Last-Translator: Yuri Nazarenko <yuri.nazarenko@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n!=1;\n"
+"X-Poedit-Language: Russian\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "Digg"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - для пересылки новостей, видеороликов и изображений"
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm.c:149
+#, c-format
+msgid "%s by %s"
+msgstr "%s на %s"
+
+#: ../services/lastfm/lastfm.c:153
+msgid "Unknown"
+msgstr "Неизвестно"
 
 #: ../services/lastfm/lastfm.keys.in.h:1
 msgid "Last.fm"
 msgstr "Last.fm"
 
+#: ../services/lastfm/lastfm.keys.in.h:2
+msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
+msgstr "Last.fm - это музыкальный сервис, который изучает ваши вкусы. Каждый трек, выбранный вами, предоставляет информацию в профиль Last.fm о том, что вам нравится. Этот сервис может связать вас с другими пользователями, которые разделяют ваши интересы, - и порекомендовать песни из их музыкальных коллекций, а также из вашей."
+
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
 msgstr "Twitter"
+
+#: ../services/twitter/twitter.keys.in.h:2
+msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
+msgstr "Twitter - это сервис для друзей, родственников и коллег по работе, который помогает им оставаться на связи и общаться, обмениваясь быстрыми и частыми ответами на простой вопрос: Что ты делаешь?"
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
 msgstr "Flickr"
 
+#: ../services/flickr/flickr.keys.in.h:2
+msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgstr "Flickr - наверное, самое лучшее онлайн-приложение в мире для работы с фотографиями и обмена ими."
+
 #: ../services/myspace/myspace.keys.in.h:1
 msgid "MySpace"
 msgstr "MySpace"
 
-#: ../services/lastfm/lastfm.keys.in.h:2
-#, fuzzy
-msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm - это музыкальный сервис, который учитывает ваши предпочтения."
-
-#: ../services/twitter/twitter.keys.in.h:2
-#, fuzzy
-msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter - это сервис для быстрого обмена которкими сообщениями, обычно это ответы на вопрос \"Что ты делаешь?\""
-
-#: ../services/flickr/flickr.keys.in.h:2
-#, fuzzy
-msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr "Flickr - один из лучших  фото-сервисов в мире."
-
 #: ../services/myspace/myspace.keys.in.h:2
-#, fuzzy
 msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace - одна из лидирующий социальных сетей."
+msgstr "MySpace - ведущий социальный портал, на котором предоставлена возможность общения между людьми, обмена различными файлами и информацией о культурных особенностях во всем мире. Создайте свой профиль, поделитесь фотографиями, профессиональными и любительскими видеороликами, ведите свой блог, обменивайтесь быстрыми сообщениями с друзьями и слушайте музыку в самом большом мировом сообществе."
+
