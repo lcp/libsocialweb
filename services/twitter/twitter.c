@@ -30,7 +30,8 @@
 #include <libsocialweb-keyfob/sw-keyfob.h>
 #include <libsocialweb-keystore/sw-keystore.h>
 #include <gconf/gconf-client.h>
-#include <rest/rest-proxy.h>
+#include <rest/oauth-proxy.h>
+#include <rest/oauth-proxy-call.h>
 #include <rest/rest-xml-parser.h>
 #include <libsoup/soup.h>
 
@@ -350,11 +351,11 @@ get_status_updates (SwServiceTwitter *twitter)
   call = rest_proxy_new_call (priv->proxy);
   switch (priv->type) {
   case OWN:
-    rest_proxy_call_set_function (call, "statuses/user_timeline.xml");
+    rest_proxy_call_set_function (call, "1/statuses/user_timeline.xml");
     break;
   case FRIENDS:
   case BOTH:
-    rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
+    rest_proxy_call_set_function (call, "1/statuses/friends_timeline.xml");
     break;
   }
 
@@ -424,39 +425,6 @@ sanity_check_date (RestProxyCall *call)
 }
 
 static void
-verify_cb (RestProxyCall *call,
-           const GError  *error,
-           GObject       *weak_object,
-           gpointer       userdata)
-{
-  SwService *service = SW_SERVICE (weak_object);
-  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
-  RestXmlNode *node;
-
-  if (error) {
-    sanity_check_date (call);
-    g_message ("Error: %s", error->message);
-    return;
-  }
-
-  SW_DEBUG (TWITTER, "Authentication verified");
-
-  node = node_from_call (call);
-  if (!node)
-    return;
-
-  twitter->priv->user_id = g_strdup (rest_xml_node_find (node, "id")->content);
-  twitter->priv->image_url = g_strdup (rest_xml_node_find (node, "profile_image_url")->content);
-
-  rest_xml_node_unref (node);
-
-  sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
-
-  if (twitter->priv->running)
-    get_status_updates (twitter);
-}
-
-static void
 start (SwService *service)
 {
   SwServiceTwitter *twitter = (SwServiceTwitter*)service;
@@ -498,6 +466,64 @@ request_avatar (SwService *service)
   }
 }
 
+
+static void
+verify_cb (RestProxyCall *call,
+           const GError  *error,
+           GObject       *weak_object,
+           gpointer       userdata)
+{
+  SwService *service = SW_SERVICE (weak_object);
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
+  RestXmlNode *node;
+
+  SW_DEBUG (TWITTER, "Verified credentials");
+
+  node = node_from_call (call);
+  if (!node)
+    return;
+
+  twitter->priv->user_id = g_strdup (rest_xml_node_find (node, "id")->content);
+  twitter->priv->image_url = g_strdup (rest_xml_node_find (node, "profile_image_url")->content);
+
+  rest_xml_node_unref (node);
+
+  sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
+
+  if (twitter->priv->running)
+    get_status_updates (twitter);
+}
+
+static void
+access_token_cb (RestProxyCall *call,
+                 const GError  *error,
+                 GObject       *weak_object,
+                 gpointer       userdata)
+{
+  SwService *service = SW_SERVICE (weak_object);
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
+
+  if (error) {
+    sanity_check_date (call);
+    g_message ("Error: %s", error->message);
+    return;
+  }
+
+  oauth_proxy_call_parse_token_reponse (OAUTH_PROXY_CALL (call));
+
+  SW_DEBUG (TWITTER, "Got OAuth access tokens");
+
+  /*
+   * Despite the fact we know the credentials are fine, we check them again to
+   * get the user ID and avatar.
+   *
+   * http://apiwiki.twitter.com/Twitter-REST-API-Method:-account verify_credentials
+   */
+  call = rest_proxy_new_call (twitter->priv->proxy);
+  rest_proxy_call_set_function (call, "1/account/verify_credentials.xml");
+  rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
+}
+
 static void
 online_notify (gboolean online, gpointer user_data)
 {
@@ -508,31 +534,28 @@ online_notify (gboolean online, gpointer user_data)
 
   if (online) {
     if (priv->username && priv->password) {
-      char *url;
-      char *escaped_user;
-      char *escaped_password;
+      const char *key = NULL, *secret = NULL;
       RestProxyCall *call;
 
-      escaped_user = g_uri_escape_string (priv->username,
-                                          NULL,
-                                          FALSE);
-      escaped_password = g_uri_escape_string (priv->password,
-                                          NULL,
-                                          FALSE);
+      sw_keystore_get_key_secret ("twitter", &key, &secret);
+      priv->proxy = oauth_proxy_new (key, secret, "https://api.twitter.com/", FALSE);
 
-      url = g_strdup_printf ("https://%s:%s@api.twitter.com/1/",
-                             escaped_user, escaped_password);
+      SW_DEBUG (TWITTER, "Getting token");
 
-      g_free (escaped_user);
-      g_free (escaped_password);
-
-      priv->proxy = rest_proxy_new (url, FALSE);
-      g_free (url);
-
-      SW_DEBUG (TWITTER, "Verifying credentials");
+      /*
+       * Here we use xAuth to transform a username and password into a OAuth
+       * access token.
+       *
+       * http://apiwiki.twitter.com/Twitter-REST-API-Method:-oauth-access_token-for-xAuth
+       */
       call = rest_proxy_new_call (priv->proxy);
-      rest_proxy_call_set_function (call, "account/verify_credentials.xml");
-      rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
+      rest_proxy_call_set_function (call, "oauth/access_token");
+      rest_proxy_call_add_params (call,
+                                  "x_auth_mode", "client_auth",
+                                  "x_auth_username", priv->username,
+                                  "x_auth_password", priv->password,
+                                  NULL);
+      rest_proxy_call_async (call, access_token_cb, (GObject*)twitter, NULL, NULL);
     } else {
       sw_service_emit_refreshed ((SwService *)twitter, NULL);
     }
@@ -774,9 +797,12 @@ _twitter_status_update_update_status (SwStatusUpdateIface   *self,
   if (!priv->user_id)
     return;
 
+  /*
+   * http://apiwiki.twitter.com/Twitter-REST-API-Method:-statuses update
+   */
   call = rest_proxy_new_call (priv->proxy);
   rest_proxy_call_set_method (call, "POST");
-  rest_proxy_call_set_function (call, "statuses/update.xml");
+  rest_proxy_call_set_function (call, "1/statuses/update.xml");
 
   rest_proxy_call_add_params (call,
                               "status", msg,
