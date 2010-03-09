@@ -14,5 +14,5 @@ MESSAGE="$@"
 dbus-send --session --print-reply \
     --dest=org.moblin.libsocialweb \
     /org/moblin/libsocialweb/Service/$SERVICE \
-    org.moblin.libsocialweb.Service.UpdateStatus \
-    string:"$MESSAGE"
+    org.moblin.libsocialweb.StatusUpdate.UpdateStatus \
+    string:"$MESSAGE" dict:string:string:
