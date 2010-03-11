@@ -1,8 +1,9 @@
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-01 16:23+0000\n"
+"POT-Creation-Date: 2010-03-10 10:36+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Paula <pkwanzek@hotmail.com>\n"
 "Language-Team: \n"
@@ -43,8 +44,26 @@ msgstr "Flickr - ehkä maailman parhain valokuvien hallinta- ja jakamispalvelu."
 msgid "MySpace"
 msgstr "MySpace"
 
-# Took description from http://www.myspace.com/index.cfm?fuseaction=misc.aboutus
+# Took description from
+# http://www.myspace.com/index.cfm?fuseaction=misc.aboutus
 #: ../services/myspace/myspace.keys.in.h:2
 msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
 msgstr "MySpace on online-yhteisö, jossa voit tavata ystäviesi ystäviä. Luo yksityinen MySpace-yhteisö ja jaa valokuvia, päiväkirjoja sekä kiinnostuksenkohteita yhteisten ystävien kasvavassa verkostossa. Tarkista, kuka tuntee kenet tai millaisia yhteyksiä sinulla on."
 
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "Digg"
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm.c:149
+#, c-format
+msgid "%s by %s"
+msgstr "%s kertaa %s"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - jaa uutisia, videoita ja kuvia"
+
+#: ../services/lastfm/lastfm.c:153
+msgid "Unknown"
+msgstr "Tuntematon"
