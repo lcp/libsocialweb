@@ -2,13 +2,13 @@
 # Copyright (C) 2009 Intel
 # This file is distributed under the same license as the PACKAGE package.
 # Zhu Yanhai <yanhai.zhu@intel.com>, 2009.
-#
-#
+# 
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: libsocialweb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-01 16:23+0000\n"
+"POT-Creation-Date: 2010-03-10 10:36+0000\n"
 "PO-Revision-Date: 2009-10-09 16:28-0800\n"
 "Last-Translator: Yun Nie <yun.nie@ptiglobal.net>\n"
 "Language-Team: zh_CN <yanhai.zhu@intel.com>\n"
@@ -21,37 +21,23 @@ msgid "Last.fm"
 msgstr "Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
-msgid ""
-"Last.fm is a music service that learns what you love. Every track you play "
-"will tell your Last.fm profile something about what you like. It can connect "
-"you to other people who like what you like - and recommend songs from their "
-"music collections and yours too."
-msgstr ""
-"Last.fm 是一项知道您喜欢什么样的音乐的服务。你每多听一首歌，Last.fm 就会多知"
-"道些关于您的喜好。它可以让您与和您有共同爱好的其他人取得联系 - 并且从他们的收"
-"藏和您自己的收藏中向您推荐音乐。"
+msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
+msgstr "Last.fm 是一项知道您喜欢什么样的音乐的服务。你每多听一首歌，Last.fm 就会多知道些关于您的喜好。它可以让您与和您有共同爱好的其他人取得联系 - 并且从他们的收藏和您自己的收藏中向您推荐音乐。"
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
 msgstr "Twitter"
 
 #: ../services/twitter/twitter.keys.in.h:2
-msgid ""
-"Twitter is a service for friends, family, and co–workers to communicate and "
-"stay connected through the exchange of quick, frequent answers to one simple "
-"question: What are you doing?"
-msgstr ""
-"Twitter 是一项供朋友、家人和同事们联系和沟通的服务，可以回答其他人经常向您提"
-"出的这样一个问题：你现在在干什么？"
+msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
+msgstr "Twitter 是一项供朋友、家人和同事们联系和沟通的服务，可以回答其他人经常向您提出的这样一个问题：你现在在干什么？"
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
 msgstr "Flickr"
 
 #: ../services/flickr/flickr.keys.in.h:2
-msgid ""
-"Flickr - almost certainly the best online photo management and sharing "
-"application in the world."
+msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
 msgstr "Flicker - 几乎是目前世界上最好的在线照片管理和共享系统。"
 
 #: ../services/myspace/myspace.keys.in.h:1
@@ -59,12 +45,23 @@ msgid "MySpace"
 msgstr "MySpace"
 
 #: ../services/myspace/myspace.keys.in.h:2
-msgid ""
-"MySpace is a leading social portal for connecting people, content, and "
-"culture from around the world. Create a profile, share photos, professional "
-"and viral videos, blog, instant message your friends, and listen to music on "
-"the world’s largest music community."
-msgstr ""
-"MySpace 是一个连接全世界各种人种、文化和信息的先进社交门户网站。您可以在上边"
-"建立自己的个人信息，共享照片，写博客，看视频，给朋友发消息，并且在世界最大的"
-"音乐社区里欣赏音乐。"
+msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
+msgstr "MySpace 是一个连接全世界各种人种、文化和信息的先进社交门户网站。您可以在上边建立自己的个人信息，共享照片，写博客，看视频，给朋友发消息，并且在世界最大的音乐社区里欣赏音乐。"
+
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "Digg"
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm.c:149
+#, c-format
+msgid "%s by %s"
+msgstr "%s 由 %s"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - 共享新闻，视频和图像"
+
+#: ../services/lastfm/lastfm.c:153
+msgid "Unknown"
+msgstr "未知"
