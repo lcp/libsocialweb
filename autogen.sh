@@ -1,3 +1,3 @@
 #!/bin/sh
 intltoolize --copy --force --automake
-autoreconf -v -i && ./configure $@
+ACLOCAL="${ACLOCAL-aclocal} $ACLOCAL_FLAGS" autoreconf -v -i && ./configure $@
