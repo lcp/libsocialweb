@@ -496,6 +496,9 @@ sw_service_myspace_initable (GInitable    *initable,
   SwServiceMySpacePrivate *priv = myspace->priv;
   const char *key = NULL, *secret = NULL;
 
+  if (priv->inited)
+    return TRUE;
+
   sw_keystore_get_key_secret ("myspace", &key, &secret);
   if (key == NULL || secret == NULL) {
     g_set_error_literal (error,
@@ -505,13 +508,12 @@ sw_service_myspace_initable (GInitable    *initable,
     return FALSE;
   }
 
-  if (priv->inited)
-    return TRUE;
-
   if (sw_is_online ()) {
     online_notify (TRUE, myspace);
   }
   sw_online_add_notify (online_notify, myspace);
+
+  priv->inited = TRUE;
 
   return TRUE;
 }
