@@ -368,6 +368,7 @@ get_static_caps (SwService *service)
   static const char * caps[] = {
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
+    CAN_GEOTAG,
     NULL
   };
 
