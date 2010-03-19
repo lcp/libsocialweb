@@ -41,6 +41,7 @@
 
 #include "twitter-item-view.h"
 
+static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
 static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
 static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
@@ -48,6 +49,8 @@ static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (SwServiceTwitter,
                          sw_service_twitter,
                          SW_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                initable_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE,
                                                 query_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_AVATAR_IFACE,
@@ -59,6 +62,7 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceTwitter,
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_TWITTER, SwServiceTwitterPrivate))
 
 struct _SwServiceTwitterPrivate {
+  gboolean inited;
   enum {
     OWN,
     FRIENDS,
@@ -596,40 +600,6 @@ sw_service_twitter_get_name (SwService *service)
 }
 
 static void
-sw_service_twitter_constructed (GObject *object)
-{
-  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (object);
-  SwServiceTwitterPrivate *priv;
-
-  priv = twitter->priv = GET_PRIVATE (twitter);
-
-  if (sw_service_get_param ((SwService *)twitter, "own")) {
-    priv->type = OWN;
-  } else if (sw_service_get_param ((SwService *)twitter, "friends")){
-    priv->type = FRIENDS;
-  } else {
-    priv->type = BOTH;
-  }
-
-  priv->twitpic_re = g_regex_new ("http://twitpic.com/([A-Za-z0-9]+)", 0, 0, NULL);
-  g_assert (priv->twitpic_re);
-
-  priv->gconf = gconf_client_get_default ();
-  gconf_client_add_dir (priv->gconf, KEY_BASE,
-                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  priv->gconf_notify_id[0] = gconf_client_notify_add (priv->gconf, KEY_USER,
-                                                      auth_changed_cb, twitter,
-                                                      NULL, NULL);
-  priv->gconf_notify_id[1] = gconf_client_notify_add (priv->gconf, KEY_PASS,
-                                                      auth_changed_cb, twitter,
-                                                      NULL, NULL);
-  gconf_client_notify (priv->gconf, KEY_USER);
-  gconf_client_notify (priv->gconf, KEY_PASS);
-
-  sw_online_add_notify (online_notify, twitter);
-}
-
-static void
 sw_service_twitter_dispose (GObject *object)
 {
   SwServiceTwitterPrivate *priv = SW_SERVICE_TWITTER (object)->priv;
@@ -678,7 +648,6 @@ sw_service_twitter_class_init (SwServiceTwitterClass *klass)
 
   g_type_class_add_private (klass, sizeof (SwServiceTwitterPrivate));
 
-  object_class->constructed = sw_service_twitter_constructed;
   object_class->dispose = sw_service_twitter_dispose;
   object_class->finalize = sw_service_twitter_finalize;
 
@@ -695,7 +664,70 @@ static void
 sw_service_twitter_init (SwServiceTwitter *self)
 {
   SW_DEBUG (TWITTER, "new instance");
+
   self->priv = GET_PRIVATE (self);
+  self->priv->inited = FALSE;
+}
+
+/* Initable interface */
+
+static gboolean
+sw_service_twitter_initable (GInitable    *initable,
+                             GCancellable *cancellable,
+                             GError      **error)
+{
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (initable);
+  SwServiceTwitterPrivate *priv = twitter->priv;
+  const char *key = NULL, *secret = NULL;
+
+  if (priv->inited)
+    return TRUE;
+
+  sw_keystore_get_key_secret ("twitter", &key, &secret);
+  if (key == NULL || secret == NULL) {
+    g_set_error_literal (error,
+                         SW_SERVICE_ERROR,
+                         SW_SERVICE_ERROR_NO_KEYS,
+                         "No API key configured");
+    return FALSE;
+  }
+
+  if (sw_service_get_param ((SwService *)twitter, "own")) {
+    priv->type = OWN;
+  } else if (sw_service_get_param ((SwService *)twitter, "friends")){
+    priv->type = FRIENDS;
+  } else {
+    priv->type = BOTH;
+  }
+
+  priv->twitpic_re = g_regex_new ("http://twitpic.com/([A-Za-z0-9]+)", 0, 0, NULL);
+  g_assert (priv->twitpic_re);
+
+  priv->gconf = gconf_client_get_default ();
+  gconf_client_add_dir (priv->gconf, KEY_BASE,
+                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
+  priv->gconf_notify_id[0] = gconf_client_notify_add (priv->gconf, KEY_USER,
+                                                      auth_changed_cb, twitter,
+                                                      NULL, NULL);
+  priv->gconf_notify_id[1] = gconf_client_notify_add (priv->gconf, KEY_PASS,
+                                                      auth_changed_cb, twitter,
+                                                      NULL, NULL);
+  gconf_client_notify (priv->gconf, KEY_USER);
+  gconf_client_notify (priv->gconf, KEY_PASS);
+
+  sw_online_add_notify (online_notify, twitter);
+
+  priv->inited = TRUE;
+
+  return TRUE;
+}
+
+static void
+initable_iface_init (gpointer g_iface, gpointer iface_data)
+{
+  GInitableIface *klass = (GInitableIface *)g_iface;
+
+  klass->init = sw_service_twitter_initable;
 }
 
 /* Query interface */
