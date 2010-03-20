@@ -2,12 +2,12 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-01 16:23+0000\n"
+"POT-Creation-Date: 2010-03-17 09:41+0000\n"
 "PO-Revision-Date: 2009-10-08 21:54+0100\n"
 "Last-Translator: Jean Cayron <jean.cayron@gmail.com>\n"
 "Language-Team: Walloon <linux-wa@walon.org>\n"
@@ -49,3 +49,20 @@ msgstr "MySpace"
 msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
 msgstr "MySpace est l' mwaisse poite sociåle po raloyî les djins, les ådvins eyet l' tuzance di pattavå l' monde. Ahivez on profil, pårtaedjîz des fotos, des videyos pol boutaedje oudonbén po tolmonde, bloguez, berdelez sol moumint avou vos soçons eyet schoûtez del muzike sol pus grande cominålté del muzike del Daegne."
 
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "Digg"
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm.c:149
+#, c-format
+msgid "%s by %s"
+msgstr "%s pa %s"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - pårtaedjî des noveles, des videyos et des imådjes"
+
+#: ../services/lastfm/lastfm.c:153
+msgid "Unknown"
+msgstr "Nén cnoxhou"
