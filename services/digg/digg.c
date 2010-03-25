@@ -90,8 +90,10 @@ digg_call (SwServiceDigg *digg,
     if (error)
       g_error_free (error);
 
-    if (node)
+    if (node) {
       rest_xml_node_unref (node);
+      node = NULL;
+    }
   }
 
   return node;
