@@ -497,6 +497,8 @@ verify_cb (RestProxyCall *call,
 
   if (twitter->priv->running)
     get_status_updates (twitter);
+
+  g_object_unref (call);
 }
 
 static void
@@ -517,6 +519,8 @@ access_token_cb (RestProxyCall *call,
   oauth_proxy_call_parse_token_reponse (OAUTH_PROXY_CALL (call));
 
   SW_DEBUG (TWITTER, "Got OAuth access tokens");
+
+  g_object_unref (call);
 
   /*
    * Despite the fact we know the credentials are fine, we check them again to
