@@ -481,7 +481,6 @@ request_avatar (SwService *service)
   }
 }
 
-
 static void
 verify_cb (RestProxyCall *call,
            const GError  *error,
@@ -515,6 +514,16 @@ verify_cb (RestProxyCall *call,
 }
 
 static void
+sw_service_twitter_verify_credentials (SwServiceTwitter *twitter)
+{
+  RestProxyCall *call;
+
+  call = rest_proxy_new_call (twitter->priv->proxy);
+  rest_proxy_call_set_function (call, "1/account/verify_credentials.xml");
+  rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
+}
+
+static void
 access_token_cb (RestProxyCall *call,
                  const GError  *error,
                  GObject       *weak_object,
@@ -541,9 +550,7 @@ access_token_cb (RestProxyCall *call,
    *
    * http://apiwiki.twitter.com/Twitter-REST-API-Method:-account verify_credentials
    */
-  call = rest_proxy_new_call (twitter->priv->proxy);
-  rest_proxy_call_set_function (call, "1/account/verify_credentials.xml");
-  rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
+  sw_service_twitter_verify_credentials (twitter);
 }
 
 static void
