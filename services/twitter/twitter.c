@@ -193,7 +193,7 @@ make_item (SwServiceTwitter *twitter, RestXmlNode *node)
 {
   SwServiceTwitterPrivate *priv = twitter->priv;
   SwItem *item;
-  RestXmlNode *u_node, *n;
+  RestXmlNode *u_node, *place_n, *n;
   const char *post_id, *user_id, *user_name, *date, *content, *screen_name;
   char *url;
   GMatchInfo *match_info;
@@ -292,6 +292,25 @@ make_item (SwServiceTwitter *twitter, RestXmlNode *node)
       }
 
       g_strfreev (split_str);
+    }
+  }
+
+  place_n = rest_xml_node_find (node, "place");
+
+  if (place_n)
+  {
+    n = rest_xml_node_find (place_n, "name");
+
+    if (n && n->content)
+    {
+      sw_item_put (item, "place_name", n->content);
+    }
+
+    n = rest_xml_node_find (place_n, "full_name");
+
+    if (n && n->content)
+    {
+      sw_item_put (item, "place_full_name", n->content);
     }
   }
 
