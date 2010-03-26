@@ -76,6 +76,7 @@ struct _SwServiceTwitterPrivate {
   GConfClient *gconf;
   guint gconf_notify_id[2];
   char *username, *password;
+  gboolean geotag_enabled;
 };
 
 #define KEY_BASE "/apps/libsocialweb/services/twitter"
@@ -393,9 +394,18 @@ get_dynamic_caps (SwService *service)
     IS_CONFIGURED,
     NULL
   };
-  static const char * no_caps[] = { NULL };
+  static const char *no_caps[] = { NULL };
+  static const char *full_caps_with_geotag[] = {
+    CAN_UPDATE_STATUS,
+    CAN_REQUEST_AVATAR,
+    IS_CONFIGURED,
+    CAN_GEOTAG,
+    NULL
+  };
 
-  if (priv->user_id)
+  if (priv->user_id && priv->geotag_enabled)
+    return full_caps_with_geotag;
+  else if (priv->user_id)
     return full_caps;
   else if (priv->username && priv->password)
     return configured_caps;
@@ -490,7 +500,8 @@ verify_cb (RestProxyCall *call,
 
   twitter->priv->user_id = g_strdup (rest_xml_node_find (node, "id")->content);
   twitter->priv->image_url = g_strdup (rest_xml_node_find (node, "profile_image_url")->content);
-
+  twitter->priv->geotag_enabled = g_str_equal (rest_xml_node_find (node, "geo_enabled")->content,
+                                               "true");
   rest_xml_node_unref (node);
 
   sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
