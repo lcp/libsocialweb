@@ -490,6 +490,7 @@ verify_cb (RestProxyCall *call,
 {
   SwService *service = SW_SERVICE (weak_object);
   SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
+  SwServiceTwitterPrivate *priv = twitter->priv;
   RestXmlNode *node;
 
   SW_DEBUG (TWITTER, "Verified credentials");
@@ -498,15 +499,16 @@ verify_cb (RestProxyCall *call,
   if (!node)
     return;
 
-  twitter->priv->user_id = g_strdup (rest_xml_node_find (node, "id")->content);
-  twitter->priv->image_url = g_strdup (rest_xml_node_find (node, "profile_image_url")->content);
-  twitter->priv->geotag_enabled = g_str_equal (rest_xml_node_find (node, "geo_enabled")->content,
-                                               "true");
+  priv->user_id = g_strdup (rest_xml_node_find (node, "id")->content);
+  priv->image_url = g_strdup (rest_xml_node_find (node, "profile_image_url")->content);
+  priv->geotag_enabled = g_str_equal (rest_xml_node_find (node, "geo_enabled")->content,
+                                      "true");
+
   rest_xml_node_unref (node);
 
   sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
 
-  if (twitter->priv->running)
+  if (priv->running)
     get_status_updates (twitter);
 
   g_object_unref (call);
