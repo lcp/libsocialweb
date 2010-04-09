@@ -96,8 +96,6 @@ sw_client_service_update_status_with_fields (SwClientService                    
                                              GHashTable                          *fields,
                                              gpointer                             userdata);
 
-const char *sw_client_service_get_name (SwClientService *service);
-
 typedef void (*SwClientServiceQueryOpenViewCallback) (SwClientService  *query,
                                                       SwClientItemView *item_view,
                                                       gpointer          userdata);
@@ -107,6 +105,10 @@ sw_client_service_query_open_view (SwClientService                      *service
                                    GHashTable                           *params,
                                    SwClientServiceQueryOpenViewCallback  cb,
                                    gpointer                              userdata);
+
+const char *sw_client_service_get_name (SwClientService *service);
+
+const char *sw_client_service_get_display_name (SwClientService *service);
 
 G_END_DECLS
 

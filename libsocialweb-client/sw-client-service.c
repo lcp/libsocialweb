@@ -46,6 +46,8 @@ struct _SwClientServicePrivate {
   char *name;
   DBusGConnection *connection;
   DBusGProxy *proxies[LAST_SIGNAL];
+  gboolean loaded_info;
+  char *display_name;
 };
 
 /* We need to have one proxy per interface because dbus-glib is annoying */
@@ -122,6 +124,7 @@ sw_client_service_finalize (GObject *object)
   SwClientServicePrivate *priv = GET_PRIVATE (object);
 
   g_free (priv->name);
+  g_free (priv->display_name);
 
   G_OBJECT_CLASS (sw_client_service_parent_class)->finalize (object);
 }
@@ -565,4 +568,45 @@ sw_client_service_query_open_view (SwClientService                      *service
 
   if (tmp_params)
     g_hash_table_unref (tmp_params);
+}
+
+#define GROUP "LibSocialWebService"
+
+static void
+load_info (SwClientService *service)
+{
+  SwClientServicePrivate *priv = GET_PRIVATE (service);
+
+  if (!priv->loaded_info) {
+    GKeyFile *keys;
+    char *filename, *path;
+
+    filename = g_strconcat (priv->name, ".keys", NULL);
+    path = g_build_filename ("libsocialweb", "services", filename, NULL);
+    g_free (filename);
+
+    keys = g_key_file_new ();
+
+    g_key_file_load_from_data_dirs (keys, path, NULL, G_KEY_FILE_NONE, NULL);
+    g_free (path);
+
+    priv->display_name = g_key_file_get_locale_string (keys, GROUP, "Name", NULL, NULL);
+
+    g_key_file_free (keys);
+    priv->loaded_info = TRUE;
+  }
+}
+
+const char *
+sw_client_service_get_display_name (SwClientService *service)
+{
+  SwClientServicePrivate *priv;
+
+  g_return_val_if_fail (SW_CLIENT_IS_SERVICE (service), NULL);
+
+  priv = GET_PRIVATE (service);
+
+  load_info (service);
+
+  return priv->display_name;
 }
