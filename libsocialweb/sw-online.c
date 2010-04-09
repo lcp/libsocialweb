@@ -180,52 +180,31 @@ static gboolean current_state;
 #define STRING_VARIANT_HASHTABLE (dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_VALUE))
 
 static void
-prop_changed (DBusGProxy *proxy,
-              const char *key,
-              GValue     *v,
-              gpointer    user_data)
+state_changed (DBusGProxy *proxy, const char *new_state)
 {
-  const char *s;
-
-  if (strcmp (key, "State") != 0)
-    return;
-
-  s = g_value_get_string (v);
-
-  current_state = (g_strcmp0 (s, "online") == 0);
-
+  current_state = (g_strcmp0 (new_state, "online") == 0);
   emit_notify (current_state);
 }
 
 static void
-got_props_cb (DBusGProxy     *proxy,
+got_state_cb (DBusGProxy     *proxy,
               DBusGProxyCall *call,
               void           *user_data)
 {
-  GHashTable *hash;
+  const char *state = NULL;
   GError *error = NULL;
-  const GValue *value;
-  const char *s;
 
-  if (!dbus_g_proxy_end_call (proxy,
-                              call,
-                              &error,
-                              STRING_VARIANT_HASHTABLE,
-                              &hash,
-                              G_TYPE_INVALID)) {
+  if (!dbus_g_proxy_end_call (proxy, call, &error,
+			      G_TYPE_STRING, &state,
+			      G_TYPE_INVALID)) {
     g_printerr ("Cannot get current online state: %s", error->message);
     g_error_free (error);
     return;
   }
 
-  value = g_hash_table_lookup (hash, "State");
-  if (value) {
-    s = g_value_get_string (value);
-    current_state = (g_strcmp0 (s, "online") == 0);
-    emit_notify (current_state);
-  }
-
-  g_hash_table_unref (hash);
+  current_state = (g_strcmp0 (state, "online") == 0);
+  emit_notify (current_state);
+  g_free (state);
 }
 
 static gboolean
@@ -247,31 +226,18 @@ online_init (void)
                                      "/",
                                      "org.moblin.connman.Manager");
 
-  dbus_g_object_register_marshaller (sw_marshal_VOID__STRING_BOXED,
-                                     G_TYPE_NONE,
-                                     G_TYPE_STRING,
-                                     G_TYPE_BOXED,
-                                     G_TYPE_INVALID);
-  dbus_g_proxy_add_signal (proxy,
-                           "PropertyChanged",
-                           G_TYPE_STRING,
-                           G_TYPE_VALUE,
-                           NULL);
-  dbus_g_proxy_connect_signal (proxy,
-                               "PropertyChanged",
-                               (GCallback)prop_changed,
-                               NULL,
-                               NULL);
+  dbus_g_object_register_marshaller (g_cclosure_marshal_VOID__STRING,
+                                     G_TYPE_NONE, G_TYPE_STRING,
+				     G_TYPE_INVALID);
+  dbus_g_proxy_add_signal (proxy, "StateChanged", G_TYPE_STRING, NULL);
+  dbus_g_proxy_connect_signal (proxy, "StateChanged",
+                               (GCallback)state_changed, NULL, NULL);
 
   current_state = FALSE;
 
   /* Get the current state */
-  dbus_g_proxy_begin_call (proxy,
-                           "GetProperties",
-                           got_props_cb,
-                           NULL,
-                           NULL,
-                           G_TYPE_INVALID);
+  dbus_g_proxy_begin_call (proxy, "GetState", got_state_cb,
+                           NULL, NULL, G_TYPE_INVALID);
 
   return TRUE;
 }
