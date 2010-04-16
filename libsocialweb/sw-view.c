@@ -624,6 +624,8 @@ sw_view_dispose (GObject *object)
 
   while (priv->services) {
     SwService *service = priv->services->data;
+
+    g_signal_handlers_disconnect_by_func (service, service_updated, object);
     g_object_unref (service);
     priv->services = g_list_delete_link (priv->services, priv->services);
   }
@@ -710,6 +712,7 @@ sw_view_add_service (SwView     *view,
 
   priv->services = g_list_append (priv->services, service);
   /* TODO: use _object etc */
+  /* We disconect this in the dispose */
   g_signal_connect (service, "refreshed", G_CALLBACK (service_updated), view);
 }
 
