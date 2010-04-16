@@ -372,6 +372,15 @@ _item_ready_notify_cb (SwItem     *item,
 }
 
 static void
+_item_ready_weak_notify_cb (gpointer  data,
+                            GObject  *dead_object)
+{
+    g_signal_handlers_disconnect_by_func (data,
+                                          _item_ready_notify_cb,
+                                          dead_object);
+}
+
+static void
 setup_ready_handler (gpointer object, gpointer user_data)
 {
   SwItem *item = SW_ITEM (object);
@@ -387,6 +396,9 @@ setup_ready_handler (gpointer object, gpointer user_data)
                     "notify::ready",
                     (GCallback)_item_ready_notify_cb,
                     view);
+  g_object_weak_ref ((GObject *)view,
+                     _item_ready_weak_notify_cb,
+                     item);
 }
 
 static void
