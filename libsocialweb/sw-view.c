@@ -356,6 +356,10 @@ sw_view_queue_recalculate (SwView *view)
 }
 
 static void
+_item_ready_weak_notify_cb (gpointer  data,
+                            GObject  *dead_object);
+
+static void
 _item_ready_notify_cb (SwItem     *item,
                        GParamSpec *pspec,
                        SwView     *view)
@@ -368,6 +372,9 @@ _item_ready_notify_cb (SwItem     *item,
     g_signal_handlers_disconnect_by_func (item,
                                           _item_ready_notify_cb,
                                           view);
+    g_object_weak_unref ((GObject *)view,
+                         _item_ready_weak_notify_cb,
+                         item);
   }
 }
 
@@ -375,9 +382,9 @@ static void
 _item_ready_weak_notify_cb (gpointer  data,
                             GObject  *dead_object)
 {
-    g_signal_handlers_disconnect_by_func (data,
-                                          _item_ready_notify_cb,
-                                          dead_object);
+  g_signal_handlers_disconnect_by_func (data,
+                                        _item_ready_notify_cb,
+                                        dead_object);
 }
 
 static void
