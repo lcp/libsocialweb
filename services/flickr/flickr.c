@@ -246,6 +246,9 @@ got_tokens_cb (RestProxy *proxy,
   } else {
     sw_service_emit_refreshed ((SwService *)flickr, NULL);
   }
+
+  /* Drop reference we took for callback */
+  g_object_unref (flickr);
 }
 
 static void
@@ -262,9 +265,9 @@ refresh (SwService *service)
     return;
   }
 
-  sw_keyfob_flickr ((FlickrProxy*)flickr->priv->proxy, got_tokens_cb, service);
-  /* TODO: BUG: this is a async operation and before it invokes the callback the
-     service object might have died. */
+  sw_keyfob_flickr ((FlickrProxy*)flickr->priv->proxy, 
+                    got_tokens_cb,
+                    g_object_ref (service)); /* ref gets dropped in cb */
 }
 
 static void
