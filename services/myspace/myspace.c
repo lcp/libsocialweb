@@ -379,6 +379,7 @@ get_dynamic_caps (SwService *service)
   static const char * caps[] = {
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
+    IS_CONFIGURED,
     NULL
   };
   static const char * no_caps[] = { NULL };
