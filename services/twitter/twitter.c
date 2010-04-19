@@ -357,7 +357,7 @@ tweets_cb (RestProxyCall *call,
   sw_service_emit_refreshed ((SwService *)service, set);
 
   /* TODO cleanup */
-
+  sw_set_unref (set);
   rest_xml_node_unref (root);
 }
 
