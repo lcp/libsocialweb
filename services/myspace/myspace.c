@@ -61,6 +61,11 @@ struct _SwServiceMySpacePrivate {
   char *display_name;
   char *profile_url;
   char *image_url;
+    enum {
+    OWN,
+    FRIENDS,
+    BOTH
+  } type;
 };
 
 RestXmlNode *
@@ -126,26 +131,15 @@ get_utc_date (const char *s)
 }
 
 static void
-got_status_cb (RestProxyCall *call,
-               const GError  *error,
-               GObject       *weak_object,
-               gpointer       userdata)
+_populate_set_from_node (SwService   *service,
+                         SwSet       *set,
+                         RestXmlNode *root)
 {
-  SwService *service = SW_SERVICE (weak_object);
   SwServiceMySpacePrivate *priv = SW_SERVICE_MYSPACE (service)->priv;
-  RestXmlNode *root, *node;
-  SwSet *set;
+  RestXmlNode *node;
 
-  if (error) {
-    g_message ("Error: %s", error->message);
-    return;
-  }
-
-  root = node_from_call (call);
   if (!root)
     return;
-
-  set = sw_item_set_new ();
 
   /*
    * The result of /status is a <user> node, whereas /friends/status is
@@ -213,7 +207,29 @@ got_status_cb (RestProxyCall *call,
 
     node = node->next;
   }
+}
 
+static void
+_get_user_status_updates (SwServiceMySpace *service,
+                          SwSet            *set);
+
+static void
+_got_user_status_cb (RestProxyCall *call,
+                     const GError  *error,
+                     GObject       *weak_object,
+                     gpointer       userdata)
+{
+  SwService *service = SW_SERVICE (weak_object);
+  RestXmlNode *root;
+  SwSet *set = (SwSet *)userdata;
+
+  if (error) {
+    g_message ("Error: %s", error->message);
+    return;
+  }
+
+  root = node_from_call (call);
+  _populate_set_from_node (service, set, root);
   rest_xml_node_unref (root);
 
   if (!sw_set_is_empty (set))
@@ -223,33 +239,102 @@ got_status_cb (RestProxyCall *call,
 }
 
 static void
-get_status_updates (SwServiceMySpace *service)
+_got_friends_status_cb (RestProxyCall *call,
+                        const GError  *error,
+                        GObject       *weak_object,
+                        gpointer       userdata)
+{
+  SwService *service = SW_SERVICE (weak_object);
+  SwServiceMySpace *myspace = (SwServiceMySpace *)service;
+  SwServiceMySpacePrivate *priv = myspace->priv;
+  RestXmlNode *root;
+  SwSet *set = (SwSet *)userdata;
+
+  if (error) {
+    g_message ("Error: %s", error->message);
+    return;
+  }
+
+  root = node_from_call (call);
+  _populate_set_from_node (service, set, root);
+  rest_xml_node_unref (root);
+
+  if (priv->type == BOTH)
+  {
+    _get_user_status_updates (myspace, set);
+    return;
+  }
+
+  if (!sw_set_is_empty (set))
+    sw_service_emit_refreshed (service, set);
+
+  sw_set_unref (set);
+}
+
+static void
+_get_user_status_updates (SwServiceMySpace *service,
+                          SwSet            *set)
 {
   SwServiceMySpacePrivate *priv = service->priv;
-  char *function;
   RestProxyCall *call;
-  GHashTable *params = NULL;
-
-  g_assert (priv->user_id);
+  char *function;
 
   call = rest_proxy_new_call (priv->proxy);
 
+  function = g_strdup_printf ("v1/users/%s/status", priv->user_id);
+  rest_proxy_call_set_function (call, function);
+  g_free (function);
+
+  rest_proxy_call_async (call, _got_user_status_cb, (GObject*)service, set, NULL);
+}
+
+static void
+_get_friends_status_update (SwServiceMySpace *service,
+                            SwSet            *set)
+{
+  SwServiceMySpacePrivate *priv = service->priv;
+  RestProxyCall *call;
+  char *function;
+
+  call = rest_proxy_new_call (priv->proxy);
+
+  function = g_strdup_printf ("v1/users/%s/friends/status", priv->user_id);
+  rest_proxy_call_set_function (call, function);
+  g_free (function);
+
+  rest_proxy_call_async (call, _got_friends_status_cb, (GObject*)service, set, NULL);
+}
+
+static void
+get_status_updates (SwServiceMySpace *service)
+{
+  SwServiceMySpacePrivate *priv = service->priv;
+  GHashTable *params = NULL;
+  SwSet *set;
+
+  g_assert (priv->user_id);
+
   g_object_get (service, "params", &params, NULL);
 
-  if (params && g_hash_table_lookup (params, "own")) {
-    function = g_strdup_printf ("v1/users/%s/status", priv->user_id);
-    rest_proxy_call_set_function (call, function);
-    g_free (function);
+  set = sw_item_set_new ();
+
+  if (sw_service_get_param ((SwService *)service, "own")) {
+    priv->type = OWN;
+  } else if (sw_service_get_param ((SwService *)service, "friends")){
+    priv->type = FRIENDS;
   } else {
-    function = g_strdup_printf ("v1/users/%s/friends/status", priv->user_id);
-    rest_proxy_call_set_function (call, function);
-    g_free (function);
+    priv->type = BOTH;
+  }
+
+  if (priv->type == OWN) {
+    _get_user_status_updates (service, set);
+  } else {
+    /* For BOTH this triggers into user */
+    _get_friends_status_update (service, set);
   }
 
   if (params)
     g_hash_table_unref (params);
-
-  rest_proxy_call_async (call, got_status_cb, (GObject*)service, NULL, NULL);
 }
 
 /*
@@ -488,9 +573,9 @@ sw_service_myspace_init (SwServiceMySpace *self)
 /* Initable interface */
 
 static gboolean
-sw_service_myspace_initable (GInitable    *initable,
-                                 GCancellable *cancellable,
-                                 GError      **error)
+sw_service_myspace_initable (GInitable     *initable,
+                             GCancellable  *cancellable,
+                             GError       **error)
 {
   SwServiceMySpace *myspace = SW_SERVICE_MYSPACE (initable);
   SwServiceMySpacePrivate *priv = myspace->priv;
