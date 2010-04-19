@@ -183,7 +183,7 @@ sw_service_emit_refreshed (SwService *service,
 {
   g_return_if_fail (SW_IS_SERVICE (service));
 
-  g_signal_emit (service, signals[SIGNAL_REFRESHED], 0, set ? sw_set_ref (set) : NULL);
+  g_signal_emit (service, signals[SIGNAL_REFRESHED], 0, set);
 }
 
 void

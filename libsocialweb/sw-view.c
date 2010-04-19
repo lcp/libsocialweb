@@ -409,9 +409,9 @@ setup_ready_handler (gpointer object, gpointer user_data)
 }
 
 static void
-service_updated (SwService *service,
-                 SwSet     *set,
-                 gpointer   user_data)
+service_refreshed_cb (SwService *service,
+                      SwSet     *set,
+                      gpointer   user_data)
 {
   SwView *view = SW_VIEW (user_data);
   SwViewPrivate *priv = view->priv;
@@ -427,7 +427,6 @@ service_updated (SwService *service,
   if (set) {
     sw_set_add_from (priv->all_items, set);
     sw_set_foreach (set, setup_ready_handler, view);
-    sw_set_unref (set);
   }
 
   sw_view_recalculate (view);
@@ -461,7 +460,9 @@ load_cache (SwView *view)
 
   for (l = priv->services; l; l = l->next) {
     SwService *service = l->data;
-    service_updated (service, sw_cache_load (service), view);
+    SwSet *set = sw_cache_load (service);
+    service_refreshed_cb (service, set, view);
+    sw_set_unref (set);
   }
 }
 
@@ -644,7 +645,7 @@ sw_view_dispose (GObject *object)
   while (priv->services) {
     SwService *service = priv->services->data;
 
-    g_signal_handlers_disconnect_by_func (service, service_updated, object);
+    g_signal_handlers_disconnect_by_func (service, service_refreshed_cb, object);
     g_object_unref (service);
     priv->services = g_list_delete_link (priv->services, priv->services);
   }
@@ -732,7 +733,10 @@ sw_view_add_service (SwView     *view,
   priv->services = g_list_append (priv->services, service);
   /* TODO: use _object etc */
   /* We disconect this in the dispose */
-  g_signal_connect (service, "refreshed", G_CALLBACK (service_updated), view);
+  g_signal_connect (service,
+                    "refreshed",
+                    G_CALLBACK (service_refreshed_cb),
+                    view);
 }
 
 
