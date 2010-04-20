@@ -383,6 +383,9 @@ get_status_updates (SwServiceTwitter *twitter)
     break;
   }
 
+  rest_proxy_call_add_params (call,
+                              "count", "50",
+                              NULL);
   rest_proxy_call_async (call, tweets_cb, (GObject*)twitter, NULL, NULL);
 }
 
