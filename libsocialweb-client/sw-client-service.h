@@ -114,6 +114,8 @@ const char *sw_client_service_get_name (SwClientService *service);
 
 const char *sw_client_service_get_display_name (SwClientService *service);
 
+gboolean sw_client_service_has_cap (const char **caps, const char *cap);
+
 G_END_DECLS
 
 #endif /* _SW_CLIENT_SERVICE */
