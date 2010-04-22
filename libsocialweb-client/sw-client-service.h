@@ -48,7 +48,7 @@ typedef struct {
 
 typedef struct {
   GObjectClass parent_class;
-  void (*capabilities_changed) (SwClientService *service, guint32 caps);
+  void (*capabilities_changed) (SwClientService *service, const char **caps);
   void (*user_changed) (SwClientService *service);
   void (*avatar_retrieved) (SwClientService *service, gchar *path);
   void (*status_updated) (SwClientService *service, gboolean success);
