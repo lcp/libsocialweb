@@ -68,6 +68,11 @@ struct _SwServiceTwitterPrivate {
     FRIENDS,
     BOTH
   } type;
+  enum {
+    OFFLINE,
+    CREDS_INVALID,
+    CREDS_VALID
+  } credentials;
   gboolean running;
   RestProxy *proxy;
   char *user_id;
@@ -393,6 +398,7 @@ static const char **
 get_static_caps (SwService *service)
 {
   static const char * caps[] = {
+    CAN_VERIFY_CREDENTIALS,
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
     CAN_GEOTAG,
@@ -406,33 +412,47 @@ static const char **
 get_dynamic_caps (SwService *service)
 {
   SwServiceTwitterPrivate *priv = GET_PRIVATE (service);
-  static const char *full_caps[] = {
-    CAN_UPDATE_STATUS,
-    CAN_REQUEST_AVATAR,
-    IS_CONFIGURED,
-    NULL
-  };
+  static const char *no_caps[] = { NULL };
   static const char *configured_caps[] = {
     IS_CONFIGURED,
     NULL
   };
-  static const char *no_caps[] = { NULL };
-  static const char *full_caps_with_geotag[] = {
+  static const char *invalid_caps[] = {
+    IS_CONFIGURED,
+    CREDENTIALS_INVALID,
+    NULL
+  };
+  static const char *full_caps[] = {
+    IS_CONFIGURED,
+    CREDENTIALS_VALID,
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
+    NULL
+  };
+  static const char *full_caps_with_geotag[] = {
     IS_CONFIGURED,
+    CREDENTIALS_VALID,
+    CAN_UPDATE_STATUS,
+    CAN_REQUEST_AVATAR,
     CAN_GEOTAG,
     NULL
   };
 
-  if (priv->user_id && priv->geotag_enabled)
-    return full_caps_with_geotag;
-  else if (priv->user_id)
-    return full_caps;
-  else if (priv->username && priv->password)
-    return configured_caps;
-  else
-    return no_caps;
+  switch (priv->credentials) {
+  case CREDS_VALID:
+    return priv->geotag_enabled ? full_caps_with_geotag : full_caps;
+  case CREDS_INVALID:
+    return invalid_caps;
+  case OFFLINE:
+    if (priv->username && priv->password)
+      return configured_caps;
+    else
+      return no_caps;
+  }
+
+  /* Just in case we fell through that switch */
+  g_warning ("Unhandled credential state %d", priv->credentials);
+  return no_caps;
 }
 
 static void
@@ -520,6 +540,7 @@ verify_cb (RestProxyCall *call,
   if (!node)
     return;
 
+  priv->credentials = CREDS_VALID;
   priv->user_id = g_strdup (rest_xml_node_find (node, "id")->content);
   priv->image_url = g_strdup (rest_xml_node_find (node, "profile_image_url")->content);
   priv->geotag_enabled = g_str_equal (rest_xml_node_find (node, "geo_enabled")->content,
@@ -536,16 +557,6 @@ verify_cb (RestProxyCall *call,
 }
 
 static void
-sw_service_twitter_verify_credentials (SwServiceTwitter *twitter)
-{
-  RestProxyCall *call;
-
-  call = rest_proxy_new_call (twitter->priv->proxy);
-  rest_proxy_call_set_function (call, "1/account/verify_credentials.xml");
-  rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
-}
-
-static void
 access_token_cb (RestProxyCall *call,
                  const GError  *error,
                  GObject       *weak_object,
@@ -557,6 +568,10 @@ access_token_cb (RestProxyCall *call,
   if (error) {
     sanity_check_date (call);
     g_message ("Error: %s", error->message);
+
+    twitter->priv->credentials = CREDS_INVALID;
+    sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
+
     return;
   }
 
@@ -572,7 +587,9 @@ access_token_cb (RestProxyCall *call,
    *
    * http://apiwiki.twitter.com/Twitter-REST-API-Method:-account verify_credentials
    */
-  sw_service_twitter_verify_credentials (twitter);
+  call = rest_proxy_new_call (twitter->priv->proxy);
+  rest_proxy_call_set_function (call, "1/account/verify_credentials.xml");
+  rest_proxy_call_async (call, verify_cb, (GObject*)twitter, NULL, NULL);
 }
 
 static void
@@ -607,7 +624,10 @@ online_notify (gboolean online, gpointer user_data)
                                   "x_auth_password", priv->password,
                                   NULL);
       rest_proxy_call_async (call, access_token_cb, (GObject*)twitter, NULL, NULL);
+      /* Set offline for now and wait for access_token_cb to return */
+      priv->credentials = OFFLINE;
     } else {
+      priv->credentials = OFFLINE;
       sw_service_emit_refreshed ((SwService *)twitter, NULL);
     }
   } else {
@@ -616,7 +636,9 @@ online_notify (gboolean online, gpointer user_data)
       priv->proxy = NULL;
     }
     g_free (priv->user_id);
+
     priv->user_id = NULL;
+    priv->credentials = OFFLINE;
 
     sw_service_emit_capabilities_changed ((SwService *)twitter,
                                           get_dynamic_caps ((SwService *)twitter));
@@ -745,6 +767,8 @@ sw_service_twitter_initable (GInitable    *initable,
   } else {
     priv->type = BOTH;
   }
+
+  priv->credentials = OFFLINE;
 
   priv->twitpic_re = g_regex_new ("http://twitpic.com/([A-Za-z0-9]+)", 0, 0, NULL);
   g_assert (priv->twitpic_re);
