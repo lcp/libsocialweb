@@ -364,6 +364,7 @@ static const char **
 get_static_caps (SwService *service)
 {
   static const char * caps[] = {
+    CAN_VERIFY_CREDENTIALS,
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
     NULL
@@ -377,9 +378,10 @@ get_dynamic_caps (SwService *service)
 {
   SwServiceMySpace *myspace = SW_SERVICE_MYSPACE (service);
   static const char * caps[] = {
+    IS_CONFIGURED,
+    CREDENTIALS_VALID,
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
-    IS_CONFIGURED,
     NULL
   };
   static const char * no_caps[] = { NULL };
