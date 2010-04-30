@@ -1,9 +1,9 @@
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-03-10 10:36+0000\n"
+"POT-Creation-Date: 2010-04-28 09:43+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Tomás Galicia <tomas.galicia@intel.com>\n"
 "Language-Team: \n"
@@ -13,41 +13,13 @@ msgstr ""
 "X-Poedit-Language: Portuguese\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ../services/lastfm/lastfm.keys.in.h:1
-msgid "Last.fm"
-msgstr "Last.fm"
-
-#: ../services/lastfm/lastfm.keys.in.h:2
-msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm é um serviço de música que aprende o que você curte. Cada trilha que você tocar vai guardar no seu perfil Last.fm algo sobre o que você curte. Ele pode te conectar com  gente que gosta do que você gosta - e recomenda canções de suas coleções e dos outros também."
-
-#: ../services/twitter/twitter.keys.in.h:1
-msgid "Twitter"
-msgstr "Twitter"
-
-#: ../services/twitter/twitter.keys.in.h:2
-msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter é um serviço para amigos, familia, e colegas para se comunicar e manter-se conectado através da troca de rápidas e frequentes respostas a uma pergunta básica: O que você está fazendo?"
-
-#: ../services/flickr/flickr.keys.in.h:1
-msgid "Flickr"
-msgstr "Flickr"
-
-#: ../services/flickr/flickr.keys.in.h:2
-msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr "Flickr - é com certeza o melhor aplicativo de gerenciamento e compartilhamento de fotos online do mundo."
-
-#: ../services/myspace/myspace.keys.in.h:1
-msgid "MySpace"
-msgstr "MySpace"
-
-#: ../services/myspace/myspace.keys.in.h:2
-msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace é um portal social para conexão de pessoas, conteúdo e cultura de todo o mundo. Crie um perfil, compartilhe fotos, vídeos profissionais e virais, blog, mensagens instantâneos a amigos, e ouça músicas da maior comunidade de música do mundo."
-
 #: ../services/digg/digg.keys.in.h:1
 msgid "Digg"
 msgstr "Digg"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - para compartilhar notícias, vídeos e imagens"
 
 #. Translators "[track title] by [artist]"
 #: ../services/lastfm/lastfm.c:149
@@ -55,10 +27,64 @@ msgstr "Digg"
 msgid "%s by %s"
 msgstr "%s por %s"
 
-#: ../services/digg/digg.keys.in.h:2
-msgid "Digg - to share news, video and images"
-msgstr "Digg - para compartilhar notícias, vídeos e imagens"
-
 #: ../services/lastfm/lastfm.c:153
 msgid "Unknown"
 msgstr "Desconhecido"
+
+#: ../services/lastfm/lastfm.keys.in.h:1
+msgid "Last.fm"
+msgstr "Last.fm"
+
+#: ../services/lastfm/lastfm.keys.in.h:2
+msgid ""
+"Last.fm is a music service that learns what you love. Every track you play "
+"will tell your Last.fm profile something about what you like. It can connect "
+"you to other people who like what you like - and recommend songs from their "
+"music collections and yours too."
+msgstr ""
+"Last.fm é um serviço de música que aprende o que você curte. Cada trilha que "
+"você tocar vai guardar no seu perfil Last.fm algo sobre o que você curte. "
+"Ele pode te conectar com  gente que gosta do que você gosta - e recomenda "
+"canções de suas coleções e dos outros também."
+
+#: ../services/twitter/twitter.keys.in.h:1
+msgid "Twitter"
+msgstr "Twitter"
+
+#: ../services/twitter/twitter.keys.in.h:2
+msgid ""
+"Twitter is a service for friends, family, and co–workers to communicate and "
+"stay connected through the exchange of quick, frequent answers to one simple "
+"question: What are you doing?"
+msgstr ""
+"Twitter é um serviço para amigos, familia, e colegas para se comunicar e "
+"manter-se conectado através da troca de rápidas e frequentes respostas a uma "
+"pergunta básica: O que você está fazendo?"
+
+#: ../services/flickr/flickr.keys.in.h:1
+msgid "Flickr"
+msgstr "Flickr"
+
+#: ../services/flickr/flickr.keys.in.h:2
+msgid ""
+"Flickr - almost certainly the best online photo management and sharing "
+"application in the world."
+msgstr ""
+"Flickr - é com certeza o melhor aplicativo de gerenciamento e "
+"compartilhamento de fotos online do mundo."
+
+#: ../services/myspace/myspace.keys.in.h:1
+msgid "MySpace"
+msgstr "MySpace"
+
+#: ../services/myspace/myspace.keys.in.h:2
+msgid ""
+"MySpace is a leading social portal for connecting people, content, and "
+"culture from around the world. Create a profile, share photos, professional "
+"and viral videos, blog, instant message your friends, and listen to music on "
+"the world’s largest music community."
+msgstr ""
+"MySpace é um portal social para conexão de pessoas, conteúdo e cultura de "
+"todo o mundo. Crie um perfil, compartilhe fotos, vídeos profissionais e "
+"virais, blog, mensagens instantâneos a amigos, e ouça músicas da maior "
+"comunidade de música do mundo."
