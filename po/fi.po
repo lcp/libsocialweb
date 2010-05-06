@@ -1,17 +1,35 @@
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-03-10 10:36+0000\n"
+"POT-Creation-Date: 2010-05-05 09:47+0000\n"
 "PO-Revision-Date: \n"
-"Last-Translator: Paula <pkwanzek@hotmail.com>\n"
+"Last-Translator: Anna Bergman <anna.b.bergman@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: Finnish\n"
 "X-Poedit-SourceCharset: utf-8\n"
+
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "Digg"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - jaa uutisia, videoita ja kuvia"
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm.c:149
+#, c-format
+msgid "%s by %s"
+msgstr "%s kertaa %s"
+
+#: ../services/lastfm/lastfm.c:153
+msgid "Unknown"
+msgstr "Tuntematon"
 
 #: ../services/lastfm/lastfm.keys.in.h:1
 msgid "Last.fm"
@@ -29,7 +47,7 @@ msgstr "Twitter"
 # FIN QA: Translated the English.
 #: ../services/twitter/twitter.keys.in.h:2
 msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter palvelun avulla voi ystävät, perheet ja tyokaverit voivat keskustella ja pitää yhteyttä vastaamaalla lyhyesti ja usein kysymykseen: Mitä teet nyt?"
+msgstr "Twitter palvelun avulla ystävät, perheet ja työkaverit voivat keskustella ja pitää yhteyttä vastaamaalla lyhyesti ja usein kysymykseen: Mitä teet nyt?"
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
@@ -50,20 +68,3 @@ msgstr "MySpace"
 msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
 msgstr "MySpace on online-yhteisö, jossa voit tavata ystäviesi ystäviä. Luo yksityinen MySpace-yhteisö ja jaa valokuvia, päiväkirjoja sekä kiinnostuksenkohteita yhteisten ystävien kasvavassa verkostossa. Tarkista, kuka tuntee kenet tai millaisia yhteyksiä sinulla on."
 
-#: ../services/digg/digg.keys.in.h:1
-msgid "Digg"
-msgstr "Digg"
-
-#. Translators "[track title] by [artist]"
-#: ../services/lastfm/lastfm.c:149
-#, c-format
-msgid "%s by %s"
-msgstr "%s kertaa %s"
-
-#: ../services/digg/digg.keys.in.h:2
-msgid "Digg - to share news, video and images"
-msgstr "Digg - jaa uutisia, videoita ja kuvia"
-
-#: ../services/lastfm/lastfm.c:153
-msgid "Unknown"
-msgstr "Tuntematon"
