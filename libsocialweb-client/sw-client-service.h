@@ -89,6 +89,9 @@ typedef void
                                         gpointer         userdata);
 
 void
+sw_client_service_credentials_updated (SwClientService *service);
+
+void
 sw_client_service_update_status (SwClientService                     *service,
                                  SwClientServiceUpdateStatusCallback  cb,
                                  const gchar                         *status_msg,
