@@ -46,6 +46,8 @@ struct _SwServiceFlickrPrivate {
   gboolean refreshing;
 };
 
+static GList *service_list = NULL;
+
 static gboolean
 check_attrs (RestXmlNode *node, ...)
 {
@@ -271,6 +273,22 @@ refresh (SwService *service)
 }
 
 static void
+credentials_updated (SwService *service)
+{
+  SwService *service_instance;
+  GList* node;
+
+  for (node = service_list; node; node = g_list_next (node)){
+    service_instance = SW_SERVICE (node->data);
+
+    sw_service_emit_user_changed (service_instance);
+
+    /* TODO: This works because we re-auth on every refresh, which is bad */
+    refresh (service_instance);
+  }
+}
+
+static void
 start (SwService *service)
 {
   SwServiceFlickr *flickr = (SwServiceFlickr*)service;
@@ -288,6 +306,8 @@ static void
 sw_service_flickr_dispose (GObject *object)
 {
   SwServiceFlickrPrivate *priv = SW_SERVICE_FLICKR (object)->priv;
+
+  service_list = g_list_remove (service_list, object);
 
   if (priv->proxy) {
     g_object_unref (priv->proxy);
@@ -348,10 +368,12 @@ sw_service_flickr_class_init (SwServiceFlickrClass *klass)
   service_class->get_name = sw_service_flickr_get_name;
   service_class->start = start;
   service_class->refresh = refresh;
+  service_class->credentials_updated = credentials_updated;
 }
 
 static void
 sw_service_flickr_init (SwServiceFlickr *self)
 {
   self->priv = GET_PRIVATE (self);
+  service_list = g_list_prepend (service_list, self);
 }
