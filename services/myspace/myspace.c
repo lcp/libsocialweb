@@ -68,6 +68,8 @@ struct _SwServiceMySpacePrivate {
   } type;
 };
 
+static GList *service_list = NULL;
+
 RestXmlNode *
 node_from_call (RestProxyCall *call)
 {
@@ -519,6 +521,29 @@ online_notify (gboolean online, gpointer user_data)
 
     g_free (priv->user_id);
     priv->user_id = NULL;
+
+    g_free (priv->image_url);
+    priv->image_url = NULL;
+  }
+}
+
+static
+void credentials_updated (SwService *service)
+{
+  SwService *service_instance;
+  GList* node;
+
+  SW_DEBUG (MYSPACE, "Credentials updated");
+  /* If we're online, force a reconnect to fetch new credentials */
+  if (sw_is_online ()) {
+    for (node = service_list; node; node = g_list_next(node)){
+      service_instance = SW_SERVICE (node->data);
+
+      online_notify (FALSE, service_instance);
+      online_notify (TRUE, service_instance);
+
+      sw_service_emit_user_changed (service_instance);
+    }
   }
 }
 
@@ -526,6 +551,8 @@ static void
 sw_service_myspace_dispose (GObject *object)
 {
   SwServiceMySpacePrivate *priv = SW_SERVICE_MYSPACE (object)->priv;
+
+  service_list = g_list_remove (service_list, object);
 
   sw_online_remove_notify (online_notify, object);
 
@@ -564,6 +591,7 @@ sw_service_myspace_class_init (SwServiceMySpaceClass *klass)
   service_class->start = start;
   service_class->refresh = refresh;
   service_class->request_avatar = request_avatar;
+  service_class->credentials_updated = credentials_updated;
 }
 
 static void
@@ -571,6 +599,8 @@ sw_service_myspace_init (SwServiceMySpace *self)
 {
   self->priv = GET_PRIVATE (self);
   self->priv->inited = FALSE;
+
+  service_list = g_list_prepend (service_list, self);
 }
 
 /* Initable interface */
