@@ -492,6 +492,22 @@ sw_client_service_request_avatar (SwClientService *service)
                                                         NULL);
 }
 
+static void
+_credentials_updated_cb (DBusGProxy *proxy, GError *error, gpointer userdata)
+{
+  /* TODO: print the error to the console? */
+}
+
+void
+sw_client_service_credentials_updated (SwClientService *service)
+{
+  SwClientServicePrivate *priv = GET_PRIVATE (service);
+
+  org_moblin_libsocialweb_Service_credentials_updated_async (priv->proxies[SERVICE_IFACE],
+                                                             _credentials_updated_cb,
+                                                             NULL);
+}
+
 const char *
 sw_client_service_get_name (SwClientService *service)
 {
