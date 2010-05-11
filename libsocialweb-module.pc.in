@@ -2,6 +2,7 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@/libsocialweb
+servicesdir=@servicesdir@
 
 Name: libsocialweb-module
 Description: Server side library for libsocialweb
