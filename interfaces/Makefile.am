@@ -29,6 +29,12 @@ libsocialweb_ginterfaces_la_SOURCES = $(GINTERFACE_SOURCES) $(MARSHALS_SOURCES)
 libsocialweb_ginterfaces_la_LIBADD = $(DBUS_GLIB_LIBS)
 libsocialweb_ginterfaces_la_CFLAGS = $(DBUS_GLIB_CFLAGS)
 
+libsocialweb_ginterfaces_ladir = $(pkgincludedir)/interfaces
+libsocialweb_ginterfaces_la_HEADERS = \
+	sw-query-ginterface.h \
+	sw-status-update-ginterface.h \
+	sw-avatar-ginterface.h
+
 %-bindings.h: %.xml
 	$(QUIET_GEN)dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
 

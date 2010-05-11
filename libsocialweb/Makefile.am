@@ -29,8 +29,12 @@ libsocialweb_la_SOURCES = sw-types.h \
 		       client-monitor.c client-monitor.h
 
 libsocialweb_la_HEADERS = \
+	sw-core.h \
 	sw-types.h \
 	sw-service.h \
+	sw-online.h \
+	sw-item-view.h \
+	sw-debug.h \
 	sw-web.h \
 	sw-set.h \
 	sw-item.h \
