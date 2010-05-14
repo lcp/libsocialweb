@@ -10,7 +10,8 @@ libsocialweb_keyfob_la_LIBADD = $(DBUS_GLIB_LIBS) $(KEYRING_LIBS) $(REST_LIBS)
 libsocialweb_keyfob_la_SOURCES = \
 	sw-keyfob.h \
 	sw-keyfob-flickr.c \
-	sw-keyfob-oauth.c
+	sw-keyfob-oauth.c \
+	sw-keyfob-oauth2.c
 
 libsocialweb_keyfob_la_HEADERS = \
 	sw-keyfob.h
