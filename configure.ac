@@ -112,7 +112,7 @@ SOCIALWEB_ENABLE_SERVICE(Twitter, twitter, TWITTER)
 servicesdir='${libdir}'/libsocialweb/services
 AC_SUBST(servicesdir)
 
-servicesdatadir='${pkgdatadir}'/services
+servicesdatadir='${datadir}'/libsocialweb/services
 AC_SUBST(servicesdatadir)
 
 SHAVE_INIT([build-aux],[enable])
