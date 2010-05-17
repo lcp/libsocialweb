@@ -140,5 +140,6 @@ AC_OUTPUT([
         po/Makefile.in
         libsocialweb-client.pc
         libsocialweb-module.pc
+        libsocialweb-keyfob.pc
         libsocialweb-keystore.pc
 ])

@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = interfaces libsocialweb libsocialweb-keyfob libsocialweb-keystore libsocialweb-client src services examples tests tools po
 
-pkgconfig_DATA = libsocialweb-client.pc libsocialweb-module.pc libsocialweb-keystore.pc
+pkgconfig_DATA = libsocialweb-client.pc libsocialweb-module.pc libsocialweb-keyfob.pc libsocialweb-keystore.pc
 pkgconfigdir   = $(libdir)/pkgconfig
 
 DISTCHECK_CONFIGURE_FLAGS = \
