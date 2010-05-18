@@ -39,6 +39,9 @@ struct _SwItemViewPrivate {
   gchar *object_path;
   SwSet *current_items_set;
   SwSet *pending_items_set;
+
+  /* timeout used for coalescing multiple delayed ready additions */
+  guint pending_timeout_id;
 };
 
 enum
@@ -119,6 +122,12 @@ sw_item_view_dispose (GObject *object)
   {
     sw_set_unref (priv->pending_items_set);
     priv->pending_items_set = NULL;
+  }
+
+  if (priv->pending_timeout_id)
+  {
+    g_source_remove (priv->pending_timeout_id);
+    priv->pending_timeout_id = 0;
   }
 
   G_OBJECT_CLASS (sw_item_view_parent_class)->dispose (object);
@@ -268,6 +277,38 @@ sw_item_view_iface_init (gpointer g_iface,
   sw_item_view_iface_implement_close (klass, sw_item_view_close);
 }
 
+static gboolean
+_handle_ready_pending_cb (gpointer data)
+{
+  SwItemView *item_view = SW_ITEM_VIEW (data);
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+  GList *items_to_send = NULL;
+  GList *pending_items, *l;
+
+  SW_DEBUG (VIEWS, "Delayed ready timeout fired");
+
+  pending_items = sw_set_as_list (priv->pending_items_set);
+
+  for (l = pending_items; l; l = l->next)
+  {
+    SwItem *item = SW_ITEM (l->data);
+
+    if (sw_item_get_ready (item))
+    {
+      items_to_send = g_list_prepend (items_to_send, item);
+      sw_set_remove (priv->pending_items_set, (GObject *)item);
+    }
+  }
+
+  sw_item_view_add_items (item_view, items_to_send);
+
+  g_list_free (pending_items);
+
+  priv->pending_timeout_id = 0;
+
+  return FALSE;
+}
+
 static void
 _item_ready_weak_notify_cb (gpointer  data,
                             GObject  *dead_object);
@@ -279,7 +320,6 @@ _item_ready_notify_cb (SwItem     *item,
 {
   SwItemViewPrivate *priv = GET_PRIVATE (item_view);
 
-  /* TODO: Use a timeout to rate limit this */
   if (sw_item_get_ready (item)) {
     SW_DEBUG (VIEWS, "Item became ready: %s.",
               sw_item_get (item, "id"));
@@ -289,8 +329,16 @@ _item_ready_notify_cb (SwItem     *item,
     g_object_weak_unref ((GObject *)item_view,
                          _item_ready_weak_notify_cb,
                          item);
-    sw_item_view_add_item (item_view, item);
-    sw_set_remove (priv->pending_items_set, (GObject *)item);
+
+    if (!priv->pending_timeout_id)
+    {
+      SW_DEBUG (VIEWS, "Setting up timeout");
+      priv->pending_timeout_id = g_timeout_add_seconds (1,
+                                                        _handle_ready_pending_cb,
+                                                        item_view);
+    } else {
+      SW_DEBUG (VIEWS, "Timeout already set up.");
+    }
   }
 }
 
