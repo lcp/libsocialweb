@@ -290,6 +290,7 @@ _handle_ready_pending_cb (gpointer data)
 
   SW_DEBUG (VIEWS, "Delayed ready timeout fired");
 
+  /* FIXME: Reword this to avoid unnecessary list creation ? */
   pending_items = sw_set_as_list (priv->pending_items_set);
 
   for (l = pending_items; l; l = l->next)
@@ -523,6 +524,7 @@ sw_item_view_update_items (SwItemView *item_view,
  * bus.
  *
  * This is used in the implementation of sw_item_view_remove_from_set()
+ *
  */
 static void
 sw_item_view_remove_items (SwItemView *item_view,
@@ -591,6 +593,7 @@ sw_item_view_get_service (SwItemView *item_view)
   return priv->service;
 }
 
+/* TODO: Export this function ? */
 /**
  * sw_item_view_add_from_set
  * @item_view: A #SwItemView
@@ -614,6 +617,7 @@ sw_item_view_add_from_set (SwItemView *item_view,
   g_list_free (items);
 }
 
+/* TODO: Export this function ? */
 /**
  * sw_item_view_remove_from_set
  * @item_view: A #SwItemView
@@ -664,6 +668,7 @@ sw_item_view_set_from_set (SwItemView *item_view,
     removed_items = sw_set_difference (priv->current_items_set, set);
     added_items = sw_set_difference (set, priv->current_items_set);
 
+    /* TODO: Include an mtime to handle changed ? */
     sw_item_view_remove_from_set (item_view, removed_items);
     sw_item_view_add_from_set (item_view, added_items);
 
