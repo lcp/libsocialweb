@@ -51,12 +51,15 @@ enum
   PROP_OBJECT_PATH
 };
 
+#if 0
 static void sw_item_view_add_item (SwItemView *item_view,
                                    SwItem     *item);
 static void sw_item_view_update_item (SwItemView *item_view,
                                       SwItem     *item);
 static void sw_item_view_remove_item (SwItemView *item_view,
                                       SwItem     *item);
+#endif
+
 static void sw_item_view_add_items (SwItemView *item_view,
                                     GList      *items);
 static void sw_item_view_update_items (SwItemView *item_view,
@@ -364,6 +367,8 @@ _setup_ready_handler (SwItem     *item,
                      item);
 }
 
+/* FIXME: Do we need these functions still? */
+#if 0
 /**
  * sw_item_view_add_item
  * @item_view: A #SwItemView
@@ -420,7 +425,7 @@ sw_item_view_remove_item (SwItemView *item_view,
   sw_item_view_remove_items (item_view, tmp_list);
   g_list_free (tmp_list);
 }
-
+#endif
 
 /**
  * sw_item_view_add_items
