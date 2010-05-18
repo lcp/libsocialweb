@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
+#include "sw-debug.h"
 #include "sw-item-view.h"
 #include "sw-item-view-ginterface.h"
 
@@ -38,6 +38,7 @@ struct _SwItemViewPrivate {
   SwService *service;
   gchar *object_path;
   SwSet *current_items_set;
+  SwSet *pending_items_set;
 };
 
 enum
@@ -112,6 +113,12 @@ sw_item_view_dispose (GObject *object)
   {
     sw_set_unref (priv->current_items_set);
     priv->current_items_set = NULL;
+  }
+
+  if (priv->pending_items_set)
+  {
+    sw_set_unref (priv->pending_items_set);
+    priv->pending_items_set = NULL;
   }
 
   G_OBJECT_CLASS (sw_item_view_parent_class)->dispose (object);
@@ -197,7 +204,10 @@ sw_item_view_init (SwItemView *self)
   SwItemViewPrivate *priv = GET_PRIVATE (self);
 
   priv->current_items_set = sw_item_set_new ();
+  priv->pending_items_set = sw_item_set_new ();
 }
+
+/* DBUS interface to class vfunc bindings */
 
 static void
 sw_item_view_start (SwItemViewIface       *iface,
@@ -256,6 +266,54 @@ sw_item_view_iface_init (gpointer g_iface,
   sw_item_view_iface_implement_refresh (klass, sw_item_view_refresh);
   sw_item_view_iface_implement_stop (klass, sw_item_view_stop);
   sw_item_view_iface_implement_close (klass, sw_item_view_close);
+}
+
+static void
+_item_ready_weak_notify_cb (gpointer  data,
+                            GObject  *dead_object);
+
+static void
+_item_ready_notify_cb (SwItem     *item,
+                       GParamSpec *pspec,
+                       SwItemView *item_view)
+{
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  /* TODO: Use a timeout to rate limit this */
+  if (sw_item_get_ready (item)) {
+    SW_DEBUG (VIEWS, "Item became ready: %s.",
+              sw_item_get (item, "id"));
+    g_signal_handlers_disconnect_by_func (item,
+                                          _item_ready_notify_cb,
+                                          item_view);
+    g_object_weak_unref ((GObject *)item_view,
+                         _item_ready_weak_notify_cb,
+                         item);
+    sw_item_view_add_item (item_view, item);
+    sw_set_remove (priv->pending_items_set, (GObject *)item);
+  }
+}
+
+static void
+_item_ready_weak_notify_cb (gpointer  data,
+                            GObject  *dead_object)
+{
+  g_signal_handlers_disconnect_by_func (data,
+                                        _item_ready_notify_cb,
+                                        dead_object);
+}
+
+static void
+_setup_ready_handler (SwItem     *item,
+                      SwItemView *item_view)
+{
+  g_signal_connect (item,
+                    "notify::ready",
+                    (GCallback)_item_ready_notify_cb,
+                    item_view);
+  g_object_weak_ref ((GObject *)item_view,
+                     _item_ready_weak_notify_cb,
+                     item);
 }
 
 /**
@@ -332,6 +390,7 @@ static void
 sw_item_view_add_items (SwItemView *item_view,
                         GList      *items)
 {
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   GValueArray *value_array;
   GPtrArray *ptr_array;
   GList *l;
@@ -340,8 +399,20 @@ sw_item_view_add_items (SwItemView *item_view,
 
   for (l = items; l; l = l->next)
   {
-    value_array = _sw_item_to_value_array (SW_ITEM (l->data));
-    g_ptr_array_add (ptr_array, value_array);
+    SwItem *item = SW_ITEM (l->data);
+
+    if (sw_item_get_ready (item))
+    {
+      SW_DEBUG (VIEWS, "Item ready: %s",
+                sw_item_get (item, "id"));
+      value_array = _sw_item_to_value_array (item);
+      g_ptr_array_add (ptr_array, value_array);
+    } else {
+      SW_DEBUG (VIEWS, "Item not ready, setting up handler: %s",
+                sw_item_get (item, "id"));
+      _setup_ready_handler (item, item_view);
+      sw_set_add (priv->pending_items_set, (GObject *)item);
+    }
   }
 
   sw_item_view_iface_emit_items_added (item_view,
@@ -360,6 +431,7 @@ static void
 sw_item_view_update_items (SwItemView *item_view,
                            GList      *items)
 {
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   GValueArray *value_array;
   GPtrArray *ptr_array;
   GList *l;
@@ -368,8 +440,19 @@ sw_item_view_update_items (SwItemView *item_view,
 
   for (l = items; l; l = l->next)
   {
-    value_array = _sw_item_to_value_array (SW_ITEM (l->data));
-    g_ptr_array_add (ptr_array, value_array);
+    SwItem *item = SW_ITEM (l->data);
+
+    if (sw_item_get_ready (item))
+    {
+      SW_DEBUG (VIEWS, "Item ready: %s",
+                sw_item_get (item, "id"));value_array = _sw_item_to_value_array (item);
+      g_ptr_array_add (ptr_array, value_array);
+    } else {
+      SW_DEBUG (VIEWS, "Item not ready, setting up handler: %s",
+                sw_item_get (item, "id"));
+      _setup_ready_handler (item, item_view);
+      sw_set_add (priv->pending_items_set, (GObject *)item);
+    }
   }
 
   sw_item_view_iface_emit_items_changed (item_view,
