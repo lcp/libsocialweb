@@ -270,16 +270,11 @@ static void
 sw_item_view_add_item (SwItemView *item_view,
                        SwItem     *item)
 {
-  GValueArray *value_array;
-  GPtrArray *ptr_array;
+  GList *tmp_list = NULL;
 
-  ptr_array = g_ptr_array_new ();
-
-  value_array = _sw_item_to_value_array (item);
-  g_ptr_array_add (ptr_array, value_array);
-
-  sw_item_view_iface_emit_items_added (item_view,
-                                       ptr_array);
+  tmp_list = g_list_append (tmp_list, item);
+  sw_item_view_add_items (item_view, tmp_list);
+  g_list_free (tmp_list);
 }
 
 /**
@@ -294,16 +289,11 @@ void
 sw_item_view_update_item (SwItemView *item_view,
                           SwItem     *item)
 {
-  GValueArray *value_array;
-  GPtrArray *ptr_array;
+  GList *tmp_list = NULL;
 
-  ptr_array = g_ptr_array_new ();
-
-  value_array = _sw_item_to_value_array (item);
-  g_ptr_array_add (ptr_array, value_array);
-
-  sw_item_view_iface_emit_items_changed (item_view,
-                                         ptr_array);
+  tmp_list = g_list_append (tmp_list, item);
+  sw_item_view_update_items (item_view, tmp_list);
+  g_list_free (tmp_list);
 }
 
 /**
@@ -318,17 +308,13 @@ void
 sw_item_view_remove_item (SwItemView *item_view,
                           SwItem     *item)
 {
-  GValueArray *value_array;
-  GPtrArray *ptr_array;
+  GList *tmp_list = NULL;
 
-  ptr_array = g_ptr_array_new ();
-
-  value_array = _sw_item_to_value_array (item);
-  g_ptr_array_add (ptr_array, value_array);
-
-  sw_item_view_iface_emit_items_removed (item_view,
-                                         ptr_array);
+  tmp_list = g_list_append (tmp_list, item);
+  sw_item_view_remove_items (item_view, tmp_list);
+  g_list_free (tmp_list);
 }
+
 
 /**
  * sw_item_view_add_items
