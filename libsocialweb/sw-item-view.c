@@ -669,8 +669,12 @@ sw_item_view_set_from_set (SwItemView *item_view,
     added_items = sw_set_difference (set, priv->current_items_set);
 
     /* TODO: Include an mtime to handle changed ? */
-    sw_item_view_remove_from_set (item_view, removed_items);
-    sw_item_view_add_from_set (item_view, added_items);
+
+    if (!sw_set_is_empty (removed_items))
+      sw_item_view_remove_from_set (item_view, removed_items);
+
+    if (!sw_set_is_empty (added_items))
+      sw_item_view_add_from_set (item_view, added_items);
 
     sw_set_unref (removed_items);
     sw_set_unref (added_items);
