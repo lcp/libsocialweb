@@ -47,6 +47,19 @@ enum
   PROP_OBJECT_PATH
 };
 
+static void sw_item_view_add_item (SwItemView *item_view,
+                                   SwItem     *item);
+static void sw_item_view_update_item (SwItemView *item_view,
+                                      SwItem     *item);
+static void sw_item_view_remove_item (SwItemView *item_view,
+                                      SwItem     *item);
+static void sw_item_view_add_items (SwItemView *item_view,
+                                    GList      *items);
+static void sw_item_view_update_items (SwItemView *item_view,
+                                       GList      *items);
+static void sw_item_view_remove_items (SwItemView *item_view,
+                                       GList      *items);
+
 static void
 sw_item_view_get_property (GObject    *object,
                            guint       property_id,
@@ -253,7 +266,7 @@ sw_item_view_iface_init (gpointer g_iface,
  * Add a single item in the #SwItemView. This will cause a signal to be
  * emitted across the bus.
  */
-void
+static void
 sw_item_view_add_item (SwItemView *item_view,
                        SwItem     *item)
 {
@@ -329,7 +342,7 @@ sw_item_view_remove_item (SwItemView *item_view,
  *
  * This is used in the implementation of sw_item_view_remove_from_set()
  */
-void
+static void
 sw_item_view_add_items (SwItemView *item_view,
                         GList      *items)
 {
@@ -357,7 +370,7 @@ sw_item_view_add_items (SwItemView *item_view,
  * Update the items supplied in the list in the #SwItemView. This is
  * will cause signal emissions over the bus.
  */
-void
+static void
 sw_item_view_update_items (SwItemView *item_view,
                            GList      *items)
 {
@@ -389,7 +402,7 @@ sw_item_view_update_items (SwItemView *item_view,
  *
  * This is used in the implementation of sw_item_view_remove_from_set()
  */
-void
+static void
 sw_item_view_remove_items (SwItemView *item_view,
                            GList      *items)
 {
