@@ -40,6 +40,9 @@ struct _SwItemViewPrivate {
   SwSet *current_items_set;
   SwSet *pending_items_set;
 
+  /* The last time we checked for modified items */
+  time_t last_mtime;
+
   /* timeout used for coalescing multiple delayed ready additions */
   guint pending_timeout_id;
 };
@@ -66,6 +69,8 @@ static void sw_item_view_update_items (SwItemView *item_view,
                                        GList      *items);
 static void sw_item_view_remove_items (SwItemView *item_view,
                                        GList      *items);
+
+static void sw_item_view_refresh_updated (SwItemView *item_view);
 
 static void
 sw_item_view_get_property (GObject    *object,
@@ -673,10 +678,66 @@ sw_item_view_set_from_set (SwItemView *item_view,
     if (!sw_set_is_empty (removed_items))
       sw_item_view_remove_from_set (item_view, removed_items);
 
+    /* Do this between removed and added so that you don't get change
+     * notification for items that have just been added.
+     */
+    sw_item_view_refresh_updated (item_view);
+
     if (!sw_set_is_empty (added_items))
       sw_item_view_add_from_set (item_view, added_items);
+
+    /* TODO: We should actually update the priv->last_mtime here to the most
+     * recent time for the items we've just added
+     */
 
     sw_set_unref (removed_items);
     sw_set_unref (added_items);
   }
+}
+
+static gboolean
+_filter_only_changed_cb (SwSet      *set,
+                         SwItem     *item,
+                         SwItemView *item_view)
+{
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  if (sw_item_get_mtime (item) >= priv->last_mtime)
+    return TRUE;
+  else
+    return FALSE;
+}
+
+/**
+ * sw_item_view_refresh_updated
+ * @item_view: A #SwItemView
+ *
+ * For all the items in the current set for this #SwItemView we check to see
+ * if the mtime is newer than the last time we checked. If so then we use
+ * sw_item_view_update_items() to fire a signal indicating that the item has
+ * been updated.
+ */
+static void
+sw_item_view_refresh_updated (SwItemView *item_view)
+{
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+  SwSet *changed_items_set = NULL;
+
+  changed_items_set = sw_set_filter (priv->current_items_set,
+                                     (SwSetFilterFunc)_filter_only_changed_cb,
+                                     item_view);
+
+  if (changed_items_set && !sw_set_is_empty (changed_items_set))
+  {
+    GList *updated_items;
+
+    updated_items = sw_set_as_list (changed_items_set);
+    sw_item_view_update_items (item_view, updated_items);
+    g_list_free (updated_items);
+  }
+
+  if (changed_items_set)
+    sw_set_unref (changed_items_set);
+
+  priv->last_mtime = time (NULL);
 }
