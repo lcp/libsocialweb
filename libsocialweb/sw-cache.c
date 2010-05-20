@@ -138,7 +138,10 @@ set_keyfile_from_item (gpointer data, gpointer user_data)
 
 /**
  * sw_cache_save:
+ *
  * @service: The service the item set is for
+ * @params: A set of parameters (strings) that can be used by the service to
+ * differentiate between different service functionality
  * @set: The set of items to cache
  *
  * Cache the items in @set to disk.
@@ -219,10 +222,13 @@ load_item_from_keyfile (SwService  *service,
 
 /**
  * sw_cache_load:
+ *
  * @service: The service to read the cache for
+ * @params: A set of parameters (strings) that can be used by the service to
+ * differentiate between different service functionality
  *
  * Load the cache for @service from disk, returning a #SwSet if there was a
- * cache, or %NULL.
+ * cache.
  */
 SwSet *
 sw_cache_load (SwService  *service,
@@ -259,6 +265,15 @@ sw_cache_load (SwService  *service,
   return set;
 }
 
+/**
+ * sw_cache_drop:
+ *
+ * @service: The service to read the cache for
+ * @params: A set of parameters (strings) that can be used by the service to
+ * differentiate between different service functionality
+ *
+ * Free the cache for @service from disk.
+ */
 void
 sw_cache_drop (SwService  *service,
                GHashTable *params)
