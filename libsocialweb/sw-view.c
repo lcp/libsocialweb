@@ -415,12 +415,17 @@ service_refreshed_cb (SwService *service,
 {
   SwView *view = SW_VIEW (user_data);
   SwViewPrivate *priv = view->priv;
+  GHashTable *params;
+
+  g_object_get (service, "params", &params, NULL);
 
   if (set) {
-    sw_cache_save (service, set);
+    sw_cache_save (service, params, set);
   } else {
-    sw_cache_drop (service);
+    sw_cache_drop (service, params);
   }
+
+  g_hash_table_unref (params);
 
   /* Remove all existing items from this service */
   sw_set_foreach_remove (priv->all_items, remove_service, service);
@@ -460,7 +465,13 @@ load_cache (SwView *view)
 
   for (l = priv->services; l; l = l->next) {
     SwService *service = l->data;
-    SwSet *set = sw_cache_load (service);
+    SwSet *set;
+    GHashTable *params;
+
+    g_object_get (service, "params", &params, NULL);
+    set = sw_cache_load (service, params);
+    g_hash_table_unref (params);
+
     service_refreshed_cb (service, set, view);
     sw_set_unref (set);
   }

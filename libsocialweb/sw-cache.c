@@ -144,10 +144,11 @@ set_keyfile_from_item (gpointer data, gpointer user_data)
  * Cache the items in @set to disk.
  */
 void
-sw_cache_save (SwService *service, SwSet *set)
+sw_cache_save (SwService  *service,
+               GHashTable *params,
+               SwSet      *set)
 {
   char *filename;
-  GHashTable *params = NULL;
 
   g_return_if_fail (SW_IS_SERVICE (service));
 
@@ -182,7 +183,9 @@ sw_cache_save (SwService *service, SwSet *set)
  * @service.
  */
 static SwItem *
-load_item_from_keyfile (SwService *service, GKeyFile *keyfile, const char *group)
+load_item_from_keyfile (SwService  *service,
+                        GKeyFile   *keyfile,
+                        const char *group)
 {
   SwItem *item = NULL;
   char **keys;
@@ -222,18 +225,16 @@ load_item_from_keyfile (SwService *service, GKeyFile *keyfile, const char *group
  * cache, or %NULL.
  */
 SwSet *
-sw_cache_load (SwService *service)
+sw_cache_load (SwService  *service,
+               GHashTable *params)
 {
   char *filename;
-  GHashTable *params = NULL;
   GKeyFile *keys;
   SwSet *set = NULL;
 
   g_return_val_if_fail (SW_IS_SERVICE (service), NULL);
 
   keys = g_key_file_new ();
-
-  g_object_get (service, "params", &params, NULL);
 
   filename = get_cache_filename (service, params);
 
@@ -254,24 +255,19 @@ sw_cache_load (SwService *service)
   }
 
   g_free (filename);
-  g_hash_table_unref (params);
 
   return set;
 }
 
 void
-sw_cache_drop (SwService *service)
+sw_cache_drop (SwService  *service,
+               GHashTable *params)
 {
   char *filename;
-  GHashTable *params = NULL;
 
   g_return_if_fail (SW_IS_SERVICE (service));
 
-  g_object_get (service, "params", &params, NULL);
-
   filename = get_cache_filename (service, params);
-
-  g_hash_table_unref (params);
 
   g_remove (filename);
 
