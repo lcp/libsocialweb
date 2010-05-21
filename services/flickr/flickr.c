@@ -153,6 +153,42 @@ extract_location (RestXmlNode *node, SwItem *item)
   sw_item_put (item, "longitude", lon);
 }
 
+SwItem *
+_flickr_item_from_from_photo_node (SwServiceFlickr *service,
+                                   RestXmlNode     *node)
+{
+  char *url;
+  SwItem *item;
+  gint64 date;
+
+  item = sw_item_new ();
+  sw_item_set_service (item, (SwService *)service);
+
+  url = construct_photo_page_url (node);
+  sw_item_put (item, "id", url);
+  sw_item_put (item, "title", rest_xml_node_get_attr (node, "title"));
+  sw_item_put (item, "authorid", rest_xml_node_get_attr (node, "owner"));
+  sw_item_put (item, "author", rest_xml_node_get_attr (node, "username"));
+  sw_item_put (item, "url", url);
+  g_free (url);
+
+  date = atoi (rest_xml_node_get_attr (node, "dateupload"));
+  sw_item_take (item, "date", sw_time_t_to_string (date));
+
+  url = construct_photo_url (node);
+  sw_item_request_image_fetch (item, TRUE, "thumbnail", url);
+  g_free (url);
+
+  url = construct_buddy_icon_url (node);
+  sw_item_request_image_fetch (item, FALSE, "authoricon", url);
+  g_free (url);
+
+  extract_location (node, item);
+
+  return item;
+}
+
+
 static void
 flickr_callback (RestProxyCall *call,
                  const GError  *error,
@@ -179,34 +215,8 @@ flickr_callback (RestProxyCall *call,
 
   node = rest_xml_node_find (root, "photos");
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
-    char *url;
     SwItem *item;
-    gint64 date;
-
-    item = sw_item_new ();
-    sw_item_set_service (item, (SwService*)service);
-
-    url = construct_photo_page_url (node);
-    sw_item_put (item, "id", url);
-    sw_item_put (item, "title", rest_xml_node_get_attr (node, "title"));
-    sw_item_put (item, "authorid", rest_xml_node_get_attr (node, "owner"));
-    sw_item_put (item, "author", rest_xml_node_get_attr (node, "username"));
-    sw_item_put (item, "url", url);
-    g_free (url);
-
-    date = atoi (rest_xml_node_get_attr (node, "dateupload"));
-    sw_item_take (item, "date", sw_time_t_to_string (date));
-
-    url = construct_photo_url (node);
-    sw_item_request_image_fetch (item, TRUE, "thumbnail", url);
-    g_free (url);
-
-    url = construct_buddy_icon_url (node);
-    sw_item_request_image_fetch (item, FALSE, "authoricon", url);
-    g_free (url);
-
-    extract_location (node, item);
-
+    item = _flickr_item_from_from_photo_node (service, node);
     sw_set_add (service->priv->set, G_OBJECT (item));
     g_object_unref (item);
   }

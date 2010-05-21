@@ -20,6 +20,7 @@
 #define _LIBSOCIALWEB_SERVICE_FLICKR
 
 #include <libsocialweb/sw-service.h>
+#include <rest/rest-xml-parser.h>
 
 G_BEGIN_DECLS
 
@@ -52,6 +53,9 @@ typedef struct {
 } SwServiceFlickrClass;
 
 GType sw_service_flickr_get_type (void);
+
+SwItem *_flickr_item_from_from_photo_node (SwServiceFlickr *service,
+                                           RestXmlNode     *node);
 
 G_END_DECLS
 
