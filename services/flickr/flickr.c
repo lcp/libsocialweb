@@ -20,7 +20,6 @@
 
 #include <stdlib.h>
 #include <gio/gio.h>
-#include "flickr.h"
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-set.h>
 #include <libsocialweb/sw-utils.h>
@@ -29,10 +28,18 @@
 #include <libsocialweb-keyfob/sw-keyfob.h>
 #include <rest-extras/flickr-proxy.h>
 #include <rest/rest-xml-parser.h>
+#include <interfaces/sw-query-ginterface.h>
+
+#include "flickr-item-view.h"
+#include "flickr.h"
+
 
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
+static void query_iface_init (gpointer g_iface, gpointer iface_data);
+
 G_DEFINE_TYPE_WITH_CODE (SwServiceFlickr, sw_service_flickr, SW_TYPE_SERVICE,
-                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init));
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE, query_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_FLICKR, SwServiceFlickrPrivate))
@@ -364,6 +371,38 @@ initable_iface_init (gpointer g_iface,
 
   klass->init = sw_service_flickr_initable;
 }
+
+static void
+_flickr_query_open_view (SwQueryIface          *self,
+                         GHashTable            *params,
+                         DBusGMethodInvocation *context)
+{
+  SwServiceFlickrPrivate *priv = GET_PRIVATE (self);
+  SwItemView *item_view;
+  const gchar *object_path;
+
+  item_view = g_object_new (SW_TYPE_FLICKR_ITEM_VIEW,
+                            "proxy", priv->proxy,
+                            "service", self,
+                            "params", params,
+                            NULL);
+
+  object_path = sw_item_view_get_object_path (item_view);
+  sw_query_iface_return_from_open_view (context,
+                                        object_path);
+}
+
+static void
+query_iface_init (gpointer g_iface,
+                  gpointer iface_data)
+{
+  SwQueryIfaceClass *klass = (SwQueryIfaceClass*)g_iface;
+
+  sw_query_iface_implement_open_view (klass,
+                                      _flickr_query_open_view);
+}
+
+
 
 static void
 sw_service_flickr_class_init (SwServiceFlickrClass *klass)
