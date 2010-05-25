@@ -35,6 +35,7 @@ struct _SwClientItemViewPrivate {
     gchar *object_path;
     DBusGConnection *connection;
     DBusGProxy *proxy;
+    GHashTable *uuid_to_items;
 };
 
 enum
@@ -48,6 +49,7 @@ enum
   ITEMS_ADDED_SIGNAL,
   ITEMS_CHANGED_SIGNAL,
   ITEMS_REMOVED_SIGNAL,
+
   LAST_SIGNAL
 };
 
@@ -103,6 +105,12 @@ sw_client_item_view_dispose (GObject *object)
     priv->proxy = NULL;
   }
 
+  if (priv->uuid_to_items)
+  {
+    g_hash_table_unref (priv->uuid_to_items);
+    priv->uuid_to_items = NULL;
+  }
+
   G_OBJECT_CLASS (sw_client_item_view_parent_class)->dispose (object);
 }
 
@@ -116,18 +124,44 @@ sw_client_item_view_finalize (GObject *object)
   G_OBJECT_CLASS (sw_client_item_view_parent_class)->finalize (object);
 }
 
+static void
+_sw_item_update_from_value_array (SwItem      *item,
+                                  GValueArray *varray)
+{
+  if (item->service)
+  {
+    g_free (item->service);
+    item->service = NULL;
+  }
+
+  item->service = g_value_dup_string (g_value_array_get_nth (varray, 0));
+
+  if (item->uuid)
+  {
+    g_free (item->uuid);
+    item->uuid = NULL;
+  }
+
+  item->uuid = g_value_dup_string (g_value_array_get_nth (varray, 1));
+
+  item->date.tv_sec = g_value_get_int64 (g_value_array_get_nth (varray, 2));
+
+  if (item->props)
+  {
+    g_hash_table_unref (item->props);
+    item->props = NULL;
+  }
+
+  item->props = g_value_dup_boxed (g_value_array_get_nth (varray, 3));
+}
+
 static SwItem *
 _sw_item_from_value_array (GValueArray *varray)
 {
   SwItem *item;
 
   item = sw_item_new ();
-
-  item->service = g_value_dup_string (g_value_array_get_nth (varray, 0));
-  item->uuid = g_value_dup_string (g_value_array_get_nth (varray, 1));
-  item->date.tv_sec = g_value_get_int64 (g_value_array_get_nth (varray, 2));
-  item->props = g_value_dup_boxed (g_value_array_get_nth (varray, 3));
-  g_debug (G_STRLOC ": Created item: %s on %s", item->uuid, item->service);
+  _sw_item_update_from_value_array (item, varray);
 
   return item;
 }
@@ -137,7 +171,8 @@ _proxy_items_added_cb (DBusGProxy *proxy,
                        GPtrArray  *items,
                        gpointer    userdata)
 {
-  SwClientItemView *item_view = SW_CLIENT_ITEM_VIEW (userdata);
+  SwClientItemView *view = SW_CLIENT_ITEM_VIEW (userdata);
+  SwClientItemViewPrivate *priv = GET_PRIVATE (view);
   gint i = 0;
   GList *items_list = NULL;
 
@@ -146,11 +181,21 @@ _proxy_items_added_cb (DBusGProxy *proxy,
     GValueArray *varray = (GValueArray *)g_ptr_array_index (items, i);
     SwItem *item;
 
+    /* First reference dropped when list freed */
     item = _sw_item_from_value_array (varray);
+
+    g_hash_table_insert (priv->uuid_to_items,
+                         g_strdup (item->uuid),
+                         sw_item_ref (item));
+
     items_list = g_list_append (items_list, item);
   }
 
-  g_signal_emit (item_view, signals[ITEMS_ADDED_SIGNAL], 0, items_list);
+  /* If handler wants a ref then it should ref it up */
+  g_signal_emit (view, signals[ITEMS_ADDED_SIGNAL], 0, items_list);
+
+  g_list_foreach (items_list, (GFunc)sw_item_unref, NULL);
+  g_list_free (items_list);
 }
 
 static void
@@ -158,6 +203,8 @@ _proxy_items_changed_cb (DBusGProxy *proxy,
                          GPtrArray  *items,
                          gpointer    userdata)
 {
+  SwClientItemView *view = SW_CLIENT_ITEM_VIEW (userdata);
+  SwClientItemViewPrivate *priv = GET_PRIVATE (view);
   gint i = 0;
   GList *items_list = NULL;
 
@@ -165,10 +212,22 @@ _proxy_items_changed_cb (DBusGProxy *proxy,
   {
     GValueArray *varray = (GValueArray *)g_ptr_array_index (items, i);
     SwItem *item;
+    const gchar *uid;
 
-    item = _sw_item_from_value_array (varray);
-    items_list = g_list_append (items_list, item);
+    uid = g_value_get_string (g_value_array_get_nth (varray, 1));
+
+    item = g_hash_table_lookup (priv->uuid_to_items,
+                                uid);
+    _sw_item_update_from_value_array (item, varray);
+
+    items_list = g_list_append (items_list, sw_item_ref (item));
   }
+
+  /* If handler wants a ref then it should ref it up */
+  g_signal_emit (view, signals[ITEMS_CHANGED_SIGNAL], 0, items_list);
+
+  g_list_foreach (items_list, (GFunc)sw_item_unref, NULL);
+  g_list_free (items_list);
 }
 
 static void
@@ -176,17 +235,35 @@ _proxy_items_removed_cb (DBusGProxy *proxy,
                          GPtrArray  *items,
                          gpointer    userdata)
 {
-  gint i= 0;
+  SwClientItemView *view = SW_CLIENT_ITEM_VIEW (userdata);
+  SwClientItemViewPrivate *priv = GET_PRIVATE (view);
+  gint i = 0;
   GList *items_list = NULL;
 
   for (i = 0; i < items->len; i++)
   {
     GValueArray *varray = (GValueArray *)g_ptr_array_index (items, i);
+    const gchar *uid;
     SwItem *item;
 
-    item = _sw_item_from_value_array (varray);
-    items_list = g_list_append (items_list, item);
+    uid = g_value_get_string (g_value_array_get_nth (varray, 1));
+
+    item = g_hash_table_lookup (priv->uuid_to_items,
+                                uid);
+
+    if (item)
+    {
+      /* Must ref up because g_hash_table_remove drops ref */
+      items_list = g_list_append (items_list, sw_item_ref (item));
+      g_hash_table_remove (priv->uuid_to_items, uid);
+    }
   }
+
+  /* If handler wants a ref then it should ref it up */
+  g_signal_emit (view, signals[ITEMS_REMOVED_SIGNAL], 0, items_list);
+
+  g_list_foreach (items_list, (GFunc)sw_item_unref, NULL);
+  g_list_free (items_list);
 }
 
 static GType
@@ -197,8 +274,8 @@ _sw_item_get_struct_type (void)
                                  G_TYPE_STRING,
                                  G_TYPE_INT64,
                                  dbus_g_type_get_map ("GHashTable",
-                                     G_TYPE_STRING,
-                                     G_TYPE_STRING),
+                                                      G_TYPE_STRING,
+                                                      G_TYPE_STRING),
                                  G_TYPE_INVALID);
 }
 
@@ -207,6 +284,16 @@ _sw_items_get_container_type (void)
 {
  return dbus_g_type_get_collection ("GPtrArray",
                                     _sw_item_get_struct_type ());
+}
+
+static GType
+_sw_items_removed_get_container_type (void)
+{
+  return dbus_g_type_get_collection ("GPtrArray",
+                                     dbus_g_type_get_struct ("GValueArray",
+                                                             G_TYPE_STRING,
+                                                             G_TYPE_STRING,
+                                                             G_TYPE_INVALID));
 }
 
 static void
@@ -264,7 +351,7 @@ sw_client_item_view_constructed (GObject *object)
 
   dbus_g_proxy_add_signal (priv->proxy,
                            "ItemsRemoved",
-                           _sw_items_get_container_type (),
+                           _sw_items_removed_get_container_type (),
                            NULL);
   dbus_g_proxy_connect_signal (priv->proxy,
                                "ItemsRemoved",
@@ -333,6 +420,13 @@ sw_client_item_view_class_init (SwClientItemViewClass *klass)
 static void
 sw_client_item_view_init (SwClientItemView *self)
 {
+  SwClientItemViewPrivate *priv = GET_PRIVATE (self);
+
+
+  priv->uuid_to_items = g_hash_table_new_full (g_str_hash,
+                                               g_str_equal,
+                                               g_free,
+                                               (GDestroyNotify)sw_item_unref);
 }
 
 SwClientItemView *
