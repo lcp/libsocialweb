@@ -472,6 +472,8 @@ sw_item_view_add_items (SwItemView *item_view,
     }
   }
 
+  SW_DEBUG (VIEWS, "Number of items to be added: %d", ptr_array->len);
+
   sw_item_view_iface_emit_items_added (item_view,
                                        ptr_array);
 }
@@ -511,6 +513,8 @@ sw_item_view_update_items (SwItemView *item_view,
       sw_set_add (priv->pending_items_set, (GObject *)item);
     }
   }
+
+  SW_DEBUG (VIEWS, "Number of items to be changed: %d", ptr_array->len);
 
   sw_item_view_iface_emit_items_changed (item_view,
                                          ptr_array);
