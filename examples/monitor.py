@@ -34,7 +34,7 @@ if not services:
 
 path = sw.OpenView(services, 10)
 view = bus.get_object("org.moblin.libsocialweb", path)
-view = dbus.Interface(view, "org.moblin.libsocialweb.View")
+view = dbus.Interface(view, "org.moblin.libsocialweb.ItemView")
 
 def now():
     return time.strftime("%T", time.localtime())
