@@ -48,9 +48,6 @@ typedef struct {
 
 typedef struct {
   GObjectClass parent_class;
-  void (*item_added)(SwClientView *view, SwItem *item);
-  void (*item_removed)(SwClientView *view, SwItem *item);
-  void (*item_changed)(SwClientView *view, SwItem *item);
   void (*items_added)(SwClientView *view, GList *items);
   void (*items_removed)(SwClientView *view, GList *items);
   void (*items_changed)(SwClientView *view, GList *items);
