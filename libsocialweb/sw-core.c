@@ -76,14 +76,6 @@ get_services (SwCoreIface *self, DBusGMethodInvocation *context)
   g_ptr_array_free (array, TRUE);
 }
 
-static char *
-make_path (void)
-{
-  static volatile int counter = 1;
-  return g_strdup_printf ("/org/moblin/libsocialweb/View/%d",
-                          g_atomic_int_exchange_and_add (&counter, 1));
-}
-
 static void
 view_weak_notify (gpointer  data,
                   GObject  *old_view)
@@ -206,12 +198,11 @@ open_view (SwCoreIface            *self,
   SwCore *core = SW_CORE (self);
   SwCorePrivate *priv = core->priv;
   SwView *view;
-  char *path;
+  const char *path;
   const char **i;
 
   view = sw_view_new (core, count);
-  path = make_path ();
-  dbus_g_connection_register_g_object (priv->connection, path, (GObject*)view);
+  path = sw_item_view_get_object_path (SW_ITEM_VIEW (view));
 
   for (i = services; *i; i++) {
     char **tokens;
@@ -249,8 +240,6 @@ open_view (SwCoreIface            *self,
   priv->views = g_list_prepend (priv->views, view);
 
   sw_core_iface_return_from_open_view (context, path);
-
-  g_free (path);
 }
 
 static void

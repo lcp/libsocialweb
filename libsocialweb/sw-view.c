@@ -18,7 +18,6 @@
 
 #include <math.h>
 #include "sw-view.h"
-#include "sw-view-ginterface.h"
 
 #include <libsocialweb/sw-core.h>
 #include <libsocialweb/sw-debug.h>
@@ -27,11 +26,9 @@
 #include <libsocialweb/sw-utils.h>
 #include <libsocialweb/sw-cache.h>
 #include <libsocialweb/sw-online.h>
+#include <libsocialweb/sw-item-view.h>
 
-static void view_iface_init (gpointer g_iface, gpointer iface_data);
-G_DEFINE_TYPE_WITH_CODE (SwView, sw_view, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (SW_TYPE_VIEW_IFACE,
-                                                view_iface_init));
+G_DEFINE_TYPE (SwView, sw_view, SW_TYPE_ITEM_VIEW);
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_VIEW, SwViewPrivate))
@@ -187,107 +184,11 @@ remove_service (GObject  *object,
   return sw_item_get_service (item) == service;
 }
 
-static void
-sw_view_removed_items (SwView *view,
-                       SwSet  *removed_items)
-{
-  GValueArray *value_array;
-  GPtrArray *ptr_array;
-  GList *items, *l;
-
-  items = sw_set_as_list (removed_items);
-  ptr_array = g_ptr_array_new ();
-
-  for (l = items; l; l = l->next)
-  {
-    SwItem *item = (SwItem *)l->data;
-    value_array = g_value_array_new (2);
-
-    value_array = g_value_array_append (value_array, NULL);
-    g_value_init (g_value_array_get_nth (value_array, 0), G_TYPE_STRING);
-    g_value_set_string (g_value_array_get_nth (value_array, 0),
-                        sw_service_get_name (sw_item_get_service (item)));
-
-    value_array = g_value_array_append (value_array, NULL);
-    g_value_init (g_value_array_get_nth (value_array, 1), G_TYPE_STRING);
-    g_value_set_string (g_value_array_get_nth (value_array, 1),
-                        sw_item_get (item, "id"));
-
-    g_ptr_array_add (ptr_array, value_array);
-  }
-
-  sw_view_iface_emit_items_removed (view, ptr_array);
-
-  g_ptr_array_foreach (ptr_array, (GFunc)g_value_array_free, NULL);
-  g_ptr_array_free (ptr_array, TRUE);
-}
-
-static void
-sw_view_added_items (SwView *view,
-                     SwSet  *added_items)
-{
-  GValueArray *value_array;
-  GPtrArray *ptr_array;
-  GList *items, *l;
-
-  items = sw_set_as_list (added_items);
-  ptr_array = g_ptr_array_new ();
-
-  for (l = items; l; l = l->next)
-  {
-    SwItem *item = (SwItem *)l->data;
-    value_array = _sw_item_to_value_array (item);
-    g_ptr_array_add (ptr_array, value_array);
-  }
-
-  sw_view_iface_emit_items_added (view, ptr_array);
-
-  g_ptr_array_foreach (ptr_array, (GFunc)g_value_array_free, NULL);
-  g_ptr_array_free (ptr_array, TRUE);
-}
-
-
-static void
-sw_view_changed_items (SwView *view,
-                       SwSet  *added_items)
-{
-  GValueArray *value_array;
-  GPtrArray *ptr_array;
-  GList *items, *l;
-
-  items = sw_set_as_list (added_items);
-  ptr_array = g_ptr_array_new ();
-
-  for (l = items; l; l = l->next)
-  {
-    SwItem *item = (SwItem *)l->data;
-    value_array = _sw_item_to_value_array (item);
-    g_ptr_array_add (ptr_array, value_array);
-  }
-
-  sw_view_iface_emit_items_changed (view, ptr_array);
-
-  g_ptr_array_foreach (ptr_array, (GFunc)g_value_array_free, NULL);
-  g_ptr_array_free (ptr_array, TRUE);
-}
-
-static gboolean
-_filter_only_changed_cb (SwSet  *set,
-                         SwItem *item,
-                         SwView *view)
-{
-  if (sw_item_get_mtime (item) >= view->priv->last_recalculate_time)
-    return TRUE;
-  else
-    return FALSE;
-}
-
 void
 sw_view_recalculate (SwView *view)
 {
   SwViewPrivate *priv;
   SwSet *old_items, *new_items;
-  SwSet *removed_items, *added_items, *changed_items = NULL;
 
   g_return_if_fail (SW_IS_VIEW (view));
 
@@ -298,114 +199,7 @@ sw_view_recalculate (SwView *view)
   old_items = priv->current;
   new_items = munge_items (view);
 
-  removed_items = sw_set_difference (old_items, new_items);
-  added_items = sw_set_difference (new_items, old_items);
-
-  if (priv->last_recalculate_time != 0)
-  {
-    changed_items = sw_set_filter (new_items,
-                                   (SwSetFilterFunc)_filter_only_changed_cb,
-                                   view);
-  }
-
-  if (!sw_set_is_empty (removed_items))
-    sw_view_removed_items (view, removed_items);
-
-  if (!sw_set_is_empty (added_items))
-    sw_view_added_items (view, added_items);
-
-  if (changed_items && !sw_set_is_empty (changed_items))
-    sw_view_changed_items (view, changed_items);
-
-  sw_set_unref (removed_items);
-  sw_set_unref (added_items);
-
-  if (changed_items)
-    sw_set_unref (changed_items);
-
-  sw_set_unref (priv->current);
-  priv->current = new_items;
-  priv->last_recalculate_time = time (NULL);
-}
-
-static gboolean
-recalculate_timeout_cb (SwView *view)
-{
-  view->priv->recalculate_timeout_id = 0;
-  sw_view_recalculate (view);
-
-  return FALSE;
-}
-
-static void
-sw_view_queue_recalculate (SwView *view)
-{
-  SwViewPrivate *priv;
-
-  priv = view->priv;
-
-  if (priv->recalculate_timeout_id)
-  {
-    g_source_remove (priv->recalculate_timeout_id);
-  }
-
-  priv->recalculate_timeout_id =
-    g_timeout_add (RECALCULATE_DELAY,
-                   (GSourceFunc)recalculate_timeout_cb,
-                   view);
-}
-
-static void
-_item_ready_weak_notify_cb (gpointer  data,
-                            GObject  *dead_object);
-
-static void
-_item_ready_notify_cb (SwItem     *item,
-                       GParamSpec *pspec,
-                       SwView     *view)
-{
-  /* TODO: Use a timeout to rate limit this */
-  if (sw_item_get_ready (item)) {
-    SW_DEBUG (VIEWS, "Item became ready: %s.",
-                  sw_item_get (item, "id"));
-    sw_view_queue_recalculate (view);
-    g_signal_handlers_disconnect_by_func (item,
-                                          _item_ready_notify_cb,
-                                          view);
-    g_object_weak_unref ((GObject *)view,
-                         _item_ready_weak_notify_cb,
-                         item);
-  }
-}
-
-static void
-_item_ready_weak_notify_cb (gpointer  data,
-                            GObject  *dead_object)
-{
-  g_signal_handlers_disconnect_by_func (data,
-                                        _item_ready_notify_cb,
-                                        dead_object);
-}
-
-static void
-setup_ready_handler (gpointer object, gpointer user_data)
-{
-  SwItem *item = SW_ITEM (object);
-  SwView *view = SW_VIEW (user_data);
-
-  if (sw_item_get_ready (item))
-    return;
-
-  SW_DEBUG (VIEWS, "Item not ready. Setting up signal handler: %s.",
-                sw_item_get (item, "id"));
-
-  g_signal_connect (item,
-                    "notify::ready",
-                    (GCallback)_item_ready_notify_cb,
-                    view);
-  g_object_weak_ref ((GObject *)view,
-                     _item_ready_weak_notify_cb,
-                     item);
+  sw_item_view_set_from_set (SW_ITEM_VIEW (view), new_items);
 }
 
 static void
@@ -431,7 +225,6 @@ service_refreshed_cb (SwService *service,
   sw_set_foreach_remove (priv->all_items, remove_service, service);
   if (set) {
     sw_set_add_from (priv->all_items, set);
-    sw_set_foreach (set, setup_ready_handler, view);
   }
 
   sw_view_recalculate (view);
@@ -513,15 +306,12 @@ online_notify (gboolean online,
 }
 
 static void
-view_start (SwViewIface           *iface,
-            DBusGMethodInvocation *context)
+view_start (SwItemView *item_view)
 {
-  SwView *view = SW_VIEW (iface);
+  SwView *view = (SwView *)item_view;
   GList *l;
 
   view->priv->running = TRUE;
-
-  sw_view_iface_return_from_start (context);
 
   /* Tell the services to start */
   for (l = view->priv->services; l; l = l->next) {
@@ -536,54 +326,6 @@ view_start (SwViewIface           *iface,
     /* Online notify doesn't load the cache if we are offline, so do that now */
     load_cache (view);
   }
-}
-
-static void
-view_refresh (SwViewIface           *iface,
-              DBusGMethodInvocation *context)
-{
-  SwView *view = SW_VIEW (iface);
-
-  /* Reinstall the timeout */
-  remove_refresh_timeout (view);
-  install_refresh_timeout (view);
-
-  sw_view_iface_return_from_refresh (context);
-
-  start_refresh (view);
-}
-
-static void
-stop (SwView *view)
-{
-  view->priv->running = FALSE;
-
-  remove_refresh_timeout (view);
-}
-
-static void
-view_stop (SwViewIface           *iface,
-           DBusGMethodInvocation *context)
-{
-  SwView *view = SW_VIEW (iface);
-
-  stop (view);
-
-  sw_view_iface_return_from_stop (context);
-}
-
-static void
-view_close (SwViewIface           *iface,
-            DBusGMethodInvocation *context)
-{
-  SwView *view = SW_VIEW (iface);
-
-  /* Explicitly stop the view in case there are pending updates in progress */
-  stop (view);
-
-  g_object_unref (view);
-
-  sw_view_iface_return_from_close (context);
 }
 
 static void
@@ -670,27 +412,16 @@ sw_view_finalize (GObject *object)
 {
   SwView *view = SW_VIEW (object);
 
-  stop (view);
-
   sw_online_remove_notify (online_notify, view);
 
   G_OBJECT_CLASS (sw_view_parent_class)->finalize (object);
 }
 
 static void
-view_iface_init (gpointer g_iface, gpointer iface_data)
-{
-  SwViewIfaceClass *klass = (SwViewIfaceClass*)g_iface;
-  sw_view_iface_implement_start (klass, view_start);
-  sw_view_iface_implement_refresh (klass, view_refresh);
-  sw_view_iface_implement_stop (klass, view_stop);
-  sw_view_iface_implement_close (klass, view_close);
-}
-
-static void
 sw_view_class_init (SwViewClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  SwItemViewClass *item_view_class = SW_ITEM_VIEW_CLASS (klass);
   GParamSpec *pspec;
 
   g_type_class_add_private (klass, sizeof (SwViewPrivate));
@@ -699,6 +430,8 @@ sw_view_class_init (SwViewClass *klass)
   object_class->set_property = sw_view_set_property;
   object_class->dispose = sw_view_dispose;
   object_class->finalize = sw_view_finalize;
+
+  item_view_class->start = view_start;
 
   pspec = g_param_spec_object ("core", "core", "The core",
                                SW_TYPE_CORE,

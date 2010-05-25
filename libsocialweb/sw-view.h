@@ -22,6 +22,7 @@
 #include <glib-object.h>
 #include <libsocialweb/sw-types.h>
 #include <libsocialweb/sw-service.h>
+#include <libsocialweb/sw-item-view.h>
 
 G_BEGIN_DECLS
 
@@ -45,12 +46,12 @@ G_BEGIN_DECLS
 typedef struct _SwViewPrivate SwViewPrivate;
 
 struct _SwView {
-  GObject parent;
+  SwItemView parent;
   SwViewPrivate *priv;
 };
 
 typedef struct {
-  GObjectClass parent_class;
+  SwItemViewClass parent_class;
 } SwViewClass;
 
 GType sw_view_get_type (void);
