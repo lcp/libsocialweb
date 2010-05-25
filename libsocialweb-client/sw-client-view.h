@@ -24,8 +24,6 @@
 #include <libsocialweb-client/sw-item.h>
 #include <libsocialweb-client/sw-client-item-view.h>
 
-#warning "Using deprecated SwClientView. Please updated to SwClientItemView!"
-
 G_BEGIN_DECLS
 
 #define SW_TYPE_CLIENT_VIEW SW_TYPE_ITEM_VIEW
@@ -45,8 +43,8 @@ G_BEGIN_DECLS
 #define SW_CLIENT_VIEW_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), SW_TYPE_CLIENT_VIEW, SwClientViewClass))
 
-typedef SwClientItemView SwClientView;
-typedef SwClientItemViewClass SwClientViewClass;
+typedef SwClientItemView SwClientView G_GNUC_DEPRECATED;
+typedef SwClientItemViewClass SwClientViewClass G_GNUC_DEPRECATED;
 
 #define sw_client_view_start sw_client_item_view_start
 #define sw_client_view_refresh sw_client_item_view_refresh
