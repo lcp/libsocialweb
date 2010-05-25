@@ -9,7 +9,7 @@ libsocialweb_client_la_LDFLAGS = -version-info $(LIBSOCIALWEB_CLIENT_CURRENT):$(
 libsocialweb_client_la_HEADERS = sw-client.h sw-client-view.h \
 			      sw-item.h sw-client-service.h \
 			      sw-client-lastfm.h sw-client-item-view.h
-libsocialweb_client_la_SOURCES = sw-client.c sw-client-view.c \
+libsocialweb_client_la_SOURCES = sw-client.c \
 			      sw-item.c sw-client-service.c \
 			      sw-client-service-private.h \
 			      sw-client-lastfm.c \

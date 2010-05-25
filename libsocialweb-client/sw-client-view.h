@@ -22,10 +22,13 @@
 #include <glib-object.h>
 
 #include <libsocialweb-client/sw-item.h>
+#include <libsocialweb-client/sw-client-item-view.h>
+
+#warning "Using deprecated SwClientView. Please updated to SwClientItemView!"
 
 G_BEGIN_DECLS
 
-#define SW_TYPE_CLIENT_VIEW sw_client_view_get_type()
+#define SW_TYPE_CLIENT_VIEW SW_TYPE_ITEM_VIEW
 
 #define SW_CLIENT_VIEW(obj) \
   (G_TYPE_CHECK_INSTANCE_CAST ((obj), SW_TYPE_CLIENT_VIEW, SwClientView))
@@ -42,23 +45,11 @@ G_BEGIN_DECLS
 #define SW_CLIENT_VIEW_GET_CLASS(obj) \
   (G_TYPE_INSTANCE_GET_CLASS ((obj), SW_TYPE_CLIENT_VIEW, SwClientViewClass))
 
-typedef struct {
-  GObject parent;
-} SwClientView;
+typedef SwClientItemView SwClientView;
+typedef SwClientItemViewClass SwClientViewClass;
 
-typedef struct {
-  GObjectClass parent_class;
-  void (*items_added)(SwClientView *view, GList *items);
-  void (*items_removed)(SwClientView *view, GList *items);
-  void (*items_changed)(SwClientView *view, GList *items);
-} SwClientViewClass;
-
-GType sw_client_view_get_type (void);
-
-SwClientView *_sw_client_view_new_for_path (const gchar *view_path);
-void sw_client_view_start (SwClientView *view);
-void sw_client_view_refresh (SwClientView *view);
-GList *sw_client_view_get_sorted_items (SwClientView *view);
+#define sw_client_view_start sw_client_item_view_start
+#define sw_client_view_refresh sw_client_item_view_refresh
 
 G_END_DECLS
 
