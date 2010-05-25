@@ -161,7 +161,7 @@ _sw_client_open_view_cb (DBusGProxy *proxy,
 {
   OpenViewClosure *closure = (OpenViewClosure *)userdata;
   SwClient *client = closure->client;
-  SwClientView *view;
+  SwClientItemView *view;
 
   if (error)
   {
@@ -170,7 +170,7 @@ _sw_client_open_view_cb (DBusGProxy *proxy,
     g_error_free (error);
     closure->cb (client, NULL, closure->userdata);
   } else {
-    view = _sw_client_view_new_for_path (view_path);
+    view = _sw_client_item_view_new_for_path (view_path);
     closure->cb (client, view, closure->userdata);
     g_free (view_path);
   }

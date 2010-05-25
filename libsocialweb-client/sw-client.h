@@ -55,9 +55,9 @@ GType sw_client_get_type (void);
 
 SwClient *sw_client_new (void);
 
-typedef void (*SwClientOpenViewCallback) (SwClient     *client,
-                                          SwClientView *view,
-                                          gpointer      userdata);
+typedef void (*SwClientOpenViewCallback) (SwClient         *client,
+                                          SwClientItemView *view,
+                                          gpointer          userdata);
 
 typedef void (*SwClientIsOnlineCallback) (SwClient *client,
                                           gboolean  online,
