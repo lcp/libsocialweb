@@ -17,9 +17,10 @@
  */
 
 #include <libsocialweb-client/sw-client.h>
+#include <libsocialweb-client/sw-client-item-view.h>
 
 static void
-client_view_items_added_cb (SwClientView *view,
+client_view_items_added_cb (SwClientItemView *view,
                             GList            *items,
                             gpointer          userdata)
 {
@@ -41,8 +42,8 @@ client_view_items_added_cb (SwClientView *view,
 }
 
 static void
-client_open_view_cb (SwClient     *client,
-                     SwClientView *view,
+client_open_view_cb (SwClient         *client,
+                     SwClientItemView *view,
                      gpointer          userdata)
 {
   sw_client_view_start (view);
@@ -64,10 +65,10 @@ client_get_services_cb (SwClient *client,
   }
 
   sw_client_open_view (client,
-                           (GList*)services,
-                           10,
-                           client_open_view_cb,
-                           NULL);
+                       (GList*)services,
+                       10,
+                       client_open_view_cb,
+                       NULL);
 }
 
 int
