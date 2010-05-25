@@ -134,7 +134,6 @@ _photos_received_cb (RestProxyCall *call,
                      gpointer       userdata)
 {
   SwItemView *item_view = SW_ITEM_VIEW (weak_object);
-  SwFlickrItemViewPrivate *priv = GET_PRIVATE (weak_object);
   RestXmlParser *parser;
   RestXmlNode *root, *node;
   SwSet *set;
