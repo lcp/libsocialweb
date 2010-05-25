@@ -154,12 +154,10 @@ sw_item_view_finalize (GObject *object)
 static gchar *
 _make_object_path (SwItemView *item_view)
 {
-  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   gchar *path;
   static gint count = 0;
 
-  path = g_strdup_printf ("/org/moblin/libsocialweb/%s/View%d",
-                          sw_service_get_name (priv->service),
+  path = g_strdup_printf ("/org/moblin/libsocialweb/View%d",
                           count);
 
   count++;
