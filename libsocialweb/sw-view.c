@@ -49,8 +49,6 @@ struct _SwViewPrivate {
   guint refresh_timeout_id;
   /* The set of all items currently being considered for the client */
   SwSet *all_items;
-  /* The items we've sent to the client */
-  SwSet *current;
   /* Whether we're currently running */
   gboolean running;
   /* For recalculate queue */
@@ -188,7 +186,7 @@ void
 sw_view_recalculate (SwView *view)
 {
   SwViewPrivate *priv;
-  SwSet *old_items, *new_items;
+  SwSet *new_items;
 
   g_return_if_fail (SW_IS_VIEW (view));
 
@@ -196,7 +194,6 @@ sw_view_recalculate (SwView *view)
   if (!priv->running)
     return;
 
-  old_items = priv->current;
   new_items = munge_items (view);
 
   sw_item_view_set_from_set (SW_ITEM_VIEW (view), new_items);
@@ -390,11 +387,6 @@ sw_view_dispose (GObject *object)
     priv->all_items = NULL;
   }
 
-  if (priv->current) {
-    sw_set_unref (priv->current);
-    priv->current = NULL;
-  }
-
   while (priv->services) {
     SwService *service = priv->services->data;
 
@@ -450,7 +442,6 @@ sw_view_init (SwView *self)
   self->priv = GET_PRIVATE (self);
 
   self->priv->all_items = sw_item_set_new ();
-  self->priv->current = sw_item_set_new ();
 
   self->priv->running = FALSE;
 
