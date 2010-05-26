@@ -41,6 +41,14 @@ enum
   PROP_READY
 };
 
+enum
+{
+  CHANGED_SIGNAL,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL] = { 0, };
+
 static void
 sw_item_dispose (GObject *object)
 {
@@ -91,6 +99,16 @@ sw_item_class_init (SwItemClass *klass)
                                 FALSE,
                                 G_PARAM_READABLE);
   g_object_class_install_property (object_class, PROP_READY, pspec);
+
+  signals[CHANGED_SIGNAL] = g_signal_new ("changed",
+                                       SW_TYPE_ITEM,
+                                       G_SIGNAL_RUN_FIRST,
+                                       G_STRUCT_OFFSET (SwItemClass, changed),
+                                       NULL,
+                                       NULL,
+                                       g_cclosure_marshal_VOID__VOID,
+                                       G_TYPE_NONE,
+                                       0);
 }
 
 static void
@@ -378,6 +396,8 @@ void
 sw_item_touch (SwItem *item)
 {
   item->priv->mtime = time (NULL);
+
+  g_signal_emit (item, signals[CHANGED_SIGNAL], 0);
 }
 
 time_t

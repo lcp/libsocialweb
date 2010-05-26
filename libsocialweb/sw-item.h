@@ -52,6 +52,7 @@ struct _SwItem {
 
 typedef struct {
   GObjectClass parent_class;
+  void (*changed)(SwItem *item);
 } SwItemClass;
 
 GType sw_item_get_type (void);
