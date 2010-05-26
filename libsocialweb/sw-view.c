@@ -326,6 +326,18 @@ view_start (SwItemView *item_view)
 }
 
 static void
+view_refresh (SwItemView *item_view)
+{
+  SwView *view = (SwView *)item_view;
+
+  /* Reinstall the timeout */
+  remove_refresh_timeout (view);
+  install_refresh_timeout (view);
+
+  start_refresh (view);
+}
+
+static void
 sw_view_get_property (GObject    *object,
                       guint       property_id,
                       GValue     *value,
@@ -424,6 +436,7 @@ sw_view_class_init (SwViewClass *klass)
   object_class->finalize = sw_view_finalize;
 
   item_view_class->start = view_start;
+  item_view_class->refresh = view_refresh;
 
   pspec = g_param_spec_object ("core", "core", "The core",
                                SW_TYPE_CORE,
