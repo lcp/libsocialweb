@@ -263,7 +263,9 @@ load_cache (SwView *view)
     g_hash_table_unref (params);
 
     service_refreshed_cb (service, set, view);
-    sw_set_unref (set);
+
+    if (set)
+      sw_set_unref (set);
   }
 }
 
