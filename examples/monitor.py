@@ -39,14 +39,15 @@ view = dbus.Interface(view, "org.moblin.libsocialweb.ItemView")
 def now():
     return time.strftime("%T", time.localtime())
 
-def added(items):
+def added(items, member=None):
     for (service, uuid, date, item) in items:
-        print "[%s] Item %s added from %s" % (now(), uuid, service)
+        print "[%s] %s: Item %s from %s" % (now(), member, uuid, service)
         print "Timestamp: %s" % time.strftime("%c", time.gmtime(date))
         for key in item:
             print "  %s: %s" % (key, item[key])
         print
-view.connect_to_signal("ItemsAdded", added)
+view.connect_to_signal("ItemsAdded", added, member_keyword="member")
+view.connect_to_signal("ItemsChanged", added, member_keyword="member")
 
 def removed(items):
     for (service, uuid) in items:
