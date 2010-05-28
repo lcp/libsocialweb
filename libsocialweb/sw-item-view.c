@@ -45,6 +45,9 @@ struct _SwItemViewPrivate {
 
   /* timeout used for coalescing multiple delayed ready additions */
   guint pending_timeout_id;
+
+  /* timeout used for ratelimiting checking for changed items */
+  guint refresh_timeout_id;
 };
 
 enum
@@ -136,6 +139,12 @@ sw_item_view_dispose (GObject *object)
   {
     g_source_remove (priv->pending_timeout_id);
     priv->pending_timeout_id = 0;
+  }
+
+  if (priv->refresh_timeout_id)
+  {
+    g_source_remove (priv->refresh_timeout_id);
+    priv->refresh_timeout_id = 0;
   }
 
   G_OBJECT_CLASS (sw_item_view_parent_class)->dispose (object);
@@ -371,6 +380,64 @@ _setup_ready_handler (SwItem     *item,
                      item);
 }
 
+static gboolean
+_item_changed_timeout_cb (gpointer data)
+{
+  SwItemView *item_view = SW_ITEM_VIEW (data);
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  sw_item_view_refresh_updated (item_view);
+
+  priv->refresh_timeout_id = 0;
+
+  return FALSE;
+}
+
+static void
+_item_changed_cb (SwItem     *item,
+                  SwItemView *item_view)
+{
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  /* We only care if the item is ready. If it's not then we don't want to be
+   * emitting changed but instead it will be added through the readiness
+   * tracking.
+   */
+  if (!sw_item_get_ready (item))
+    return;
+
+  if (!priv->refresh_timeout_id)
+  {
+    SW_DEBUG (VIEWS, "Item changed, Setting up timeout");
+
+    priv->refresh_timeout_id = g_timeout_add_seconds (10,
+                                                      _item_changed_timeout_cb,
+                                                      item_view);
+  }
+}
+
+static void
+_item_changed_weak_notify_cb (gpointer  data,
+                              GObject  *dead_object)
+{
+  g_signal_handlers_disconnect_by_func (data,
+                                        _item_changed_cb,
+                                        dead_object);
+}
+
+static void
+_setup_changed_handler (SwItem     *item,
+                        SwItemView *item_view)
+{
+  g_signal_connect (item,
+                    "changed",
+                    (GCallback)_item_changed_cb,
+                    item_view);
+  g_object_weak_ref ((GObject *)item_view,
+                     _item_changed_weak_notify_cb,
+                     item);
+}
+
 /* FIXME: Do we need these functions still? */
 #if 0
 /**
@@ -470,6 +537,8 @@ sw_item_view_add_items (SwItemView *item_view,
       _setup_ready_handler (item, item_view);
       sw_set_add (priv->pending_items_set, (GObject *)item);
     }
+
+    _setup_changed_handler (item, item_view);
   }
 
   SW_DEBUG (VIEWS, "Number of items to be added: %d", ptr_array->len);
