@@ -34,7 +34,8 @@ sw_debug_init (const char *string)
     { "item", SW_DEBUG_ITEM },
     { "twitter", SW_DEBUG_TWITTER },
     { "myspace", SW_DEBUG_MYSPACE },
-    { "lastfm", SW_DEBUG_LASTFM }
+    { "lastfm", SW_DEBUG_LASTFM },
+    { "core", SW_DEBUG_CORE }
   };
 
   if (G_LIKELY (setup_done))

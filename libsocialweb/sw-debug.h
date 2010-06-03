@@ -25,7 +25,8 @@ typedef enum {
   SW_DEBUG_ITEM = 1 << 3,
   SW_DEBUG_TWITTER = 1 << 4,
   SW_DEBUG_MYSPACE = 1 << 5,
-  SW_DEBUG_LASTFM = 1 << 6
+  SW_DEBUG_LASTFM = 1 << 6,
+  SW_DEBUG_CORE = 1 << 7
 } SwDebugFlags;
 
 extern guint sw_debug_flags;
