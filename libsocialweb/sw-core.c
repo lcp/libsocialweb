@@ -23,6 +23,8 @@
 #include "sw-online.h"
 #include "sw-view.h"
 #include "sw-banned.h"
+#include "sw-debug.h"
+
 #include "client-monitor.h"
 
 #include "sw-core-ginterface.h"
@@ -303,6 +305,14 @@ load_module (SwCore *core, const char *file)
     return;
   } else {
     service_name = (*(SwModuleGetNameFunc)sym)();
+  }
+
+  /* Module already loaded */
+  if (g_hash_table_lookup (priv->service_types, service_name))
+  {
+    SW_DEBUG (CORE, "Module %s already loaded.", service_name);
+    g_module_close (service_module);
+    return;
   }
 
   if (!g_module_symbol (service_module, "sw_module_get_type", &sym)) {
