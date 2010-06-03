@@ -51,6 +51,8 @@ struct _SwCorePrivate {
   GHashTable *banned_uids;
   /* List of open views */
   GList *views;
+  /* Monitor for modules directory */
+  GFileMonitor *modules_monitor;
 };
 
 typedef const gchar *(*SwModuleGetNameFunc)(void);
@@ -409,6 +411,48 @@ load_modules_from_dir (SwCore *core)
 }
 
 static void
+_modules_monitor_changed_cb (GFileMonitor      *monitor,
+                             GFile             *file,
+                             GFile             *other_file,
+                             GFileMonitorEvent  event,
+                             SwCore            *core)
+{
+  if (event == G_FILE_MONITOR_EVENT_CREATED)
+  {
+    load_modules_from_dir (core);
+  }
+}
+
+static void
+setup_modules_monitor (SwCore *core)
+{
+  SwCorePrivate *priv = core->priv;
+  GFile *file;
+  GError *error = NULL;
+
+  file = g_file_new_for_path (SOCIALWEB_SERVICES_MODULES_DIR);
+
+  priv->modules_monitor = g_file_monitor (file,
+                                          G_FILE_MONITOR_NONE,
+                                          NULL,
+                                          &error);
+
+  if (error)
+  {
+    g_critical (G_STRLOC ": error setting up modules directory monitor: %s",
+                error->message);
+    g_clear_error (&error);
+  } else {
+    g_signal_connect (priv->modules_monitor,
+                      "changed",
+                      (GCallback)_modules_monitor_changed_cb,
+                      core);
+  }
+
+  g_object_unref (file);
+}
+
+static void
 load_modules_from_string (SwCore *core, const char *s)
 {
   char **modules, **basename;
@@ -456,6 +500,7 @@ sw_core_constructed (GObject *object)
   if (modules) {
     load_modules_from_string (core, modules);
   } else {
+    setup_modules_monitor (core);
     load_modules_from_dir (core);
   }
 
@@ -465,6 +510,15 @@ sw_core_constructed (GObject *object)
 static void
 sw_core_dispose (GObject *object)
 {
+  SwCore *core = SW_CORE (object);
+  SwCorePrivate *priv = core->priv;
+
+  if (priv->modules_monitor)
+  {
+    g_object_unref (priv->modules_monitor);
+    priv->modules_monitor = NULL;
+  }
+
   G_OBJECT_CLASS (sw_core_parent_class)->dispose (object);
 }
 
