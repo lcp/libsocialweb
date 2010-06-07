@@ -24,6 +24,7 @@
 #include <interfaces/sw-service-bindings.h>
 #include <interfaces/sw-status-update-bindings.h>
 #include <interfaces/sw-query-bindings.h>
+#include <interfaces/sw-avatar-bindings.h>
 #include <interfaces/sw-marshals.h>
 
 G_DEFINE_TYPE (SwClientService, sw_client_service, G_TYPE_OBJECT)
@@ -289,11 +290,20 @@ _sw_client_service_setup (SwClientService  *service,
     return FALSE;
   }
 
-  dbus_g_proxy_add_signal (priv->proxies[SERVICE_IFACE],
+  if (!_sw_client_service_setup_proxy_for_iface (service,
+                                                 service_name,
+                                                 AVATAR_IFACE,
+                                                 &error))
+  {
+    g_propagate_error (error_out, error);
+    return FALSE;
+  }
+
+  dbus_g_proxy_add_signal (priv->proxies[AVATAR_IFACE],
                            "AvatarRetrieved",
                            G_TYPE_STRING,
                            G_TYPE_INVALID);
-  dbus_g_proxy_connect_signal (priv->proxies[SERVICE_IFACE],
+  dbus_g_proxy_connect_signal (priv->proxies[AVATAR_IFACE],
                                "AvatarRetrieved",
                                (GCallback)_avatar_retrieved_cb,
                                service,
@@ -487,9 +497,9 @@ sw_client_service_request_avatar (SwClientService *service)
 {
   SwClientServicePrivate *priv = GET_PRIVATE (service);
 
-  org_moblin_libsocialweb_Service_request_avatar_async (priv->proxies[SERVICE_IFACE],
-                                                        _request_avatar_cb,
-                                                        NULL);
+  org_moblin_libsocialweb_Avatar_request_avatar_async (priv->proxies[AVATAR_IFACE],
+                                                       _request_avatar_cb,
+                                                       NULL);
 }
 
 static void
