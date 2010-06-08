@@ -227,9 +227,8 @@ open_view (SwCoreIface            *self,
     } else {
       g_warning (G_STRLOC ": Request for unknown service: %s",
                  name);
-
-      g_strfreev (tokens);
     }
+    g_strfreev (tokens);
 
     g_hash_table_unref (params);
   }
