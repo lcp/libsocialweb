@@ -8,13 +8,31 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libsocialweb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-03-10 10:36+0000\n"
+"POT-Creation-Date: 2010-06-08 02:13+0000\n"
 "PO-Revision-Date: 2009-10-09 16:28-0800\n"
 "Last-Translator: Yun Nie <yun.nie@ptiglobal.net>\n"
 "Language-Team: zh_CN <yanhai.zhu@intel.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "Digg"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "Digg - 共享新闻，视频和图像"
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm.c:149
+#, c-format
+msgid "%s by %s"
+msgstr "%s 由 %s"
+
+#: ../services/lastfm/lastfm.c:153
+msgid "Unknown"
+msgstr "未知"
 
 #: ../services/lastfm/lastfm.keys.in.h:1
 msgid "Last.fm"
@@ -36,10 +54,6 @@ msgstr "Twitter 是一项供朋友、家人和同事们联系和沟通的服务�
 msgid "Flickr"
 msgstr "Flickr"
 
-#: ../services/flickr/flickr.keys.in.h:2
-msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr "Flicker - 几乎是目前世界上最好的在线照片管理和共享系统。"
-
 #: ../services/myspace/myspace.keys.in.h:1
 msgid "MySpace"
 msgstr "MySpace"
@@ -48,20 +62,6 @@ msgstr "MySpace"
 msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
 msgstr "MySpace 是一个连接全世界各种人种、文化和信息的先进社交门户网站。您可以在上边建立自己的个人信息，共享照片，写博客，看视频，给朋友发消息，并且在世界最大的音乐社区里欣赏音乐。"
 
-#: ../services/digg/digg.keys.in.h:1
-msgid "Digg"
-msgstr "Digg"
-
-#. Translators "[track title] by [artist]"
-#: ../services/lastfm/lastfm.c:149
-#, c-format
-msgid "%s by %s"
-msgstr "%s 由 %s"
-
-#: ../services/digg/digg.keys.in.h:2
-msgid "Digg - to share news, video and images"
-msgstr "Digg - 共享新闻，视频和图像"
-
-#: ../services/lastfm/lastfm.c:153
-msgid "Unknown"
-msgstr "未知"
+#: ../services/flickr/flickr.keys.in.h:2
+msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgstr "Flicker - 是目前世界上最好的在线照片管理和共享系统。"
