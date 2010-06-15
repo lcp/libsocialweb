@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<node name="/Photo_Upload_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+  <interface name="org.moblin.libsocialweb.PhotoUpload">
+    <method name="UploadPhoto" tp:name-for-bindings="UploadPhoto">
+      <arg name="local_filename" type="s" direction="in"/>
+      <arg name="fields" type="a{ss}" direction="in"/>
+      <arg name="opid" type="i" direction="out"/>
+    </method>
+    <signal name="PhotoUploadProgress" tp:name-for-bindings="PhotoUploadProgress">
+      <arg name="opid" type="i"/>
+      <!-- 100 for complete, -1 for error -->
+      <arg name="progress" type="i"/>
+      <arg name="error_message" type="s"/>
+    </signal>
+  </interface>
+</node>
