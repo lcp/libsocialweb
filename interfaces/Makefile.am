@@ -16,6 +16,7 @@ MARSHALS_LISTS = sw-marshals.list
 DBUS_SPECS = sw-core.xml sw-service.xml \
 	     sw-item-view.xml sw-query.xml \
 	     sw-avatar.xml sw-status-update.xml \
+	     sw-photo-upload.xml \
 	     lastfm.xml
 
 %-ginterface.h %-ginterface.c: %.xml Makefile.am
@@ -33,7 +34,9 @@ libsocialweb_ginterfaces_ladir = $(pkgincludedir)/interfaces
 libsocialweb_ginterfaces_la_HEADERS = \
 	sw-query-ginterface.h \
 	sw-status-update-ginterface.h \
-	sw-avatar-ginterface.h
+	sw-avatar-ginterface.h \
+	sw-photo-upload-ginterface.h
+
 
 %-bindings.h: %.xml
 	$(QUIET_GEN)dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
