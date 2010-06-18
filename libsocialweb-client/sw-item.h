@@ -23,6 +23,8 @@
 
 #include <glib-object.h>
 
+G_BEGIN_DECLS
+
 typedef struct {
   volatile gint refcount;
   gchar *service;
@@ -44,4 +46,5 @@ const gchar *sw_item_get_value (SwItem  *item,
 
 GType sw_item_get_type (void);
 
+G_END_DECLS
 #endif
