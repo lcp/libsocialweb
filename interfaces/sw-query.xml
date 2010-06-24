@@ -2,6 +2,7 @@
 <node name="/Query_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">>
   <interface name="org.moblin.libsocialweb.Query">
     <method name="OpenView" tp:name-for-bindings="Open_View">
+      <arg name="query" type="s" direction="in"/>
       <arg name="params" type="a{ss}" direction="in"/>
       <arg name="view" type="o" direction="out"/>
     </method>
