@@ -46,19 +46,25 @@ struct _SwTwitterItemViewPrivate {
   RestProxy *proxy;
   GRegex *twitpic_re;
   guint timeout_id;
+  GHashTable *params;
+  gchar *query;
 };
 
 enum
 {
   PROP_0,
-  PROP_PROXY
+  PROP_PROXY,
+  PROP_PARAMS,
+  PROP_QUERY
 };
 
 #define UPDATE_TIMEOUT 5 * 60
 
 static void
-sw_twitter_item_view_get_property (GObject *object, guint property_id,
-                              GValue *value, GParamSpec *pspec)
+sw_twitter_item_view_get_property (GObject    *object,
+                                   guint       property_id,
+                                   GValue     *value,
+                                   GParamSpec *pspec)
 {
   SwTwitterItemViewPrivate *priv = GET_PRIVATE (object);
 
@@ -66,14 +72,22 @@ sw_twitter_item_view_get_property (GObject *object, guint property_id,
     case PROP_PROXY:
       g_value_set_object (value, priv->proxy);
       break;
+    case PROP_PARAMS:
+      g_value_set_boxed (value, priv->params);
+      break;
+    case PROP_QUERY:
+      g_value_set_string (value, priv->query);
+      break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
 }
 
 static void
-sw_twitter_item_view_set_property (GObject *object, guint property_id,
-                              const GValue *value, GParamSpec *pspec)
+sw_twitter_item_view_set_property (GObject      *object,
+                                   guint         property_id,
+                                   const GValue *value,
+                                   GParamSpec   *pspec)
 {
   SwTwitterItemViewPrivate *priv = GET_PRIVATE (object);
 
@@ -84,6 +98,12 @@ sw_twitter_item_view_set_property (GObject *object, guint property_id,
         g_object_unref (priv->proxy);
       }
       priv->proxy = g_value_dup_object (value);
+      break;
+    case PROP_PARAMS:
+      priv->params = g_value_dup_boxed (value);
+      break;
+    case PROP_QUERY:
+      priv->query = g_value_dup_string (value);
       break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -304,7 +324,10 @@ _get_status_updates (SwTwitterItemView *item_view)
   call = rest_proxy_new_call (priv->proxy);
 
   /* TODO: Use query parameters here */
-  rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
+  if (g_str_equal (priv->query, "x-feed"))
+  {
+    rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
+  }
 
   rest_proxy_call_async (call,
                          _got_status_updates_cb,
@@ -362,6 +385,22 @@ sw_twitter_item_view_class_init (SwTwitterItemViewClass *klass)
                                REST_TYPE_PROXY,
                                G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
   g_object_class_install_property (object_class, PROP_PROXY, pspec);
+
+
+  pspec = g_param_spec_string ("query",
+                               "query",
+                               "query",
+                               NULL,
+                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+  g_object_class_install_property (object_class, PROP_QUERY, pspec);
+
+
+  pspec = g_param_spec_boxed ("params",
+                              "params",
+                              "params",
+                              G_TYPE_HASH_TABLE,
+                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+  g_object_class_install_property (object_class, PROP_PARAMS, pspec);
 }
 
 static void

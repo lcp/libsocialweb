@@ -803,7 +803,8 @@ initable_iface_init (gpointer g_iface, gpointer iface_data)
 /* Query interface */
 
 static void
-_twitter_query_open_view (SwQueryIface      *self,
+_twitter_query_open_view (SwQueryIface          *self,
+                          const gchar           *query,
                           GHashTable            *params,
                           DBusGMethodInvocation *context)
 {
@@ -814,11 +815,13 @@ _twitter_query_open_view (SwQueryIface      *self,
   item_view = g_object_new (SW_TYPE_TWITTER_ITEM_VIEW,
                             "proxy", priv->proxy,
                             "service", self,
+                            "query", query,
+                            "params", params,
                             NULL);
 
   object_path = sw_item_view_get_object_path (item_view);
   sw_query_iface_return_from_open_view (context,
-                                            object_path);
+                                        object_path);
 }
 
 static void
@@ -828,7 +831,7 @@ query_iface_init (gpointer g_iface,
   SwQueryIfaceClass *klass = (SwQueryIfaceClass*)g_iface;
 
   sw_query_iface_implement_open_view (klass,
-                                          _twitter_query_open_view);
+                                      _twitter_query_open_view);
 }
 
 /* Avatar interface */
