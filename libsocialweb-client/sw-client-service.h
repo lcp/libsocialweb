@@ -109,6 +109,7 @@ typedef void (*SwClientServiceQueryOpenViewCallback) (SwClientService  *query,
 
 void
 sw_client_service_query_open_view (SwClientService                      *service,
+                                   const gchar                          *query,
                                    GHashTable                           *params,
                                    SwClientServiceQueryOpenViewCallback  cb,
                                    gpointer                              userdata);

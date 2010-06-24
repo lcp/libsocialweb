@@ -556,6 +556,7 @@ _query_open_view_cb (DBusGProxy *proxy,
 
 void
 sw_client_service_query_open_view (SwClientService                      *service,
+                                   const gchar                          *query,
                                    GHashTable                           *params,
                                    SwClientServiceQueryOpenViewCallback  cb,
                                    gpointer                              userdata)
@@ -588,6 +589,7 @@ sw_client_service_query_open_view (SwClientService                      *service
   }
 
   org_moblin_libsocialweb_Query_open_view_async (priv->proxies [QUERY_IFACE],
+                                                 query,
                                                  params,
                                                  _query_open_view_cb,
                                                  closure);
