@@ -802,6 +802,22 @@ initable_iface_init (gpointer g_iface, gpointer iface_data)
 
 /* Query interface */
 
+static const gchar *valid_queries[] = { "feed", "own", "friends-only"};
+
+static gboolean
+_check_query_validity (const gchar *query)
+{
+  gint i = 0;
+
+  for (i = 0; i < G_N_ELEMENTS(valid_queries); i++)
+  {
+    if (g_str_equal (query, valid_queries[i]))
+      return TRUE;
+  }
+
+  return FALSE;
+}
+
 static void
 _twitter_query_open_view (SwQueryIface          *self,
                           const gchar           *query,
@@ -812,7 +828,7 @@ _twitter_query_open_view (SwQueryIface          *self,
   SwItemView *item_view;
   const gchar *object_path;
 
-  if (!g_str_equal (query, "feed"))
+  if (!_check_query_validity (query))
   {
     dbus_g_method_return_error (context,
                                 g_error_new (SW_SERVICE_ERROR,
