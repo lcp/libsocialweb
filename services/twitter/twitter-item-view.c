@@ -323,13 +323,14 @@ _get_status_updates (SwTwitterItemView *item_view)
 
   call = rest_proxy_new_call (priv->proxy);
 
-  /* TODO: Use query parameters here */
-  if (!g_str_equal (priv->query, "feed"))
-  {
-    /* The query interface code should prevent us getting this far */
-    g_assert (FALSE);
-  }
-  rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
+  if (g_str_equal (priv->query, "own"))
+    rest_proxy_call_set_function (call, "statuses/user_timeline.xml");
+  else if (g_str_equal (priv->query, "x-mentions"))
+    rest_proxy_call_set_function (call, "statuses/mentions.xml");
+  else if (g_str_equal (priv->query, "feed") || g_str_equal (priv->query, "friends-only"))
+    rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
+  else
+    g_error (G_STRLOC ": Unexpected query '%s'", priv->query);
 
   rest_proxy_call_async (call,
                          _got_status_updates_cb,

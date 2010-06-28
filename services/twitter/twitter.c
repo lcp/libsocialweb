@@ -802,7 +802,10 @@ initable_iface_init (gpointer g_iface, gpointer iface_data)
 
 /* Query interface */
 
-static const gchar *valid_queries[] = { "feed", "own", "friends-only"};
+static const gchar *valid_queries[] = { "feed",
+                                        "own",
+                                        "friends-only",
+                                        "x-mentions"};
 
 static gboolean
 _check_query_validity (const gchar *query)
