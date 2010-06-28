@@ -324,10 +324,12 @@ _get_status_updates (SwTwitterItemView *item_view)
   call = rest_proxy_new_call (priv->proxy);
 
   /* TODO: Use query parameters here */
-  if (g_str_equal (priv->query, "x-feed"))
+  if (!g_str_equal (priv->query, "feed"))
   {
-    rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
+    /* The query interface code should prevent us getting this far */
+    g_assert (FALSE);
   }
+  rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
 
   rest_proxy_call_async (call,
                          _got_status_updates_cb,

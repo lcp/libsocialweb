@@ -812,6 +812,16 @@ _twitter_query_open_view (SwQueryIface          *self,
   SwItemView *item_view;
   const gchar *object_path;
 
+  if (!g_str_equal (query, "feed"))
+  {
+    dbus_g_method_return_error (context,
+                                g_error_new (SW_SERVICE_ERROR,
+                                             SW_SERVICE_ERROR_INVALID_QUERY,
+                                             "Query '%s' is invalid",
+                                             query));
+    return;
+  }
+
   item_view = g_object_new (SW_TYPE_TWITTER_ITEM_VIEW,
                             "proxy", priv->proxy,
                             "service", self,
