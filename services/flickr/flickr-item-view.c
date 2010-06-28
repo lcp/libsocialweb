@@ -47,13 +47,15 @@ struct _SwFlickrItemViewPrivate {
   RestProxy *proxy;
   guint timeout_id;
   GHashTable *params;
+  gchar *query;
 };
 
 enum
 {
   PROP_0,
   PROP_PROXY,
-  PROP_PARAMS
+  PROP_PARAMS,
+  PROP_QUERY
 };
 
 
@@ -75,6 +77,9 @@ sw_flickr_item_view_get_property (GObject    *object,
     case PROP_PARAMS:
       g_value_set_boxed (value, priv->params);
       break;
+    case PROP_QUERY:
+      g_value_set_string (value, priv->query);
+      break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -94,6 +99,9 @@ sw_flickr_item_view_set_property (GObject      *object,
       break;
     case PROP_PARAMS:
       priv->params = g_value_dup_boxed (value);
+      break;
+    case PROP_QUERY:
+      priv->query = g_value_dup_string (value);
       break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -124,6 +132,10 @@ sw_flickr_item_view_dispose (GObject *object)
 static void
 sw_flickr_item_view_finalize (GObject *object)
 {
+  SwFlickrItemViewPrivate *priv = GET_PRIVATE (object);
+
+  g_free (priv->query);
+
   G_OBJECT_CLASS (sw_flickr_item_view_parent_class)->finalize (object);
 }
 
@@ -175,14 +187,12 @@ _make_request (SwFlickrItemView *item_view)
   SwFlickrItemViewPrivate *priv = GET_PRIVATE (item_view);
   RestProxyCall *call;
   GError *error = NULL;
-  const gchar *request_type;
 
   call = rest_proxy_new_call (priv->proxy);
 
-  request_type = g_hash_table_lookup (priv->params, "request_type");
-
-  if (g_str_equal (request_type, "search"))
+  if (g_str_equal (priv->query, "x-search"))
   {
+    /* http://www.flickr.com/services/api/flickr.photos.search.html */
     rest_proxy_call_set_function (call, "flickr.photos.search");
 
     if (g_hash_table_lookup (priv->params, "text"))
@@ -191,9 +201,31 @@ _make_request (SwFlickrItemView *item_view)
     if (g_hash_table_lookup (priv->params, "tags"))
       rest_proxy_call_add_param (call, "tags", g_hash_table_lookup (priv->params, "tags"));
 
-    rest_proxy_call_add_param (call, "extras", "date_upload,icon_server,geo");
-    rest_proxy_call_add_param (call, "count", "50");
+  } else if (g_str_equal (priv->query, "own")) {
+
+    /* http://www.flickr.com/services/api/flickr.people.getPhotos.html */
+    rest_proxy_call_set_function (call, "flickr.people.getPhotos");
+    rest_proxy_call_add_param (call, "user_id", "me");
+
+  } else if (g_str_equal (priv->query, "friends-only") || 
+             g_str_equal (priv->query, "feed")) {
+    /* 
+     * http://www.flickr.com/services/api/flickr.photos.getContactsPhotos.html
+     * */
+    rest_proxy_call_set_function (call, "flickr.photos.getContactsPhotos");
+
+    if (g_str_equal (priv->query, "friends-only"))
+    {
+      rest_proxy_call_add_param (call, "include_self", "0");
+    } else {
+      rest_proxy_call_add_param (call, "include_self", "1");
+    }
+  } else {
+    g_error (G_STRLOC ": Unexpected query '%s", priv->query);
   }
+
+  rest_proxy_call_add_param (call, "count", "50");
+  rest_proxy_call_add_param (call, "extras", "date_upload,icon_server,geo");
 
   if (!rest_proxy_call_async (call,
                               _photos_received_cb,
@@ -287,6 +319,13 @@ sw_flickr_item_view_class_init (SwFlickrItemViewClass *klass)
                               G_TYPE_HASH_TABLE,
                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
   g_object_class_install_property (object_class, PROP_PARAMS, pspec);
+
+  pspec = g_param_spec_string ("query",
+                               "query",
+                               "query",
+                               NULL,
+                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+  g_object_class_install_property (object_class, PROP_QUERY, pspec);
 }
 
 static void
