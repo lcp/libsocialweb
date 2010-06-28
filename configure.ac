@@ -42,6 +42,10 @@ AC_SUBST(LIBSOCIALWEB_CLIENT_CURRENT)
 AC_SUBST(LIBSOCIALWEB_CLIENT_REVISION)
 AC_SUBST(LIBSOCIALWEB_CLIENT_AGE)
 
+AM_PATH_GLIB_2_0([2.14.0], [have_glib=yes], [have_glib=no],
+                 [gobject gthread gmodule-no-export])
+AS_IF([test "x$have_glib" = "xno"], AC_MSG_ERROR([glib-2.0 is required]))
+
 PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.14)
 PKG_CHECK_MODULES(GIO, gio-2.0)
 PKG_CHECK_MODULES(GOBJECT, gobject-2.0 >= 2.14)
