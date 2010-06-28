@@ -129,6 +129,8 @@ sw_service_class_init (SwServiceClass *klass)
                   NULL, NULL,
                   g_cclosure_marshal_VOID__BOXED,
                   G_TYPE_NONE, 1, SW_TYPE_SET);
+
+  dbus_g_error_domain_register (SW_SERVICE_ERROR, NULL, SW_TYPE_SERVICE_ERROR);
 }
 
 static void

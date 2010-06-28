@@ -24,6 +24,7 @@
 #include <libsocialweb/sw-types.h>
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-set.h>
+#include <libsocialweb/sw-enum-types.h>
 
 G_BEGIN_DECLS
 
