@@ -136,6 +136,7 @@ sw_twitter_item_view_finalize (GObject *object)
   SwTwitterItemViewPrivate *priv = GET_PRIVATE (object);
 
   g_free (priv->query);
+  g_regex_unref (priv->twitpic_re);
 
   G_OBJECT_CLASS (sw_twitter_item_view_parent_class)->finalize (object);
 }
