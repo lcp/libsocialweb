@@ -72,7 +72,7 @@ node_from_call (RestProxyCall *call)
     parser = rest_xml_parser_new ();
 
   if (!SOUP_STATUS_IS_SUCCESSFUL (rest_proxy_call_get_status_code (call))) {
-    g_message ("Error from Last.fm: %s (%d)",
+    g_message (G_STRLOC ": error from Last.fm: %s (%d)",
                rest_proxy_call_get_status_message (call),
                rest_proxy_call_get_status_code (call));
     return NULL;
@@ -85,7 +85,7 @@ node_from_call (RestProxyCall *call)
 
   /* No content, or wrong content */
   if (node == NULL || strcmp (node->name, "lfm") != 0) {
-    g_printerr ("Cannot make Last.fm call: %s\n",
+    g_message (G_STRLOC ": cannot make Last.fm call: %s",
                 error ? error->message : "unknown reason");
     if (error) g_error_free (error);
     if (node) rest_xml_node_unref (node);
@@ -95,7 +95,7 @@ node_from_call (RestProxyCall *call)
   if (strcmp (rest_xml_node_get_attr (node, "status"), "ok") != 0) {
     RestXmlNode *err_node;
     err_node = rest_xml_node_find (node, "error");
-    g_printerr ("Cannot make Last.fm call: %s (code %s)\n",
+    g_message (G_STRLOC ": cannot make Last.fm call: %s (code %s)",
                 err_node->content,
                 rest_xml_node_get_attr (err_node, "code"));
     rest_xml_node_unref (node);
@@ -203,7 +203,7 @@ get_artist_info_cb (RestProxyCall *call,
   sw_call_list_remove (lastfm->priv->calls, call);
 
   if (error) {
-    g_message ("Error: %s", error->message);
+    g_message (G_STRLOC ": error from Last.fm: %s", error->message);
     /* TODO: cleanup or something */
     return;
   }
@@ -328,7 +328,7 @@ get_tracks_cb (RestProxyCall *call,
   sw_call_list_remove (lastfm->priv->calls, call);
 
   if (error) {
-    g_message ("Error: %s", error->message);
+    g_message (G_STRLOC ": error from Last.fm: %s", error->message);
     /* TODO: cleanup or something */
     return;
   }
@@ -367,7 +367,7 @@ get_friends_cb (RestProxyCall *call,
   sw_call_list_remove (lastfm->priv->calls, call);
 
   if (error) {
-    g_message ("Error: %s", error->message);
+    g_message (G_STRLOC ": error from Last.fm: %s", error->message);
     return;
   }
 
