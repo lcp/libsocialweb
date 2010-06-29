@@ -188,9 +188,25 @@ sw_item_view_constructed (GObject *object)
                                        priv->object_path,
                                        G_OBJECT (item_view));
   g_object_unref (core);
+  /* The only reference should be the one on the bus */
 
   if (G_OBJECT_CLASS (sw_item_view_parent_class)->constructed)
     G_OBJECT_CLASS (sw_item_view_parent_class)->constructed (object);
+}
+
+/* Default implementation for close */
+static void
+sw_item_view_default_close (SwItemView *item_view)
+{
+  SwCore *core;
+
+  core = sw_core_dup_singleton ();
+  dbus_g_connection_unregister_g_object (sw_core_get_connection (core),
+                                         G_OBJECT (item_view));
+  g_object_unref (core);
+
+  /* Object is no longer needed */
+  g_object_unref (item_view);
 }
 
 static void
@@ -206,6 +222,8 @@ sw_item_view_class_init (SwItemViewClass *klass)
   object_class->dispose = sw_item_view_dispose;
   object_class->finalize = sw_item_view_finalize;
   object_class->constructed = sw_item_view_constructed;
+
+  klass->close = sw_item_view_default_close;
 
   pspec = g_param_spec_object ("service",
                                "service",
