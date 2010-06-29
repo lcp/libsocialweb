@@ -68,7 +68,7 @@ main (int    argc,
   client = sw_client_new ();
   service = sw_client_get_service (client, "twitter");
   sw_client_service_query_open_view (service,
-                                     "x-feed",
+                                     "feed",
                                      NULL,
                                      _query_open_view_cb,
                                      NULL);
