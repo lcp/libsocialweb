@@ -563,6 +563,8 @@ sw_item_view_add_items (SwItemView *item_view,
 
   sw_item_view_iface_emit_items_added (item_view,
                                        ptr_array);
+
+  g_ptr_array_free (ptr_array, TRUE);
 }
 
 /**
@@ -605,6 +607,8 @@ sw_item_view_update_items (SwItemView *item_view,
 
   sw_item_view_iface_emit_items_changed (item_view,
                                          ptr_array);
+
+  g_ptr_array_free (ptr_array, TRUE);
 }
 
 /**
@@ -652,6 +656,8 @@ sw_item_view_remove_items (SwItemView *item_view,
 
   sw_item_view_iface_emit_items_removed (item_view,
                                          ptr_array);
+
+  g_ptr_array_free (ptr_array, TRUE);
 }
 
 /**
