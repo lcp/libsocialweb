@@ -78,8 +78,9 @@ sw_call_list_cancel_all (SwCallList *list)
   while (list->l) {
     RestProxyCall *call = list->l->data;
 
-    rest_proxy_call_cancel (call);
     g_object_weak_unref (G_OBJECT (call), call_weak_notify, list);
     list->l = g_list_delete_link (list->l, list->l);
+
+    rest_proxy_call_cancel (call);
   }
 }
