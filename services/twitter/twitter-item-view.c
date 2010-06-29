@@ -133,6 +133,10 @@ sw_twitter_item_view_dispose (GObject *object)
 static void
 sw_twitter_item_view_finalize (GObject *object)
 {
+  SwTwitterItemViewPrivate *priv = GET_PRIVATE (object);
+
+  g_free (priv->query);
+
   G_OBJECT_CLASS (sw_twitter_item_view_parent_class)->finalize (object);
 }
 
@@ -327,7 +331,8 @@ _get_status_updates (SwTwitterItemView *item_view)
     rest_proxy_call_set_function (call, "statuses/user_timeline.xml");
   else if (g_str_equal (priv->query, "x-mentions"))
     rest_proxy_call_set_function (call, "statuses/mentions.xml");
-  else if (g_str_equal (priv->query, "feed") || g_str_equal (priv->query, "friends-only"))
+  else if (g_str_equal (priv->query, "feed") ||
+           g_str_equal (priv->query, "friends-only"))
     rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
   else
     g_error (G_STRLOC ": Unexpected query '%s'", priv->query);
