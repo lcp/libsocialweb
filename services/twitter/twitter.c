@@ -42,6 +42,7 @@
 #include <interfaces/sw-query-ginterface.h>
 #include <interfaces/sw-avatar-ginterface.h>
 #include <interfaces/sw-status-update-ginterface.h>
+#include <interfaces/sw-photo-upload-ginterface.h>
 
 
 #include "twitter.h"
@@ -51,6 +52,7 @@ static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
 static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
 static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
+static void photo_upload_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (SwServiceTwitter,
                          sw_service_twitter,
@@ -62,7 +64,12 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceTwitter,
                          G_IMPLEMENT_INTERFACE (SW_TYPE_AVATAR_IFACE,
                                                 avatar_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_STATUS_UPDATE_IFACE,
-                                                status_update_iface_init));
+                                                status_update_iface_init)
+                         if (sw_keystore_get_key ("twitpic")) {
+                           G_IMPLEMENT_INTERFACE (SW_TYPE_PHOTO_UPLOAD_IFACE,
+                                                  photo_upload_iface_init)
+                         }
+);
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_TWITTER, SwServiceTwitterPrivate))
@@ -75,6 +82,7 @@ struct _SwServiceTwitterPrivate {
     CREDS_VALID
   } credentials;
   RestProxy *proxy;
+  RestProxy *twitpic_proxy;
   char *user_id;
   char *image_url;
   GConfClient *gconf;
@@ -306,6 +314,12 @@ _oauth_access_token_cb (RestProxyCall *call,
 
   g_object_unref (call);
 
+  /* Create a TwitPic proxy using OAuth Echo */
+  twitter->priv->twitpic_proxy = oauth_proxy_new_echo_proxy
+    (OAUTH_PROXY (twitter->priv->proxy),
+     "https://api.twitter.com/1/account/verify_credentials.json",
+     "http://api.twitpic.com/2/", FALSE);
+
   /*
    * Despite the fact we know the credentials are fine, we check them again to
    * get the user ID and avatar.
@@ -353,6 +367,11 @@ online_notify (gboolean online, gpointer user_data)
   } else {
     g_free (priv->user_id);
 
+    if (priv->twitpic_proxy) {
+      g_object_unref (priv->twitpic_proxy);
+      priv->twitpic_proxy = NULL;
+    }
+
     priv->user_id = NULL;
     priv->credentials = OFFLINE;
 
@@ -393,6 +412,11 @@ sw_service_twitter_dispose (GObject *object)
   if (priv->proxy) {
     g_object_unref (priv->proxy);
     priv->proxy = NULL;
+  }
+
+  if (priv->twitpic_proxy) {
+    g_object_unref (priv->twitpic_proxy);
+    priv->twitpic_proxy = NULL;
   }
 
   if (priv->gconf) {
@@ -699,3 +723,81 @@ status_update_iface_init (gpointer g_iface,
                                                   _twitter_status_update_update_status);
 }
 
+/* Photo upload interface */
+
+static void
+on_upload_cb (RestProxyCall *call,
+              const GError *error,
+              GObject *weak_object,
+              gpointer user_data)
+{
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (weak_object);
+
+  if (error) {
+    sw_photo_upload_iface_emit_photo_upload_progress (twitter, 0, -1, error->message);
+    /* TODO: clean up */
+  } else {
+    /* TODO: Send a tweet pointing to the twitpic url before returning */
+    sw_photo_upload_iface_emit_photo_upload_progress (twitter, 0, 100, "");
+  }
+}
+static void
+_twitpic_upload_photo (SwPhotoUploadIface    *self,
+                       const gchar           *filename,
+                       GHashTable            *params,
+                       DBusGMethodInvocation *context)
+{
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (self);
+  SwServiceTwitterPrivate *priv = twitter->priv;
+  GError *error = NULL;
+  RestProxyCall *call;
+  RestParam *param;
+  GMappedFile *map;
+  char *title;
+
+  map = g_mapped_file_new (filename, FALSE, &error);
+  if (error) {
+    /* TODO */
+    g_message (error->message);
+    return;
+  }
+
+  /* Use the title as the tweet, and if the title isn't specified use the
+     filename */
+  title = g_hash_table_lookup (params, "title");
+  if (title == NULL) {
+    title = g_path_get_basename (filename);
+  }
+
+  call = rest_proxy_new_call (priv->twitpic_proxy);
+  rest_proxy_call_set_function (call, "upload.xml");
+
+  rest_proxy_call_add_param (call, "key", sw_keystore_get_key ("twitpic"));
+
+  rest_proxy_call_add_param (call, "message", title);
+  g_free (title);
+
+  param = rest_param_new_with_owner ("media",
+                                     g_mapped_file_get_contents (map),
+                                     g_mapped_file_get_length (map),
+                                     /* TODO: extract this from the file */
+                                     "image/jpeg",
+                                     filename,
+                                     map,
+                                     (GDestroyNotify)g_mapped_file_unref);
+  rest_proxy_call_add_param_full (call, param);
+
+  rest_proxy_call_async (call, on_upload_cb, (GObject *)self, NULL, NULL);
+
+  /* TODO */
+  sw_photo_upload_iface_return_from_upload_photo (context, 0);
+}
+
+static void
+photo_upload_iface_init (gpointer g_iface,
+                         gpointer iface_data)
+{
+  SwPhotoUploadIfaceClass *klass = (SwPhotoUploadIfaceClass *)g_iface;
+
+  sw_photo_upload_iface_implement_upload_photo (klass, _twitpic_upload_photo);
+}
