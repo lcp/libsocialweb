@@ -501,29 +501,6 @@ refresh (SwService *service)
 }
 
 static void
-avatar_downloaded_cb (const gchar *uri,
-                       gchar       *local_path,
-                       gpointer     userdata)
-{
-  SwService *service = SW_SERVICE (userdata);
-
-  sw_service_emit_avatar_retrieved (service, local_path);
-  g_free (local_path);
-}
-
-static void
-request_avatar (SwService *service)
-{
-  SwServiceTwitterPrivate *priv = GET_PRIVATE (service);
-
-  if (priv->image_url) {
-    sw_web_download_image_async (priv->image_url,
-                                     avatar_downloaded_cb,
-                                     service);
-  }
-}
-
-static void
 verify_cb (RestProxyCall *call,
            const GError  *error,
            GObject       *weak_object,
@@ -724,7 +701,6 @@ sw_service_twitter_class_init (SwServiceTwitterClass *klass)
   service_class->refresh = refresh;
   service_class->get_static_caps = get_static_caps;
   service_class->get_dynamic_caps = get_dynamic_caps;
-  service_class->request_avatar = request_avatar;
   service_class->credentials_updated = credentials_updated;
 }
 
