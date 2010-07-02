@@ -30,6 +30,7 @@
 
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb/sw-item.h>
+#include <libsocialweb/sw-cache.h>
 
 #include "twitter-item-view.h"
 
@@ -279,6 +280,7 @@ _make_node_from_call (RestProxyCall *call)
   return root;
 }
 
+
 static void
 _got_status_updates_cb (RestProxyCall *call,
                         const GError  *error,
@@ -286,6 +288,7 @@ _got_status_updates_cb (RestProxyCall *call,
                         gpointer       userdata)
 {
   SwTwitterItemView *item_view = SW_TWITTER_ITEM_VIEW (weak_object);
+  SwTwitterItemViewPrivate *priv = GET_PRIVATE (item_view);
   RestXmlNode *root, *node;
   SwSet *set;
   SwService *service;
@@ -304,18 +307,29 @@ _got_status_updates_cb (RestProxyCall *call,
 
   SW_DEBUG (TWITTER, "Got tweets!");
 
-  for (node = rest_xml_node_find (root, "status"); node; node = node->next) {
+  service = sw_item_view_get_service (SW_ITEM_VIEW (item_view));
+
+  for (node = rest_xml_node_find (root, "status"); node; node = node->next)
+  {
     SwItem *item;
 
     item = _make_item (item_view, node);
-    service = sw_item_view_get_service (SW_ITEM_VIEW (item_view));
     sw_item_set_service (item, service);
+
     if (item)
       sw_set_add (set, (GObject *)item);
   }
 
   sw_item_view_set_from_set (SW_ITEM_VIEW (item_view),
-                                 set);
+                             set);
+
+  /* Save the results of this set to the cache */
+  sw_cache_save (service,
+                 priv->query,
+                 priv->params,
+                 set);
+
+
   sw_set_unref (set);
   rest_xml_node_unref (root);
 }
@@ -353,6 +367,24 @@ _update_timeout_cb (gpointer data)
   _get_status_updates (item_view);
 
   return TRUE;
+}
+
+static void
+_load_from_cache (SwTwitterItemView *item_view)
+{
+  SwTwitterItemViewPrivate *priv = GET_PRIVATE (item_view);
+  SwSet *set;
+
+  set = sw_cache_load (sw_item_view_get_service (SW_ITEM_VIEW (item_view)),
+                       priv->query,
+                       priv->params);
+
+  if (set)
+  {
+    sw_item_view_set_from_set (SW_ITEM_VIEW (item_view),
+                               set);
+    sw_set_unref (set);
+  }
 }
 
 static void
