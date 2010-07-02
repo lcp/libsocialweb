@@ -31,15 +31,20 @@
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <gconf/gconf-client.h>
+#include <interfaces/sw-query-ginterface.h>
 
 #include "lastfm.h"
 #include "lastfm-ginterface.h"
 
+#include "lastfm-item-view.h"
+
 static void lastfm_iface_init (gpointer g_iface, gpointer iface_data);
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
+static void query_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (SwServiceLastfm, sw_service_lastfm, SW_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init)
-                         G_IMPLEMENT_INTERFACE (SW_TYPE_LASTFM_IFACE, lastfm_iface_init));
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_LASTFM_IFACE, lastfm_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE, query_iface_init));
 
 
 #define GET_PRIVATE(o) \
@@ -561,6 +566,66 @@ lastfm_iface_init (gpointer g_iface,
 
   sw_lastfm_iface_implement_submit_track (klass, lastfm_submit_track);
   sw_lastfm_iface_implement_now_playing (klass, lastfm_now_playing);
+}
+
+/* Query interface */
+
+static const gchar *valid_queries[] = { "feed" };
+
+static gboolean
+_check_query_validity (const gchar *query)
+{
+  gint i = 0;
+
+  for (i = 0; i < G_N_ELEMENTS(valid_queries); i++)
+  {
+    if (g_str_equal (query, valid_queries[i]))
+      return TRUE;
+  }
+
+  return FALSE;
+}
+
+static void
+_lastfm_query_open_view (SwQueryIface          *self,
+                         const gchar           *query,
+                         GHashTable            *params,
+                         DBusGMethodInvocation *context)
+{
+  SwServiceLastfmPrivate *priv = GET_PRIVATE (self);
+  SwItemView *item_view;
+  const gchar *object_path;
+
+  if (!_check_query_validity (query))
+  {
+    dbus_g_method_return_error (context,
+                                g_error_new (SW_SERVICE_ERROR,
+                                             SW_SERVICE_ERROR_INVALID_QUERY,
+                                             "Query '%s' is invalid",
+                                             query));
+    return;
+  }
+
+  item_view = g_object_new (SW_TYPE_LASTFM_ITEM_VIEW,
+                            "proxy", priv->proxy,
+                            "service", self,
+                            "query", query,
+                            "params", params,
+                            NULL);
+
+  object_path = sw_item_view_get_object_path (item_view);
+  sw_query_iface_return_from_open_view (context,
+                                        object_path);
+}
+
+static void
+query_iface_init (gpointer g_iface,
+                  gpointer iface_data)
+{
+  SwQueryIfaceClass *klass = (SwQueryIfaceClass*)g_iface;
+
+  sw_query_iface_implement_open_view (klass,
+                                      _lastfm_query_open_view);
 }
 
 static void
