@@ -431,10 +431,10 @@ refresh (SwService *service)
 }
 
 static void
-user_changed_cb (GConfClient *client,
-                 guint        cnxn_id,
-                 GConfEntry  *entry,
-                 gpointer     user_data)
+_gconf_user_changed_cb (GConfClient *client,
+                        guint        cnxn_id,
+                        GConfEntry  *entry,
+                        gpointer     user_data)
 {
   SwService *service = SW_SERVICE (user_data);
   SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (service);
@@ -456,10 +456,7 @@ user_changed_cb (GConfClient *client,
 
     SW_DEBUG (LASTFM, "User set to %s", priv->user_id);
 
-    if (priv->user_id)
-      refresh (service);
-    else
-      sw_service_emit_refreshed (service, NULL);
+    g_signal_emit_by_name (service, "user-changed");
   }
 }
 
@@ -511,6 +508,19 @@ sw_service_lastfm_finalize (GObject *object)
   G_OBJECT_CLASS (sw_service_lastfm_parent_class)->finalize (object);
 }
 
+static void
+_service_user_changed_cb (SwService *service,
+                          gpointer   userdata)
+{
+  SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (service);
+  SwServiceLastfmPrivate *priv = lastfm->priv;
+
+  if (priv->user_id)
+    refresh (service);
+  else
+    sw_service_emit_refreshed (service, NULL);
+}
+
 static gboolean
 sw_service_lastfm_initable (GInitable     *initable,
                             GCancellable  *cancellable,
@@ -542,8 +552,13 @@ sw_service_lastfm_initable (GInitable     *initable,
   gconf_client_add_dir (priv->gconf, KEY_BASE,
                         GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
   priv->gconf_notify_id = gconf_client_notify_add (priv->gconf, KEY_USER,
-                                                   user_changed_cb, lastfm,
+                                                   _gconf_user_changed_cb, lastfm,
                                                    NULL, NULL);
+
+  g_signal_connect (lastfm,
+                    "user-changed",
+                    (GCallback)_service_user_changed_cb,
+                    NULL);
   gconf_client_notify (priv->gconf, KEY_USER);
 
   return TRUE;
