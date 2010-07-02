@@ -3,6 +3,140 @@ libsocialweb
 
 A personal social data server.
 
+Core
+~~~~
+
+libsocialweb (referred to as lsw in this document) comprises of a core daemon
+process that can load in multiple modules.
+
+The lsw core sits on the dbus at the well known name org.moblin.libsocialweb.
+The core object sits on the bus at /org/moblin/libsocialweb and implemented
+the org.moblin.libsocialweb interface.
+
+This interface has the following methods:
+
+org.moblin.libsocialweb (TODO: Rename to .Core)
+
+GetServices -> returns the set of available services
+
+TODO: Add ServiceAdded signal since we now monitor for services)
+
+TODO: Add GetServicesByStaticCapability
+
+HideItem - LEGACY - DEPRECATED DO NOT USE -> Use Banish interface on service
+OpenView - LEGACY - DEPRECATED DO NOT USE -> Use Query interface on service
+
+
+Services
+~~~~~~~~
+
+The service names returned by GetServices can then be mapped to service
+objects sitting on the dbus. These services have the object path:
+
+/org/moblin/libsocialweb/Service/<service name>
+
+The service objects are provided by the loaded backends. Each service must
+implement the org.moblin.libsocialweb.Service interface.
+
+This has the following methods:
+
+CredentialsUpdated - Used by web service configuration to indicate to the
+service that is must update it's credentials. Not needed to usual client use.
+
+GetDynamicCapabilities -> returns the set of variable capabilities for the
+service - these are capabilities that can vary over time based on whether the
+service is configured, available or use control
+
+GetStaticCapabilities -> returns the set of fixed capabilities for the service -
+these represent what type of functionality the service supports when fully
+configured and available.
+
+RequestAvatar - LEGACY - DEPRECATED DO NOT USE -> Use Avatar interrace
+
+Signals:
+
+CapabilitiesChanged -> fired with the new set of dynamic capabilities
+AvatarRetrieved - LEGACY DEPRECATED DO NOT USE -> Use Avatar interrace
+UserChanged - ???
+
+Available capabilities:
+========= ============
+
+can-verify-credentials - static - means that credentials-invalid and
+credentials-valid dynamic caps are available
+
+can-update-status - static - this service has the StatusUpdate interface
+                  - dynamic - this service is able to accept status updates on
+                              the StatusUpdate interface
+
+can-request-avatar - static - this service has the Avatar interface
+                   - dynamic - this service is able to accept avatar requests
+                               on the Avatar interface
+
+can-geotag - static - this service has the StatusUpdate interface and
+                      potentially supports sending latitude/longitude in the
+                      status update
+           - dynamic - this service is able to accept the geotag'ed status
+                       updates
+
+is-configured - dynamic - all necessary configuration steps for the service
+                          have been completed. The service may still have
+                          invalid credentials or unable to work so the other
+                          dynamic caps must be checked.
+
+credentials-invalid - dynamic - the provided credentials are invalid
+credentials-valid - dynamic - the provided credentials have been checked and
+                              are correct
+
+
+TODO: rename can-update-status static to has-status-update-interface
+      rename can-request-avatar static to has-request-avatar-interface
+      rename can-geotag static to can-status-update-with-geotag
+      add has-query-interface static
+
+StatusUpdate interface
+============ =========
+
+This interface should only be used if the static caps indicate that it is
+present and the dynamic caps indicate it is available.
+
+Methods:
+
+UpdateStatus - updates the status for the service with the given message and
+               optional string hash of parameters. Use latitude and longitude
+               parameters if the can-geotag dynamic cap is set
+
+Signals:
+
+StatusUpdated - fired if the call to update the status has finished with a
+                boolean parameter to indicate success
+
+Avatar interface
+====== =========
+
+This interface should only be used if the static caps indicate that it is
+present and the dynamic caps indicate it is available.
+
+Methods:
+
+RequestAvatar - asks the service to download the user's own avatar
+
+Signals:
+
+AvatarRetrieved - fired when the avatar has been successfully downloaded, the
+                  paramater is the local filename for the avatar
+
+
+PhotoUpload interface
+=========== =========
+
+TODO
+
+Query interface
+===== =========
+
+TODO
+
 
 Defined Keys
 ==
