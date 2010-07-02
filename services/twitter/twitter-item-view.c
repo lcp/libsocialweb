@@ -400,8 +400,30 @@ twitter_item_view_start (SwItemView *item_view)
     priv->timeout_id = g_timeout_add_seconds (UPDATE_TIMEOUT,
                                               (GSourceFunc)_update_timeout_cb,
                                               item_view);
+
+    _load_from_cache ((SwTwitterItemView *)item_view);
     _get_status_updates ((SwTwitterItemView *)item_view);
   }
+}
+
+static void
+twitter_item_view_stop (SwItemView *item_view)
+{
+  SwTwitterItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  if (!priv->timeout_id)
+  {
+    g_warning (G_STRLOC ": View not running");
+  } else {
+    g_source_remove (priv->timeout_id);
+    priv->timeout_id = 0;
+  }
+}
+
+static void
+twitter_item_view_refresh (SwItemView *item_view)
+{
+  _get_status_updates ((SwTwitterItemView *)item_view);
 }
 
 static void
@@ -419,6 +441,8 @@ sw_twitter_item_view_class_init (SwTwitterItemViewClass *klass)
   object_class->finalize = sw_twitter_item_view_finalize;
 
   item_view_class->start = twitter_item_view_start;
+  item_view_class->stop = twitter_item_view_stop;
+  item_view_class->refresh = twitter_item_view_refresh;
 
   pspec = g_param_spec_object ("proxy",
                                "proxy",
