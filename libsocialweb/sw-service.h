@@ -61,7 +61,6 @@ typedef struct _SwServiceClass SwServiceClass;
 struct _SwServiceClass {
   GObjectClass parent_class;
   /* signals */
-  void (*avatar_retrieved)(SwService *service, const gchar *path);
   void (*caps_changed) (SwService *service, char **caps);
 
   /* vfuncs */
@@ -75,8 +74,6 @@ struct _SwServiceClass {
 
   const gchar ** (*get_static_caps) (SwService *service);
   const gchar ** (*get_dynamic_caps) (SwService *service);
-
-  void (*request_avatar) (SwService *service);
 
   void (*credentials_updated) (SwService *service);
 };

@@ -198,15 +198,6 @@ sw_service_emit_capabilities_changed (SwService   *service,
 }
 
 void
-sw_service_emit_avatar_retrieved (SwService   *service,
-                                  const gchar *path)
-{
-  g_return_if_fail (SW_IS_SERVICE (service));
-
-  sw_service_iface_emit_avatar_retrieved (service, path);
-}
-
-void
 sw_service_emit_user_changed (SwService *service)
 {
   g_return_if_fail (SW_IS_SERVICE (service));
@@ -214,22 +205,6 @@ sw_service_emit_user_changed (SwService *service)
   sw_service_iface_emit_user_changed (service);
 }
 
-
-static void
-service_request_avatar (SwServiceIface        *self,
-                        DBusGMethodInvocation *context)
-{
-  SwServiceClass *service_class;
-
-  service_class = SW_SERVICE_GET_CLASS (self);
-
-  if (service_class->request_avatar)
-  {
-    service_class->request_avatar ((SwService *)self);
-  }
-
-  sw_service_iface_return_from_request_avatar (context);
-}
 
 static void
 service_get_static_caps (SwServiceIface        *self,
@@ -305,8 +280,6 @@ service_iface_init (gpointer g_iface,
                                                       service_get_static_caps);
   sw_service_iface_implement_get_dynamic_capabilities (klass,
                                                        service_get_dynamic_caps);
-  sw_service_iface_implement_request_avatar (klass,
-                                             service_request_avatar);
   sw_service_iface_implement_credentials_updated (klass,
                                                   service_credentials_updated);
 }
