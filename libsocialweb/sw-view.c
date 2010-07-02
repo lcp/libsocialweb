@@ -211,9 +211,9 @@ service_refreshed_cb (SwService *service,
   g_object_get (service, "params", &params, NULL);
 
   if (set) {
-    sw_cache_save (service, params, set);
+    sw_cache_save (service, NULL, params, set);
   } else {
-    sw_cache_drop (service, params);
+    sw_cache_drop (service, NULL, params);
   }
 
   g_hash_table_unref (params);
@@ -259,7 +259,7 @@ load_cache (SwView *view)
     GHashTable *params;
 
     g_object_get (service, "params", &params, NULL);
-    set = sw_cache_load (service, params);
+    set = sw_cache_load (service, NULL, params);
     g_hash_table_unref (params);
 
     service_refreshed_cb (service, set, view);

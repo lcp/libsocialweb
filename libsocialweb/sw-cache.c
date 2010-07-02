@@ -28,7 +28,9 @@
  * creates the parent directory if required.
  */
 static char *
-get_cache_filename (SwService *service, GHashTable *params)
+get_cache_filename (SwService   *service,
+                    const gchar *query,
+                    GHashTable  *params)
 {
   char *path, *param_hash, *filename, *full_filename;
 
@@ -49,7 +51,10 @@ get_cache_filename (SwService *service, GHashTable *params)
 
   param_hash = sw_hash_string_dict (params);
   filename = g_strconcat (sw_service_get_name (service),
-                          "-", param_hash, NULL);
+                          "-", 
+                          query,
+                          "-",
+                          param_hash, NULL);
   g_free (param_hash);
 
   full_filename = g_build_filename (path, filename, NULL);
@@ -140,6 +145,7 @@ set_keyfile_from_item (gpointer data, gpointer user_data)
  * sw_cache_save:
  *
  * @service: The service the item set is for
+ * @query: The query that this cache represents
  * @params: A set of parameters (strings) that can be used by the service to
  * differentiate between different service functionality
  * @set: The set of items to cache
@@ -147,17 +153,19 @@ set_keyfile_from_item (gpointer data, gpointer user_data)
  * Cache the items in @set to disk.
  */
 void
-sw_cache_save (SwService  *service,
-               GHashTable *params,
-               SwSet      *set)
+sw_cache_save (SwService   *service,
+               const gchar *query,
+               GHashTable  *params,
+               SwSet       *set)
 {
   char *filename;
 
   g_return_if_fail (SW_IS_SERVICE (service));
 
-  g_object_get (service, "params", &params, NULL);
+  if (query == NULL)
+    query = "feed";
 
-  filename = get_cache_filename (service, params);
+  filename = get_cache_filename (service, query, params);
 
   if (set == NULL || sw_set_is_empty (set)) {
     g_remove (filename);
@@ -178,7 +186,6 @@ sw_cache_save (SwService  *service,
   }
 
   g_free (filename);
-  g_hash_table_unref (params);
 }
 
 /*
@@ -224,6 +231,7 @@ load_item_from_keyfile (SwService  *service,
  * sw_cache_load:
  *
  * @service: The service to read the cache for
+ * @query: The query for this cache
  * @params: A set of parameters (strings) that can be used by the service to
  * differentiate between different service functionality
  *
@@ -231,8 +239,9 @@ load_item_from_keyfile (SwService  *service,
  * cache.
  */
 SwSet *
-sw_cache_load (SwService  *service,
-               GHashTable *params)
+sw_cache_load (SwService   *service,
+               const gchar *query,
+               GHashTable  *params)
 {
   char *filename;
   GKeyFile *keys;
@@ -240,9 +249,12 @@ sw_cache_load (SwService  *service,
 
   g_return_val_if_fail (SW_IS_SERVICE (service), NULL);
 
+  if (query == NULL)
+    query = "feed";
+
   keys = g_key_file_new ();
 
-  filename = get_cache_filename (service, params);
+  filename = get_cache_filename (service, query, params);
 
   if (g_key_file_load_from_file (keys, filename, G_KEY_FILE_NONE, NULL)) {
     char **groups;
@@ -269,20 +281,25 @@ sw_cache_load (SwService  *service,
  * sw_cache_drop:
  *
  * @service: The service to read the cache for
+ * @query: The query for this cache
  * @params: A set of parameters (strings) that can be used by the service to
  * differentiate between different service functionality
  *
  * Free the cache for @service from disk.
  */
 void
-sw_cache_drop (SwService  *service,
-               GHashTable *params)
+sw_cache_drop (SwService   *service,
+               const gchar *query,
+               GHashTable  *params)
 {
   char *filename;
 
   g_return_if_fail (SW_IS_SERVICE (service));
 
-  filename = get_cache_filename (service, params);
+  if (query == NULL)
+    query = "feed";
+
+  filename = get_cache_filename (service, query, params);
 
   g_remove (filename);
 

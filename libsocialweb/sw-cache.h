@@ -24,15 +24,18 @@
 
 G_BEGIN_DECLS
 
-void sw_cache_save (SwService  *service,
-                    GHashTable *params,
-                    SwSet      *set);
+void sw_cache_save (SwService   *service,
+                    const gchar *query,
+                    GHashTable  *params,
+                    SwSet       *set);
 
-SwSet *sw_cache_load (SwService  *service,
-                      GHashTable *params);
+SwSet *sw_cache_load (SwService   *service,
+                      const gchar *query,
+                      GHashTable  *params);
 
-void sw_cache_drop (SwService  *service,
-                    GHashTable *params);
+void sw_cache_drop (SwService   *service,
+                    const gchar *query,
+                    GHashTable  *params);
 
 G_END_DECLS
 
