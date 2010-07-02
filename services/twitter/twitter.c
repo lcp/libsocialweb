@@ -64,20 +64,13 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceTwitter,
 struct _SwServiceTwitterPrivate {
   gboolean inited;
   enum {
-    OWN,
-    FRIENDS,
-    BOTH
-  } type;
-  enum {
     OFFLINE,
     CREDS_INVALID,
     CREDS_VALID
   } credentials;
-  gboolean running;
   RestProxy *proxy;
   char *user_id;
   char *image_url;
-  GRegex *twitpic_re;
   GConfClient *gconf;
   guint gconf_notify_id[2];
   char *username, *password;
@@ -92,11 +85,16 @@ static void online_notify (gboolean online, gpointer user_data);
 static void credentials_updated (SwService *service);
 
 static void
-auth_changed_cb (GConfClient *client, guint cnxn_id, GConfEntry *entry, gpointer user_data)
+_gconf_auth_changed_cb (GConfClient *client,
+                        guint        cnxn_id,
+                        GConfEntry  *entry,
+                        gpointer     user_data)
 {
   SwService *service = SW_SERVICE (user_data);
+
   SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
   SwServiceTwitterPrivate *priv = twitter->priv;
+
   const char *username = NULL, *password = NULL;
   gboolean updated = FALSE;
 
@@ -158,242 +156,6 @@ node_from_call (RestProxyCall *call)
   return root;
 }
 
-static char *
-make_date (const char *s)
-{
-  struct tm tm;
-  strptime (s, "%a %b %d %T %z %Y", &tm);
-  return sw_time_t_to_string (timegm (&tm));
-}
-
-/*
- * Remove trailing and leading whitespace and hyphens in an attempt to clean up
- * twitpic tweets.
- */
-static void
-cleanup_twitpic (char *string)
-{
-  guchar *start;
-  size_t len;
-
-  g_return_if_fail (string != NULL);
-
-  for (start = (guchar*) string; *start && (g_ascii_isspace (*start) || *start == '-'); start++)
-    ;
-
-  len = strlen ((char*)start);
-
-  g_memmove (string, start, len + 1);
-
-  while (len--) {
-    if (g_ascii_isspace ((guchar) string[len]) || string[len] == '-')
-      string[len] = '\0';
-    else
-      break;
-  }
-}
-
-static SwItem *
-make_item (SwServiceTwitter *twitter, RestXmlNode *node)
-{
-  SwServiceTwitterPrivate *priv = twitter->priv;
-  SwItem *item;
-  RestXmlNode *u_node, *place_n, *n;
-  const char *post_id, *user_id, *user_name, *date, *content, *screen_name;
-  char *url;
-  GMatchInfo *match_info;
-
-  u_node = rest_xml_node_find (node, "user");
-
-  user_id = rest_xml_node_find (u_node, "id")->content;
-
-  /* For friend only feeds, ignore our own tweets */
-  if (priv->type == FRIENDS &&
-      user_id && g_str_equal (user_id, priv->user_id))
-  {
-    return NULL;
-  }
-
-  item = sw_item_new ();
-  sw_item_set_service (item, (SwService *)twitter);
-
-  post_id = rest_xml_node_find (node, "id")->content;
-  sw_item_put (item, "authorid", user_id);
-
-  if (rest_xml_node_find (u_node, "screen_name"))
-  {
-    screen_name = rest_xml_node_find (u_node, "screen_name")->content;
-    sw_item_put (item, "screen_name", screen_name);
-
-    url = g_strdup_printf ("http://twitter.com/%s/statuses/%s",
-                           screen_name,
-                           post_id);
-
-  } else {
-    url = g_strdup_printf ("http://twitter.com/%s/statuses/%s",
-                           user_id,
-                           post_id);
-  }
-
-  sw_item_put (item, "id", url);
-  sw_item_take (item, "url", url);
-
-  user_name = rest_xml_node_find (u_node, "name")->content;
-  sw_item_put (item, "author", user_name);
-
-  content = rest_xml_node_find (node, "text")->content;
-  if (g_regex_match (priv->twitpic_re, content, 0, &match_info)) {
-    char *twitpic_id, *new_content;
-
-    /* Construct the thumbnail URL and download the image */
-    twitpic_id = g_match_info_fetch (match_info, 1);
-    url = g_strconcat ("http://twitpic.com/show/thumb/", twitpic_id, NULL);
-    sw_item_request_image_fetch (item, FALSE, "thumbnail", url);
-    g_free (url);
-
-    /* Remove the URL from the tweet and use that as the title */
-    new_content = g_regex_replace (priv->twitpic_re,
-                                   content, -1,
-                                   0, "", 0, NULL);
-
-    cleanup_twitpic (new_content);
-
-    sw_item_take (item, "title", new_content);
-
-    /* Update the URL to point at twitpic */
-    url = g_strconcat ("http://twitpic.com/", twitpic_id, NULL);
-    sw_item_take (item, "url", url);
-
-    g_free (twitpic_id);
-  }
-
-  sw_item_put (item, "content", content);
-
-  g_match_info_free (match_info);
-
-  date = rest_xml_node_find (node, "created_at")->content;
-  sw_item_take (item, "date", make_date (date));
-
-  n = rest_xml_node_find (u_node, "location");
-  if (n && n->content)
-    sw_item_put (item, "location", n->content);
-
-  n = rest_xml_node_find (node, "geo");
-
-  if (n)
-  {
-    n = rest_xml_node_find (n, "georss:point");
-
-    if (n && n->content)
-    {
-      gchar **split_str;
-
-      split_str = g_strsplit (n->content, " ", 2);
-
-      if (split_str[0] && split_str[1])
-      {
-        sw_item_put (item, "latitude", split_str[0]);
-        sw_item_put (item, "longitude", split_str[1]);
-      }
-
-      g_strfreev (split_str);
-    }
-  }
-
-  place_n = rest_xml_node_find (node, "place");
-
-  if (place_n)
-  {
-    n = rest_xml_node_find (place_n, "name");
-
-    if (n && n->content)
-    {
-      sw_item_put (item, "place_name", n->content);
-    }
-
-    n = rest_xml_node_find (place_n, "full_name");
-
-    if (n && n->content)
-    {
-      sw_item_put (item, "place_full_name", n->content);
-    }
-  }
-
-  n = rest_xml_node_find (u_node, "profile_image_url");
-  if (n && n->content)
-    sw_item_request_image_fetch (item, FALSE, "authoricon", n->content);
-
-
-  return item;
-}
-
-static void
-tweets_cb (RestProxyCall *call,
-           const GError  *error,
-           GObject       *weak_object,
-           gpointer       userdata)
-{
-  SwServiceTwitter *service = SW_SERVICE_TWITTER (weak_object);
-  RestXmlNode *root, *node;
-  SwSet *set;
-
-  if (error) {
-    g_message ("Error: %s", error->message);
-    return;
-  }
-
-  root = node_from_call (call);
-  if (!root)
-    return;
-
-  set = sw_item_set_new ();
-
-  SW_DEBUG (TWITTER, "Got tweets!");
-
-  for (node = rest_xml_node_find (root, "status"); node; node = node->next) {
-    SwItem *item;
-    /* TODO: skip the user's own tweets */
-
-    item = make_item (service, node);
-    if (item)
-      sw_set_add (set, (GObject *)item);
-  }
-
-  sw_service_emit_refreshed ((SwService *)service, set);
-
-  /* TODO cleanup */
-  sw_set_unref (set);
-  rest_xml_node_unref (root);
-}
-
-static void
-get_status_updates (SwServiceTwitter *twitter)
-{
-  SwServiceTwitterPrivate *priv = twitter->priv;
-  RestProxyCall *call;
-
-  if (!priv->user_id || !priv->running)
-    return;
-
-  SW_DEBUG (TWITTER, "Got status updates");
-
-  call = rest_proxy_new_call (priv->proxy);
-  switch (priv->type) {
-  case OWN:
-    rest_proxy_call_set_function (call, "1/statuses/user_timeline.xml");
-    break;
-  case FRIENDS:
-  case BOTH:
-    rest_proxy_call_set_function (call, "1/statuses/friends_timeline.xml");
-    break;
-  }
-
-  rest_proxy_call_add_params (call,
-                              "count", "50",
-                              NULL);
-  rest_proxy_call_async (call, tweets_cb, (GObject*)twitter, NULL, NULL);
-}
-
 static const char **
 get_static_caps (SwService *service)
 {
@@ -412,6 +174,7 @@ static const char **
 get_dynamic_caps (SwService *service)
 {
   SwServiceTwitterPrivate *priv = GET_PRIVATE (service);
+
   static const char *no_caps[] = { NULL };
   static const char *configured_caps[] = {
     IS_CONFIGURED,
@@ -438,16 +201,17 @@ get_dynamic_caps (SwService *service)
     NULL
   };
 
-  switch (priv->credentials) {
-  case CREDS_VALID:
-    return priv->geotag_enabled ? full_caps_with_geotag : full_caps;
-  case CREDS_INVALID:
-    return invalid_caps;
-  case OFFLINE:
-    if (priv->username && priv->password)
-      return configured_caps;
-    else
-      return no_caps;
+  switch (priv->credentials)
+  {
+    case CREDS_VALID:
+      return priv->geotag_enabled ? full_caps_with_geotag : full_caps;
+    case CREDS_INVALID:
+      return invalid_caps;
+    case OFFLINE:
+      if (priv->username && priv->password)
+        return configured_caps;
+      else
+        return no_caps;
   }
 
   /* Just in case we fell through that switch */
@@ -482,25 +246,6 @@ sanity_check_date (RestProxyCall *call)
 }
 
 static void
-start (SwService *service)
-{
-  SwServiceTwitter *twitter = (SwServiceTwitter*)service;
-
-  twitter->priv->running = TRUE;
-}
-
-static void
-refresh (SwService *service)
-{
-  SwServiceTwitter *twitter = (SwServiceTwitter*)service;
-  SwServiceTwitterPrivate *priv = twitter->priv;
-
-  if (priv->running && priv->username && priv->password && priv->proxy) {
-    get_status_updates (twitter);
-  }
-}
-
-static void
 verify_cb (RestProxyCall *call,
            const GError  *error,
            GObject       *weak_object,
@@ -527,17 +272,14 @@ verify_cb (RestProxyCall *call,
 
   sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
 
-  if (priv->running)
-    get_status_updates (twitter);
-
   g_object_unref (call);
 }
 
 static void
-access_token_cb (RestProxyCall *call,
-                 const GError  *error,
-                 GObject       *weak_object,
-                 gpointer       userdata)
+_oauth_access_token_cb (RestProxyCall *call,
+                        const GError  *error,
+                        GObject       *weak_object,
+                        gpointer       userdata)
 {
   SwService *service = SW_SERVICE (weak_object);
   SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
@@ -579,11 +321,7 @@ online_notify (gboolean online, gpointer user_data)
 
   if (online) {
     if (priv->username && priv->password) {
-      const char *key = NULL, *secret = NULL;
       RestProxyCall *call;
-
-      sw_keystore_get_key_secret ("twitter", &key, &secret);
-      priv->proxy = oauth_proxy_new (key, secret, "https://api.twitter.com/", FALSE);
 
       SW_DEBUG (TWITTER, "Getting token");
 
@@ -600,7 +338,7 @@ online_notify (gboolean online, gpointer user_data)
                                   "x_auth_username", priv->username,
                                   "x_auth_password", priv->password,
                                   NULL);
-      rest_proxy_call_async (call, access_token_cb, (GObject*)twitter, NULL, NULL);
+      rest_proxy_call_async (call, _oauth_access_token_cb, (GObject*)twitter, NULL, NULL);
       /* Set offline for now and wait for access_token_cb to return */
       priv->credentials = OFFLINE;
     } else {
@@ -608,10 +346,6 @@ online_notify (gboolean online, gpointer user_data)
       sw_service_emit_refreshed ((SwService *)twitter, NULL);
     }
   } else {
-    if (priv->proxy) {
-      g_object_unref (priv->proxy);
-      priv->proxy = NULL;
-    }
     g_free (priv->user_id);
 
     priv->user_id = NULL;
@@ -656,11 +390,6 @@ sw_service_twitter_dispose (GObject *object)
     priv->proxy = NULL;
   }
 
-  if (priv->twitpic_re) {
-    g_regex_unref (priv->twitpic_re);
-    priv->twitpic_re = NULL;
-  }
-
   if (priv->gconf) {
     gconf_client_notify_remove (priv->gconf, priv->gconf_notify_id[0]);
     gconf_client_notify_remove (priv->gconf, priv->gconf_notify_id[1]);
@@ -697,8 +426,6 @@ sw_service_twitter_class_init (SwServiceTwitterClass *klass)
   object_class->finalize = sw_service_twitter_finalize;
 
   service_class->get_name = sw_service_twitter_get_name;
-  service_class->start = start;
-  service_class->refresh = refresh;
   service_class->get_static_caps = get_static_caps;
   service_class->get_dynamic_caps = get_dynamic_caps;
   service_class->credentials_updated = credentials_updated;
@@ -728,6 +455,7 @@ sw_service_twitter_initable (GInitable    *initable,
     return TRUE;
 
   sw_keystore_get_key_secret ("twitter", &key, &secret);
+
   if (key == NULL || secret == NULL) {
     g_set_error_literal (error,
                          SW_SERVICE_ERROR,
@@ -736,28 +464,32 @@ sw_service_twitter_initable (GInitable    *initable,
     return FALSE;
   }
 
-  if (sw_service_get_param ((SwService *)twitter, "own")) {
-    priv->type = OWN;
-  } else if (sw_service_get_param ((SwService *)twitter, "friends")){
-    priv->type = FRIENDS;
-  } else {
-    priv->type = BOTH;
-  }
-
   priv->credentials = OFFLINE;
 
-  priv->twitpic_re = g_regex_new ("http://twitpic.com/([A-Za-z0-9]+)", 0, 0, NULL);
-  g_assert (priv->twitpic_re);
+  sw_keystore_get_key_secret ("twitter", &key, &secret);
+  priv->proxy = oauth_proxy_new (key, secret, "https://api.twitter.com/", FALSE);
 
   priv->gconf = gconf_client_get_default ();
-  gconf_client_add_dir (priv->gconf, KEY_BASE,
-                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  priv->gconf_notify_id[0] = gconf_client_notify_add (priv->gconf, KEY_USER,
-                                                      auth_changed_cb, twitter,
-                                                      NULL, NULL);
-  priv->gconf_notify_id[1] = gconf_client_notify_add (priv->gconf, KEY_PASS,
-                                                      auth_changed_cb, twitter,
-                                                      NULL, NULL);
+
+  gconf_client_add_dir (priv->gconf,
+                        KEY_BASE,
+                        GCONF_CLIENT_PRELOAD_ONELEVEL,
+                        NULL);
+
+  priv->gconf_notify_id[0] = gconf_client_notify_add (priv->gconf,
+                                                      KEY_USER,
+                                                      _gconf_auth_changed_cb,
+                                                      twitter,
+                                                      NULL,
+                                                      NULL);
+
+  priv->gconf_notify_id[1] = gconf_client_notify_add (priv->gconf,
+                                                      KEY_PASS,
+                                                      _gconf_auth_changed_cb,
+                                                      twitter,
+                                                      NULL,
+                                                      NULL);
+
   gconf_client_notify (priv->gconf, KEY_USER);
   gconf_client_notify (priv->gconf, KEY_PASS);
 
@@ -781,7 +513,7 @@ initable_iface_init (gpointer g_iface, gpointer iface_data)
 static const gchar *valid_queries[] = { "feed",
                                         "own",
                                         "friends-only",
-                                        "x-mentions"};
+                                        "x-mentions" };
 
 static gboolean
 _check_query_validity (const gchar *query)
