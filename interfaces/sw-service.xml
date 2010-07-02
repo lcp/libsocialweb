@@ -14,12 +14,6 @@
       <arg name="caps" type="as" direction="out"/>
     </signal>
 
-    <method name="RequestAvatar" tp:name-for-bindings="Request_Avatar"/>
-
-    <signal name="AvatarRetrieved" tp:name-for-bindings="Avatar_Retrieved">
-      <arg name="path" type="s"/>
-    </signal>
-
     <!-- Signal to clients that the user has changed so they should re-fetch the
          avatar and so on -->
     <signal name="UserChanged" tp:name-for-bindings="User_Changed"/>
