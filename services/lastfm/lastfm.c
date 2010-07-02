@@ -584,3 +584,10 @@ sw_service_lastfm_init (SwServiceLastfm *self)
 {
   self->priv = GET_PRIVATE (self);
 }
+
+
+const gchar *
+sw_service_lastfm_get_user_id (SwServiceLastfm *service)
+{
+  return service->priv->user_id;
+}

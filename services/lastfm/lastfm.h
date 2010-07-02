@@ -54,6 +54,8 @@ typedef struct {
 
 GType sw_service_lastfm_get_type (void);
 
+const gchar *sw_service_lastfm_get_user_id (SwServiceLastfm *service);
+
 G_END_DECLS
 
 #endif /* _SW_SERVICE_LASTFM */
