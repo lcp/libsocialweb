@@ -20,11 +20,16 @@
 #include "sw-marshals.h"
 #include "sw-item.h"
 #include "sw-service-ginterface.h"
+#include "sw-banishable-ginterface.h"
+#include "sw-banned.h"
 
 static void service_iface_init (gpointer g_iface, gpointer iface_data);
+static void banishable_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE (SwService, sw_service, G_TYPE_OBJECT,
                                   G_IMPLEMENT_INTERFACE (SW_TYPE_SERVICE_IFACE,
-                                                         service_iface_init));
+                                                         service_iface_init)
+                                  G_IMPLEMENT_INTERFACE (SW_TYPE_BANISHABLE_IFACE,
+                                                         banishable_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE, SwServicePrivate))
@@ -33,6 +38,8 @@ typedef struct _SwServicePrivate SwServicePrivate;
 
 struct _SwServicePrivate {
   GHashTable *params;
+
+  GHashTable *banned_uids;
 };
 
 enum {
@@ -99,6 +106,12 @@ sw_service_dispose (GObject *object)
     priv->params = NULL;
   }
 
+  if (priv->banned_uids)
+  {
+    g_hash_table_unref (priv->banned_uids);
+    priv->banned_uids = NULL;
+  }
+
   G_OBJECT_CLASS (sw_service_parent_class)->dispose (object);
 }
 
@@ -136,6 +149,9 @@ sw_service_class_init (SwServiceClass *klass)
 static void
 sw_service_init (SwService *self)
 {
+  SwServicePrivate *priv = GET_PRIVATE (self);
+
+  priv->banned_uids = sw_ban_load (sw_service_get_name (self));
 }
 
 gboolean
@@ -204,7 +220,6 @@ sw_service_emit_user_changed (SwService *service)
 
   sw_service_iface_emit_user_changed (service);
 }
-
 
 static void
 service_get_static_caps (SwServiceIface        *self,
@@ -282,4 +297,31 @@ service_iface_init (gpointer g_iface,
                                                        service_get_dynamic_caps);
   sw_service_iface_implement_credentials_updated (klass,
                                                   service_credentials_updated);
+}
+
+static void
+banishable_hide_item (SwBanishableIface     *self,
+                      const gchar           *uid,
+                      DBusGMethodInvocation *context)
+{
+  SwServicePrivate *priv = GET_PRIVATE (self);
+
+  g_hash_table_insert (priv->banned_uids,
+                       g_strdup (uid),
+                       GINT_TO_POINTER (42));
+
+  /* TODO: Emit signal to trigger refresh of item views */
+  sw_ban_save (sw_service_get_name (SW_SERVICE (self)), priv->banned_uids);
+
+  sw_banishable_iface_return_from_hide_item (context);
+}
+
+static void
+banishable_iface_init (gpointer g_iface,
+                       gpointer iface_data)
+{
+  SwBanishableIfaceClass *klass = (SwBanishableIfaceClass *)g_iface;
+
+  sw_banishable_iface_implement_hide_item (klass,
+                                           banishable_hide_item);
 }
