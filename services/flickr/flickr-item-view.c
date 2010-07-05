@@ -31,8 +31,9 @@
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb-keyfob/sw-keyfob.h>
-#include <rest-extras/flickr-proxy.h>
+#include <libsocialweb/sw-cache.h>
 
+#include <rest-extras/flickr-proxy.h>
 #include "flickr-item-view.h"
 #include "flickr.h"
 
@@ -271,6 +272,24 @@ _update_timeout_cb (gpointer data)
   _get_status_updates (item_view);
 
   return TRUE;
+}
+
+static void
+_load_from_cache (SwFlickrItemView *item_view)
+{
+  SwFlickrItemViewPrivate *priv = GET_PRIVATE (item_view);
+  SwSet *set;
+
+  set = sw_cache_load (sw_item_view_get_service (SW_ITEM_VIEW (item_view)),
+                       priv->query,
+                       priv->params);
+
+  if (set)
+  {
+    sw_item_view_set_from_set (SW_ITEM_VIEW (item_view),
+                               set);
+    sw_set_unref (set);
+  }
 }
 
 static void
