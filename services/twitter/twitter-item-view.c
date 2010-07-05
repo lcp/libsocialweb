@@ -138,6 +138,7 @@ sw_twitter_item_view_finalize (GObject *object)
 
   g_free (priv->query);
   g_regex_unref (priv->twitpic_re);
+  g_hash_table_unref (priv->params);
 
   G_OBJECT_CLASS (sw_twitter_item_view_parent_class)->finalize (object);
 }
