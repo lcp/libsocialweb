@@ -147,9 +147,11 @@ _photos_received_cb (RestProxyCall *call,
                      gpointer       userdata)
 {
   SwItemView *item_view = SW_ITEM_VIEW (weak_object);
+  SwFlickrItemViewPrivate *priv = GET_PRIVATE (item_view);
   RestXmlParser *parser;
   RestXmlNode *root, *node;
   SwSet *set;
+  SwService *service;
 
   if (error) {
     g_warning ("Cannot get Flickr photos: %s", error->message);
@@ -163,11 +165,12 @@ _photos_received_cb (RestProxyCall *call,
   set = sw_set_new ();
 
   node = rest_xml_node_find (root, "photos");
+
+  service = sw_item_view_get_service (item_view);
+
   for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
     SwItem *item;
-    SwService *service;
 
-    service = sw_item_view_get_service (item_view);
     item = _flickr_item_from_from_photo_node (SW_SERVICE_FLICKR (service),
                                               node);
     sw_set_add (set, G_OBJECT (item));
@@ -178,6 +181,10 @@ _photos_received_cb (RestProxyCall *call,
   g_object_unref (parser);
 
   sw_item_view_set_from_set (item_view, set);
+  sw_cache_save (service,
+                 priv->query,
+                 priv->params,
+                 set);
 
   sw_set_unref (set);
 }
