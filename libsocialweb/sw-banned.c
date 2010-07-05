@@ -79,6 +79,21 @@ sw_ban_save (GHashTable *hash)
 
   path = g_build_filename (g_get_user_cache_dir (),
                            PACKAGE,
+                           NULL);
+
+  if (!g_file_test (path, G_FILE_TEST_IS_DIR)) {
+    int err;
+
+    err = g_mkdir_with_parents (path, 0777);
+
+    if (err)
+      g_critical (G_STRLOC "Cannot create cache directory: %s", g_strerror (err));
+  }
+
+  g_free (path);
+
+  path = g_build_filename (g_get_user_cache_dir (),
+                           PACKAGE,
                            "banned.txt",
                            NULL);
   file = g_file_new_for_path (path);
