@@ -18,6 +18,7 @@
 
 #include <glib.h>
 
-GHashTable * sw_ban_load (void);
+GHashTable *sw_ban_load (const gchar *service_name);
 
-void sw_ban_save (GHashTable *hash);
+void sw_ban_save (const gchar *service_name,
+                  GHashTable  *hash);

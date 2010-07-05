@@ -22,8 +22,34 @@
 
 /* TODO: turn this into a proper object which manages the ban list properly */
 
+static gchar *
+_make_banned_filename (const gchar *service_name)
+{
+  gchar *path;
+
+  if (service_name)
+  {
+    gchar *filename;
+
+    filename = g_strdup_printf ("%s-banned.txt", service_name);
+
+    path = g_build_filename (g_get_user_cache_dir (),
+                             PACKAGE,
+                             filename,
+                             NULL);
+    g_free (filename);
+  } else {
+    path = g_build_filename (g_get_user_cache_dir (),
+                             PACKAGE,
+                             "banned.txt",
+                             NULL);
+  }
+
+  return path;
+}
+
 GHashTable *
-sw_ban_load (void)
+sw_ban_load (const gchar *service_name)
 {
   GHashTable *hash;
   char *path;
@@ -34,11 +60,7 @@ sw_ban_load (void)
   char *line;
 
   hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-
-  path = g_build_filename (g_get_user_cache_dir (),
-                           PACKAGE,
-                           "banned.txt",
-                           NULL);
+  path = _make_banned_filename (service_name);
   file = g_file_new_for_path (path);
   g_free (path);
 
@@ -65,7 +87,8 @@ sw_ban_load (void)
 }
 
 void
-sw_ban_save (GHashTable *hash)
+sw_ban_save (const gchar *service_name,
+             GHashTable  *hash)
 {
   char *path;
   GFile *file;
@@ -92,10 +115,7 @@ sw_ban_save (GHashTable *hash)
 
   g_free (path);
 
-  path = g_build_filename (g_get_user_cache_dir (),
-                           PACKAGE,
-                           "banned.txt",
-                           NULL);
+  path = _make_banned_filename (service_name);
   file = g_file_new_for_path (path);
   g_free (path);
 

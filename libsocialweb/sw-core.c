@@ -259,7 +259,7 @@ core_hide_item (SwCoreIface           *iface,
   g_list_foreach (core->priv->views, (GFunc)sw_view_recalculate, NULL);
 
   /* TODO: do in an idle or on quit? */
-  sw_ban_save (core->priv->banned_uids);
+  sw_ban_save (NULL, core->priv->banned_uids);
 
   sw_core_iface_return_from_hide_item (context);
 }
@@ -481,7 +481,7 @@ sw_core_constructed (GObject *object)
   GError *error = NULL;
   const char *modules;
 
-  priv->banned_uids = sw_ban_load ();
+  priv->banned_uids = sw_ban_load (NULL);
 
   priv->connection = dbus_g_bus_get (DBUS_BUS_STARTER, &error);
   if (error) {
