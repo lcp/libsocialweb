@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE node SYSTEM "dbus.dtd">
+
+<node name="/Banishable_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+  <interface name="org.moblin.libsocialweb.Banishable">
+    <method name="HideItem" tp:name-for-bindings="Hide_Item">
+      <arg name="uid" type="s" direction="in"/>
+    </method>
+  </interface>
+</node>
