@@ -293,7 +293,14 @@ _photos_received_cb (RestProxyCall *call,
 
     item = _flickr_item_from_from_photo_node (SW_SERVICE_FLICKR (service),
                                               node);
-    sw_set_add (set, G_OBJECT (item));
+
+
+    if (!sw_service_is_uid_banned (service,
+                                   sw_item_get (item, "id")))
+    {
+      sw_set_add (set, (GObject *)item);
+    }
+
     g_object_unref (item);
   }
 

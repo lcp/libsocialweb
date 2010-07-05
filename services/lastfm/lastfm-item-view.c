@@ -431,7 +431,14 @@ _get_tracks_cb (RestProxyCall *call,
     SwItem *item;
 
     item = make_item (item_view, service, user_node, track_node);
-    sw_set_add (priv->set, (GObject *)item);
+
+    if (!sw_service_is_uid_banned (service,
+                                   sw_item_get (item, "id")))
+    {
+      sw_set_add (priv->set, (GObject *)item);
+    }
+
+    g_object_unref (item);
   }
 
   rest_xml_node_unref (root);

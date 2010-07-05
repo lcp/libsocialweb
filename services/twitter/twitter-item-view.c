@@ -318,7 +318,15 @@ _got_status_updates_cb (RestProxyCall *call,
     sw_item_set_service (item, service);
 
     if (item)
-      sw_set_add (set, (GObject *)item);
+    {
+      if (!sw_service_is_uid_banned (service,
+                                     sw_item_get (item, "id")))
+      {
+        sw_set_add (set, (GObject *)item);
+      }
+
+      g_object_unref (item);
+    }
   }
 
   sw_item_view_set_from_set (SW_ITEM_VIEW (item_view),
