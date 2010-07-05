@@ -274,7 +274,7 @@ _update_timeout_cb (gpointer data)
 }
 
 static void
-sw_flickr_item_view_start (SwItemView *item_view)
+flickr_item_view_start (SwItemView *item_view)
 {
   SwFlickrItemViewPrivate *priv = GET_PRIVATE (item_view);
 
@@ -282,12 +282,32 @@ sw_flickr_item_view_start (SwItemView *item_view)
   {
     g_warning (G_STRLOC ": View already started.");
   } else {
-    SW_DEBUG (TWITTER, G_STRLOC ": Setting up the timeout");
     priv->timeout_id = g_timeout_add_seconds (UPDATE_TIMEOUT,
                                               (GSourceFunc)_update_timeout_cb,
                                               item_view);
+    _load_from_cache ((SwFlickrItemView *)item_view);
     _get_status_updates ((SwFlickrItemView *)item_view);
   }
+}
+
+static void
+flickr_item_view_stop (SwItemView *item_view)
+{
+  SwFlickrItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  if (!priv->timeout_id)
+  {
+    g_warning (G_STRLOC ": View not running");
+  } else {
+    g_source_remove (priv->timeout_id);
+    priv->timeout_id = 0;
+  }
+}
+
+static void
+flickr_item_view_refresh (SwItemView *item_view)
+{
+  _get_status_updates ((SwFlickrItemView *)item_view);
 }
 
 static void
@@ -304,7 +324,9 @@ sw_flickr_item_view_class_init (SwFlickrItemViewClass *klass)
   object_class->dispose = sw_flickr_item_view_dispose;
   object_class->finalize = sw_flickr_item_view_finalize;
 
-  item_view_class->start = sw_flickr_item_view_start;
+  item_view_class->start = flickr_item_view_start;
+  item_view_class->stop = flickr_item_view_stop;
+  item_view_class->refresh = flickr_item_view_refresh;
 
   pspec = g_param_spec_object ("proxy",
                                "proxy",
