@@ -54,9 +54,6 @@ typedef struct {
 
 GType sw_service_flickr_get_type (void);
 
-SwItem *_flickr_item_from_from_photo_node (SwServiceFlickr *service,
-                                           RestXmlNode     *node);
-
 G_END_DECLS
 
 #endif /* _LIBSOCIALWEB_SERVICE_FLICKR */

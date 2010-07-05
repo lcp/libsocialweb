@@ -56,66 +56,6 @@ struct _SwServiceFlickrPrivate {
 
 static GList *service_list = NULL;
 
-static gboolean
-check_attrs (RestXmlNode *node, ...)
-{
-  va_list attrs;
-  const char *name;
-
-  g_assert (node);
-
-  va_start (attrs, node);
-  while ((name = va_arg (attrs, char*)) != NULL) {
-    if (rest_xml_node_get_attr (node, name) == NULL) {
-      g_warning ("XML node doesn't have required attribute %s", name);
-      return FALSE;
-    }
-  }
-  va_end (attrs);
-
-  return TRUE;
-}
-
-/* TODO: pass in size enum */
-static char *
-construct_photo_url (RestXmlNode *node)
-{
-  if (!check_attrs (node, "farm", "server", "id", "secret", NULL))
-    return NULL;
-
-  return g_strdup_printf ("http://farm%s.static.flickr.com/%s/%s_%s_m.jpg",
-                          rest_xml_node_get_attr (node, "farm"),
-                          rest_xml_node_get_attr (node, "server"),
-                          rest_xml_node_get_attr (node, "id"),
-                          rest_xml_node_get_attr (node, "secret"));
-}
-
-static char *
-construct_photo_page_url (RestXmlNode *node)
-{
-  if (!check_attrs (node, "owner", "id", NULL))
-    return NULL;
-
-  return g_strdup_printf ("http://www.flickr.com/photos/%s/%s/",
-                          rest_xml_node_get_attr (node, "owner"),
-                          rest_xml_node_get_attr (node, "id"));
-}
-
-static char *
-construct_buddy_icon_url (RestXmlNode *node)
-{
-  if (!check_attrs (node, "iconfarm", "iconserver", "owner", NULL))
-    return g_strdup ("http://www.flickr.com/images/buddyicon.jpg");
-
-  if (atoi (rest_xml_node_get_attr (node, "iconserver")) == 0)
-    return g_strdup ("http://www.flickr.com/images/buddyicon.jpg");
-
-  return g_strdup_printf ("http://farm%s.static.flickr.com/%s/buddyicons/%s.jpg",
-                          rest_xml_node_get_attr (node, "iconfarm"),
-                          rest_xml_node_get_attr (node, "iconserver"),
-                          rest_xml_node_get_attr (node, "owner"));
-}
-
 typedef struct {
   SwService *service;
   SwSet *set;
@@ -129,63 +69,7 @@ typedef struct {
   const char *key;
 } ImageData;
 
-static void
-extract_location (RestXmlNode *node, SwItem *item)
-{
-  const char *acc, *lon, *lat;
 
-  g_assert (node);
-  g_assert (SW_IS_ITEM (item));
-
-  acc = rest_xml_node_get_attr (node, "accuracy");
-  if (acc == NULL || atoi (acc) == 0)
-    return;
-
-  lat = rest_xml_node_get_attr (node, "latitude");
-  lon = rest_xml_node_get_attr (node, "longitude");
-
-  if (lat == NULL || lat[0] == '\0' ||
-      lon == NULL || lon[0] == '\0')
-    return;
-
-  sw_item_put (item, "latitude", lat);
-  sw_item_put (item, "longitude", lon);
-}
-
-SwItem *
-_flickr_item_from_from_photo_node (SwServiceFlickr *service,
-                                   RestXmlNode     *node)
-{
-  char *url;
-  SwItem *item;
-  gint64 date;
-
-  item = sw_item_new ();
-  sw_item_set_service (item, (SwService *)service);
-
-  url = construct_photo_page_url (node);
-  sw_item_put (item, "id", url);
-  sw_item_put (item, "title", rest_xml_node_get_attr (node, "title"));
-  sw_item_put (item, "authorid", rest_xml_node_get_attr (node, "owner"));
-  sw_item_put (item, "author", rest_xml_node_get_attr (node, "username"));
-  sw_item_put (item, "url", url);
-  g_free (url);
-
-  date = atoi (rest_xml_node_get_attr (node, "dateupload"));
-  sw_item_take (item, "date", sw_time_t_to_string (date));
-
-  url = construct_photo_url (node);
-  sw_item_request_image_fetch (item, TRUE, "thumbnail", url);
-  g_free (url);
-
-  url = construct_buddy_icon_url (node);
-  sw_item_request_image_fetch (item, FALSE, "authoricon", url);
-  g_free (url);
-
-  extract_location (node, item);
-
-  return item;
-}
 
 static void
 got_tokens_cb (RestProxy *proxy,
