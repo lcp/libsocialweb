@@ -113,6 +113,8 @@ void sw_service_emit_user_changed (SwService *service);
 const char * sw_service_get_param (SwService  *service,
                                    const char *key);
 
+gboolean sw_service_is_uid_banned (SwService   *service,
+                                   const gchar *uid);
 G_END_DECLS
 
 #endif /* _SW_SERVICE */

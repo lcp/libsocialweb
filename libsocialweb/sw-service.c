@@ -325,3 +325,17 @@ banishable_iface_init (gpointer g_iface,
   sw_banishable_iface_implement_hide_item (klass,
                                            banishable_hide_item);
 }
+
+gboolean
+sw_service_is_uid_banned (SwService   *service,
+                          const gchar *uid)
+{
+  SwServicePrivate *priv = GET_PRIVATE (service);
+
+  if (g_hash_table_lookup (priv->banned_uids, uid))
+  {
+    return TRUE;
+  } else {
+    return FALSE;
+  }
+}
