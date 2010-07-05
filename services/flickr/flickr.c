@@ -49,27 +49,9 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceFlickr, sw_service_flickr, SW_TYPE_SERVICE,
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_FLICKR, SwServiceFlickrPrivate))
 
 struct _SwServiceFlickrPrivate {
-  gboolean running;
   RestProxy *proxy;
   SoupSession *session; /* for upload */
 };
-
-static GList *service_list = NULL;
-
-typedef struct {
-  SwService *service;
-  SwSet *set;
-  /* Set of URL to list of SwItems waiting for that URL */
-  GHashTable *pending;
-  gboolean running;
-} RefreshData;
-
-typedef struct {
-  SwServiceFlickr *service;
-  const char *key;
-} ImageData;
-
-
 
 static void
 got_tokens_cb (RestProxy *proxy,
@@ -108,8 +90,6 @@ static void
 sw_service_flickr_dispose (GObject *object)
 {
   SwServiceFlickrPrivate *priv = SW_SERVICE_FLICKR (object)->priv;
-
-  service_list = g_list_remove (service_list, object);
 
   if (priv->proxy) {
     g_object_unref (priv->proxy);
@@ -443,5 +423,4 @@ sw_service_flickr_init (SwServiceFlickr *self)
 {
   self->priv = GET_PRIVATE (self);
   self->priv->session = soup_session_async_new ();
-  service_list = g_list_prepend (service_list, self);
 }
