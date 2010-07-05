@@ -52,10 +52,6 @@ struct _SwServiceFlickrPrivate {
   gboolean running;
   RestProxy *proxy;
   SoupSession *session; /* for upload */
-
-  /* Used when running a refresh */
-  SwSet *set;
-  gboolean refreshing;
 };
 
 static GList *service_list = NULL;
@@ -134,15 +130,6 @@ typedef struct {
 } ImageData;
 
 static void
-refresh_done (SwServiceFlickr *service)
-{
-  sw_service_emit_refreshed ((SwService*)service, service->priv->set);
-  service->priv->refreshing = FALSE;
-  sw_set_empty (service->priv->set);
-  /* TODO: more cleanup? */
-}
-
-static void
 extract_location (RestXmlNode *node, SwItem *item)
 {
   const char *acc, *lon, *lat;
@@ -200,62 +187,6 @@ _flickr_item_from_from_photo_node (SwServiceFlickr *service,
   return item;
 }
 
-
-static void
-flickr_callback (RestProxyCall *call,
-                 const GError  *error,
-                 GObject       *weak_object,
-                 gpointer       user_data)
-{
-  SwServiceFlickr *service = SW_SERVICE_FLICKR (weak_object);
-  RestXmlParser *parser;
-  RestXmlNode *root, *node;
-
-  if (error) {
-    g_warning ("Cannot get Flickr photos: %s", error->message);
-    return;
-  }
-
-  parser = rest_xml_parser_new ();
-  root = rest_xml_parser_parse_from_data (parser,
-                                          rest_proxy_call_get_payload (call),
-                                          rest_proxy_call_get_payload_length (call));
-  g_object_unref (call);
-
-  node = rest_xml_node_find (root, "rsp");
-  /* TODO: check for failure */
-
-  node = rest_xml_node_find (root, "photos");
-  for (node = rest_xml_node_find (node, "photo"); node; node = node->next) {
-    SwItem *item;
-    item = _flickr_item_from_from_photo_node (service, node);
-    sw_set_add (service->priv->set, G_OBJECT (item));
-    g_object_unref (item);
-  }
-
-  rest_xml_node_unref (root);
-  g_object_unref (parser);
-
-  refresh_done (service);
-}
-
-static void
-get_photos (SwServiceFlickr *flickr)
-{
-  RestProxyCall *call;
-  GError *error = NULL;
-
-  call = rest_proxy_new_call (flickr->priv->proxy);
-  rest_proxy_call_set_function (call, "flickr.photos.getContactsPhotos");
-  rest_proxy_call_add_param (call, "extras", "date_upload,icon_server,geo");
-  rest_proxy_call_add_param (call, "count", "50");
-
-  if (!rest_proxy_call_async (call, flickr_callback, (GObject*)flickr, NULL, &error)) {
-    g_warning ("Cannot get photos: %s", error->message);
-    g_error_free (error);
-  }
-}
-
 static void
 got_tokens_cb (RestProxy *proxy,
                gboolean   authorised,
@@ -266,9 +197,6 @@ got_tokens_cb (RestProxy *proxy,
   if (authorised) {
     /* TODO: this assumes that the tokens are valid. we should call checkToken
        and re-auth if required. */
-    get_photos (flickr);
-  } else {
-    sw_service_emit_refreshed ((SwService *)flickr, NULL);
   }
 
   /* Drop reference we took for callback */
@@ -276,47 +204,15 @@ got_tokens_cb (RestProxy *proxy,
 }
 
 static void
-refresh (SwService *service)
+credentials_updated (SwService *service)
 {
-  SwServiceFlickr *flickr = (SwServiceFlickr*)service;
+  SwServiceFlickr *flickr = (SwServiceFlickr *)service;
 
-  if (!flickr->priv->running) {
-    return;
-  }
-
-  if (flickr->priv->refreshing) {
-    /* We're currently refreshing, ignore this latest request */
-    return;
-  }
-
-  sw_keyfob_flickr ((FlickrProxy*)flickr->priv->proxy, 
+  sw_keyfob_flickr ((FlickrProxy *)flickr->priv->proxy, 
                     got_tokens_cb,
                     g_object_ref (service)); /* ref gets dropped in cb */
 }
 
-static void
-credentials_updated (SwService *service)
-{
-  SwService *service_instance;
-  GList* node;
-
-  for (node = service_list; node; node = g_list_next (node)){
-    service_instance = SW_SERVICE (node->data);
-
-    sw_service_emit_user_changed (service_instance);
-
-    /* TODO: This works because we re-auth on every refresh, which is bad */
-    refresh (service_instance);
-  }
-}
-
-static void
-start (SwService *service)
-{
-  SwServiceFlickr *flickr = (SwServiceFlickr*)service;
-
-  flickr->priv->running = TRUE;
-}
 
 static const char *
 sw_service_flickr_get_name (SwService *service)
@@ -367,9 +263,6 @@ sw_service_flickr_initable (GInitable    *initable,
     return TRUE;
 
   priv->proxy = flickr_proxy_new (key, secret);
-
-  priv->set = sw_item_set_new ();
-  priv->refreshing = FALSE;
 
   return TRUE;
 }
@@ -658,8 +551,6 @@ sw_service_flickr_class_init (SwServiceFlickrClass *klass)
   object_class->dispose = sw_service_flickr_dispose;
 
   service_class->get_name = sw_service_flickr_get_name;
-  service_class->start = start;
-  service_class->refresh = refresh;
   service_class->credentials_updated = credentials_updated;
 }
 
