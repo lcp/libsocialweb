@@ -164,17 +164,6 @@ sw_service_init (SwService *self)
 {
 }
 
-gboolean
-sw_service_ready (SwServiceClass *klass)
-{
-  g_return_val_if_fail (SW_IS_SERVICE_CLASS (klass), FALSE);
-
-  if (klass->ready)
-    return klass->ready (klass);
-  else
-    return TRUE;
-}
-
 const char *
 sw_service_get_name (SwService *service)
 {

@@ -65,7 +65,6 @@ struct _SwServiceClass {
 
   /* vfuncs */
   /* Call before construction to see if this service can be used */
-  gboolean (*ready) (SwServiceClass *klass); /* TODO: rename */
   const char *(*get_name) (SwService *service);
   void (*start) (SwService *service);
   /* fires ::refreshed (SwSet *set) signal */
@@ -87,8 +86,6 @@ struct _SwServiceClass {
 #define CAN_GEOTAG "can-geotag"
 
 GType sw_service_get_type (void);
-
-gboolean sw_service_ready (SwServiceClass *klass);
 
 const char *sw_service_get_name (SwService *service);
 
