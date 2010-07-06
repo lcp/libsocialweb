@@ -1,20 +1,22 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Xosé <xosecalvo@edu.xunta.es>, 2009.
+# Miguel Anxo Bouzada <mbouzada@gmail.com>, 2010.
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: libsocialweb\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-12-02 17:42+0000\n"
-"PO-Revision-Date: 2009-09-21 15:23+0200\n"
-"Last-Translator: Xosé <xosecalvo@edu.xunta.es>\n"
-"Language-Team: Galego <proxecto@trasno.org>\n"
+"PO-Revision-Date: 2010-07-06 14:18+0100\n"
+"Last-Translator: Miguel Anxo Bouzada <mbouzada@gmail.com>\n"
+"Language-Team: Galician <proxecto@trasno.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.0\n"
+"X-Poedit-Language: Galician\n"
 
 #: ../services/lastfm/lastfm.keys.in.h:1
 msgid "Last.fm"
@@ -22,7 +24,7 @@ msgstr "Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
 msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm é un servizo de música que aprende o que lle gusta a vostede. Cada tema que escoite diralle ao seu perfíl de Last.fm algo do que lle gusta. Pódeo conectar con outras persoas que gosten do mesmo que vostede - e recomendar cancións das súas coleccións musicais e tamén da súa."
+msgstr "Last.fm é un servizo de música que aprende o que lle gusta a vostede. Cada tema que escoite diralle ao seu perfil de Last.fm algo do que lle gusta. Pódeo conectar con outras persoas que gusten do mesmo que vostede - e recomendar cancións das súas coleccións musicais e tamén da súa propia."
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
@@ -30,7 +32,7 @@ msgstr "Twitter"
 
 #: ../services/twitter/twitter.keys.in.h:2
 msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter é un servizo para se comunicar coas amizades, a familia e os compañeiros de traballo mediante o intercambio de respostas rápidas e freceuentes a unha pregunta sinxela: Que andas a facer?"
+msgstr "Twitter é un servizo para comunicarse coas amizades, a familia e os compañeiros de traballo mediante o intercambio de respostas rápidas e frecuentes a unha pregunta sinxela: Que andas a facer?"
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
@@ -38,7 +40,7 @@ msgstr "Flickr"
 
 #: ../services/flickr/flickr.keys.in.h:2
 msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr "Flickr - case seguro que a mellor aplicación de todas para xestionar e compartir fotos en liña."
+msgstr "Flickr - case seguro que o mellor aplicativo de todos para xestionar e compartir fotos en liña."
 
 #: ../services/myspace/myspace.keys.in.h:1
 msgid "MySpace"
@@ -46,7 +48,7 @@ msgstr "MySpace"
 
 #: ../services/myspace/myspace.keys.in.h:2
 msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace é un portal social líder en conectar persoas, contido e cultura de todo o mundo. Cree un perfíl, comparta fotos, vídeos profesionais e populares, escriba o seu blogue, converse instantaneamente coas súas amizades e escoite música na comunidade musical máis grande do mundo."
+msgstr "MySpace é un portal social líder en conectar persoas, contido e cultura de todo o mundo. Cree un perfil, comparta fotos, vídeos profesionais e populares, escriba o seu blogue, converse instantaneamente coas súas amizades e escoite música na comunidade musical máis grande do mundo."
 
 #: ../services/digg/digg.keys.in.h:1
 msgid "Digg"
@@ -60,8 +62,9 @@ msgstr "%s de %s"
 
 #: ../services/digg/digg.keys.in.h:2
 msgid "Digg - to share news, video and images"
-msgstr "Digg - para compartir novas, vídeo e imaxes"
+msgstr "Digg - para compartir novas, vídeos e imaxes"
 
 #: ../services/lastfm/lastfm.c:149
 msgid "Unknown"
 msgstr "Descoñecido"
+
