@@ -21,14 +21,19 @@
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <glib/gi18n.h>
+#include <dbus/dbus-glib-lowlevel.h>
+
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-set.h>
 #include <libsocialweb/sw-utils.h>
 #include <libsocialweb/sw-web.h>
 #include <libsocialweb-keystore/sw-keystore.h>
 #include <libsocialweb-keyfob/sw-keyfob.h>
+#include <libsocialweb/client-monitor.h>
+
 #include <rest-extras/flickr-proxy.h>
 #include <rest/rest-xml-parser.h>
+
 #include <interfaces/sw-query-ginterface.h>
 #include <interfaces/sw-photo-upload-ginterface.h>
 
@@ -185,6 +190,10 @@ _flickr_query_open_view (SwQueryIface          *self,
                             "query", query,
                             "params", params,
                             NULL);
+
+  /* Ensure the object gets disposed when the client goes away */
+  client_monitor_add (dbus_g_method_get_sender (context),
+                      (GObject *)item_view);
 
   object_path = sw_item_view_get_object_path (item_view);
   sw_query_iface_return_from_open_view (context,

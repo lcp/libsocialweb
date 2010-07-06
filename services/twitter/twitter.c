@@ -17,10 +17,13 @@
  */
 
 #include <config.h>
+
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
-#include "twitter.h"
+#include <dbus/dbus-glib-lowlevel.h>
+#include <gconf/gconf-client.h>
+
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-set.h>
 #include <libsocialweb/sw-online.h>
@@ -29,7 +32,8 @@
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb-keyfob/sw-keyfob.h>
 #include <libsocialweb-keystore/sw-keystore.h>
-#include <gconf/gconf-client.h>
+#include <libsocialweb/client-monitor.h>
+
 #include <rest/oauth-proxy.h>
 #include <rest/oauth-proxy-call.h>
 #include <rest/rest-xml-parser.h>
@@ -39,6 +43,8 @@
 #include <interfaces/sw-avatar-ginterface.h>
 #include <interfaces/sw-status-update-ginterface.h>
 
+
+#include "twitter.h"
 #include "twitter-item-view.h"
 
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
@@ -555,6 +561,10 @@ _twitter_query_open_view (SwQueryIface          *self,
                             "query", query,
                             "params", params,
                             NULL);
+
+  /* Ensure the object gets disposed when the client goes away */
+  client_monitor_add (dbus_g_method_get_sender (context),
+                      (GObject *)item_view);
 
   object_path = sw_item_view_get_object_path (item_view);
   sw_query_iface_return_from_open_view (context,

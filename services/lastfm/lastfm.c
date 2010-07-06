@@ -21,6 +21,9 @@
 #include <string.h>
 #include <glib/gi18n.h>
 #include <gio/gio.h>
+#include <dbus/dbus-glib-lowlevel.h>
+#include <gconf/gconf-client.h>
+
 #include <libsocialweb/sw-service.h>
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-utils.h>
@@ -28,14 +31,15 @@
 #include <libsocialweb/sw-call-list.h>
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb-keystore/sw-keystore.h>
+#include <libsocialweb/client-monitor.h>
+
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
-#include <gconf/gconf-client.h>
+
 #include <interfaces/sw-query-ginterface.h>
+#include <interfaces/lastfm-ginterface.h>
 
 #include "lastfm.h"
-#include "lastfm-ginterface.h"
-
 #include "lastfm-item-view.h"
 
 static void lastfm_iface_init (gpointer g_iface, gpointer iface_data);
@@ -275,6 +279,11 @@ _lastfm_query_open_view (SwQueryIface          *self,
                             "query", query,
                             "params", params,
                             NULL);
+
+  /* Ensure the object gets disposed when the client goes away */
+  client_monitor_add (dbus_g_method_get_sender (context),
+                      (GObject *)item_view);
+
 
   object_path = sw_item_view_get_object_path (item_view);
   sw_query_iface_return_from_open_view (context,
