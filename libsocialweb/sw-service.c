@@ -116,6 +116,18 @@ sw_service_dispose (GObject *object)
 }
 
 static void
+sw_service_constructed (GObject *object)
+{
+  SwService *self = SW_SERVICE (object);
+  SwServicePrivate *priv = GET_PRIVATE (self);
+
+  priv->banned_uids = sw_ban_load (sw_service_get_name (self));
+
+  if (G_OBJECT_CLASS (sw_service_parent_class)->constructed)
+    G_OBJECT_CLASS (sw_service_parent_class)->constructed (object);
+}
+
+static void
 sw_service_class_init (SwServiceClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -126,6 +138,7 @@ sw_service_class_init (SwServiceClass *klass)
   object_class->get_property = sw_service_get_property;
   object_class->set_property = sw_service_set_property;
   object_class->dispose = sw_service_dispose;
+  object_class->constructed = sw_service_constructed;
 
   /* TODO: make services define gobject properties for each property they support */
   pspec = g_param_spec_boxed ("params", "params",
@@ -149,9 +162,6 @@ sw_service_class_init (SwServiceClass *klass)
 static void
 sw_service_init (SwService *self)
 {
-  SwServicePrivate *priv = GET_PRIVATE (self);
-
-  priv->banned_uids = sw_ban_load (sw_service_get_name (self));
 }
 
 gboolean
