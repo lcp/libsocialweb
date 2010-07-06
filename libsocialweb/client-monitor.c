@@ -72,17 +72,31 @@ client_monitor_init (DBusGConnection *connection)
                                NULL, NULL);
 }
 
+static void
+_view_weak_notify (gpointer  data,
+                   GObject  *old_view)
+{
+  char *sender = data;
+
+  g_assert (data);
+
+  client_monitor_remove (sender, old_view);
+}
+
 /* @sender has connected to @object.  If @sender disconnects from the bus,
    unref @object.  takes ownership of sender */
 void
-client_monitor_add (char *sender, GObject *object)
+client_monitor_add (char    *sender,
+                    GObject *object)
 {
   GList *list;
 
   g_return_if_fail (sender);
   g_return_if_fail (G_IS_OBJECT (object));
 
-  // TODO? g_object_weak_ref (object, weak_notify, NULL);
+  g_object_weak_ref (object,
+                     _view_weak_notify,
+                     g_strdup (sender)); /* freed by _remove */
 
   list = g_hash_table_lookup (clients, sender);
   list = g_list_prepend (list, object);
@@ -92,7 +106,8 @@ client_monitor_add (char *sender, GObject *object)
 /* @sender has disconnected from @object.  Takes ownership of sender. This does
    not unref object, but simply stops tracking it. */
 void
-client_monitor_remove (char *sender, GObject *object)
+client_monitor_remove (char    *sender,
+                       GObject *object)
 {
   GList *list;
 

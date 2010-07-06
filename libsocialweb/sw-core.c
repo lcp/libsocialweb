@@ -80,17 +80,6 @@ get_services (SwCoreIface *self, DBusGMethodInvocation *context)
   g_ptr_array_free (array, TRUE);
 }
 
-static void
-view_weak_notify (gpointer  data,
-                  GObject  *old_view)
-{
-  char *sender = data;
-
-  g_assert (data);
-
-  client_monitor_remove (sender, old_view);
-}
-
 static GHashTable *
 make_param_hash (const char *s)
 {
@@ -235,9 +224,6 @@ open_view (SwCoreIface            *self,
 
   /* TODO: move this into the view? */
   client_monitor_add (dbus_g_method_get_sender (context), (GObject*)view);
-  g_object_weak_ref ((GObject*)view,
-                     view_weak_notify,
-                     dbus_g_method_get_sender (context));
 
   g_object_weak_ref ((GObject*)view, view_weak_notify_list, core);
   priv->views = g_list_prepend (priv->views, view);
