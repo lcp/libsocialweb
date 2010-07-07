@@ -39,36 +39,6 @@ get_name (SwService *service)
 }
 
 static void
-refresh (SwService *service)
-{
-  SwSet *set;
-  SwItem *item;
-
-  set = sw_item_set_new ();
-
-  item = sw_item_new ();
-  sw_item_set_service (item, service);
-  sw_item_put (item, "id", "dummy-1");
-  sw_item_put (item, "title", "Dummy 1");
-  sw_item_put (item, "url", "http://burtonini.com/");
-  sw_item_take (item, "date", sw_time_t_to_string (time (NULL)));
-  sw_set_add (set, G_OBJECT (item));
-  g_object_unref (item);
-
-  item = sw_item_new ();
-  sw_item_set_service (item, service);
-  sw_item_put (item, "id", "dummy-2");
-  sw_item_put (item, "title", "Dummy 2");
-  sw_item_put (item, "url", "http://burtonini.com/");
-  sw_item_take (item, "date", sw_time_t_to_string (time (NULL) - 3600));
-  sw_set_add (set, G_OBJECT (item));
-  g_object_unref (item);
-
-  sw_service_emit_refreshed (service, set);
-  sw_set_unref (set);
-}
-
-static void
 sw_service_dummy_get_property (GObject    *object,
                                guint       property_id,
                                GValue     *value,
@@ -118,7 +88,6 @@ sw_service_dummy_class_init (SwServiceDummyClass *klass)
   object_class->finalize = sw_service_dummy_finalize;
 
   service_class->get_name = get_name;
-  service_class->refresh = refresh;
 }
 
 static void
