@@ -20,7 +20,6 @@ libsocialweb_la_SOURCES = sw-types.h \
 		       sw-debug.c sw-debug.h \
 		       sw-core.c sw-core.h \
 		       sw-item.c sw-item.h \
-		       sw-view.c sw-view.h \
 		       sw-item-view.c sw-item-view.h \
 		       sw-service.c sw-service.h \
 		       sw-utils.c sw-utils.h \

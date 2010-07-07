@@ -21,9 +21,9 @@
 #include "sw-core.h"
 #include "sw-utils.h"
 #include "sw-online.h"
-#include "sw-view.h"
 #include "sw-banned.h"
 #include "sw-debug.h"
+#include "sw-item.h"
 
 #include "client-monitor.h"
 
@@ -49,8 +49,6 @@ struct _SwCorePrivate {
   GHashTable *active_services;
   /* Hash of banned UID strings to a senitel (TODO: to timestamp) */
   GHashTable *banned_uids;
-  /* List of open views */
-  GList *views;
   /* Monitor for modules directory */
   GFileMonitor *modules_monitor;
 };
@@ -80,156 +78,10 @@ get_services (SwCoreIface *self, DBusGMethodInvocation *context)
   g_ptr_array_free (array, TRUE);
 }
 
-static GHashTable *
-make_param_hash (const char *s)
-{
-  char **tokens, **i;
-  GHashTable *hash;
-
-  hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-
-  if (s) {
-    tokens = g_strsplit (s, ",", 0);
-    for (i = tokens; *i; i++) {
-      char **nv;
-      nv = g_strsplit (*i, "=", 2);
-      if (nv[0] && nv[1]) {
-        /* Hash takes ownership of the strings */
-        g_hash_table_insert (hash, nv[0], nv[1]);
-        /* Just free the array */
-        g_free (nv);
-      } else {
-        g_strfreev (nv);
-      }
-    }
-    g_strfreev (tokens);
-  }
-
-  return hash;
-}
-
 typedef struct {
   SwCore *core;
   char *key;
 } WeakServiceData;
-
-static void
-service_destroy_notify (gpointer user_data, GObject *dead_service)
-{
-  WeakServiceData *data = user_data;
-
-  /* We need to do steal and free because the object is already dead */
-  g_hash_table_steal (data->core->priv->active_services, data->key);
-  g_free (data->key);
-  g_slice_free (WeakServiceData, data);
-}
-
-/* For the given name and parameters, return reference to a SwService. */
-static SwService *
-get_service (SwCore     *core,
-             const char *name,
-             GHashTable *params)
-{
-  SwCorePrivate *priv = core->priv;
-  char *param_hash, *key;
-  SwService *service;
-  GType type;
-  WeakServiceData *data;
-  GError *error = NULL;
-
-  param_hash = sw_hash_string_dict (params);
-  key = g_strconcat (name, "-", param_hash, NULL);
-  g_free (param_hash);
-
-  service = g_hash_table_lookup (priv->active_services, key);
-  if (service) {
-    g_free (key);
-    return g_object_ref (service);
-  }
-
-  type = GPOINTER_TO_INT (g_hash_table_lookup (priv->service_types, name));
-  if (!type)
-    return NULL;
-
-  service = g_object_new (type, "params", params, NULL);
-  if (G_IS_INITABLE (service)) {
-    if (!g_initable_init (G_INITABLE (service), NULL, &error)) {
-      g_message ("Cannot construct %s: %s", name, error->message);
-      g_error_free (error);
-      g_object_unref (service);
-      return NULL;
-    }
-  }
-
-  g_hash_table_insert (priv->active_services, key, service);
-
-  data = g_slice_new0 (WeakServiceData);
-  data->core = core;
-  data->key = key;
-  g_object_weak_ref ((GObject*)service, service_destroy_notify, data);
-
-  return service;
-}
-
-static void
-view_weak_notify_list (gpointer  data,
-                       GObject  *old_view)
-{
-  SwCore *core = data;
-
-  g_assert (SW_IS_CORE (core));
-
-  core->priv->views = g_list_remove (core->priv->views, old_view);
-}
-
-static void
-open_view (SwCoreIface            *self,
-           const char            **services,
-           guint                   count,
-           DBusGMethodInvocation  *context)
-{
-  SwCore *core = SW_CORE (self);
-  SwCorePrivate *priv = core->priv;
-  SwView *view;
-  const char *path;
-  const char **i;
-
-  view = sw_view_new (core, count);
-  path = sw_item_view_get_object_path (SW_ITEM_VIEW (view));
-
-  for (i = services; *i; i++) {
-    char **tokens;
-    const char *name;
-    GHashTable *params;
-    SwService *service;
-
-    tokens = g_strsplit (*i, ":", 2);
-    name = tokens[0];
-    params = make_param_hash (tokens[1]);
-
-    g_message ("%s: service name %s", __FUNCTION__, name);
-
-    service = get_service (core, name, params);
-
-    if (service) {
-      sw_view_add_service (view, service, params);
-    } else {
-      g_warning (G_STRLOC ": Request for unknown service: %s",
-                 name);
-    }
-    g_strfreev (tokens);
-
-    g_hash_table_unref (params);
-  }
-
-  /* TODO: move this into the view? */
-  client_monitor_add (dbus_g_method_get_sender (context), (GObject*)view);
-
-  g_object_weak_ref ((GObject*)view, view_weak_notify_list, core);
-  priv->views = g_list_prepend (priv->views, view);
-
-  sw_core_iface_return_from_open_view (context, path);
-}
 
 /* Online notifications */
 static void
@@ -502,7 +354,6 @@ core_iface_init (gpointer g_iface, gpointer iface_data)
   SwCoreIfaceClass *klass = (SwCoreIfaceClass*)g_iface;
 
   sw_core_iface_implement_get_services (klass, get_services);
-  sw_core_iface_implement_open_view (klass, open_view);
   sw_core_iface_implement_is_online (klass, is_online);
 }
 
