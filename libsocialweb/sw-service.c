@@ -37,22 +37,8 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (SwService, sw_service, G_TYPE_OBJECT,
 typedef struct _SwServicePrivate SwServicePrivate;
 
 struct _SwServicePrivate {
-  GHashTable *params;
-
   GHashTable *banned_uids;
 };
-
-enum {
-  PROP_0,
-  PROP_PARAMS
-};
-
-enum {
-  SIGNAL_REFRESHED,
-  N_SIGNALS
-};
-
-static guint signals[N_SIGNALS] = {0};
 
 GQuark
 sw_service_error_quark (void)
@@ -66,14 +52,7 @@ sw_service_set_property (GObject      *object,
                          const GValue *value,
                          GParamSpec   *pspec)
 {
-  SwServicePrivate *priv = GET_PRIVATE (object);
-
   switch (property_id) {
-  case PROP_PARAMS:
-    if (priv->params)
-      g_hash_table_unref (priv->params);
-    priv->params = g_value_dup_boxed (value);
-    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -85,12 +64,7 @@ sw_service_get_property (GObject    *object,
                          GValue     *value,
                          GParamSpec *pspec)
 {
-  SwServicePrivate *priv = GET_PRIVATE (object);
-
   switch (property_id) {
-  case PROP_PARAMS:
-    g_value_set_boxed (value, priv->params);
-    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
   }
@@ -100,11 +74,6 @@ static void
 sw_service_dispose (GObject *object)
 {
   SwServicePrivate *priv = GET_PRIVATE (object);
-
-  if (priv->params) {
-    g_hash_table_unref (priv->params);
-    priv->params = NULL;
-  }
 
   if (priv->banned_uids)
   {
@@ -131,7 +100,6 @@ static void
 sw_service_class_init (SwServiceClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  GParamSpec *pspec;
 
   g_type_class_add_private (klass, sizeof (SwServicePrivate));
 
@@ -139,22 +107,6 @@ sw_service_class_init (SwServiceClass *klass)
   object_class->set_property = sw_service_set_property;
   object_class->dispose = sw_service_dispose;
   object_class->constructed = sw_service_constructed;
-
-  /* TODO: make services define gobject properties for each property they support */
-  pspec = g_param_spec_boxed ("params", "params",
-                               "The service parameters",
-                              G_TYPE_HASH_TABLE,
-                              G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class, PROP_PARAMS, pspec);
-
-  signals[SIGNAL_REFRESHED] =
-    g_signal_new ("refreshed",
-                  G_OBJECT_CLASS_TYPE (klass),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__BOXED,
-                  G_TYPE_NONE, 1, SW_TYPE_SET);
 
   dbus_g_error_domain_register (SW_SERVICE_ERROR, NULL, SW_TYPE_SERVICE_ERROR);
 }
@@ -172,35 +124,6 @@ sw_service_get_name (SwService *service)
   g_return_val_if_fail (service_class->get_name, NULL);
 
   return service_class->get_name (service);
-}
-
-void
-sw_service_start (SwService *service)
-{
-  SwServiceClass *service_class = SW_SERVICE_GET_CLASS (service);
-
-  g_return_if_fail (service_class->start);
-
-  service_class->start (service);
-}
-
-void
-sw_service_refresh (SwService *service)
-{
-  SwServiceClass *service_class = SW_SERVICE_GET_CLASS (service);
-
-  g_return_if_fail (service_class->refresh);
-
-  service_class->refresh (service);
-}
-
-void
-sw_service_emit_refreshed (SwService *service,
-                           SwSet     *set)
-{
-  g_return_if_fail (SW_IS_SERVICE (service));
-
-  g_signal_emit (service, signals[SIGNAL_REFRESHED], 0, set);
 }
 
 void
@@ -262,26 +185,6 @@ service_credentials_updated (SwServiceIface        *self,
     service_class->credentials_updated ((SwService *)self);
 
   sw_service_iface_return_from_credentials_updated (context);
-}
-
-/*
- * Convenience function for subclasses to lookup a paramter
- */
-const char *
-sw_service_get_param (SwService  *service,
-                      const char *key)
-{
-  SwServicePrivate *priv;
-
-  g_return_val_if_fail (SW_IS_SERVICE (service), NULL);
-  g_return_val_if_fail (key, NULL);
-
-  priv = GET_PRIVATE (service);
-
-  if (priv->params)
-    return g_hash_table_lookup (priv->params, key);
-  else
-    return NULL;
 }
 
 static void

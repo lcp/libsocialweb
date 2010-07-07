@@ -60,20 +60,10 @@ struct _SwService {
 typedef struct _SwServiceClass SwServiceClass;
 struct _SwServiceClass {
   GObjectClass parent_class;
-  /* signals */
-  void (*caps_changed) (SwService *service, char **caps);
-
   /* vfuncs */
-  /* Call before construction to see if this service can be used */
   const char *(*get_name) (SwService *service);
-  void (*start) (SwService *service);
-  /* fires ::refreshed (SwSet *set) signal */
-  void (*refresh) (SwService *service);
-  SwItem *(*get_last_item) (SwService *service);
-
   const gchar ** (*get_static_caps) (SwService *service);
   const gchar ** (*get_dynamic_caps) (SwService *service);
-
   void (*credentials_updated) (SwService *service);
 };
 
@@ -89,26 +79,9 @@ GType sw_service_get_type (void);
 
 const char *sw_service_get_name (SwService *service);
 
-void sw_service_start (SwService *service);
-
-void sw_service_refresh (SwService *service);
-
-void sw_service_emit_refreshed (SwService *service,
-                                SwSet     *set);
-
 void sw_service_emit_capabilities_changed (SwService   *service,
                                            const char **caps);
-
-void sw_service_emit_status_updated (SwService *service,
-                                     gboolean   success);
-
-void sw_service_emit_avatar_retrieved (SwService   *service,
-                                       const gchar *path);
-
 void sw_service_emit_user_changed (SwService *service);
-
-const char * sw_service_get_param (SwService  *service,
-                                   const char *key);
 
 gboolean sw_service_is_uid_banned (SwService   *service,
                                    const gchar *uid);
