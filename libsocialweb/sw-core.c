@@ -231,25 +231,6 @@ open_view (SwCoreIface            *self,
   sw_core_iface_return_from_open_view (context, path);
 }
 
-static void
-core_hide_item (SwCoreIface           *iface,
-                const gchar           *uid,
-                DBusGMethodInvocation *context)
-{
-  SwCore *core = SW_CORE (iface);
-
-  g_hash_table_insert (core->priv->banned_uids,
-                       g_strdup (uid),
-                       GINT_TO_POINTER (42));
-
-  g_list_foreach (core->priv->views, (GFunc)sw_view_recalculate, NULL);
-
-  /* TODO: do in an idle or on quit? */
-  sw_ban_save (NULL, core->priv->banned_uids);
-
-  sw_core_iface_return_from_hide_item (context);
-}
-
 /* Online notifications */
 static void
 is_online (SwCoreIface *self, DBusGMethodInvocation *context)
@@ -522,7 +503,6 @@ core_iface_init (gpointer g_iface, gpointer iface_data)
 
   sw_core_iface_implement_get_services (klass, get_services);
   sw_core_iface_implement_open_view (klass, open_view);
-  sw_core_iface_implement_hide_item (klass, core_hide_item);
   sw_core_iface_implement_is_online (klass, is_online);
 }
 
