@@ -6,11 +6,6 @@
     <method name="GetServices" tp:name-for-bindings="Get_Services">
       <arg name="services" type="as" direction="out"/>
     </method>
-    <method name="OpenView" tp:name-for-bindings="Open_View">
-      <arg name="services" type="as" direction="in"/>
-      <arg name="count" type="u" direction="in"/>
-      <arg name="view" type="o" direction="out"/>
-    </method>
 
     <method name="IsOnline" tp:name-for-bindings="Is_Online">
       <arg name="online" type="b" direction="out"/>
