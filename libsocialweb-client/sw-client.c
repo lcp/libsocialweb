@@ -374,24 +374,3 @@ sw_client_is_online (SwClient                 *client,
                                     closure);
 }
 
-static void
-_hide_item_cb (DBusGProxy *proxy,
-               GError     *error,
-               gpointer    userdata)
-{
-  /* no-op */
-}
-
-void
-sw_client_hide_item (SwClient *client,
-                     SwItem   *item)
-{
-  SwClientPrivate *priv;
-
-  g_return_if_fail (SW_IS_CLIENT (client));
-  g_return_if_fail (item);
-
-  priv = GET_PRIVATE (client);
-
-  org_moblin_libsocialweb_hide_item_async (priv->proxy, item->uuid, _hide_item_cb, NULL);
-}

@@ -90,7 +90,6 @@ void sw_client_is_online (SwClient                 *client,
                           SwClientIsOnlineCallback  cb,
                           gpointer                  userdata);
 
-void sw_client_hide_item (SwClient *client, SwItem *item);
 
 G_END_DECLS
 
