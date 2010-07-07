@@ -349,7 +349,6 @@ online_notify (gboolean online, gpointer user_data)
       priv->credentials = OFFLINE;
     } else {
       priv->credentials = OFFLINE;
-      sw_service_emit_refreshed ((SwService *)twitter, NULL);
     }
   } else {
     g_free (priv->user_id);
