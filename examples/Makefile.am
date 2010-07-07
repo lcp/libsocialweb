@@ -1,9 +1,4 @@
-noinst_PROGRAMS = test-client monitor-caps test-client-query
-
-test_client_CFLAGS = $(DBUS_GLIB_CFLAGS) -I$(top_srcdir)
-test_client_LDFLAGS = $(DBUS_GLIB_LIBS) \
-		      $(top_builddir)/libsocialweb-client/libsocialweb-client.la
-test_client_SOURCES = test-client.c
+noinst_PROGRAMS = monitor-caps test-client-query
 
 test_client_query_CFLAGS = $(DBUS_GLIB_CFLAGS) -I$(top_srcdir)
 test_client_query_LDFLAGS = $(DBUS_GLIB_LIBS) \
