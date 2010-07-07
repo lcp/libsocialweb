@@ -30,7 +30,7 @@ libsocialweb_la_SOURCES = sw-types.h \
 		       sw-banned.c sw-banned.h \
 		       sw-call-list.c sw-call-list.h \
 		       sw-module.h \
-		       client-monitor.c client-monitor.h \
+		       sw-client-monitor.c sw-client-monitor.h \
 		       sw-enum-types.h sw-enum-types.c
 
 libsocialweb_la_HEADERS = \

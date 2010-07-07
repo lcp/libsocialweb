@@ -31,7 +31,7 @@
 #include <libsocialweb/sw-call-list.h>
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb-keystore/sw-keystore.h>
-#include <libsocialweb/client-monitor.h>
+#include <libsocialweb/sw-client-monitor.h>
 
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>

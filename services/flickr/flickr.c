@@ -29,7 +29,7 @@
 #include <libsocialweb/sw-web.h>
 #include <libsocialweb-keystore/sw-keystore.h>
 #include <libsocialweb-keyfob/sw-keyfob.h>
-#include <libsocialweb/client-monitor.h>
+#include <libsocialweb/sw-client-monitor.h>
 
 #include <rest-extras/flickr-proxy.h>
 #include <rest/rest-xml-parser.h>

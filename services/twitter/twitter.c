@@ -32,7 +32,7 @@
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb-keyfob/sw-keyfob.h>
 #include <libsocialweb-keystore/sw-keystore.h>
-#include <libsocialweb/client-monitor.h>
+#include <libsocialweb/sw-client-monitor.h>
 
 #include <rest/oauth-proxy.h>
 #include <rest/oauth-proxy-call.h>

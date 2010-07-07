@@ -25,7 +25,7 @@
 #include "sw-debug.h"
 #include "sw-item.h"
 
-#include "client-monitor.h"
+#include "sw-client-monitor.h"
 
 #include "sw-core-ginterface.h"
 
