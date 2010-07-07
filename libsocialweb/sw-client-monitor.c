@@ -49,7 +49,7 @@ name_owner_changed (DBusGProxy *proxy,
 
 /* init structures, listen to nameownerchanged */
 void
-client_monitor_init (DBusGConnection *connection)
+sw_client_monitor_init (DBusGConnection *connection)
 {
   DBusGProxy *bus;
 
@@ -80,14 +80,14 @@ _view_weak_notify (gpointer  data,
 
   g_assert (data);
 
-  client_monitor_remove (sender, old_view);
+  sw_client_monitor_remove (sender, old_view);
 }
 
 /* @sender has connected to @object.  If @sender disconnects from the bus,
    unref @object.  takes ownership of sender */
 void
-client_monitor_add (char    *sender,
-                    GObject *object)
+sw_client_monitor_add (char    *sender,
+                       GObject *object)
 {
   GList *list;
 
@@ -106,8 +106,8 @@ client_monitor_add (char    *sender,
 /* @sender has disconnected from @object.  Takes ownership of sender. This does
    not unref object, but simply stops tracking it. */
 void
-client_monitor_remove (char    *sender,
-                       GObject *object)
+sw_client_monitor_remove (char    *sender,
+                          GObject *object)
 {
   GList *list;
 
@@ -116,3 +116,4 @@ client_monitor_remove (char    *sender,
   /* This will cause sender to be freed */
   g_hash_table_insert (clients, sender, list);
 }
+

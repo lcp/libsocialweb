@@ -312,7 +312,7 @@ sw_core_constructed (GObject *object)
                                        "/org/moblin/libsocialweb",
                                        object);
 
-  client_monitor_init (priv->connection);
+  sw_client_monitor_init (priv->connection);
 
   modules = g_getenv ("SW_MODULES");
   if (modules) {

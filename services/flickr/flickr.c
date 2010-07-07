@@ -192,8 +192,8 @@ _flickr_query_open_view (SwQueryIface          *self,
                             NULL);
 
   /* Ensure the object gets disposed when the client goes away */
-  client_monitor_add (dbus_g_method_get_sender (context),
-                      (GObject *)item_view);
+  sw_client_monitor_add (dbus_g_method_get_sender (context),
+                         (GObject *)item_view);
 
   object_path = sw_item_view_get_object_path (item_view);
   sw_query_iface_return_from_open_view (context,
