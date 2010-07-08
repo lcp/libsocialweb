@@ -223,7 +223,18 @@ load_item_from_keyfile (SwService  *service,
       }
     }
   }
+
   g_strfreev (keys);
+
+  if (sw_service_is_uid_banned (service,
+                                sw_item_get (item,
+                                             "id")))
+  {
+    g_object_unref (item);
+
+    return NULL;
+  }
+
   return item;
 }
 
@@ -261,10 +272,18 @@ sw_cache_load (SwService   *service,
     gsize i, count;
 
     groups = g_key_file_get_groups (keys, &count);
+
     if (count) {
       set = sw_item_set_new ();
+
       for (i = 0; i < count; i++) {
-        sw_set_add (set, (GObject*)load_item_from_keyfile (service, keys, groups[i]));
+        SwItem *item;
+
+        /* May be null if it's banned */
+        item = load_item_from_keyfile (service, keys, groups[i]);
+
+        if (item)
+          sw_set_add (set, (GObject *)item);
       }
     }
 
