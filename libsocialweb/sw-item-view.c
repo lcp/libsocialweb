@@ -583,7 +583,8 @@ sw_item_view_add_items (SwItemView *item_view,
 
   g_ptr_array_free (ptr_array, TRUE);
 
-  priv->last_mtime = last_mtime;
+  if (last_mtime > priv->last_mtime)
+    priv->last_mtime = last_mtime;
 }
 
 /**
@@ -632,7 +633,8 @@ sw_item_view_update_items (SwItemView *item_view,
                                          ptr_array);
   g_ptr_array_free (ptr_array, TRUE);
 
-  priv->last_mtime = last_mtime;
+  if (last_mtime > priv->last_mtime)
+    priv->last_mtime = last_mtime;
 }
 
 /**
