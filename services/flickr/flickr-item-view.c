@@ -282,7 +282,7 @@ _photos_received_cb (RestProxyCall *call,
   root = rest_xml_parser_parse_from_data (parser,
                                           rest_proxy_call_get_payload (call),
                                           rest_proxy_call_get_payload_length (call));
-  set = sw_set_new ();
+  set = sw_item_set_new ();
 
   node = rest_xml_node_find (root, "photos");
 
