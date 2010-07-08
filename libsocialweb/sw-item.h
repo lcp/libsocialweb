@@ -94,6 +94,10 @@ void sw_item_pop_pending (SwItem *item);
 void sw_item_touch (SwItem *item);
 time_t sw_item_get_mtime (SwItem *item);
 
+
+gboolean sw_item_equal (SwItem *a,
+                        SwItem *b);
+
 /* Convenience function */
 SwSet *sw_item_set_new (void);
 

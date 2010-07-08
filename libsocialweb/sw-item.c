@@ -405,3 +405,48 @@ sw_item_get_mtime (SwItem *item)
 {
   return item->priv->mtime;
 }
+
+/* Intentionally don't compare the mtime */
+gboolean
+sw_item_equal (SwItem *a,
+               SwItem *b)
+{
+  SwItemPrivate *priv_a = GET_PRIVATE (a);
+  SwItemPrivate *priv_b = GET_PRIVATE (b);
+  GHashTable *hash_a = priv_a->hash;
+  GHashTable *hash_b = priv_b->hash;
+  GHashTableIter iter_a, iter_b;
+  gpointer key_a, value_a;
+  gpointer key_b, value_b;
+  gboolean iter_valid_a, iter_valid_b;
+
+  if (priv_a->service != priv_b->service)
+    return FALSE;
+
+  if (priv_a->remaining_fetches != priv_b->remaining_fetches)
+    return FALSE;
+
+  g_hash_table_iter_init (&iter_a, hash_a);
+  g_hash_table_iter_init (&iter_b, hash_b);
+
+  iter_valid_a = g_hash_table_iter_next (&iter_a, &key_a, &value_a);
+  iter_valid_b = g_hash_table_iter_next (&iter_b, &key_b, &value_b);
+
+  do
+  {
+    if (!g_str_equal ((gchar *)key_a, (gchar *)key_b))
+      return FALSE;
+
+    if (!g_str_equal ((gchar *)value_a, (gchar *)value_b))
+      return FALSE;
+
+    iter_valid_a = g_hash_table_iter_next (&iter_a, &key_a, &value_a);
+    iter_valid_b = g_hash_table_iter_next (&iter_b, &key_b, &value_b);
+  } while (iter_valid_a && iter_valid_b);
+
+  if ((iter_valid_a && !iter_valid_b) || (!iter_valid_a && iter_valid_b))
+    return FALSE;
+
+  return TRUE;
+}
+
