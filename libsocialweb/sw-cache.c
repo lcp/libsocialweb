@@ -328,6 +328,54 @@ sw_cache_drop (SwService   *service,
   g_free (filename);
 }
 
+/**
+ * sw_cache_drop_all:
+ *
+ * @service: a valid #SwService
+ *
+ * Free all cached data for @service.
+ */
+void
+sw_cache_drop_all (SwService *service)
+{
+  char *path = NULL, *prefix = NULL;
+  GError *error = NULL;
+  const char *name;
+  GDir *dir;
+
+  g_return_if_fail (SW_IS_SERVICE (service));
+
+  path = g_build_filename (g_get_user_cache_dir (),
+                           PACKAGE,
+                           "cache",
+                           NULL);
+
+  if (!g_file_test (path, G_FILE_TEST_IS_DIR)) {
+    /* No cache directory */
+    goto done;
+  }
+
+  dir = g_dir_open (path, 0, &error);
+  if (error) {
+    g_message ("Cannot open cache %s: %s", path, error->message);
+    g_error_free (error);
+    goto done;
+  }
+
+  prefix = g_strconcat (sw_service_get_name (service), "-", NULL);
+
+  while ((name = g_dir_read_name (dir)) != NULL) {
+    if (g_str_has_prefix (name, prefix)) {
+      char *filename = g_build_filename (path, name, NULL);
+      g_remove (filename);
+      g_free (filename);
+    }
+  }
+
+ done:
+  g_free (prefix);
+  g_free (path);
+}
 
 #if BUILD_TESTS
 

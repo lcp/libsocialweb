@@ -37,6 +37,8 @@ void sw_cache_drop (SwService   *service,
                     const gchar *query,
                     GHashTable  *params);
 
+void sw_cache_drop_all (SwService *service);
+
 G_END_DECLS
 
 #endif /* _SW_CACHE */
