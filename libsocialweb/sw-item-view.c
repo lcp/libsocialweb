@@ -536,6 +536,7 @@ sw_item_view_add_items (SwItemView *item_view,
   GValueArray *value_array;
   GPtrArray *ptr_array;
   GList *l;
+  time_t last_mtime = 0;
 
   ptr_array = g_ptr_array_new ();
 
@@ -557,6 +558,9 @@ sw_item_view_add_items (SwItemView *item_view,
     }
 
     _setup_changed_handler (item, item_view);
+
+    if (sw_item_get_mtime (item) > last_mtime)
+      last_mtime = sw_item_get_mtime (item);
   }
 
   SW_DEBUG (VIEWS, "Number of items to be added: %d", ptr_array->len);
@@ -565,6 +569,8 @@ sw_item_view_add_items (SwItemView *item_view,
                                        ptr_array);
 
   g_ptr_array_free (ptr_array, TRUE);
+
+  priv->last_mtime = last_mtime;
 }
 
 /**
@@ -583,6 +589,7 @@ sw_item_view_update_items (SwItemView *item_view,
   GValueArray *value_array;
   GPtrArray *ptr_array;
   GList *l;
+  time_t last_mtime = 0;
 
   ptr_array = g_ptr_array_new ();
 
@@ -601,14 +608,18 @@ sw_item_view_update_items (SwItemView *item_view,
       _setup_ready_handler (item, item_view);
       sw_set_add (priv->pending_items_set, (GObject *)item);
     }
+
+    if (sw_item_get_mtime (item) > last_mtime)
+      last_mtime = sw_item_get_mtime (item);
   }
 
   SW_DEBUG (VIEWS, "Number of items to be changed: %d", ptr_array->len);
 
   sw_item_view_iface_emit_items_changed (item_view,
                                          ptr_array);
-
   g_ptr_array_free (ptr_array, TRUE);
+
+  priv->last_mtime = last_mtime;
 }
 
 /**
@@ -773,11 +784,6 @@ sw_item_view_set_from_set (SwItemView *item_view,
     if (!sw_set_is_empty (removed_items))
       sw_item_view_remove_from_set (item_view, removed_items);
 
-    /* Do this between removed and added so that you don't get change
-     * notification for items that have just been added.
-     */
-    sw_item_view_refresh_updated (item_view);
-
     if (!sw_set_is_empty (added_items))
       sw_item_view_add_from_set (item_view, added_items);
 
@@ -797,6 +803,10 @@ _filter_only_changed_cb (SwSet      *set,
 {
   SwItemViewPrivate *priv = GET_PRIVATE (item_view);
 
+  SW_DEBUG (VIEWS, "Comparing item = %d with view = %d for %s",
+            (int)sw_item_get_mtime (item),
+            (int)priv->last_mtime,
+            sw_item_get (item, "id"));
   if (sw_item_get_mtime (item) >= priv->last_mtime)
     return TRUE;
   else
@@ -833,6 +843,4 @@ sw_item_view_refresh_updated (SwItemView *item_view)
 
   if (changed_items_set)
     sw_set_unref (changed_items_set);
-
-  priv->last_mtime = time (NULL);
 }
