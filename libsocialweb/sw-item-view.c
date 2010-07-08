@@ -48,6 +48,8 @@ struct _SwItemViewPrivate {
 
   /* timeout used for ratelimiting checking for changed items */
   guint refresh_timeout_id;
+
+  GHashTable *uid_to_items;
 };
 
 enum
@@ -133,6 +135,12 @@ sw_item_view_dispose (GObject *object)
   {
     sw_set_unref (priv->pending_items_set);
     priv->pending_items_set = NULL;
+  }
+
+  if (priv->uid_to_items)
+  {
+    g_hash_table_unref (priv->uid_to_items);
+    priv->uid_to_items = NULL;
   }
 
   if (priv->pending_timeout_id)
@@ -247,6 +255,11 @@ sw_item_view_init (SwItemView *self)
 
   priv->current_items_set = sw_item_set_new ();
   priv->pending_items_set = sw_item_set_new ();
+
+  priv->uid_to_items = g_hash_table_new_full (g_str_hash,
+                                              g_str_equal,
+                                              g_free,
+                                              g_object_unref);
 }
 
 /* DBUS interface to class vfunc bindings */
@@ -720,9 +733,19 @@ sw_item_view_add_from_set (SwItemView *item_view,
 {
   SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   GList *items;
+  GList *l;
 
   sw_set_add_from (priv->current_items_set, set);
   items = sw_set_as_list (set);
+
+  for (l = items; l; l = l->next)
+  {
+    SwItem *item = (SwItem *)l->data;
+
+    g_hash_table_replace (priv->uid_to_items,
+                          g_strdup (sw_item_get (item, "id")),
+                          g_object_ref (item));
+  }
 
   sw_item_view_add_items (item_view, items);
   g_list_free (items);
@@ -744,12 +767,68 @@ sw_item_view_remove_from_set (SwItemView *item_view,
 {
   SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   GList *items;
+  GList *l;
 
   sw_set_remove_from (priv->current_items_set, set);
 
   items = sw_set_as_list (set);
 
+  for (l = items; l; l = l->next)
+  {
+    SwItem *item = (SwItem *)l->data;
+
+    g_hash_table_remove (priv->uid_to_items,
+                         sw_item_get (item, "id"));
+  }
+
   sw_item_view_remove_items (item_view, items);
+  g_list_free (items);
+}
+
+/**
+ * sw_item_view_update_existing
+ * @item_view: A #SwItemView
+ * @set: A #SwSet
+ *
+ * Replaces items in the internal set for the #SwItemView with the version
+ * from #SwSet if and only if they are sw_item_equal() says that they are
+ * unequal. This prevents sending excessive items changed signals.
+ */
+static void
+sw_item_view_update_existing (SwItemView *item_view,
+                              SwSet      *set)
+{
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+  GList *items;
+  SwItem *new_item;
+  SwItem *old_item;
+  GList *l;
+
+  items = sw_set_as_list (set);
+
+  for (l = items; l; l = l->next)
+  {
+    new_item = (SwItem *)l->data;
+    old_item = g_hash_table_lookup (priv->uid_to_items,
+                                    sw_item_get (new_item, "id"));
+
+    /* This is just a new item so we won't find it */
+    if (!old_item)
+      continue;
+
+    if (!sw_item_equal (new_item, old_item))
+    {
+      g_hash_table_replace (priv->uid_to_items,
+                            g_strdup (sw_item_get (new_item, "id")),
+                            new_item);
+      /* 
+       * This works because sw_set_add uses g_hash_table_replace behind the
+       * scenes
+       */
+      sw_set_add (priv->current_items_set, (GObject *)new_item);
+    }
+  }
+
   g_list_free (items);
 }
 
@@ -784,6 +863,13 @@ sw_item_view_set_from_set (SwItemView *item_view,
     if (!sw_set_is_empty (removed_items))
       sw_item_view_remove_from_set (item_view, removed_items);
 
+    /* 
+     * Replace items that exist in the new set that are also present in the
+     * original set iff they're not equal
+     */
+    sw_item_view_update_existing (item_view, set);
+    sw_item_view_refresh_updated (item_view);
+
     if (!sw_set_is_empty (added_items))
       sw_item_view_add_from_set (item_view, added_items);
 
@@ -807,7 +893,7 @@ _filter_only_changed_cb (SwSet      *set,
             (int)sw_item_get_mtime (item),
             (int)priv->last_mtime,
             sw_item_get (item, "id"));
-  if (sw_item_get_mtime (item) >= priv->last_mtime)
+  if (sw_item_get_mtime (item) > priv->last_mtime)
     return TRUE;
   else
     return FALSE;
