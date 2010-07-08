@@ -33,7 +33,10 @@ static const int sentinel = 0xDECAFBAD;
 static void
 add (SwSet *set, GObject *object)
 {
-  g_hash_table_insert (set->hash, g_object_ref (object), (gpointer)&sentinel);
+  /* Use replace not insert here since when adding we always want to use the
+   * newer version not the older one.
+   */
+  g_hash_table_replace (set->hash, g_object_ref (object), (gpointer)&sentinel);
 }
 
 GType
