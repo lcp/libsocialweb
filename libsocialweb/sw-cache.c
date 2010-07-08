@@ -283,7 +283,10 @@ sw_cache_load (SwService   *service,
         item = load_item_from_keyfile (service, keys, groups[i]);
 
         if (item)
+        {
           sw_set_add (set, (GObject *)item);
+          g_object_unref (item);
+        }
       }
     }
 
