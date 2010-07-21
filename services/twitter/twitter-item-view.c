@@ -183,7 +183,7 @@ _make_item (SwTwitterItemView *item_view,
             RestXmlNode           *node)
 {
   SwTwitterItemViewPrivate *priv = GET_PRIVATE (item_view);
-  RestXmlNode *u_node, *n;
+  RestXmlNode *u_node, *n, *place_n;
   const char *post_id, *user_id, *user_name, *date, *content;
   char *url;
   GMatchInfo *match_info;
@@ -240,6 +240,47 @@ _make_item (SwTwitterItemView *item_view,
   n = rest_xml_node_find (u_node, "location");
   if (n && n->content)
     sw_item_put (item, "location", n->content);
+
+    n = rest_xml_node_find (node, "geo");
+
+  if (n)
+  {
+    n = rest_xml_node_find (n, "georss:point");
+
+    if (n && n->content)
+    {
+      gchar **split_str;
+
+      split_str = g_strsplit (n->content, " ", 2);
+
+      if (split_str[0] && split_str[1])
+      {
+        sw_item_put (item, "latitude", split_str[0]);
+        sw_item_put (item, "longitude", split_str[1]);
+      }
+
+      g_strfreev (split_str);
+    }
+  }
+
+  place_n = rest_xml_node_find (node, "place");
+
+  if (place_n)
+  {
+    n = rest_xml_node_find (place_n, "name");
+
+    if (n && n->content)
+    {
+      sw_item_put (item, "place_name", n->content);
+    }
+
+    n = rest_xml_node_find (place_n, "full_name");
+
+    if (n && n->content)
+    {
+      sw_item_put (item, "place_full_name", n->content);
+    }
+  }
 
   n = rest_xml_node_find (u_node, "profile_image_url");
   if (n && n->content)
