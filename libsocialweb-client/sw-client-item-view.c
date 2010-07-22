@@ -218,9 +218,14 @@ _proxy_items_changed_cb (DBusGProxy *proxy,
 
     item = g_hash_table_lookup (priv->uuid_to_items,
                                 uid);
-    _sw_item_update_from_value_array (item, varray);
 
-    items_list = g_list_append (items_list, sw_item_ref (item));
+    if (item)
+    {
+      _sw_item_update_from_value_array (item, varray);
+      items_list = g_list_append (items_list, sw_item_ref (item));
+    } else {
+      g_critical (G_STRLOC ": Item changed before added: %s", uid);
+    }
   }
 
   /* If handler wants a ref then it should ref it up */
