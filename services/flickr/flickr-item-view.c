@@ -127,6 +127,12 @@ sw_flickr_item_view_dispose (GObject *object)
     priv->params = NULL;
   }
 
+  if (priv->timeout_id)
+  {
+    g_source_remove (priv->timeout_id);
+    priv->timeout_id = 0;
+  }
+
   G_OBJECT_CLASS (sw_flickr_item_view_parent_class)->dispose (object);
 }
 
