@@ -895,10 +895,19 @@ _filter_only_changed_cb (SwSet      *set,
             (int)sw_item_get_mtime (item),
             (int)priv->last_mtime,
             sw_item_get (item, "id"));
-  if (sw_item_get_mtime (item) > priv->last_mtime)
+
+  /* We need this to be >= since things can be touched in the same second that
+   * they were created. We still want to send an ItemsChanged here since
+   * the old version has already been added
+   */
+  if (sw_item_get_mtime (item) >= priv->last_mtime)
+  {
+    SW_DEBUG (VIEWS, "Including %s", sw_item_get (item, "id"));
     return TRUE;
-  else
+  } else {
+    SW_DEBUG (VIEWS, "Skipping %s", sw_item_get (item, "id"));
     return FALSE;
+  }
 }
 
 /**
