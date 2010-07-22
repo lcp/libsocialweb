@@ -120,13 +120,6 @@ sw_flickr_item_view_dispose (GObject *object)
     priv->proxy = NULL;
   }
 
-  if (priv->params)
-  {
-    g_boxed_free (G_TYPE_HASH_TABLE,
-                  priv->params);
-    priv->params = NULL;
-  }
-
   if (priv->timeout_id)
   {
     g_source_remove (priv->timeout_id);
@@ -142,6 +135,7 @@ sw_flickr_item_view_finalize (GObject *object)
   SwFlickrItemViewPrivate *priv = GET_PRIVATE (object);
 
   g_free (priv->query);
+  g_hash_table_unref (priv->params);
 
   G_OBJECT_CLASS (sw_flickr_item_view_parent_class)->finalize (object);
 }
