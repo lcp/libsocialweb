@@ -40,9 +40,6 @@ struct _SwItemViewPrivate {
   SwSet *current_items_set;
   SwSet *pending_items_set;
 
-  /* The last time we checked for modified items */
-  time_t last_mtime;
-
   /* timeout used for coalescing multiple delayed ready additions */
   guint pending_timeout_id;
 
@@ -50,6 +47,8 @@ struct _SwItemViewPrivate {
   guint refresh_timeout_id;
 
   GHashTable *uid_to_items;
+
+  GList *changed_items;
 };
 
 enum
@@ -74,8 +73,6 @@ static void sw_item_view_update_items (SwItemView *item_view,
                                        GList      *items);
 static void sw_item_view_remove_items (SwItemView *item_view,
                                        GList      *items);
-
-static void sw_item_view_refresh_updated (SwItemView *item_view);
 
 static void
 sw_item_view_get_property (GObject    *object,
@@ -417,7 +414,10 @@ _item_changed_timeout_cb (gpointer data)
   SwItemView *item_view = SW_ITEM_VIEW (data);
   SwItemViewPrivate *priv = GET_PRIVATE (item_view);
 
-  sw_item_view_refresh_updated (item_view);
+  sw_item_view_update_items (item_view, priv->changed_items);
+  g_list_foreach (priv->changed_items, (GFunc)g_object_unref, NULL);
+  g_list_free (priv->changed_items);
+  priv->changed_items = NULL;
 
   priv->refresh_timeout_id = 0;
 
@@ -436,6 +436,9 @@ _item_changed_cb (SwItem     *item,
    */
   if (!sw_item_get_ready (item))
     return;
+
+  if (!g_list_find (priv->changed_items, item))
+    priv->changed_items = g_list_append (priv->changed_items, item);
 
   if (!priv->refresh_timeout_id)
   {
@@ -549,7 +552,6 @@ sw_item_view_add_items (SwItemView *item_view,
   GValueArray *value_array;
   GPtrArray *ptr_array;
   GList *l;
-  time_t last_mtime = 0;
 
   ptr_array = g_ptr_array_new ();
 
@@ -571,9 +573,6 @@ sw_item_view_add_items (SwItemView *item_view,
     }
 
     _setup_changed_handler (item, item_view);
-
-    if (sw_item_get_mtime (item) > last_mtime)
-      last_mtime = sw_item_get_mtime (item);
   }
 
   SW_DEBUG (VIEWS, "Number of items to be added: %d", ptr_array->len);
@@ -582,14 +581,6 @@ sw_item_view_add_items (SwItemView *item_view,
                                        ptr_array);
 
   g_ptr_array_free (ptr_array, TRUE);
-
-  /* Update the last mtime for the view to be one second beyond the most
-   * recent item. We have to do this since we check for the greater than or
-   * equals in the filtering to catch items that are changed in the same
-   * second as they are sent.
-   */
-  if (last_mtime >= priv->last_mtime)
-    priv->last_mtime = last_mtime + 1;
 }
 
 /**
@@ -604,11 +595,9 @@ static void
 sw_item_view_update_items (SwItemView *item_view,
                            GList      *items)
 {
-  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   GValueArray *value_array;
   GPtrArray *ptr_array;
   GList *l;
-  time_t last_mtime = 0;
 
   ptr_array = g_ptr_array_new ();
 
@@ -616,35 +605,23 @@ sw_item_view_update_items (SwItemView *item_view,
   {
     SwItem *item = SW_ITEM (l->data);
 
+    /*
+     * Item must be ready and also not in the pending items set; we need to
+     * check this to prevent ItemsChanged coming before ItemsAdded
+     */
     if (sw_item_get_ready (item))
     {
-      SW_DEBUG (VIEWS, "Item ready: %s",
-                sw_item_get (item, "id"));value_array = _sw_item_to_value_array (item);
+      value_array = _sw_item_to_value_array (item);
       g_ptr_array_add (ptr_array, value_array);
-    } else {
-      SW_DEBUG (VIEWS, "Item not ready, setting up handler: %s",
-                sw_item_get (item, "id"));
-      _setup_ready_handler (item, item_view);
-      sw_set_add (priv->pending_items_set, (GObject *)item);
     }
-
-    if (sw_item_get_mtime (item) >= last_mtime)
-      last_mtime = sw_item_get_mtime (item);
   }
 
   SW_DEBUG (VIEWS, "Number of items to be changed: %d", ptr_array->len);
 
-  sw_item_view_iface_emit_items_changed (item_view,
-                                         ptr_array);
+  if (ptr_array->len > 0)
+    sw_item_view_iface_emit_items_changed (item_view,
+                                           ptr_array);
   g_ptr_array_free (ptr_array, TRUE);
-
-  /* Update the last mtime for the view to be one second beyond the most
-   * recent item. We have to do this since we check for the greater than or
-   * equals in the filtering to catch items that are changed in the same
-   * second as they are sent.
-   */
-  if (last_mtime > priv->last_mtime)
-    priv->last_mtime = last_mtime + 1;
 }
 
 /**
@@ -815,6 +792,7 @@ sw_item_view_update_existing (SwItemView *item_view,
   SwItem *new_item;
   SwItem *old_item;
   GList *l;
+  GList *items_to_send = NULL;
 
   items = sw_set_as_list (set);
 
@@ -838,8 +816,11 @@ sw_item_view_update_existing (SwItemView *item_view,
        * scenes
        */
       sw_set_add (priv->current_items_set, (GObject *)new_item);
+      items_to_send = g_list_append (items_to_send, g_object_ref (new_item));
     }
   }
+
+  sw_item_view_update_items (item_view, items_to_send);
 
   g_list_free (items);
 }
@@ -870,7 +851,6 @@ sw_item_view_set_from_set (SwItemView *item_view,
     removed_items = sw_set_difference (priv->current_items_set, set);
     added_items = sw_set_difference (set, priv->current_items_set);
 
-    /* TODO: Include an mtime to handle changed ? */
 
     if (!sw_set_is_empty (removed_items))
       sw_item_view_remove_from_set (item_view, removed_items);
@@ -878,76 +858,17 @@ sw_item_view_set_from_set (SwItemView *item_view,
     /* 
      * Replace items that exist in the new set that are also present in the
      * original set iff they're not equal
+     *
+     * This function will also cause the ItemsChanged signal to be fired with
+     * the items that have changed.
      */
     sw_item_view_update_existing (item_view, set);
-    sw_item_view_refresh_updated (item_view);
 
     if (!sw_set_is_empty (added_items))
       sw_item_view_add_from_set (item_view, added_items);
-
-    /* TODO: We should actually update the priv->last_mtime here to the most
-     * recent time for the items we've just added
-     */
 
     sw_set_unref (removed_items);
     sw_set_unref (added_items);
   }
 }
 
-static gboolean
-_filter_only_changed_cb (SwSet      *set,
-                         SwItem     *item,
-                         SwItemView *item_view)
-{
-  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
-
-  SW_DEBUG (VIEWS, "Comparing item = %d with view = %d for %s",
-            (int)sw_item_get_mtime (item),
-            (int)priv->last_mtime,
-            sw_item_get (item, "id"));
-
-  /* We need this to be >= since things can be touched in the same second that
-   * they were created. We still want to send an ItemsChanged here since
-   * the old version has already been added
-   */
-  if (sw_item_get_mtime (item) >= priv->last_mtime)
-  {
-    SW_DEBUG (VIEWS, "Including %s", sw_item_get (item, "id"));
-    return TRUE;
-  } else {
-    SW_DEBUG (VIEWS, "Skipping %s", sw_item_get (item, "id"));
-    return FALSE;
-  }
-}
-
-/**
- * sw_item_view_refresh_updated
- * @item_view: A #SwItemView
- *
- * For all the items in the current set for this #SwItemView we check to see
- * if the mtime is newer than the last time we checked. If so then we use
- * sw_item_view_update_items() to fire a signal indicating that the item has
- * been updated.
- */
-static void
-sw_item_view_refresh_updated (SwItemView *item_view)
-{
-  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
-  SwSet *changed_items_set = NULL;
-
-  changed_items_set = sw_set_filter (priv->current_items_set,
-                                     (SwSetFilterFunc)_filter_only_changed_cb,
-                                     item_view);
-
-  if (changed_items_set && !sw_set_is_empty (changed_items_set))
-  {
-    GList *updated_items;
-
-    updated_items = sw_set_as_list (changed_items_set);
-    sw_item_view_update_items (item_view, updated_items);
-    g_list_free (updated_items);
-  }
-
-  if (changed_items_set)
-    sw_set_unref (changed_items_set);
-}
