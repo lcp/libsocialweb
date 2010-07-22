@@ -583,8 +583,13 @@ sw_item_view_add_items (SwItemView *item_view,
 
   g_ptr_array_free (ptr_array, TRUE);
 
-  if (last_mtime > priv->last_mtime)
-    priv->last_mtime = last_mtime;
+  /* Update the last mtime for the view to be one second beyond the most
+   * recent item. We have to do this since we check for the greater than or
+   * equals in the filtering to catch items that are changed in the same
+   * second as they are sent.
+   */
+  if (last_mtime >= priv->last_mtime)
+    priv->last_mtime = last_mtime + 1;
 }
 
 /**
@@ -623,7 +628,7 @@ sw_item_view_update_items (SwItemView *item_view,
       sw_set_add (priv->pending_items_set, (GObject *)item);
     }
 
-    if (sw_item_get_mtime (item) > last_mtime)
+    if (sw_item_get_mtime (item) >= last_mtime)
       last_mtime = sw_item_get_mtime (item);
   }
 
@@ -633,8 +638,13 @@ sw_item_view_update_items (SwItemView *item_view,
                                          ptr_array);
   g_ptr_array_free (ptr_array, TRUE);
 
+  /* Update the last mtime for the view to be one second beyond the most
+   * recent item. We have to do this since we check for the greater than or
+   * equals in the filtering to catch items that are changed in the same
+   * second as they are sent.
+   */
   if (last_mtime > priv->last_mtime)
-    priv->last_mtime = last_mtime;
+    priv->last_mtime = last_mtime + 1;
 }
 
 /**
