@@ -25,6 +25,7 @@
 #include <interfaces/sw-status-update-bindings.h>
 #include <interfaces/sw-query-bindings.h>
 #include <interfaces/sw-avatar-bindings.h>
+#include <interfaces/sw-banishable-bindings.h>
 #include <interfaces/sw-marshals.h>
 
 G_DEFINE_TYPE (SwClientService, sw_client_service, G_TYPE_OBJECT)
@@ -43,14 +44,6 @@ enum
   LAST_SIGNAL
 };
 
-struct _SwClientServicePrivate {
-  char *name;
-  DBusGConnection *connection;
-  DBusGProxy *proxies[LAST_SIGNAL];
-  gboolean loaded_info;
-  char *display_name;
-};
-
 /* We need to have one proxy per interface because dbus-glib is annoying */
 typedef enum
 {
@@ -58,14 +51,24 @@ typedef enum
   AVATAR_IFACE,
   QUERY_IFACE,
   STATUS_UPDATE_IFACE,
+  BANISHABLE_IFACE,
   LAST_IFACE
 } SwServiceIface;
+
+struct _SwClientServicePrivate {
+  char *name;
+  DBusGConnection *connection;
+  DBusGProxy *proxies[LAST_IFACE];
+  gboolean loaded_info;
+  char *display_name;
+};
 
 static const gchar *interface_names[LAST_IFACE] = {
   "org.moblin.libsocialweb.Service",
   "org.moblin.libsocialweb.Avatar",
   "org.moblin.libsocialweb.Query",
   "org.moblin.libsocialweb.StatusUpdate",
+  "org.moblin.libsocialweb.Banishable",
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
@@ -654,3 +657,27 @@ sw_client_service_has_cap (const char **caps, const char *cap)
   return FALSE;
 }
 
+
+void
+sw_client_service_banishable_hide_item (SwClientService *service,
+                                        const gchar     *uid)
+{
+  SwClientServicePrivate *priv = GET_PRIVATE (service);
+  GError *error = NULL;
+
+  if (!_sw_client_service_setup_proxy_for_iface (service,
+                                                 priv->name,
+                                                 BANISHABLE_IFACE,
+                                                 &error))
+  {
+    g_critical (G_STRLOC ": Unable to setup proxy on Banishable interface: %s",
+                error->message);
+    g_clear_error (&error);
+    return;
+  }
+
+  org_moblin_libsocialweb_Banishable_hide_item_async (priv->proxies[BANISHABLE_IFACE],
+                                                      uid,
+                                                      NULL,
+                                                      NULL);
+}

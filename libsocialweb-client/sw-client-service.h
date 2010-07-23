@@ -114,6 +114,10 @@ sw_client_service_query_open_view (SwClientService                      *service
                                    SwClientServiceQueryOpenViewCallback  cb,
                                    gpointer                              userdata);
 
+void
+sw_client_service_banishable_hide_item (SwClientService *service,
+                                        const gchar     *uid);
+
 const char *sw_client_service_get_name (SwClientService *service);
 
 const char *sw_client_service_get_display_name (SwClientService *service);
