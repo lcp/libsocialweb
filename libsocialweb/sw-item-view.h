@@ -59,6 +59,8 @@ GType sw_item_view_get_type (void);
 
 void sw_item_view_set_from_set (SwItemView *item_view,
                                 SwSet      *set);
+void sw_item_view_remove_by_uid (SwItemView  *item_view,
+                                 const gchar *uid);
 
 const gchar *sw_item_view_get_object_path (SwItemView *item_view);
 SwService *sw_item_view_get_service (SwItemView *item_view);

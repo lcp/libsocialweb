@@ -851,7 +851,6 @@ sw_item_view_set_from_set (SwItemView *item_view,
     removed_items = sw_set_difference (priv->current_items_set, set);
     added_items = sw_set_difference (set, priv->current_items_set);
 
-
     if (!sw_set_is_empty (removed_items))
       sw_item_view_remove_from_set (item_view, removed_items);
 
@@ -872,3 +871,52 @@ sw_item_view_set_from_set (SwItemView *item_view,
   }
 }
 
+static void
+sw_item_view_remove_item (SwItemView *item_view,
+                          SwItem     *item)
+{
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
+
+  ptr_array = g_ptr_array_new ();
+
+  value_array = g_value_array_new (2);
+
+  value_array = g_value_array_append (value_array, NULL);
+  g_value_init (g_value_array_get_nth (value_array, 0), G_TYPE_STRING);
+  g_value_set_string (g_value_array_get_nth (value_array, 0),
+                      sw_service_get_name (sw_item_get_service (item)));
+
+  value_array = g_value_array_append (value_array, NULL);
+  g_value_init (g_value_array_get_nth (value_array, 1), G_TYPE_STRING);
+  g_value_set_string (g_value_array_get_nth (value_array, 1),
+                      sw_item_get (item, "id"));
+
+  g_ptr_array_add (ptr_array, value_array);
+
+  sw_item_view_iface_emit_items_removed (item_view,
+                                         ptr_array);
+
+  g_ptr_array_free (ptr_array, TRUE);
+}
+
+void
+sw_item_view_remove_by_uid (SwItemView  *item_view,
+                            const gchar *uid)
+{
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+  SwItem *item;
+
+  item = g_hash_table_lookup (priv->uid_to_items,
+                              uid);
+
+  if (item)
+  {
+    sw_item_view_remove_item (item_view, item);
+    sw_set_remove (priv->current_items_set, (GObject *)item);
+    g_hash_table_remove (priv->uid_to_items,
+                         uid);
+  } else {
+    g_critical (G_STRLOC ": Asked to remove unknown item: %s", uid);
+  }
+}
