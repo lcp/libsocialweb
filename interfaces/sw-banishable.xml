@@ -6,5 +6,8 @@
     <method name="HideItem" tp:name-for-bindings="Hide_Item">
       <arg name="uid" type="s" direction="in"/>
     </method>
+    <signal name="ItemHidden" tp:name-for-bindings="Item_Hidden">
+      <arg name="uid" type="s"/>
+    </signal>
   </interface>
 </node>
