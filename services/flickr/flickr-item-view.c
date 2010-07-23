@@ -62,6 +62,9 @@ enum
 
 #define UPDATE_TIMEOUT 5 * 60
 
+static void _service_item_hidden_cb (SwService   *service,
+                                     const gchar *uid,
+                                     SwItemView  *item_view);
 
 static void
 sw_flickr_item_view_get_property (GObject    *object,
@@ -112,6 +115,7 @@ sw_flickr_item_view_set_property (GObject      *object,
 static void
 sw_flickr_item_view_dispose (GObject *object)
 {
+  SwItemView *item_view = SW_ITEM_VIEW (object);
   SwFlickrItemViewPrivate *priv = GET_PRIVATE (object);
 
   if (priv->proxy)
@@ -125,6 +129,10 @@ sw_flickr_item_view_dispose (GObject *object)
     g_source_remove (priv->timeout_id);
     priv->timeout_id = 0;
   }
+
+  g_signal_handlers_disconnect_by_func (sw_item_view_get_service (item_view),
+                                      _service_item_hidden_cb,
+                                      item_view);
 
   G_OBJECT_CLASS (sw_flickr_item_view_parent_class)->dispose (object);
 }
@@ -464,6 +472,28 @@ flickr_item_view_refresh (SwItemView *item_view)
 }
 
 static void
+_service_item_hidden_cb (SwService   *service,
+                         const gchar *uid,
+                         SwItemView  *item_view)
+{
+  sw_item_view_remove_by_uid (item_view, uid);
+}
+
+static void
+sw_flickr_item_view_constructed (GObject *object)
+{
+  SwItemView *item_view = SW_ITEM_VIEW (object);
+
+  g_signal_connect (sw_item_view_get_service (item_view),
+                    "item-hidden",
+                    (GCallback)_service_item_hidden_cb,
+                    item_view);
+
+  if (G_OBJECT_CLASS (sw_flickr_item_view_parent_class)->constructed)
+    G_OBJECT_CLASS (sw_flickr_item_view_parent_class)->constructed (object);
+}
+
+static void
 sw_flickr_item_view_class_init (SwFlickrItemViewClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -476,6 +506,7 @@ sw_flickr_item_view_class_init (SwFlickrItemViewClass *klass)
   object_class->set_property = sw_flickr_item_view_set_property;
   object_class->dispose = sw_flickr_item_view_dispose;
   object_class->finalize = sw_flickr_item_view_finalize;
+  object_class->constructed = sw_flickr_item_view_constructed;
 
   item_view_class->start = flickr_item_view_start;
   item_view_class->stop = flickr_item_view_stop;
