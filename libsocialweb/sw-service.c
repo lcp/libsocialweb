@@ -212,7 +212,7 @@ banishable_hide_item (SwBanishableIface     *self,
                        g_strdup (uid),
                        GINT_TO_POINTER (42));
 
-  /* TODO: Emit signal to trigger refresh of item views */
+  sw_banishable_iface_emit_item_hidden (self, uid);
   sw_ban_save (sw_service_get_name (SW_SERVICE (self)), priv->banned_uids);
 
   sw_banishable_iface_return_from_hide_item (context);
