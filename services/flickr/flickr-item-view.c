@@ -236,6 +236,7 @@ _flickr_item_from_from_photo_node (SwServiceFlickr *service,
                                    RestXmlNode     *node)
 {
   char *url;
+  const char *photo_url;
   SwItem *item;
   gint64 date;
 
@@ -249,6 +250,14 @@ _flickr_item_from_from_photo_node (SwServiceFlickr *service,
   sw_item_put (item, "author", rest_xml_node_get_attr (node, "username"));
   sw_item_put (item, "url", url);
   g_free (url);
+
+  photo_url = rest_xml_node_get_attr (node, "url_o");
+  if (!photo_url)
+    photo_url = rest_xml_node_get_attr (node, "url_l");
+  if (!photo_url)
+    photo_url = rest_xml_node_get_attr (node, "url_m");
+
+  sw_item_put (item, "x-flickr-photo-url", photo_url);
 
   date = atoi (rest_xml_node_get_attr (node, "dateupload"));
   sw_item_take (item, "date", sw_time_t_to_string (date));
