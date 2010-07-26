@@ -368,7 +368,8 @@ _make_request (SwFlickrItemView *item_view)
   }
 
   rest_proxy_call_add_param (call, "count", "50");
-  rest_proxy_call_add_param (call, "extras", "date_upload,icon_server,geo");
+  rest_proxy_call_add_param (call, "extras",
+                             "date_upload,icon_server,geo,url_m,url_l,url_o");
 
   if (!rest_proxy_call_async (call,
                               _photos_received_cb,
