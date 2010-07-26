@@ -5,6 +5,8 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([foreign -Wno-portability])
 AM_CONFIG_HEADER(config.h)
+m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
+
 
 AC_CANONICAL_HOST
 
@@ -119,11 +121,7 @@ AC_SUBST(servicesdir)
 servicesdatadir='${datadir}'/libsocialweb/services
 AC_SUBST(servicesdatadir)
 
-SHAVE_INIT([build-aux],[enable])
-
 AC_OUTPUT([
-        build-aux/shave:m4/shave.in
-        build-aux/shave-libtool:m4/shave-libtool.in
         Makefile
         libsocialweb/Makefile
         interfaces/Makefile
