@@ -19,13 +19,15 @@
 #include <libsocialweb-client/sw-client.h>
 #include <libsocialweb-client/sw-client-service.h>
 
+#include <stdlib.h>
+
 static SwClient *client = NULL;
 static SwClientService *service = NULL;
 
 static void
 _view_items_added_cb (SwClientItemView *item_view,
-                      GList                *items,
-                      gpointer              userdata)
+                      GList            *items,
+                      gpointer          userdata)
 {
   GList *l;
 
@@ -48,8 +50,15 @@ _view_items_added_cb (SwClientItemView *item_view,
 static void
 _query_open_view_cb (SwClientService  *service,
                      SwClientItemView *item_view,
-                     gpointer              userdata)
+                     gpointer          userdata)
 {
+
+  if (!item_view)
+  {
+    g_critical ("Could not connect to twitter service");
+    exit (1);
+  }
+
   g_signal_connect (item_view,
                     "items-added",
                     (GCallback)_view_items_added_cb,
@@ -75,5 +84,7 @@ main (int    argc,
   loop = g_main_loop_new (NULL, FALSE);
 
   g_main_loop_run (loop);
+
+  return 0;
 }
 
