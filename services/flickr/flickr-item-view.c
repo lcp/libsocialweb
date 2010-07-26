@@ -168,20 +168,6 @@ check_attrs (RestXmlNode *node, ...)
   return TRUE;
 }
 
-/* TODO: pass in size enum */
-static char *
-construct_photo_url (RestXmlNode *node)
-{
-  if (!check_attrs (node, "farm", "server", "id", "secret", NULL))
-    return NULL;
-
-  return g_strdup_printf ("http://farm%s.static.flickr.com/%s/%s_%s_m.jpg",
-                          rest_xml_node_get_attr (node, "farm"),
-                          rest_xml_node_get_attr (node, "server"),
-                          rest_xml_node_get_attr (node, "id"),
-                          rest_xml_node_get_attr (node, "secret"));
-}
-
 static char *
 construct_photo_page_url (RestXmlNode *node)
 {
@@ -262,9 +248,8 @@ _flickr_item_from_from_photo_node (SwServiceFlickr *service,
   date = atoi (rest_xml_node_get_attr (node, "dateupload"));
   sw_item_take (item, "date", sw_time_t_to_string (date));
 
-  url = construct_photo_url (node);
-  sw_item_request_image_fetch (item, TRUE, "thumbnail", url);
-  g_free (url);
+  photo_url = rest_xml_node_get_attr (node, "url_m");
+  sw_item_request_image_fetch (item, TRUE, "thumbnail", photo_url);
 
   url = construct_buddy_icon_url (node);
   sw_item_request_image_fetch (item, FALSE, "authoricon", url);
