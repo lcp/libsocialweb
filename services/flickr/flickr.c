@@ -148,7 +148,7 @@ initable_iface_init (gpointer g_iface,
 const static gchar *valid_queries[] = { "feed",
                                         "own",
                                         "friends-only",
-                                        "x-search" };
+                                        "x-flickr-search" };
 
 static gboolean
 _check_query_validity (const gchar *query)

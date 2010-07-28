@@ -327,7 +327,7 @@ _make_request (SwFlickrItemView *item_view)
 
   call = rest_proxy_new_call (priv->proxy);
 
-  if (g_str_equal (priv->query, "x-search"))
+  if (g_str_equal (priv->query, "x-flickr-search"))
   {
     /* http://www.flickr.com/services/api/flickr.photos.search.html */
     rest_proxy_call_set_function (call, "flickr.photos.search");
