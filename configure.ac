@@ -117,6 +117,7 @@ SOCIALWEB_ENABLE_SERVICE(Flickr, flickr, FLICKR)
 SOCIALWEB_ENABLE_SERVICE(Last.fm, lastfm, LASTFM)
 SOCIALWEB_ENABLE_SERVICE(MySpace, myspace, MYSPACE)
 SOCIALWEB_ENABLE_SERVICE(Twitter, twitter, TWITTER)
+SOCIALWEB_ENABLE_SERVICE(Vimeo, vimeo, VIMEO)
 
 
 servicesdir='${libdir}'/libsocialweb/services
@@ -142,6 +143,7 @@ AC_OUTPUT([
         services/twitter/Makefile
         services/myspace/Makefile
         services/digg/Makefile
+        services/vimeo/Makefile
         tests/Makefile
         tools/Makefile
         examples/Makefile

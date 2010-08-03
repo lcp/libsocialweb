@@ -19,3 +19,7 @@ endif
 if WITH_DIGG
 SUBDIRS += digg
 endif
+
+if WITH_VIMEO
+SUBDIRS += vimeo
+endif
