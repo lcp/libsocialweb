@@ -32,6 +32,8 @@ INTLTOOL_SOCIALWEB_KEYS='%.keys: %.keys.in $(INTLTOOL_MERGE) $(wildcard $(top_sr
 AC_SUBST(INTLTOOL_SOCIALWEB_KEYS)
 
 GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
+# TODO: only check if gtk-doc is enabled
+AC_CHECK_PROGS(XSLT, xsltproc)
 
 # TODO: bit nasty, should we use gnome-common?
 CFLAGS="$CFLAGS -Wall"

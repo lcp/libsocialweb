@@ -64,9 +64,11 @@ IGNORE_HFILES=test-runner.h
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
 HTML_IMAGES=
 
+DBUS=lastfm.xml sw-avatar.xml sw-banishable.xml sw-core.xml sw-item-view.xml sw-photo-upload.xml sw-query.xml sw-service.xml sw-status-update.xml
+
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
-content_files=
+content_files=$(foreach dbus, $(DBUS), xml/ref-$(dbus))
 
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
@@ -100,5 +102,8 @@ if ENABLE_GTK_DOC
 #TESTS_ENVIRONMENT = cd $(srcsrc) &&
 #TESTS = $(GTKDOC_CHECK)
 endif
+
+xml/ref-%.xml: $(top_srcdir)/interfaces/%.xml
+	$(XSLT) -o $@ $(top_srcdir)/docs/spec-to-docbook.xsl $<
 
 -include $(top_srcdir)/git.mk
