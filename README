@@ -153,7 +153,7 @@ The URL of the item for viewing online.
 
 date
 
-The date the item was created.
+The date the item was created in HTTP "Date" format, i.e. "Sun, 06 Nov 1994 08:49:37 GMT".
 
 content
 
