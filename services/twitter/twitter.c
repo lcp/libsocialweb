@@ -542,7 +542,7 @@ initable_iface_init (gpointer g_iface, gpointer iface_data)
 static const gchar *valid_queries[] = { "feed",
                                         "own",
                                         "friends-only",
-                                        "x-mentions" };
+                                        "x-twitter-mentions" };
 
 static gboolean
 _check_query_validity (const gchar *query)

@@ -402,7 +402,7 @@ _get_status_updates (SwTwitterItemView *item_view)
 
   if (g_str_equal (priv->query, "own"))
     rest_proxy_call_set_function (call, "statuses/user_timeline.xml");
-  else if (g_str_equal (priv->query, "x-mentions"))
+  else if (g_str_equal (priv->query, "x-twitter-mentions"))
     rest_proxy_call_set_function (call, "statuses/mentions.xml");
   else if (g_str_equal (priv->query, "feed") ||
            g_str_equal (priv->query, "friends-only"))
