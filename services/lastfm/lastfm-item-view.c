@@ -579,7 +579,7 @@ lastfm_item_view_start (SwItemView *item_view)
   {
     g_warning (G_STRLOC ": View already started.");
   } else {
-    SW_DEBUG (TWITTER, G_STRLOC ": Setting up the timeout");
+    SW_DEBUG (LASTFM, G_STRLOC ": Setting up the timeout");
     priv->timeout_id = g_timeout_add_seconds (UPDATE_TIMEOUT,
                                               (GSourceFunc)_update_timeout_cb,
                                               item_view);
