@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+[
+  <!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'">
+]>
+<book id="index">
+  <bookinfo>
+    <title>libsocialweb Reference Manual</title>
+  </bookinfo>
+
+  <chapter>
+    <title>libsocialweb</title>
+    <xi:include href="xml/sw-banned.xml"/>
+    <xi:include href="xml/sw-cache.xml"/>
+    <xi:include href="xml/sw-call-list.xml"/>
+    <xi:include href="xml/sw-client-monitor.xml"/>
+    <xi:include href="xml/sw-core.xml"/>
+    <xi:include href="xml/sw-debug.xml"/>
+    <xi:include href="xml/sw-enum-types.xml"/>
+    <xi:include href="xml/sw-item-view.xml"/>
+    <xi:include href="xml/sw-item.xml"/>
+    <xi:include href="xml/sw-module.xml"/>
+    <xi:include href="xml/sw-online.xml"/>
+    <xi:include href="xml/sw-service.xml"/>
+    <xi:include href="xml/sw-set.xml"/>
+    <xi:include href="xml/sw-types.xml"/>
+    <xi:include href="xml/sw-utils.xml"/>
+    <xi:include href="xml/sw-web.xml"/>
+  </chapter>
+
+  <chapter>
+    <title>libsocialweb-keyfob</title>
+    <xi:include href="xml/sw-keyfob.xml"/>
+  </chapter>
+
+  <chapter>
+    <title>libsocialweb-keystore</title>
+    <xi:include href="xml/sw-keystore.xml"/>
+  </chapter>
+
+  <chapter id="object-tree">
+    <title>Object Hierarchy</title>
+    <xi:include href="xml/tree_index.sgml"/>
+  </chapter>
+  <index id="api-index-full">
+    <title>API Index</title>
+    <xi:include href="xml/api-index-full.xml"/>
+  </index>
+
+  <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>
+</book>

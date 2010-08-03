@@ -1,0 +1,8 @@
+sw_item_get_type
+sw_core_get_type
+sw_service_error_get_type
+sw_debug_flags_get_type
+sw_item_get_type
+sw_item_view_get_type
+sw_service_get_type
+sw_set_get_type

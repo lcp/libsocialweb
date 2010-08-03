@@ -31,6 +31,8 @@ AC_PATH_PROG([GLIB_GENMARSHAL], [glib-genmarshal])
 INTLTOOL_SOCIALWEB_KEYS='%.keys: %.keys.in $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; LC_ALL=C $(INTLTOOL_MERGE) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@'
 AC_SUBST(INTLTOOL_SOCIALWEB_KEYS)
 
+GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
+
 # TODO: bit nasty, should we use gnome-common?
 CFLAGS="$CFLAGS -Wall"
 
@@ -123,6 +125,8 @@ AC_SUBST(servicesdatadir)
 
 AC_OUTPUT([
         Makefile
+        docs/Makefile
+        docs/libsocialweb/Makefile
         libsocialweb/Makefile
         interfaces/Makefile
         libsocialweb-keyfob/Makefile
