@@ -1,15 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE node SYSTEM "dbus.dtd">
 
-<node name="/Core_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+<node name="/Core_Iface"
+      xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
+      xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+
   <interface name="org.moblin.libsocialweb">
+
+    <doc:doc>
+      <doc:summary>Core interface.</doc:summary>
+    </doc:doc>
+
     <method name="GetServices" tp:name-for-bindings="Get_Services">
-      <arg name="services" type="as" direction="out"/>
+      <arg name="services" type="as" direction="out">
+        <doc:doc>
+          <doc:summary>The list of service names that are available</doc:summary>
+        </doc:doc>
+      </arg>
     </method>
 
     <method name="IsOnline" tp:name-for-bindings="Is_Online">
       <arg name="online" type="b" direction="out"/>
     </method>
+
     <signal name="OnlineChanged"  tp:name-for-bindings="Online_Changed">
       <arg name="online" type="b"/>
     </signal>
