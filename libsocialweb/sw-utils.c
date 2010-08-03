@@ -49,24 +49,6 @@ sw_time_t_to_string (time_t t)
   return s;
 }
 
-char *
-sw_date_to_iso (const char *s)
-{
-  SoupDate *date;
-  char *iso;
-
-  g_return_val_if_fail (s, NULL);
-
-  date = soup_date_new_from_string (s);
-  if (date) {
-    iso = soup_date_to_string (date, SOUP_DATE_ISO8601);
-    soup_date_free (date);
-    return iso;
-  } else {
-    return NULL;
-  }
-}
-
 /**
  * Return a hash of the contents of a string->string hash table.
  */
