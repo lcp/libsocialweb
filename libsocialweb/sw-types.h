@@ -27,8 +27,6 @@ typedef struct _SwService SwService;
 
 typedef struct _SwSet SwSet;
 
-typedef struct _SwView SwView;
-
 typedef struct _SwItem SwItem;
 
 typedef struct _SwCore SwCore;

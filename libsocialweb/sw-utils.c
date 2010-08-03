@@ -49,7 +49,7 @@ sw_time_t_to_string (time_t t)
   return s;
 }
 
-/**
+/*
  * Return a hash of the contents of a string->string hash table.
  */
 char *
