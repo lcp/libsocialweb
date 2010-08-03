@@ -338,6 +338,11 @@ _make_request (SwFlickrItemView *item_view)
     if (g_hash_table_lookup (priv->params, "tags"))
       rest_proxy_call_add_param (call, "tags", g_hash_table_lookup (priv->params, "tags"));
 
+    if (g_hash_table_lookup (priv->params, "licenses"))
+      rest_proxy_call_add_param (call,
+                                 "license",
+                                 g_hash_table_lookup (priv->params, "licenses"));
+
   } else if (g_str_equal (priv->query, "own")) {
 
     /* http://www.flickr.com/services/api/flickr.people.getPhotos.html */
