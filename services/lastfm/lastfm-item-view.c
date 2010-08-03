@@ -167,7 +167,6 @@ static RestXmlNode *
 node_from_call (RestProxyCall *call)
 {
   static RestXmlParser *parser = NULL;
-  GError *error = NULL;
   RestXmlNode *node;
 
   if (call == NULL)
@@ -190,9 +189,8 @@ node_from_call (RestProxyCall *call)
 
   /* No content, or wrong content */
   if (node == NULL || strcmp (node->name, "lfm") != 0) {
-    g_message (G_STRLOC ": cannot make Last.fm call: %s",
-                error ? error->message : "unknown reason");
-    if (error) g_error_free (error);
+    g_message (G_STRLOC ": cannot make Last.fm call");
+    /* TODO: display the payload if its short */
     if (node) rest_xml_node_unref (node);
     return NULL;
   }
