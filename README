@@ -51,12 +51,10 @@ GetStaticCapabilities -> returns the set of fixed capabilities for the service -
 these represent what type of functionality the service supports when fully
 configured and available.
 
-RequestAvatar - LEGACY - DEPRECATED DO NOT USE -> Use Avatar interrace
 
 Signals:
 
 CapabilitiesChanged -> fired with the new set of dynamic capabilities
-AvatarRetrieved - LEGACY DEPRECATED DO NOT USE -> Use Avatar interrace
 UserChanged - ???
 
 Available capabilities:
