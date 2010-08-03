@@ -279,6 +279,11 @@ _got_videos_cb (RestProxyCall *call,
   for (video_n = rest_xml_node_find (root, "video"); video_n; video_n = video_n->next) {
     SwItem *item;
 
+    /* Vimeo is stupid and returns an empty <video> element if there are no
+       videos, so check for this and skip it */
+    if (rest_xml_node_find (video_n, "url") == NULL)
+      continue;
+
     item = make_item (item_view, service, video_n);
 
     if (!sw_service_is_uid_banned (service, sw_item_get (item, "id"))) {
