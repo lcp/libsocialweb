@@ -304,17 +304,19 @@ _get_status_updates (SwVimeoItemView *item_view)
   SwVimeoItemViewPrivate *priv = GET_PRIVATE (item_view);
   RestProxyCall *call;
 
-  if (!g_str_equal (priv->query, "feed")) {
-    g_error (G_STRLOC ": Unexpected query '%s'", priv->query);
-  }
-
   sw_call_list_cancel_all (priv->calls);
   sw_set_empty (priv->set);
 
   SW_DEBUG (VIMEO, "Fetching videos");
   call = rest_proxy_new_call (priv->proxy);
-  rest_proxy_call_set_function (call, "subscriptions.xml");
   sw_call_list_add (priv->calls, call);
+
+  if (g_str_equal (priv->query, "feed"))
+    rest_proxy_call_set_function (call, "subscriptions.xml");
+  else if (g_str_equal (priv->query, "own"))
+    rest_proxy_call_set_function (call, "videos.xml");
+  else
+    g_assert_not_reached ();
 
   rest_proxy_call_async (call,
                          _got_videos_cb,

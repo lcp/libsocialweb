@@ -128,7 +128,7 @@ sw_service_vimeo_finalize (GObject *object)
 
 /* Query interface */
 
-static const gchar *valid_queries[] = { "feed", /* TODO "own" */ };
+static const gchar *valid_queries[] = { "feed", "own" };
 
 static gboolean
 _check_query_validity (const gchar *query)
