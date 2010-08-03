@@ -35,7 +35,8 @@ sw_debug_init (const char *string)
     { "twitter", SW_DEBUG_TWITTER },
     { "myspace", SW_DEBUG_MYSPACE },
     { "lastfm", SW_DEBUG_LASTFM },
-    { "core", SW_DEBUG_CORE }
+    { "core", SW_DEBUG_CORE },
+    { "vimeo", SW_DEBUG_VIMEO }
   };
 
   if (G_LIKELY (setup_done))
