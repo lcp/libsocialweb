@@ -9,9 +9,9 @@ DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-gtk-doc \
 	--enable-flickr \
 	--enable-lastfm \
-	--enable-myspace \
-	--enable-twitter \
-	--enable-digg
+	--enable-twitter
+#	--enable-myspace
+#	--enable-digg
 
 EXTRA_DIST = intltool-extract.in intltool-merge.in intltool-update.in
 DISTCLEANFILES = intltool-extract intltool-merge intltool-update
