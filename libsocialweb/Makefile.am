@@ -57,7 +57,7 @@ test_runner_LDFLAGS = $(libsocialweb_la_LIBADD)
 
 glib_enum_h = sw-enum-types.h
 glib_enum_c = sw-enum-types.c
-glib_enum_headers = $(libsocialweb_la_HEADERS)
+glib_enum_headers = $(foreach f, $(libsocialweb_la_HEADERS), $(srcdir)/$(f))
 include $(top_srcdir)/glib-enums.mk
 
 # TODO: use gtester
