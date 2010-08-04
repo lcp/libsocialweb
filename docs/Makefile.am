@@ -1,1 +1,1 @@
-SUBDIRS = libsocialweb
+SUBDIRS = libsocialweb-dbus libsocialweb

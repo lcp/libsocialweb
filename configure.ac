@@ -130,6 +130,7 @@ AC_OUTPUT([
         Makefile
         docs/Makefile
         docs/libsocialweb/Makefile
+        docs/libsocialweb-dbus/Makefile
         libsocialweb/Makefile
         interfaces/Makefile
         libsocialweb-keyfob/Makefile

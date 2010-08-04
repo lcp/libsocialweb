@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+[
+  <!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'">
+]>
+<book id="index">
+  <bookinfo>
+    <title>libsocialweb DBus API Reference Manual</title>
+  </bookinfo>
+
+  <chapter>
+    <title>DBus Interfaces</title>
+    <section>
+      <title>Core Interfaces</title>
+      <xi:include href="xml/ref-sw-core.xml"/>
+      <xi:include href="xml/ref-sw-service.xml"/>
+      <xi:include href="xml/ref-sw-item-view.xml"/>
+    </section>
+    <section>
+      <title>Feature Interfaces</title>
+      <xi:include href="xml/ref-sw-avatar.xml"/>
+      <xi:include href="xml/ref-sw-banishable.xml"/>
+      <xi:include href="xml/ref-sw-photo-upload.xml"/>
+      <xi:include href="xml/ref-sw-query.xml"/>
+      <xi:include href="xml/ref-sw-status-update.xml"/>
+    </section>
+    <section>
+      <title>Service-specific Interfaces</title>
+      <xi:include href="xml/ref-lastfm.xml"/>
+    </section>
+  </chapter>
+</book>
