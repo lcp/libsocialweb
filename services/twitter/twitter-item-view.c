@@ -220,7 +220,7 @@ _make_item (SwTwitterItemView *item_view,
     /* Construct the thumbnail URL and download the image */
     twitpic_id = g_match_info_fetch (match_info, 1);
     url = g_strconcat ("http://twitpic.com/show/thumb/", twitpic_id, NULL);
-    sw_item_request_image_fetch (item, FALSE, "thumbnail", url);
+    sw_item_request_image_fetch (item, TRUE, "thumbnail", url);
     g_free (url);
 
     /* Remove the URL from the tweet and use that as the title */
