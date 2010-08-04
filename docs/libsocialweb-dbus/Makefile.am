@@ -49,7 +49,7 @@ if ENABLE_GTK_DOC
 endif
 
 xml/ref-%.xml: $(top_srcdir)/interfaces/%.xml
-	$(XSLT) -o $@ $(top_srcdir)/docs/libsocialweb-dbus/spec-to-docbook.xsl $<
+	$(AM_V_GEN)$(XSLT) -o $@ $(top_srcdir)/docs/libsocialweb-dbus/spec-to-docbook.xsl $<
 
 -include $(top_srcdir)/git.mk
 

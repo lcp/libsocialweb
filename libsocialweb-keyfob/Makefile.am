@@ -1,5 +1,3 @@
-QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
-
 lib_LTLIBRARIES = libsocialweb-keyfob.la
 libsocialweb_keyfob_ladir = $(pkgincludedir)/libsocialweb-keyfob
 

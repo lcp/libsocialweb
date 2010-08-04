@@ -1,12 +1,10 @@
-QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
-
 noinst_LTLIBRARIES = libsocialweb-ginterfaces.la libsocialweb-bindings.la
 
 %.c: %.list Makefile.am
-	$(QUIET_GEN)glib-genmarshal --body --prefix=sw_marshal $< > $@
+	$(AM_V_GEN)glib-genmarshal --body --prefix=sw_marshal $< > $@
 
 %.h: %.list Makefile.am
-	$(QUIET_GEN)glib-genmarshal --header --prefix=sw_marshal $< > $@
+	$(AM_V_GEN)glib-genmarshal --header --prefix=sw_marshal $< > $@
 
 MARSHALS_SOURCES = \
 	sw-marshals.c sw-marshals.h
@@ -20,7 +18,7 @@ DBUS_SPECS = sw-core.xml sw-service.xml \
 	     lastfm.xml
 
 %-ginterface.h %-ginterface.c: %.xml Makefile.am
-	$(QUIET_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"sw-marshals.h"' --filename=$(basename $@) $< Sw_
+	$(AM_V_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"sw-marshals.h"' --filename=$(basename $@) $< Sw_
 
 GINTERFACE_SOURCES = \
 	$(DBUS_SPECS:.xml=-ginterface.h) \
@@ -40,7 +38,7 @@ libsocialweb_ginterfaces_la_HEADERS = \
 
 
 %-bindings.h: %.xml
-	$(QUIET_GEN)dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
+	$(AM_V_GEN)dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
 
 BINDINGS_SOURCES = $(DBUS_SPECS:.xml=-bindings.h)
 

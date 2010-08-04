@@ -1,5 +1,3 @@
-QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
-
 lib_LTLIBRARIES = libsocialweb-client.la
 
 libsocialweb_client_ladir = $(includedir)/libsocialweb/libsocialweb-client

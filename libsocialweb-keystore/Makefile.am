@@ -1,5 +1,3 @@
-QUIET_GEN = $(Q:@=@echo '  GEN   '$@;)
-
 lib_LTLIBRARIES = libsocialweb-keystore.la
 libsocialweb_keystore_ladir = $(pkgincludedir)/libsocialweb-keystore
 
