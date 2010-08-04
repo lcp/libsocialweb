@@ -61,5 +61,6 @@ docs/*/*.hierarchy
 docs/*/*.interfaces
 docs/*/*.prerequisites
 docs/*/*.signals
+docs/libsocialweb-client/libsocialweb-client.types
 docs/libsocialweb-dbus/libsocialweb-dbus-sections.txt
 docs/libsocialweb-dbus/libsocialweb-dbus.types
