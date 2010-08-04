@@ -50,12 +50,6 @@ main (int argc, char *argv[])
   test_add ("/set/is_empty", test_set_is_empty);
   test_add ("/set/foreach_remove", test_set_foreach_remove);
 
-  test_add ("/view/new", test_view_new);
-  test_add ("/view/munge-1", test_view_munge_1);
-  test_add ("/view/munge-2", test_view_munge_2);
-  test_add ("/view/munge-3", test_view_munge_3);
-  test_add ("/view/munge-4", test_view_munge_4);
-
   test_add ("/cache/absolute", test_cache_absolute);
   test_add ("/cache/relative", test_cache_relative);
 
