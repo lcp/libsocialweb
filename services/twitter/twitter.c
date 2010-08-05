@@ -745,6 +745,7 @@ on_upload_cb (RestProxyCall *call,
     sw_photo_upload_iface_emit_photo_upload_progress (twitter, 0, 100, "");
   }
 }
+
 static void
 _twitpic_upload_photo (SwPhotoUploadIface    *self,
                        const gchar           *filename,
