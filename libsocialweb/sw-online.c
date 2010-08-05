@@ -191,7 +191,7 @@ got_state_cb (DBusGProxy     *proxy,
               DBusGProxyCall *call,
               void           *user_data)
 {
-  const char *state = NULL;
+  char *state = NULL;
   GError *error = NULL;
 
   if (!dbus_g_proxy_end_call (proxy, call, &error,
