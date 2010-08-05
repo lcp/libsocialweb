@@ -28,7 +28,7 @@ content_files=$(foreach dbus, $(DBUS), xml/ref-$(dbus))
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
 # e.g. expand_content_files=running.sgml
-expand_content_files=
+expand_content_files=$(content_files)
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make
