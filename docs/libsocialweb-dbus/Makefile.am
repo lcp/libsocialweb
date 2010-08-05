@@ -48,8 +48,8 @@ if ENABLE_GTK_DOC
 #TESTS = $(GTKDOC_CHECK)
 endif
 
-xml/ref-%.xml: $(top_srcdir)/interfaces/%.xml
-	$(AM_V_GEN)$(XSLT) -o $@ $(top_srcdir)/docs/libsocialweb-dbus/spec-to-docbook.xsl $<
+xml/ref-%.xml: $(top_srcdir)/interfaces/%.xml $(srcdir)/spec-to-docbook.xsl
+	$(AM_V_GEN)$(XSLT) -o $@ $(srcdir)/spec-to-docbook.xsl $<
 
 -include $(top_srcdir)/git.mk
 
