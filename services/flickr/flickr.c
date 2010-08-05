@@ -286,9 +286,6 @@ _tokens_fetched_for_upload_photo (RestProxy *proxy,
     g_hash_table_insert (closure->params, "auth_token", (gchar *)auth_token);
     g_hash_table_insert (closure->params, "api_key", (gchar *)api_key);
 
-    /* For testing */
-    g_hash_table_insert (closure->params, "is_public", (gchar *)"0");
-
     /* Then sign it */
     s = flickr_proxy_sign ((FlickrProxy *)priv->proxy, closure->params);
     g_hash_table_insert (closure->params, "api_sig", s);
@@ -335,7 +332,7 @@ _tokens_fetched_for_upload_photo (RestProxy *proxy,
       error_msg = _("Error getting file type");
       goto fail;
     }
-  
+
     content_type = g_file_info_get_attribute_string (fi, G_FILE_ATTRIBUTE_STANDARD_FAST_CONTENT_TYPE);
 
     /* Now for the body, we need to use control name "photo"
