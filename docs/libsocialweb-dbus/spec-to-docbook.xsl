@@ -188,7 +188,7 @@
   </xsl:variable>
   <xsl:for-each select="///signal">
   <refsect2>
-    <title><anchor role="function"><xsl:attribute name="id"><xsl:value-of select="$basename"/>::<xsl:value-of select="@name"/></xsl:attribute></anchor>The <xsl:value-of select="@name"/> signal</title>
+    <title><anchor role="function"><xsl:attribute name="id"><xsl:value-of select="$basename"/>-<xsl:value-of select="@name"/></xsl:attribute></anchor>The <xsl:value-of select="@name"/> signal</title>
 <indexterm><primary><xsl:value-of select="@name"/></primary><secondary><xsl:value-of select="$basename"/></secondary></indexterm>
 <programlisting><xsl:value-of select="@name"/> (<xsl:call-template name="signal-args"><xsl:with-param name="indent" select="string-length(@name) + 2"/><xsl:with-param name="prefix" select="."/></xsl:call-template>)</programlisting>
   <xsl:call-template name="signal-doc"/>
@@ -463,7 +463,7 @@ See also:
     </xsl:call-template>
   </xsl:variable>
   <xsl:for-each select="///signal">
-<link><xsl:attribute name="linkend"><xsl:value-of select="$basename"/>::<xsl:value-of select="@name"/></xsl:attribute><xsl:value-of select="@name"/></link><xsl:call-template name="pad-spaces"><xsl:with-param name="width" select="$longest - string-length(@name) + 1"/></xsl:call-template>(<xsl:call-template name="signal-args"><xsl:with-param name="indent" select="$longest + 2"/><xsl:with-param name="prefix" select="///signal"/></xsl:call-template>)
+<link><xsl:attribute name="linkend"><xsl:value-of select="$basename"/>-<xsl:value-of select="@name"/></xsl:attribute><xsl:value-of select="@name"/></link><xsl:call-template name="pad-spaces"><xsl:with-param name="width" select="$longest - string-length(@name) + 1"/></xsl:call-template>(<xsl:call-template name="signal-args"><xsl:with-param name="indent" select="$longest + 2"/><xsl:with-param name="prefix" select="///signal"/></xsl:call-template>)
 </xsl:for-each>
 </xsl:template>
 
