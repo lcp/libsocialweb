@@ -65,6 +65,11 @@ enum
 static void _service_item_hidden_cb (SwService   *service,
                                      const gchar *uid,
                                      SwItemView  *item_view);
+static void _service_user_changed_cb (SwService  *service,
+                                      SwItemView *item_view);
+static void _service_capabilities_changed_cb (SwService    *service,
+                                              const gchar **caps,
+                                              SwItemView   *item_view);
 
 static void
 sw_flickr_item_view_get_property (GObject    *object,
@@ -131,8 +136,14 @@ sw_flickr_item_view_dispose (GObject *object)
   }
 
   g_signal_handlers_disconnect_by_func (sw_item_view_get_service (item_view),
-                                      _service_item_hidden_cb,
-                                      item_view);
+                                        _service_item_hidden_cb,
+                                        item_view);
+  g_signal_handlers_disconnect_by_func (sw_item_view_get_service (item_view),
+                                        _service_user_changed_cb,
+                                        item_view);
+  g_signal_handlers_disconnect_by_func (sw_item_view_get_service (item_view),
+                                        _service_capabilities_changed_cb,
+                                        item_view);
 
   G_OBJECT_CLASS (sw_flickr_item_view_parent_class)->dispose (object);
 }
@@ -480,6 +491,33 @@ _service_item_hidden_cb (SwService   *service,
 }
 
 static void
+_service_user_changed_cb (SwService  *service,
+                          SwItemView *item_view)
+{
+  SwSet *set;
+
+  /* We need to empty the set */
+  set = sw_set_new ();
+  sw_item_view_set_from_set (SW_ITEM_VIEW (item_view),
+                             set);
+  sw_set_unref (set);
+
+  /* And drop the cache */
+  sw_cache_drop_all (service);
+}
+
+static void
+_service_capabilities_changed_cb (SwService    *service,
+                                  const gchar **caps,
+                                  SwItemView   *item_view)
+{
+  if (sw_service_has_cap (caps, CREDENTIALS_VALID))
+  {
+    flickr_item_view_refresh (item_view);
+  }
+}
+
+static void
 sw_flickr_item_view_constructed (GObject *object)
 {
   SwItemView *item_view = SW_ITEM_VIEW (object);
@@ -487,6 +525,14 @@ sw_flickr_item_view_constructed (GObject *object)
   g_signal_connect (sw_item_view_get_service (item_view),
                     "item-hidden",
                     (GCallback)_service_item_hidden_cb,
+                    item_view);
+  g_signal_connect (sw_item_view_get_service (item_view),
+                    "user-changed",
+                    (GCallback)_service_user_changed_cb,
+                    item_view);
+  g_signal_connect (sw_item_view_get_service (item_view),
+                    "capabilities-changed",
+                    (GCallback)_service_capabilities_changed_cb,
                     item_view);
 
   if (G_OBJECT_CLASS (sw_flickr_item_view_parent_class)->constructed)
