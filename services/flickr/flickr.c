@@ -56,22 +56,53 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceFlickr, sw_service_flickr, SW_TYPE_SERVICE,
 struct _SwServiceFlickrPrivate {
   RestProxy *proxy;
   SoupSession *session; /* for upload */
+  gboolean authorised;
 };
+
+static const char **
+get_dynamic_caps (SwService *service)
+{
+  SwServiceFlickrPrivate *priv = GET_PRIVATE (service);
+
+  static const char *authorised_caps[] = {
+    IS_CONFIGURED,
+    CREDENTIALS_VALID,
+    NULL
+  };
+
+  static const char *unauthorised_caps[] = {
+    IS_CONFIGURED,
+    CREDENTIALS_INVALID,
+    NULL
+  };
+
+  if (priv->authorised)
+  {
+    return authorised_caps;
+  } else {
+    return unauthorised_caps;
+  }
+}
 
 static void
 got_tokens_cb (RestProxy *proxy,
                gboolean   authorised,
                gpointer   user_data)
 {
-  SwServiceFlickr *flickr = SW_SERVICE_FLICKR (user_data);
+  SwService *service = SW_SERVICE (user_data);
+  SwServiceFlickrPrivate *priv = GET_PRIVATE (service);
 
   if (authorised) {
     /* TODO: this assumes that the tokens are valid. we should call checkToken
        and re-auth if required. */
   }
 
+  priv->authorised = authorised;
+  sw_service_emit_capabilities_changed (service,
+                                        get_dynamic_caps (service));
+
   /* Drop reference we took for callback */
-  g_object_unref (flickr);
+  g_object_unref (service);
 }
 
 static void
@@ -422,6 +453,7 @@ sw_service_flickr_class_init (SwServiceFlickrClass *klass)
 
   service_class->get_name = sw_service_flickr_get_name;
   service_class->credentials_updated = credentials_updated;
+  service_class->get_dynamic_caps = get_dynamic_caps;
 }
 
 static void
