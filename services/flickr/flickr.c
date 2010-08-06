@@ -60,6 +60,17 @@ struct _SwServiceFlickrPrivate {
 };
 
 static const char **
+get_static_caps (SwService *service)
+{
+  static const char * caps[] = {
+    CAN_VERIFY_CREDENTIALS,
+    NULL
+  };
+
+  return caps;
+}
+
+static const char **
 get_dynamic_caps (SwService *service)
 {
   SwServiceFlickrPrivate *priv = GET_PRIVATE (service);
@@ -441,7 +452,6 @@ photo_upload_iface_init (gpointer g_iface,
 }
 
 
-
 static void
 sw_service_flickr_class_init (SwServiceFlickrClass *klass)
 {
@@ -455,6 +465,7 @@ sw_service_flickr_class_init (SwServiceFlickrClass *klass)
   service_class->get_name = sw_service_flickr_get_name;
   service_class->credentials_updated = credentials_updated;
   service_class->get_dynamic_caps = get_dynamic_caps;
+  service_class->get_static_caps = get_static_caps;
 }
 
 static void
