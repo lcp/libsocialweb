@@ -98,6 +98,28 @@ lastfm_submit_track (SwLastfmIface *self,
   sw_lastfm_iface_return_from_submit_track (context);
 }
 
+static const char **
+get_dynamic_caps (SwService *service)
+{
+  SwServiceLastfmPrivate *priv = GET_PRIVATE (service);
+
+  static const char *configured_caps[] = {
+    IS_CONFIGURED,
+    CREDENTIALS_VALID,
+    NULL
+  };
+
+  static const char *unconfigured_caps[] = {
+    NULL
+  };
+
+  if (priv->user_id)
+  {
+    return configured_caps;
+  } else {
+    return unconfigured_caps;
+  }
+}
 
 static void
 _gconf_user_changed_cb (GConfClient *client,
@@ -126,6 +148,7 @@ _gconf_user_changed_cb (GConfClient *client,
     SW_DEBUG (LASTFM, "User set to %s", priv->user_id);
 
     sw_service_emit_user_changed (service);
+    sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
   }
 }
 
@@ -312,6 +335,7 @@ sw_service_lastfm_class_init (SwServiceLastfmClass *klass)
   object_class->finalize = sw_service_lastfm_finalize;
 
   service_class->get_name = get_name;
+  service_class->get_dynamic_caps = get_dynamic_caps;
 }
 
 static void
