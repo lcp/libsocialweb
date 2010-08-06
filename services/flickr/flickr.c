@@ -56,6 +56,7 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceFlickr, sw_service_flickr, SW_TYPE_SERVICE,
 struct _SwServiceFlickrPrivate {
   RestProxy *proxy;
   SoupSession *session; /* for upload */
+  gboolean inited;
   gboolean authorised;
 };
 
@@ -155,12 +156,15 @@ sw_service_flickr_dispose (GObject *object)
 
 static gboolean
 sw_service_flickr_initable (GInitable    *initable,
-                         GCancellable *cancellable,
-                         GError      **error)
+                            GCancellable *cancellable,
+                            GError      **error)
 {
   SwServiceFlickr *flickr = SW_SERVICE_FLICKR (initable);
   SwServiceFlickrPrivate *priv = flickr->priv;
   const char *key = NULL, *secret = NULL;
+
+  if (priv->inited)
+    return TRUE;
 
   sw_keystore_get_key_secret ("flickr", &key, &secret);
   if (key == NULL || secret == NULL) {
@@ -171,10 +175,9 @@ sw_service_flickr_initable (GInitable    *initable,
     return FALSE;
   }
 
-  if (priv->proxy)
-    return TRUE;
-
   priv->proxy = flickr_proxy_new (key, secret);
+
+  priv->inited = TRUE;
 
   return TRUE;
 }
@@ -472,5 +475,6 @@ static void
 sw_service_flickr_init (SwServiceFlickr *self)
 {
   self->priv = GET_PRIVATE (self);
+  self->priv->inited = FALSE;
   self->priv->session = soup_session_async_new ();
 }
