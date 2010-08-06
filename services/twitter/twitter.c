@@ -339,6 +339,10 @@ online_notify (gboolean online, gpointer user_data)
 
   SW_DEBUG (TWITTER, "Online: %s", online ? "yes" : "no");
 
+  /* Clear the token and token secret stored inside the proxy */
+  oauth_proxy_set_token (OAUTH_PROXY (priv->proxy), NULL);
+  oauth_proxy_set_token_secret (OAUTH_PROXY (priv->proxy), NULL);
+
   if (online) {
     if (priv->username && priv->password) {
       RestProxyCall *call;
