@@ -110,6 +110,7 @@ credentials_updated (SwService *service)
 {
   SwServiceFlickr *flickr = (SwServiceFlickr *)service;
 
+  sw_service_emit_user_changed (service);
   sw_keyfob_flickr ((FlickrProxy *)flickr->priv->proxy, 
                     got_tokens_cb,
                     g_object_ref (service)); /* ref gets dropped in cb */
