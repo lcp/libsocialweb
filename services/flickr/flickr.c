@@ -23,6 +23,7 @@
 #include <glib/gi18n.h>
 #include <dbus/dbus-glib-lowlevel.h>
 
+#include <libsocialweb/sw-debug.h>
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-set.h>
 #include <libsocialweb/sw-utils.h>
@@ -103,6 +104,8 @@ got_tokens_cb (RestProxy *proxy,
 {
   SwService *service = SW_SERVICE (user_data);
   SwServiceFlickrPrivate *priv = GET_PRIVATE (service);
+
+  SW_DEBUG (FLICKR, "Authorised: %s", authorised ? "yes" : "no");
 
   if (authorised) {
     /* TODO: this assumes that the tokens are valid. we should call checkToken
