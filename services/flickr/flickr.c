@@ -26,6 +26,7 @@
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-set.h>
+#include <libsocialweb/sw-online.h>
 #include <libsocialweb/sw-utils.h>
 #include <libsocialweb/sw-web.h>
 #include <libsocialweb-keystore/sw-keystore.h>
@@ -107,11 +108,8 @@ got_tokens_cb (RestProxy *proxy,
 
   SW_DEBUG (FLICKR, "Authorised: %s", authorised ? "yes" : "no");
 
-  if (authorised) {
-    /* TODO: this assumes that the tokens are valid. we should call checkToken
-       and re-auth if required. */
-  }
-
+  /* TODO: this assumes that the tokens are valid. we should call checkToken
+     and re-auth if required. */
   priv->authorised = authorised;
   sw_service_emit_capabilities_changed (service,
                                         get_dynamic_caps (service));
@@ -121,14 +119,37 @@ got_tokens_cb (RestProxy *proxy,
 }
 
 static void
+online_notify (gboolean online, gpointer user_data)
+{
+  SwService *service = SW_SERVICE (user_data);
+  SwServiceFlickrPrivate *priv = GET_PRIVATE (service);
+
+  SW_DEBUG (FLICKR, "Online: %s", online ? "yes" : "no");
+
+  if (online) {
+    sw_keyfob_flickr ((FlickrProxy *)priv->proxy,
+                      got_tokens_cb,
+                      g_object_ref (service)); /* ref gets dropped in cb */
+  } else {
+    priv->authorised = FALSE;
+
+    sw_service_emit_capabilities_changed (service,
+                                          get_dynamic_caps (service));
+  }
+}
+
+static void
 credentials_updated (SwService *service)
 {
-  SwServiceFlickr *flickr = (SwServiceFlickr *)service;
+  /* If we're online, force a reconnect to fetch new credentials */
+  if (sw_is_online ()) {
+    online_notify (FALSE, service);
+    online_notify (TRUE, service);
+  }
 
   sw_service_emit_user_changed (service);
-  sw_keyfob_flickr ((FlickrProxy *)flickr->priv->proxy, 
-                    got_tokens_cb,
-                    g_object_ref (service)); /* ref gets dropped in cb */
+  sw_service_emit_capabilities_changed ((SwService *)service,
+                                        get_dynamic_caps (service));
 }
 
 
@@ -179,6 +200,9 @@ sw_service_flickr_initable (GInitable    *initable,
   }
 
   priv->proxy = flickr_proxy_new (key, secret);
+
+  sw_online_add_notify (online_notify, flickr);
+  online_notify (sw_is_online (), flickr);
 
   priv->inited = TRUE;
 
@@ -479,5 +503,6 @@ sw_service_flickr_init (SwServiceFlickr *self)
 {
   self->priv = GET_PRIVATE (self);
   self->priv->inited = FALSE;
+  self->priv->authorised = FALSE;
   self->priv->session = soup_session_async_new ();
 }
