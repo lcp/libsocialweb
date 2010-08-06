@@ -527,6 +527,12 @@ _get_status_updates (SwLastfmItemView *item_view)
   service = sw_item_view_get_service (SW_ITEM_VIEW (item_view));
   user_id = sw_service_lastfm_get_user_id (SW_SERVICE_LASTFM (service));
 
+  if (!user_id)
+  {
+    /* Not yet configured */
+    return;
+  }
+
   rest_proxy_call_add_params (call,
                               "api_key", sw_keystore_get_key ("lastfm"),
                               "user", user_id,
