@@ -125,7 +125,7 @@ _gconf_user_changed_cb (GConfClient *client,
 
     SW_DEBUG (LASTFM, "User set to %s", priv->user_id);
 
-    g_signal_emit_by_name (service, "user-changed");
+    sw_service_emit_user_changed (service);
   }
 }
 
