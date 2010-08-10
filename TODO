@@ -1,7 +1,3 @@
-Check for leaks
+StatusUpdate::StatusUpdated only has a status parameter. Should add an error?
 
-Add sequence-complete signal, or batch all changes into a single signal
-
-Validate items in the view callback (id and date required)
-
-Make the refresh interval per-source
+Port to the new static capabilities.
