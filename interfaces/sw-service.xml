@@ -1,9 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<node name="/Service_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+<node name="/Service_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
+                            xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
   <interface name="org.moblin.libsocialweb.Service">
+    <doc:doc>
+      <doc:summary>An interface representing the core functionality present on
+      all objects representing service backends.</doc:summary>
+    </doc:doc>
+
     <method name="GetStaticCapabilities" tp:name-for-bindings="Get_Static_Capabilities">
-      <arg name="caps" type="as" direction="out"/>
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Query the service for the capabilities that this service provides.
+            Static capabilities represent capabilities that this service can theoretically
+            provide. Depending on the internal configuration of the service the list of
+            dynamic capabilities may change.
+          </doc:para>
+          <doc:list>
+            <doc:item>
+              <doc:term>has-update-status-iface</doc:term>
+              <doc:definition>The service supports the #UpdateStatus interface.</doc:definition>
+            </doc:item>
+            <doc:item>
+              <doc:term>has-avatar-iface</doc:term>
+              <doc:definition>The service supports the #Avatar interface.</doc:definition>
+            </doc:item>
+            <doc:item>
+              <doc:term>has-photo-upload-iface</doc:term>
+              <doc:definition>The service supports the #PhotoUpload interface.</doc:definition>
+            </doc:item>
+            <doc:item>
+              <doc:term>has-banishable-iface</doc:term>
+              <doc:definition>The service supports the #Banishable interface.</doc:definition>
+            </doc:item>
+            <doc:item>
+              <doc:term>has-query-iface</doc:term>
+              <doc:definition>The service supports the #Query interface.</doc:definition>
+            </doc:item>
+            <doc:item>
+              <doc:term>can-verify-credentials</doc:term>
+              <doc:definition>The credentials-invalid and credentials-valid dynamic capabilities are available.</doc:definition>
+            </doc:item>
+            <doc:item>
+              <doc:term>can-update-status-with-geotag</doc:term>
+              <doc:definition>When using #StatusUpdate:UpdateStatus () it is possible to provide latitude and longitude fields.</doc:definition>
+            </doc:item>
+          </doc:list>
+        </doc:description>
+      </doc:doc>
+
+      <arg name="caps" type="as" direction="out">
+        <doc:doc>
+          <doc:summary>The list of static capabilities that this service supports.</doc:summary>
+        </doc:doc>
+      </arg>
     </method>
 
     <method name="GetDynamicCapabilities" tp:name-for-bindings="Get_Dynamic_Capabilities">
