@@ -176,9 +176,18 @@ get_static_caps (SwService *service)
 {
   static const char * caps[] = {
     CAN_VERIFY_CREDENTIALS,
+    HAS_UPDATE_STATUS_IFACE,
+    HAS_AVATAR_IFACE,
+    HAS_PHOTO_UPLOAD_IFACE,
+    HAS_BANISHABLE_IFACE,
+    HAS_QUERY_IFACE,
+    CAN_UPDATE_STATUS_WITH_GEOTAG,
+
+    /* deprecated */
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
     CAN_GEOTAG,
+
     NULL
   };
 
