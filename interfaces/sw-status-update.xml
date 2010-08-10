@@ -1,13 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<node name="/Status_Update_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+<node name="/Status_Update_Iface"
+  xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
+  xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+
   <interface name="org.moblin.libsocialweb.StatusUpdate">
+    <doc:doc>
+      <doc:summary>An interface for updating the user's status.</doc:summary>
+    </doc:doc>
+
     <method name="UpdateStatus" tp:name-for-bindings="Update_Status">
-      <arg name="status_message" type="s" direction="in"/>
-      <arg name="fields" type="a{ss}" direction="in"/>
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Update the user's status to @status_message. The update will be
+            performed asynchronously. The #StatusUpdate::StatusUpdated signal will be fired
+            when complete.
+          </doc:para>
+
+          <doc:para>
+            @fields is a set of key-value pairs that are passed to the service.
+            None of these are required and not all services support all of the
+            keys.  Defined keys include:
+          </doc:para>
+          <doc:list>
+            <doc:item>
+              <doc:term>latitude, longitude</doc:term>
+              <doc:definition>The latitude and longitude for the tweet.</doc:definition>
+            </doc:item>
+          </doc:list>
+        </doc:description>
+      </doc:doc>
+      <arg name="status_message" type="s" direction="in">
+        <doc:doc>
+          <doc:summary>The message to use for the user's status.</doc:summary>
+        </doc:doc>
+      </arg>
+      <arg name="fields" type="a{ss}" direction="in">
+        <doc:doc>
+          <doc:summary>The (optional) extra fields to use when updating the status.</doc:summary>
+        </doc:doc>
+      </arg>
     </method>
+    
     <signal name="StatusUpdated" tp:name-for-bindings="Status_Updated">
-      <arg name="success" type="b"/>
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Emitted when the status has been updated on the remote service. The @success
+            signal indicates whether the update was successful.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+
+      <arg name="success" type="b">
+        <doc:doc>
+          <doc:summary>Boolean value indicating whether the status update has been successful.</doc:summary>
+        </doc:doc>
+      </arg>
     </signal>
   </interface>
 </node>
