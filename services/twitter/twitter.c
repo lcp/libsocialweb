@@ -21,6 +21,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib/gi18n.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <gconf/gconf-client.h>
 
@@ -730,20 +731,55 @@ status_update_iface_init (gpointer g_iface,
 /* Photo upload interface */
 
 static void
+on_upload_tweet_cb (RestProxyCall *call,
+                    const GError *error,
+                    GObject *weak_object,
+                    gpointer user_data)
+{
+  if (error)
+    g_message ("Cannot post to Twitter: %s", error->message);
+}
+
+static void
 on_upload_cb (RestProxyCall *call,
               const GError *error,
               GObject *weak_object,
               gpointer user_data)
 {
   SwServiceTwitter *twitter = SW_SERVICE_TWITTER (weak_object);
+  RestXmlNode *root;
+  char *tweet;
 
   if (error) {
+    /* TODO opid */
     sw_photo_upload_iface_emit_photo_upload_progress (twitter, 0, -1, error->message);
     /* TODO: clean up */
-  } else {
-    /* TODO: Send a tweet pointing to the twitpic url before returning */
-    sw_photo_upload_iface_emit_photo_upload_progress (twitter, 0, 100, "");
+    return;
   }
+
+  /* Now post to Twitter */
+
+  root = node_from_call (call);
+  if (root == NULL || g_strcmp0 (root->name, "image") != 0) {
+    /* TODO opid */
+    sw_photo_upload_iface_emit_photo_upload_progress (twitter, 0, -1, "Unexpected response from Twitpic");
+    /* TODO: clean up */
+    return;
+  }
+
+  /* This format is for tweets announcing twitpic URLs, "[tweet] [url]". */
+  tweet = g_strdup_printf (_("%s %s"),
+                           rest_xml_node_find (root, "text")->content,
+                           rest_xml_node_find (root, "url")->content);
+
+  call = rest_proxy_new_call (twitter->priv->proxy);
+  rest_proxy_call_set_method (call, "POST");
+  rest_proxy_call_set_function (call, "1/statuses/update.xml");
+  rest_proxy_call_add_param (call, "status", tweet);
+  rest_proxy_call_async (call, on_upload_tweet_cb, (GObject *)twitter, NULL, NULL);
+
+  /* TODO opid */
+  sw_photo_upload_iface_emit_photo_upload_progress (twitter, 0, 100, "");
 }
 
 static void
