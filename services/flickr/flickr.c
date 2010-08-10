@@ -67,6 +67,10 @@ get_static_caps (SwService *service)
 {
   static const char * caps[] = {
     CAN_VERIFY_CREDENTIALS,
+    HAS_PHOTO_UPLOAD_IFACE,
+    HAS_BANISHABLE_IFACE,
+    HAS_QUERY_IFACE,
+
     NULL
   };
 
