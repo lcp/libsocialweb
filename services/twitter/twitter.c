@@ -685,9 +685,7 @@ _twitter_status_update_update_status (SwStatusUpdateIface   *self,
   rest_proxy_call_set_method (call, "POST");
   rest_proxy_call_set_function (call, "1/statuses/update.xml");
 
-  rest_proxy_call_add_params (call,
-                              "status", msg,
-                              NULL);
+  rest_proxy_call_add_param (call, "status", msg);
 
   if (fields)
   {
@@ -708,9 +706,7 @@ _twitter_status_update_update_status (SwStatusUpdateIface   *self,
 
     if (twitter_reply_to)
     {
-      rest_proxy_call_add_params (call,
-                                  "in_reply_to_status_id", twitter_reply_to,
-                                  NULL);
+      rest_proxy_call_add_param (call, "in_reply_to_status_id", twitter_reply_to);
     }
   }
 
@@ -813,9 +809,10 @@ _twitpic_upload_photo (SwPhotoUploadIface    *self,
   call = rest_proxy_new_call (priv->twitpic_proxy);
   rest_proxy_call_set_function (call, "upload.xml");
 
-  rest_proxy_call_add_param (call, "key", sw_keystore_get_key ("twitpic"));
-
-  rest_proxy_call_add_param (call, "message", title);
+  rest_proxy_call_add_params (call,
+                              "key", sw_keystore_get_key ("twitpic"),
+                              "message", title,
+                              NULL);
   g_free (title);
 
   param = rest_param_new_with_owner ("media",
