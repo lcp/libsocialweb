@@ -58,8 +58,9 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceFlickr, sw_service_flickr, SW_TYPE_SERVICE,
 struct _SwServiceFlickrPrivate {
   RestProxy *proxy;
   SoupSession *session; /* for upload */
-  gboolean inited;
-  gboolean authorised;
+  gboolean inited; /* For GInitable */
+  gboolean configured; /* Set if we have user tokens */
+  gboolean authorised; /* Set if the tokens are valid */
 };
 
 static const char **
@@ -82,6 +83,10 @@ get_dynamic_caps (SwService *service)
 {
   SwServiceFlickrPrivate *priv = GET_PRIVATE (service);
 
+  static const char *unconfigured_caps[] = {
+    NULL,
+  };
+
   static const char *authorised_caps[] = {
     IS_CONFIGURED,
     CREDENTIALS_VALID,
@@ -94,32 +99,124 @@ get_dynamic_caps (SwService *service)
     NULL
   };
 
-  if (priv->authorised)
-  {
-    return authorised_caps;
+  if (priv->configured) {
+    if (priv->authorised) {
+      return authorised_caps;
+    } else {
+      return unauthorised_caps;
+    }
   } else {
-    return unauthorised_caps;
+    return unconfigured_caps;
   }
+}
+
+static RestXmlNode *
+node_from_call (RestProxyCall *call)
+{
+  static RestXmlParser *parser = NULL;
+  RestXmlNode *node;
+
+  if (call == NULL)
+    return NULL;
+
+  if (parser == NULL)
+    parser = rest_xml_parser_new ();
+
+  if (!SOUP_STATUS_IS_SUCCESSFUL (rest_proxy_call_get_status_code (call))) {
+    g_warning (G_STRLOC ": error from Flickr: %s (%d)",
+               rest_proxy_call_get_status_message (call),
+               rest_proxy_call_get_status_code (call));
+    return NULL;
+  }
+
+  node = rest_xml_parser_parse_from_data (parser,
+                                          rest_proxy_call_get_payload (call),
+                                          rest_proxy_call_get_payload_length (call));
+  g_object_unref (call);
+
+  /* Invalid XML, or incorrect root */
+  if (node == NULL || !g_str_equal (node->name, "rsp")) {
+    g_warning (G_STRLOC ": cannot make Flickr call");
+    /* TODO: display the payload if its short */
+    if (node) rest_xml_node_unref (node);
+    return NULL;
+  }
+
+  if (g_strcmp0 (rest_xml_node_get_attr (node, "stat"), "ok") != 0) {
+    RestXmlNode *err;
+    err = rest_xml_node_find (node, "err");
+    if (err)
+      g_warning (G_STRLOC ": cannot make Flickr call: %s",
+                 rest_xml_node_get_attr (err, "msg"));
+    rest_xml_node_unref (node);
+    return NULL;
+  }
+
+  return node;
+}
+
+static void
+check_tokens_cb (RestProxyCall *call,
+                 const GError  *error,
+                 GObject       *weak_object,
+                 gpointer       user_data)
+{
+  SwService *service = SW_SERVICE (weak_object);
+  SwServiceFlickrPrivate *priv = GET_PRIVATE (service);
+  RestXmlNode *root;
+
+  root = node_from_call (call);
+  if (root) {
+    SW_DEBUG (FLICKR, "checkToken: authorised");
+    priv->authorised = TRUE;
+    rest_xml_node_unref (root);
+  } else {
+    SW_DEBUG (FLICKR, "checkToken: invalid token");
+    priv->authorised = FALSE;
+  }
+
+  sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
 }
 
 static void
 got_tokens_cb (RestProxy *proxy,
-               gboolean   authorised,
+               gboolean   got_tokens,
                gpointer   user_data)
 {
   SwService *service = SW_SERVICE (user_data);
   SwServiceFlickrPrivate *priv = GET_PRIVATE (service);
+  RestProxyCall *call;
 
-  SW_DEBUG (FLICKR, "Authorised: %s", authorised ? "yes" : "no");
+  SW_DEBUG (FLICKR, "Got tokens: %s", got_tokens ? "yes" : "no");
 
-  /* TODO: this assumes that the tokens are valid. we should call checkToken
-     and re-auth if required. */
-  priv->authorised = authorised;
-  sw_service_emit_capabilities_changed (service,
-                                        get_dynamic_caps (service));
+  priv->configured = got_tokens;
+  sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
+
+  if (got_tokens && sw_is_online ()) {
+    call = rest_proxy_new_call (priv->proxy);
+    rest_proxy_call_set_function (call, "flickr.auth.checkToken");
+    rest_proxy_call_async (call, check_tokens_cb, G_OBJECT (service), NULL, NULL);
+    /* TODO: error checking */
+  }
 
   /* Drop reference we took for callback */
   g_object_unref (service);
+}
+
+static void
+credentials_updated (SwService *service)
+{
+  SwServiceFlickrPrivate *priv = GET_PRIVATE (service);
+
+  priv->configured = FALSE;
+  priv->authorised = FALSE;
+
+  sw_keyfob_flickr ((FlickrProxy *)priv->proxy,
+                    got_tokens_cb,
+                    g_object_ref (service)); /* ref gets dropped in cb */
+
+  sw_service_emit_user_changed (service);
+  sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
 }
 
 static void
@@ -131,31 +228,13 @@ online_notify (gboolean online, gpointer user_data)
   SW_DEBUG (FLICKR, "Online: %s", online ? "yes" : "no");
 
   if (online) {
-    sw_keyfob_flickr ((FlickrProxy *)priv->proxy,
-                      got_tokens_cb,
-                      g_object_ref (service)); /* ref gets dropped in cb */
+    got_tokens_cb (priv->proxy, TRUE, service);
   } else {
     priv->authorised = FALSE;
 
-    sw_service_emit_capabilities_changed (service,
-                                          get_dynamic_caps (service));
+    sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
   }
 }
-
-static void
-credentials_updated (SwService *service)
-{
-  /* If we're online, force a reconnect to fetch new credentials */
-  if (sw_is_online ()) {
-    online_notify (FALSE, service);
-    online_notify (TRUE, service);
-  }
-
-  sw_service_emit_user_changed (service);
-  sw_service_emit_capabilities_changed ((SwService *)service,
-                                        get_dynamic_caps (service));
-}
-
 
 static const char *
 sw_service_flickr_get_name (SwService *service)
@@ -203,12 +282,14 @@ sw_service_flickr_initable (GInitable    *initable,
     return FALSE;
   }
 
+  priv->session = soup_session_async_new ();
   priv->proxy = flickr_proxy_new (key, secret);
 
   sw_online_add_notify (online_notify, flickr);
-  online_notify (sw_is_online (), flickr);
 
   priv->inited = TRUE;
+
+  credentials_updated (SW_SERVICE (flickr));
 
   return TRUE;
 }
@@ -467,7 +548,7 @@ _flickr_upload_photo (SwPhotoUploadIface    *self,
 
   /* TODO: Copy supported params from params_in */
 
-  sw_keyfob_flickr ((FlickrProxy*)priv->proxy, 
+  sw_keyfob_flickr ((FlickrProxy*)priv->proxy,
                     _tokens_fetched_for_upload_photo,
                     closure);
 
@@ -507,6 +588,6 @@ sw_service_flickr_init (SwServiceFlickr *self)
 {
   self->priv = GET_PRIVATE (self);
   self->priv->inited = FALSE;
+  self->priv->configured = FALSE;
   self->priv->authorised = FALSE;
-  self->priv->session = soup_session_async_new ();
 }
