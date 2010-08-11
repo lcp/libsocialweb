@@ -805,8 +805,7 @@ _twitpic_upload_photo (SwPhotoUploadIface    *self,
 
   map = g_mapped_file_new (filename, FALSE, &error);
   if (error) {
-    /* TODO */
-    g_message (error->message);
+    dbus_g_method_return_error (context, error);
     return;
   }
 
