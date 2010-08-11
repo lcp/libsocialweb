@@ -111,6 +111,8 @@ AS_IF(
         AC_MSG_RESULT([no])
 )
 
+AC_ARG_ENABLE([all-services],[AS_HELP_STRING([--enable-all-services], [enable every service])],
+              [], [enable_all_services=no])
 
 SOCIALWEB_ENABLE_SERVICE(Digg, digg, DIGG)
 SOCIALWEB_ENABLE_SERVICE(Flickr, flickr, FLICKR)

@@ -1,12 +1,13 @@
 # SOCIALWEB_ENABLE_SERVICE(DisplayName,optionname,VARNAME)
 AC_DEFUN([SOCIALWEB_ENABLE_SERVICE],
 [AC_MSG_CHECKING([whether to enable $1])
-AC_ARG_ENABLE([$2], [AS_HELP_STRING([--enable-$2], [Enable $1 support])],
+AC_ARG_ENABLE([$2], [AS_HELP_STRING([--enable-$2], [enable $1 support])],
                             [], [enable_$2=no])
 AS_IF(
-        [test "x$enable_$2" != xno],
+        [test "x$enable_all_services" != xno -o "x$enable_$2" != xno],
         [
-        AC_MSG_RESULT([$enable_$2])
+        AC_MSG_RESULT([yes])
+        enable_$2=yes
         ],
         AC_MSG_RESULT([not enabling $1 support])
 )
