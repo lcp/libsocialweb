@@ -33,7 +33,6 @@ sw_debug_init (const char *string)
     { "online", SW_DEBUG_ONLINE },
     { "item", SW_DEBUG_ITEM },
     { "twitter", SW_DEBUG_TWITTER },
-    { "myspace", SW_DEBUG_MYSPACE },
     { "lastfm", SW_DEBUG_LASTFM },
     { "core", SW_DEBUG_CORE },
     { "vimeo", SW_DEBUG_VIMEO },

@@ -5,5 +5,4 @@ services/lastfm/lastfm.keys.in
 services/twitter/twitter.keys.in
 services/flickr/flickr.c
 services/flickr/flickr.keys.in
-services/myspace/myspace.keys.in
 services/vimeo/vimeo.keys.in

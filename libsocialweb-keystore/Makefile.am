@@ -24,5 +24,4 @@ dist_check_DATA = \
 	test-keys/facebook \
 	test-keys/flickr \
 	test-keys/lastfm \
-	test-keys/myspace \
 	test-keys/twitter

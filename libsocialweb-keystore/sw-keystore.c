@@ -231,12 +231,6 @@ test_key_secret (void)
   g_assert_cmpstr (secret, ==, NULL);
 
   key = secret = NULL;
-  ret = sw_keystore_get_key_secret ("myspace", &key, &secret);
-  g_assert (ret == TRUE);
-  g_assert_cmpstr (key, ==, "myspacekey");
-  g_assert_cmpstr (secret, ==, "myspacesecret");
-
-  key = secret = NULL;
   ret = sw_keystore_get_key_secret ("twitter", &key, &secret);
   g_assert (ret == TRUE);
   g_assert_cmpstr (key, ==, "twitterkey");
@@ -259,9 +253,6 @@ test_key (void)
 
   key = sw_keystore_get_key ("lastfm");
   g_assert_cmpstr (key, ==, "lastfmkey");
-
-  key = sw_keystore_get_key ("myspace");
-  g_assert_cmpstr (key, ==, "myspacekey");
 
   key = sw_keystore_get_key ("twitter");
   g_assert_cmpstr (key, ==, "twitterkey");

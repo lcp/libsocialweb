@@ -115,7 +115,6 @@ AS_IF(
 SOCIALWEB_ENABLE_SERVICE(Digg, digg, DIGG)
 SOCIALWEB_ENABLE_SERVICE(Flickr, flickr, FLICKR)
 SOCIALWEB_ENABLE_SERVICE(Last.fm, lastfm, LASTFM)
-SOCIALWEB_ENABLE_SERVICE(MySpace, myspace, MYSPACE)
 SOCIALWEB_ENABLE_SERVICE(Twitter, twitter, TWITTER)
 SOCIALWEB_ENABLE_SERVICE(Vimeo, vimeo, VIMEO)
 
@@ -143,7 +142,6 @@ AC_OUTPUT([
         services/flickr/Makefile
         services/lastfm/Makefile
         services/twitter/Makefile
-        services/myspace/Makefile
         services/digg/Makefile
         services/vimeo/Makefile
         tests/Makefile
