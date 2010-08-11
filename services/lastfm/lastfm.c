@@ -118,6 +118,20 @@ get_dynamic_caps (SwService *service)
   }
 }
 
+static const char **
+get_static_caps (SwService *service)
+{
+  static const char * caps[] = {
+    CAN_VERIFY_CREDENTIALS,
+    HAS_QUERY_IFACE,
+    HAS_BANISHABLE_IFACE,
+
+    NULL
+  };
+
+  return caps;
+}
+
 static void
 _gconf_user_changed_cb (GConfClient *client,
                         guint        cnxn_id,
@@ -317,6 +331,7 @@ sw_service_lastfm_class_init (SwServiceLastfmClass *klass)
 
   service_class->get_name = get_name;
   service_class->get_dynamic_caps = get_dynamic_caps;
+  service_class->get_static_caps = get_static_caps;
 }
 
 static void
