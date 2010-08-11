@@ -58,13 +58,10 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceLastfm, sw_service_lastfm, SW_TYPE_SERVICE,
 #define KEY_USER KEY_BASE "/user"
 
 struct _SwServiceLastfmPrivate {
-  gboolean running;
   RestProxy *proxy;
   GConfClient *gconf;
   char *user_id;
   guint gconf_notify_id;
-  SwSet *set;
-  SwCallList *calls;
 };
 
 static void
@@ -176,17 +173,6 @@ sw_service_lastfm_dispose (GObject *object)
     priv->gconf = NULL;
   }
 
-  /* Do this here so only disposing if there are callbacks pending */
-  if (priv->calls) {
-    sw_call_list_free (priv->calls);
-    priv->calls = NULL;
-  }
-
-  if (priv->set) {
-    sw_set_unref (priv->set);
-    priv->set = NULL;
-  }
-
   G_OBJECT_CLASS (sw_service_lastfm_parent_class)->dispose (object);
 }
 
@@ -219,11 +205,6 @@ sw_service_lastfm_initable (GInitable     *initable,
 
   if (priv->proxy)
     return TRUE;
-
-  priv->set = sw_item_set_new ();
-  priv->calls = sw_call_list_new ();
-
-  priv->running = FALSE;
 
   priv->proxy = rest_proxy_new ("http://ws.audioscrobbler.com/2.0/", FALSE);
 
