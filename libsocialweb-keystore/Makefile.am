@@ -20,7 +20,6 @@ test_suite_LDFLAGS = $(libsocialweb_keystore_la_LIBADD)
 # TODO: use gtester
 
 dist_check_DATA = \
-	test-keys/digg \
 	test-keys/facebook \
 	test-keys/flickr \
 	test-keys/lastfm \

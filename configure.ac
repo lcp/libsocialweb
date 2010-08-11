@@ -114,7 +114,6 @@ AS_IF(
 AC_ARG_ENABLE([all-services],[AS_HELP_STRING([--enable-all-services], [enable every service])],
               [], [enable_all_services=no])
 
-SOCIALWEB_ENABLE_SERVICE(Digg, digg, DIGG)
 SOCIALWEB_ENABLE_SERVICE(Flickr, flickr, FLICKR)
 SOCIALWEB_ENABLE_SERVICE(Last.fm, lastfm, LASTFM)
 SOCIALWEB_ENABLE_SERVICE(Twitter, twitter, TWITTER)
@@ -144,7 +143,6 @@ AC_OUTPUT([
         services/flickr/Makefile
         services/lastfm/Makefile
         services/twitter/Makefile
-        services/digg/Makefile
         services/vimeo/Makefile
         tests/Makefile
         tools/Makefile

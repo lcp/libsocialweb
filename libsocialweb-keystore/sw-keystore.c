@@ -235,12 +235,6 @@ test_key_secret (void)
   g_assert (ret == TRUE);
   g_assert_cmpstr (key, ==, "twitterkey");
   g_assert_cmpstr (secret, ==, "twittersecret");
-
-  key = secret = NULL;
-  ret = sw_keystore_get_key_secret ("digg", &key, &secret);
-  g_assert (ret == TRUE);
-  g_assert_cmpstr (key, ==, "diggkey");
-  g_assert_cmpstr (secret, ==, NULL);
 }
 
 static void
@@ -256,9 +250,6 @@ test_key (void)
 
   key = sw_keystore_get_key ("twitter");
   g_assert_cmpstr (key, ==, "twitterkey");
-
-  key = sw_keystore_get_key ("digg");
-  g_assert_cmpstr (key, ==, "diggkey");
 }
 
 int
