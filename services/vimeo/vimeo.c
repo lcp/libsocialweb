@@ -95,6 +95,19 @@ get_name (SwService *service)
   return "vimeo";
 }
 
+static const char **
+get_static_caps (SwService *service)
+{
+  static const char * caps[] = {
+    HAS_QUERY_IFACE,
+    HAS_BANISHABLE_IFACE,
+
+    NULL
+  };
+
+  return caps;
+}
+
 static void
 sw_service_vimeo_dispose (GObject *object)
 {
@@ -201,6 +214,7 @@ sw_service_vimeo_class_init (SwServiceVimeoClass *klass)
   object_class->finalize = sw_service_vimeo_finalize;
 
   service_class->get_name = get_name;
+  service_class->get_static_caps = get_static_caps;
 }
 
 static void
