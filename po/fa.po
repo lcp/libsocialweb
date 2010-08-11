@@ -1,0 +1,70 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Libsocialweb\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-03-04 15:06+0000\n"
+"PO-Revision-Date: 2010-08-12 02:34+0330\n"
+"Last-Translator: Mostafa <info@mostafadaneshvar.com>\n"
+"Language-Team: Persian <trans-fa@lists.fedoraproject.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Persian\n"
+"X-Poedit-Country: Iran\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: ../services/digg/digg.keys.in.h:1
+msgid "Digg"
+msgstr "دیگ"
+
+#: ../services/digg/digg.keys.in.h:2
+msgid "Digg - to share news, video and images"
+msgstr "دیگ - برای اشتراک اخبار، ویدیو و تصاویر"
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm.c:149
+#, c-format
+msgid "%s by %s"
+msgstr "%s به وسیله ی %s"
+
+#: ../services/lastfm/lastfm.c:153
+msgid "Unknown"
+msgstr "ناشناس"
+
+#: ../services/lastfm/lastfm.keys.in.h:1
+msgid "Last.fm"
+msgstr "لست.اف‌ام"
+
+#: ../services/lastfm/lastfm.keys.in.h:2
+msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
+msgstr "لست.اف‌ام یک خدمت موسیقی است که می آموزد انچه را که شما دوست دارید. هر شیاری که شما پخش می کنید به نمایه شما در لست.اف‌ام درباره ی آنچه که دوست دارید می گوید. آن می تواند شما را به افراد دیگری که چیزی مانند شما دوست دارند متصل کند - و به شما و انها اهنگ های از مجموعه موسیقی ها پیشنهاد دهد."
+
+#: ../services/twitter/twitter.keys.in.h:1
+msgid "Twitter"
+msgstr "توییتر"
+
+#: ../services/twitter/twitter.keys.in.h:2
+msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
+msgstr "توییتر یک سرویس برای دوستان ، خانواده ، و همکاران و ارتباط و اقامت متصل است از طریق تبادل سریع ، مکرر پاسخ به یک سوال ساده است : چه کار می کنی؟"
+
+#: ../services/flickr/flickr.keys.in.h:1
+msgid "Flickr"
+msgstr "فلیکر"
+
+#: ../services/flickr/flickr.keys.in.h:2
+msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgstr "فلیکر - تقریبا بهترین برنامه مدیریت و اشتراک تصاویر در دنیا است."
+
+#: ../services/myspace/myspace.keys.in.h:1
+msgid "MySpace"
+msgstr "مای‌اس‌پیس"
+
+#: ../services/myspace/myspace.keys.in.h:2
+msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
+msgstr "مای اسپیس پورتال اجتماعی که منجر به اتصال مردم ، محتوا ، و فرهنگ از سراسر جهان است. ایجاد مشخصات ، عکس به اشتراک بگذارند ، ویدیوهای حرفه ای و فیلم ، وبلاگ ، پیام فوری از دوستان خود ، و گوش دادن به موسیقی را در جهان بزرگترین جامعه موسیقی است."
+
