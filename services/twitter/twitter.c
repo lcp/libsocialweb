@@ -745,10 +745,10 @@ on_upload_cb (RestProxyCall *call,
   SwServiceTwitter *twitter = SW_SERVICE_TWITTER (weak_object);
   RestXmlNode *root;
   char *tweet;
+  int opid = GPOINTER_TO_INT (user_data);
 
   if (error) {
-    /* TODO opid */
-    sw_photo_upload_iface_emit_photo_upload_progress (twitter, 0, -1, error->message);
+    sw_photo_upload_iface_emit_photo_upload_progress (twitter, opid, -1, error->message);
     /* TODO: clean up */
     return;
   }
@@ -757,8 +757,7 @@ on_upload_cb (RestProxyCall *call,
 
   root = node_from_call (call);
   if (root == NULL || g_strcmp0 (root->name, "image") != 0) {
-    /* TODO opid */
-    sw_photo_upload_iface_emit_photo_upload_progress (twitter, 0, -1, "Unexpected response from Twitpic");
+    sw_photo_upload_iface_emit_photo_upload_progress (twitter, opid, -1, "Unexpected response from Twitpic");
     /* TODO: clean up */
     return;
   }
@@ -774,8 +773,7 @@ on_upload_cb (RestProxyCall *call,
   rest_proxy_call_add_param (call, "status", tweet);
   rest_proxy_call_async (call, on_upload_tweet_cb, (GObject *)twitter, NULL, NULL);
 
-  /* TODO opid */
-  sw_photo_upload_iface_emit_photo_upload_progress (twitter, 0, 100, "");
+  sw_photo_upload_iface_emit_photo_upload_progress (twitter, opid, 100, "");
 }
 
 static void
@@ -791,6 +789,7 @@ _twitpic_upload_photo (SwPhotoUploadIface    *self,
   RestParam *param;
   GMappedFile *map;
   char *title;
+  static int opid = 0;
 
   map = g_mapped_file_new (filename, FALSE, &error);
   if (error) {
@@ -825,10 +824,15 @@ _twitpic_upload_photo (SwPhotoUploadIface    *self,
                                      (GDestroyNotify)g_mapped_file_unref);
   rest_proxy_call_add_param_full (call, param);
 
-  rest_proxy_call_async (call, on_upload_cb, (GObject *)self, NULL, NULL);
+  opid++;
 
-  /* TODO */
-  sw_photo_upload_iface_return_from_upload_photo (context, 0);
+  rest_proxy_call_async (call,
+                         on_upload_cb,
+                         (GObject *)self,
+                         GINT_TO_POINTER (opid),
+                         NULL);
+
+  sw_photo_upload_iface_return_from_upload_photo (context, opid);
 }
 
 static void
