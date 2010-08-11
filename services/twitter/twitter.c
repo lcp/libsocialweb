@@ -758,7 +758,6 @@ on_upload_cb (RestProxyCall *call,
 
   if (error) {
     sw_photo_upload_iface_emit_photo_upload_progress (twitter, opid, -1, error->message);
-    /* TODO: clean up */
     return;
   }
 
@@ -767,7 +766,8 @@ on_upload_cb (RestProxyCall *call,
   root = node_from_call (call);
   if (root == NULL || g_strcmp0 (root->name, "image") != 0) {
     sw_photo_upload_iface_emit_photo_upload_progress (twitter, opid, -1, "Unexpected response from Twitpic");
-    /* TODO: clean up */
+    if (root)
+      rest_xml_node_unref (root);
     return;
   }
 
@@ -783,6 +783,9 @@ on_upload_cb (RestProxyCall *call,
   rest_proxy_call_async (call, on_upload_tweet_cb, (GObject *)twitter, NULL, NULL);
 
   sw_photo_upload_iface_emit_photo_upload_progress (twitter, opid, 100, "");
+
+  rest_xml_node_unref (root);
+  g_free (tweet);
 }
 
 static void
