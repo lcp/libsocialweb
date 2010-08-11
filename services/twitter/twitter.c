@@ -788,7 +788,7 @@ _twitpic_upload_photo (SwPhotoUploadIface    *self,
   RestProxyCall *call;
   RestParam *param;
   GMappedFile *map;
-  char *title;
+  char *title, *content_type;
   static int opid = 0;
 
   map = g_mapped_file_new (filename, FALSE, &error);
@@ -814,24 +814,28 @@ _twitpic_upload_photo (SwPhotoUploadIface    *self,
                               NULL);
   g_free (title);
 
+  content_type = g_content_type_guess (filename,
+                                       (const guchar*) g_mapped_file_get_contents (map),
+                                       g_mapped_file_get_length (map),
+                                       NULL);
+
   param = rest_param_new_with_owner ("media",
                                      g_mapped_file_get_contents (map),
                                      g_mapped_file_get_length (map),
-                                     /* TODO: extract this from the file */
-                                     "image/jpeg",
+                                     content_type,
                                      filename,
                                      map,
                                      (GDestroyNotify)g_mapped_file_unref);
   rest_proxy_call_add_param_full (call, param);
 
-  opid++;
+  g_free (content_type);
 
+  opid++;
   rest_proxy_call_async (call,
                          on_upload_cb,
                          (GObject *)self,
                          GINT_TO_POINTER (opid),
                          NULL);
-
   sw_photo_upload_iface_return_from_upload_photo (context, opid);
 }
 
