@@ -196,7 +196,6 @@ node_from_call (RestProxyCall *call)
   node = rest_xml_parser_parse_from_data (parser,
                                           rest_proxy_call_get_payload (call),
                                           rest_proxy_call_get_payload_length (call));
-  g_object_unref (call);
 
   /* No content, or wrong content */
   if (node == NULL || strcmp (node->name, "lfm") != 0) {
@@ -282,11 +281,12 @@ get_artist_info_cb (RestProxyCall *call,
 
   if (error) {
     g_message (G_STRLOC ": error from Last.fm: %s", error->message);
-    /* TODO: cleanup or something */
+    g_object_unref (call);
     return;
   }
 
   root = node_from_call (call);
+  g_object_unref (call);
   if (!root)
     return;
 
@@ -427,13 +427,14 @@ _get_tracks_cb (RestProxyCall *call,
 
   if (error) {
     g_message (G_STRLOC ": error from Last.fm: %s", error->message);
-    /* TODO: cleanup or something */
+    g_object_unref (call);
     return;
   }
 
   SW_DEBUG (LASTFM, "Got results for getTracks call");
 
   root = node_from_call (call);
+  g_object_unref (call);
   if (!root)
     return;
 
@@ -479,12 +480,14 @@ _get_friends_cb (RestProxyCall *call,
 
   if (error) {
     g_message (G_STRLOC ": error from Last.fm: %s", error->message);
+    g_object_unref (call);
     return;
   }
 
   SW_DEBUG (LASTFM, "Got result of getFriends call");
 
   root = node_from_call (call);
+  g_object_unref (call);
   if (!root)
     return;
 
