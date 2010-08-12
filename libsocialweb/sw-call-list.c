@@ -61,9 +61,15 @@ sw_call_list_add (SwCallList *list, RestProxyCall *call)
 void
 sw_call_list_remove (SwCallList *list, RestProxyCall *call)
 {
-  g_object_weak_unref (G_OBJECT (call), call_weak_notify, list);
+  GList *l;
 
-  list->l = g_list_remove (list->l, call);
+  l = g_list_find (list->l, call);
+
+  if (l)
+  {
+    g_object_weak_unref (G_OBJECT (call), call_weak_notify, list);
+    list->l = g_list_delete_link (list->l, l);
+  }
 }
 
 gboolean
