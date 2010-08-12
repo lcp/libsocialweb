@@ -553,7 +553,7 @@ sw_item_view_add_items (SwItemView *item_view,
   GPtrArray *ptr_array;
   GList *l;
 
-  ptr_array = g_ptr_array_new ();
+  ptr_array = g_ptr_array_new_with_free_func ((GDestroyNotify)g_value_array_free);
 
   for (l = items; l; l = l->next)
   {
@@ -599,7 +599,7 @@ sw_item_view_update_items (SwItemView *item_view,
   GPtrArray *ptr_array;
   GList *l;
 
-  ptr_array = g_ptr_array_new ();
+  ptr_array = g_ptr_array_new_with_free_func ((GDestroyNotify)g_value_array_free);
 
   for (l = items; l; l = l->next)
   {
@@ -646,7 +646,7 @@ sw_item_view_remove_items (SwItemView *item_view,
   GList *l;
   SwItem *item;
 
-  ptr_array = g_ptr_array_new ();
+  ptr_array = g_ptr_array_new_with_free_func ((GDestroyNotify)g_value_array_free);
 
   for (l = items; l; l = l->next)
   {
