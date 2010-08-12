@@ -182,6 +182,7 @@ sw_cache_save (SwService   *service,
       g_error_free (error);
     }
     g_free (data);
+    g_key_file_free (keys);
   }
 
   g_free (filename);
