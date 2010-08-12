@@ -293,6 +293,7 @@ sw_cache_load (SwService   *service,
 
   }
 
+  g_key_file_free (keys);
   g_free (filename);
 
   return set;
