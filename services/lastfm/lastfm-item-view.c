@@ -642,7 +642,7 @@ _service_user_changed_cb (SwService  *service,
   SwSet *set;
 
   /* We need to empty the set */
-  set = sw_set_new ();
+  set = sw_item_set_new ();
   sw_item_view_set_from_set (SW_ITEM_VIEW (item_view),
                              set);
   sw_set_unref (set);
@@ -734,7 +734,7 @@ sw_lastfm_item_view_init (SwLastfmItemView *self)
   SwLastfmItemViewPrivate *priv = GET_PRIVATE (self);
 
   priv->calls = sw_call_list_new ();
-  priv->set = sw_set_new ();
+  priv->set = sw_item_set_new ();
 }
 
 
