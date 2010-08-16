@@ -1,3 +1,4 @@
+services/twitter/twitter.c
 services/lastfm/lastfm.c
 services/lastfm/lastfm-item-view.c
 services/lastfm/lastfm.keys.in
