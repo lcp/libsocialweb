@@ -36,7 +36,8 @@ sw_debug_init (const char *string)
     { "lastfm", SW_DEBUG_LASTFM },
     { "core", SW_DEBUG_CORE },
     { "vimeo", SW_DEBUG_VIMEO },
-    { "flickr", SW_DEBUG_FLICKR }
+    { "flickr", SW_DEBUG_FLICKR },
+    { "client-monitor", SW_DEBUG_CLIENT_MONITOR }
   };
 
   if (G_LIKELY (setup_done))

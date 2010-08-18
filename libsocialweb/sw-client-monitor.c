@@ -21,6 +21,7 @@
 #include <dbus/dbus-glib.h>
 
 #include "sw-client-monitor.h"
+#include "sw-debug.h"
 
 /* Hash of client addresses to GList of GObjects */
 static GHashTable *clients;
@@ -38,6 +39,9 @@ name_owner_changed (DBusGProxy *proxy,
     GList *list;
 
     list = g_hash_table_lookup (clients, prev_owner);
+    SW_DEBUG (CLIENT_MONITOR, "Client %s went away. It was using %d objects",
+              name,
+              g_list_length (list));
     g_hash_table_remove (clients, prev_owner);
 
     while (list) {
@@ -98,6 +102,11 @@ sw_client_monitor_add (char    *sender,
                      _view_weak_notify,
                      g_strdup (sender)); /* freed by _remove */
 
+
+  SW_DEBUG (CLIENT_MONITOR, "Monitoring new object (%p) for client: %s",
+            object,
+            sender);
+
   list = g_hash_table_lookup (clients, sender);
   list = g_list_prepend (list, object);
   g_hash_table_insert (clients, sender, list);
@@ -110,6 +119,10 @@ sw_client_monitor_remove (char    *sender,
                           GObject *object)
 {
   GList *list;
+
+  SW_DEBUG (CLIENT_MONITOR, "Unmonitoring object (%p) for client: %s",
+            object,
+            sender);
 
   list = g_hash_table_lookup (clients, sender);
   list = g_list_remove (list, object);

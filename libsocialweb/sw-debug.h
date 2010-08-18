@@ -27,7 +27,8 @@ typedef enum {
   SW_DEBUG_LASTFM = 1 << 5,
   SW_DEBUG_CORE = 1 << 6,
   SW_DEBUG_VIMEO = 1 << 7,
-  SW_DEBUG_FLICKR = 1 << 8
+  SW_DEBUG_FLICKR = 1 << 8,
+  SW_DEBUG_CLIENT_MONITOR = 1 << 9
 } SwDebugFlags;
 
 extern guint sw_debug_flags;
