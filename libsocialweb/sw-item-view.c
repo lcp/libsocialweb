@@ -454,9 +454,12 @@ static void
 _item_changed_weak_notify_cb (gpointer  data,
                               GObject  *dead_object)
 {
-  g_signal_handlers_disconnect_by_func (data,
+  SwItem *item = (SwItem *)data;
+
+  g_signal_handlers_disconnect_by_func (item,
                                         _item_changed_cb,
                                         dead_object);
+  g_object_unref (item);
 }
 
 static void
@@ -469,7 +472,7 @@ _setup_changed_handler (SwItem     *item,
                     item_view);
   g_object_weak_ref ((GObject *)item_view,
                      _item_changed_weak_notify_cb,
-                     item);
+                     g_object_ref (item));
 }
 
 /* FIXME: Do we need these functions still? */
