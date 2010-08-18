@@ -282,6 +282,7 @@ get_artist_info_cb (RestProxyCall *call,
   if (error) {
     g_message (G_STRLOC ": error from Last.fm: %s", error->message);
     g_object_unref (call);
+    g_object_unref (item);
     return;
   }
 
@@ -296,6 +297,7 @@ get_artist_info_cb (RestProxyCall *call,
     sw_item_request_image_fetch (item, TRUE, "thumbnail", url);
 
   sw_item_pop_pending (item);
+  g_object_unref (item);
 
   _update_if_done (item_view);
 }
@@ -340,7 +342,7 @@ get_thumbnail (SwLastfmItemView *item_view,
   rest_proxy_call_async (call,
                          get_artist_info_cb,
                          (GObject *)item_view,
-                         item,
+                         g_object_ref (item),
                          NULL);
 }
 
