@@ -300,6 +300,8 @@ get_artist_info_cb (RestProxyCall *call,
   g_object_unref (item);
 
   _update_if_done (item_view);
+
+  rest_xml_node_unref (root);
 }
 
 static void
