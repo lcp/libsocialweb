@@ -465,6 +465,7 @@ _get_tracks_cb (RestProxyCall *call,
   }
 
   rest_xml_node_unref (root);
+  rest_xml_node_unref (user_node);
 
   _update_if_done (item_view);
 }
