@@ -389,6 +389,8 @@ _make_request (SwFlickrItemView *item_view)
     g_warning ("Cannot get photos: %s", error->message);
     g_error_free (error);
   }
+
+  g_object_unref (call);
 }
 
 static void

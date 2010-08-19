@@ -428,6 +428,7 @@ _get_status_updates (SwTwitterItemView *item_view)
                          (GObject*)item_view,
                          NULL,
                          NULL);
+  g_object_unref (call);
 }
 
 static gboolean
