@@ -56,6 +56,7 @@ typedef struct {
 
 GType sw_client_service_get_type (void);
 
+/* Keep in sync with sw-service.h */
 #define IS_CONFIGURED "is-configured"
 #define CAN_VERIFY_CREDENTIALS "can-verify-credentials"
 #define CREDENTIALS_VALID "credentials-valid"
@@ -63,6 +64,14 @@ GType sw_client_service_get_type (void);
 #define CAN_UPDATE_STATUS "can-update-status"
 #define CAN_REQUEST_AVATAR "can-request-avatar"
 #define CAN_GEOTAG "can-geotag"
+
+#define HAS_UPDATE_STATUS_IFACE "has-update-status-iface"
+#define HAS_AVATAR_IFACE "has-avatar-iface"
+#define HAS_PHOTO_UPLOAD_IFACE "has-photo-upload-iface"
+#define HAS_BANISHABLE_IFACE "has-banishable-iface"
+#define HAS_QUERY_IFACE "has-query-iface"
+
+#define CAN_UPDATE_STATUS_WITH_GEOTAG "can-update-status-with-geotag"
 
 typedef void
 (*SwClientServiceGetCapabilitiesCallback) (SwClientService  *service,

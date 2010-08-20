@@ -67,6 +67,7 @@ struct _SwServiceClass {
   void (*credentials_updated) (SwService *service);
 };
 
+/* Keep in sync with sw-client-service.h */
 #define IS_CONFIGURED "is-configured"
 #define CAN_VERIFY_CREDENTIALS "can-verify-credentials"
 #define CREDENTIALS_VALID "credentials-valid"
