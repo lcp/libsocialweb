@@ -221,6 +221,7 @@ get_dynamic_caps (SwService *service)
     CREDENTIALS_VALID,
     CAN_UPDATE_STATUS,
     CAN_REQUEST_AVATAR,
+    CAN_UPDATE_STATUS_WITH_GEOTAG,
     CAN_GEOTAG,
     NULL
   };
