@@ -33,7 +33,7 @@ libsocialweb_la_SOURCES = sw-types.h \
 		       sw-client-monitor.c sw-client-monitor.h \
 		       sw-enum-types.h sw-enum-types.c
 
-libsocialweb_la_HEADERS = \
+public_headers = \
 	sw-core.h \
 	sw-types.h \
 	sw-service.h \
@@ -44,8 +44,9 @@ libsocialweb_la_HEADERS = \
 	sw-set.h \
 	sw-item.h \
 	sw-module.h \
-	sw-utils.h \
-	sw-enum-types.h
+	sw-utils.h
+
+libsocialweb_la_HEADERS = $(public_headers) sw-enum-types.h
 
 # Test suite
 TESTS = test-runner
@@ -57,7 +58,7 @@ test_runner_LDFLAGS = $(libsocialweb_la_LIBADD)
 
 glib_enum_h = sw-enum-types.h
 glib_enum_c = sw-enum-types.c
-glib_enum_headers = $(foreach f, $(libsocialweb_la_HEADERS), $(srcdir)/$(f))
+glib_enum_headers = $(foreach f, $(public_headers), $(srcdir)/$(f))
 include $(top_srcdir)/glib-enums.mk
 
 # TODO: use gtester
