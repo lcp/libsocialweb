@@ -178,7 +178,6 @@ get_static_caps (SwService *service)
     CAN_VERIFY_CREDENTIALS,
     HAS_UPDATE_STATUS_IFACE,
     HAS_AVATAR_IFACE,
-    HAS_PHOTO_UPLOAD_IFACE,
     HAS_BANISHABLE_IFACE,
     HAS_QUERY_IFACE,
     CAN_UPDATE_STATUS_WITH_GEOTAG,
@@ -188,8 +187,13 @@ get_static_caps (SwService *service)
     CAN_REQUEST_AVATAR,
     CAN_GEOTAG,
 
+    NULL, /* hack to enable the photo upload if we have the key */
     NULL
   };
+
+  if (sw_keystore_get_key ("twitpic")) {
+     caps[G_N_ELEMENTS(caps) - 2] = HAS_PHOTO_UPLOAD_IFACE;
+  }
 
   return caps;
 }
