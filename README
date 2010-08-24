@@ -9,13 +9,13 @@ Core
 libsocialweb (referred to as lsw in this document) comprises of a core daemon
 process that can load in multiple modules.
 
-The lsw core sits on the dbus at the well known name org.moblin.libsocialweb.
-The core object sits on the bus at /org/moblin/libsocialweb and implemented
-the org.moblin.libsocialweb interface.
+The lsw core sits on the dbus at the well known name com.meego.libsocialweb.
+The core object sits on the bus at /com/meego/libsocialweb and implemented
+the com.meego.libsocialweb interface.
 
 This interface has the following methods:
 
-org.moblin.libsocialweb (TODO: Rename to .Core)
+com.meego.libsocialweb (TODO: Rename to .Core)
 
 GetServices -> returns the set of available services
 
@@ -33,10 +33,10 @@ Services
 The service names returned by GetServices can then be mapped to service
 objects sitting on the dbus. These services have the object path:
 
-/org/moblin/libsocialweb/Service/<service name>
+/com/meego/libsocialweb/Service/<service name>
 
 The service objects are provided by the loaded backends. Each service must
-implement the org.moblin.libsocialweb.Service interface.
+implement the com.meego.libsocialweb.Service interface.
 
 This has the following methods:
 

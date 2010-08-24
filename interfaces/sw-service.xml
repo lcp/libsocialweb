@@ -2,7 +2,7 @@
 
 <node name="/Service_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
                             xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
-  <interface name="org.moblin.libsocialweb.Service">
+  <interface name="com.meego.libsocialweb.Service">
     <doc:doc>
       <doc:summary>An interface representing the core functionality present on
       all objects representing service backends.</doc:summary>

@@ -44,9 +44,9 @@ enum
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
-#define SW_SERVICE_NAME "org.moblin.libsocialweb"
-#define SW_SERVICE_CORE_OBJECT "/org/moblin/libsocialweb"
-#define SW_SERVICE_CORE_INTERFACE "org.moblin.libsocialweb"
+#define SW_SERVICE_NAME "com.meego.libsocialweb"
+#define SW_SERVICE_CORE_OBJECT "/com/meego/libsocialweb"
+#define SW_SERVICE_CORE_INTERFACE "com.meego.libsocialweb"
 
 static void
 _online_changed_cb (DBusGProxy *proxy,
@@ -201,7 +201,7 @@ sw_client_get_services (SwClient                    *client,
   closure->cb = cb;
   closure->userdata = userdata;
 
-  org_moblin_libsocialweb_get_services_async (priv->proxy,
+  com_meego_libsocialweb_get_services_async (priv->proxy,
                                               _sw_client_get_services_cb,
                                               closure);
 }
@@ -271,7 +271,7 @@ sw_client_is_online (SwClient                 *client,
   closure->cb = cb;
   closure->userdata = userdata;
 
-  org_moblin_libsocialweb_is_online_async (priv->proxy,
+  com_meego_libsocialweb_is_online_async (priv->proxy,
                                     _sw_client_is_online_cb,
                                     closure);
 }

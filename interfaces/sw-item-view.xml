@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <node name="/Item_View_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">>
-  <interface name="org.moblin.libsocialweb.ItemView">
+  <interface name="com.meego.libsocialweb.ItemView">
     <method name="Start" tp:name-for-bindings="Start"/>
 
     <method name="Refresh"  tp:name-for-bindings="Refresh"/>

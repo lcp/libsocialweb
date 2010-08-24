@@ -171,7 +171,7 @@ _make_object_path (SwItemView *item_view)
   gchar *path;
   static gint count = 0;
 
-  path = g_strdup_printf ("/org/moblin/libsocialweb/View%d",
+  path = g_strdup_printf ("/com/meego/libsocialweb/View%d",
                           count);
 
   count++;

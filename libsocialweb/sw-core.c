@@ -167,7 +167,7 @@ load_module (SwCore *core, const char *file)
     g_hash_table_insert (priv->bus_services,
                          (gchar *)service_name,
                          service);
-    path = g_strdup_printf ("/org/moblin/libsocialweb/Service/%s",
+    path = g_strdup_printf ("/com/meego/libsocialweb/Service/%s",
                             service_name);
     dbus_g_connection_register_g_object (priv->connection,
                                          path,
@@ -309,7 +309,7 @@ sw_core_constructed (GObject *object)
   }
 
   dbus_g_connection_register_g_object (priv->connection,
-                                       "/org/moblin/libsocialweb",
+                                       "/com/meego/libsocialweb",
                                        object);
 
   sw_client_monitor_init (priv->connection);

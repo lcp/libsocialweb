@@ -22,10 +22,10 @@ from dbus.mainloop.glib import DBusGMainLoop
 DBusGMainLoop(set_as_default=True)
 
 bus = dbus.SessionBus()
-bus.start_service_by_name("org.moblin.libsocialweb")
+bus.start_service_by_name("com.meego.libsocialweb")
 
-sw = bus.get_object("org.moblin.libsocialweb", "/org/moblin/libsocialweb")
-sw = dbus.Interface(sw, "org.moblin.libsocialweb")
+sw = bus.get_object("com.meego.libsocialweb", "/com/meego/libsocialweb")
+sw = dbus.Interface(sw, "com.meego.libsocialweb")
 
 def online(state):
     if state:

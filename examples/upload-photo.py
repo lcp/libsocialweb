@@ -28,10 +28,10 @@ DBusGMainLoop(set_as_default=True)
 loop = gobject.MainLoop()
 
 bus = dbus.SessionBus()
-bus.start_service_by_name("org.moblin.libsocialweb")
+bus.start_service_by_name("com.meego.libsocialweb")
 
-service = bus.get_object("org.moblin.libsocialweb", "/org/moblin/libsocialweb/Service/%s" % sys.argv[1])
-photoupload = dbus.Interface(service, "org.moblin.libsocialweb.PhotoUpload")
+service = bus.get_object("com.meego.libsocialweb", "/com/meego/libsocialweb/Service/%s" % sys.argv[1])
+photoupload = dbus.Interface(service, "com.meego.libsocialweb.PhotoUpload")
 
 def progress_cb(opid, progress, message):
     # Ignore signals for other uploads

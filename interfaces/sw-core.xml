@@ -5,7 +5,7 @@
       xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
       xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
 
-  <interface name="org.moblin.libsocialweb">
+  <interface name="com.meego.libsocialweb">
 
     <doc:doc>
       <doc:summary>Core interface.</doc:summary>

@@ -2,7 +2,7 @@
 <!DOCTYPE node SYSTEM "dbus.dtd">
 
 <node name="/Banishable_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
-  <interface name="org.moblin.libsocialweb.Banishable">
+  <interface name="com.meego.libsocialweb.Banishable">
     <method name="HideItem" tp:name-for-bindings="Hide_Item">
       <arg name="uid" type="s" direction="in"/>
     </method>

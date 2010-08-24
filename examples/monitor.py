@@ -23,18 +23,18 @@ from dbus.mainloop.glib import DBusGMainLoop
 DBusGMainLoop(set_as_default=True)
 
 bus = dbus.SessionBus()
-bus.start_service_by_name("org.moblin.libsocialweb")
+bus.start_service_by_name("com.meego.libsocialweb")
 
-sw = bus.get_object("org.moblin.libsocialweb", "/org/moblin/libsocialweb")
-sw = dbus.Interface(sw, "org.moblin.libsocialweb")
+sw = bus.get_object("com.meego.libsocialweb", "/com/meego/libsocialweb")
+sw = dbus.Interface(sw, "com.meego.libsocialweb")
 
 services = sys.argv[1:]
 if not services:
     services = sw.GetServices()
 
 path = sw.OpenView(services, 10)
-view = bus.get_object("org.moblin.libsocialweb", path)
-view = dbus.Interface(view, "org.moblin.libsocialweb.ItemView")
+view = bus.get_object("com.meego.libsocialweb", path)
+view = dbus.Interface(view, "com.meego.libsocialweb.ItemView")
 
 def now():
     return time.strftime("%T", time.localtime())

@@ -51,7 +51,7 @@ request_name (void)
                                      DBUS_PATH_DBUS,
                                      DBUS_INTERFACE_DBUS);
 
-  if (!org_freedesktop_DBus_request_name (proxy, "org.moblin.libsocialweb",
+  if (!org_freedesktop_DBus_request_name (proxy, "com.meego.libsocialweb",
                                           DBUS_NAME_FLAG_DO_NOT_QUEUE, &request_status,
                                           &error)) {
     g_printerr ("Failed to request name: %s\n", error->message);

@@ -4,7 +4,7 @@
   xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
   xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
 
-  <interface name="org.moblin.libsocialweb.StatusUpdate">
+  <interface name="com.meego.libsocialweb.StatusUpdate">
     <doc:doc>
       <doc:summary>An interface for updating the user's status.</doc:summary>
     </doc:doc>

@@ -55,8 +55,8 @@ enum
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
-#define SW_SERVICE_NAME "org.moblin.libsocialweb"
-#define SW_SERVICE_ITEM_VIEW_INTERFACE "org.moblin.libsocialweb.ItemView"
+#define SW_SERVICE_NAME "com.meego.libsocialweb"
+#define SW_SERVICE_ITEM_VIEW_INTERFACE "com.meego.libsocialweb.ItemView"
 
 static void
 sw_client_item_view_get_property (GObject *object, guint property_id,
@@ -460,7 +460,7 @@ sw_client_item_view_start (SwClientItemView *item_view)
 {
   SwClientItemViewPrivate *priv = GET_PRIVATE (item_view);
 
-  org_moblin_libsocialweb_ItemView_start_async (priv->proxy,
+  com_meego_libsocialweb_ItemView_start_async (priv->proxy,
                                          _sw_client_item_view_start_cb,
                                          NULL);
 }
@@ -484,7 +484,7 @@ sw_client_item_view_refresh (SwClientItemView *item_view)
 {
   SwClientItemViewPrivate *priv = GET_PRIVATE (item_view);
 
-  org_moblin_libsocialweb_ItemView_refresh_async (priv->proxy,
+  com_meego_libsocialweb_ItemView_refresh_async (priv->proxy,
                                            _sw_client_item_view_refresh_cb,
                                            NULL);
 }

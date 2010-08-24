@@ -64,17 +64,17 @@ struct _SwClientServicePrivate {
 };
 
 static const gchar *interface_names[LAST_IFACE] = {
-  "org.moblin.libsocialweb.Service",
-  "org.moblin.libsocialweb.Avatar",
-  "org.moblin.libsocialweb.Query",
-  "org.moblin.libsocialweb.StatusUpdate",
-  "org.moblin.libsocialweb.Banishable",
+  "com.meego.libsocialweb.Service",
+  "com.meego.libsocialweb.Avatar",
+  "com.meego.libsocialweb.Query",
+  "com.meego.libsocialweb.StatusUpdate",
+  "com.meego.libsocialweb.Banishable",
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
-#define SW_CLIENT_SERVICE_NAME "org.moblin.libsocialweb"
-#define SW_CLIENT_SERVICE_OBJECT "/org/moblin/libsocialweb/Service/%s"
+#define SW_CLIENT_SERVICE_NAME "com.meego.libsocialweb"
+#define SW_CLIENT_SERVICE_OBJECT "/com/meego/libsocialweb/Service/%s"
 
 static void
 sw_client_service_get_property (GObject    *object,
@@ -394,7 +394,7 @@ sw_client_service_get_static_capabilities (SwClientService                      
   closure->cb = (GCallback)cb;
   closure->userdata = userdata;
 
-  org_moblin_libsocialweb_Service_get_static_capabilities_async (priv->proxies[SERVICE_IFACE],
+  com_meego_libsocialweb_Service_get_static_capabilities_async (priv->proxies[SERVICE_IFACE],
                                                                  _get_capabilities_cb,
                                                                  closure);
 }
@@ -412,7 +412,7 @@ sw_client_service_get_dynamic_capabilities (SwClientService                     
   closure->cb = (GCallback)cb;
   closure->userdata = userdata;
 
-  org_moblin_libsocialweb_Service_get_dynamic_capabilities_async (priv->proxies[SERVICE_IFACE],
+  com_meego_libsocialweb_Service_get_dynamic_capabilities_async (priv->proxies[SERVICE_IFACE],
                                                                   _get_capabilities_cb,
                                                                   closure);
 }
@@ -479,7 +479,7 @@ sw_client_service_update_status_with_fields (SwClientService                    
   closure->cb = (GCallback)cb;
   closure->userdata = userdata;
 
-  org_moblin_libsocialweb_StatusUpdate_update_status_async (priv->proxies[STATUS_UPDATE_IFACE],
+  com_meego_libsocialweb_StatusUpdate_update_status_async (priv->proxies[STATUS_UPDATE_IFACE],
                                                             status_msg,
                                                             fields,
                                                             _update_status_cb,
@@ -500,7 +500,7 @@ sw_client_service_request_avatar (SwClientService *service)
 {
   SwClientServicePrivate *priv = GET_PRIVATE (service);
 
-  org_moblin_libsocialweb_Avatar_request_avatar_async (priv->proxies[AVATAR_IFACE],
+  com_meego_libsocialweb_Avatar_request_avatar_async (priv->proxies[AVATAR_IFACE],
                                                        _request_avatar_cb,
                                                        NULL);
 }
@@ -516,7 +516,7 @@ sw_client_service_credentials_updated (SwClientService *service)
 {
   SwClientServicePrivate *priv = GET_PRIVATE (service);
 
-  org_moblin_libsocialweb_Service_credentials_updated_async (priv->proxies[SERVICE_IFACE],
+  com_meego_libsocialweb_Service_credentials_updated_async (priv->proxies[SERVICE_IFACE],
                                                              _credentials_updated_cb,
                                                              NULL);
 }
@@ -591,7 +591,7 @@ sw_client_service_query_open_view (SwClientService                      *service
     params = tmp_params;
   }
 
-  org_moblin_libsocialweb_Query_open_view_async (priv->proxies [QUERY_IFACE],
+  com_meego_libsocialweb_Query_open_view_async (priv->proxies [QUERY_IFACE],
                                                  query,
                                                  params,
                                                  _query_open_view_cb,
@@ -676,7 +676,7 @@ sw_client_service_banishable_hide_item (SwClientService *service,
     return;
   }
 
-  org_moblin_libsocialweb_Banishable_hide_item_async (priv->proxies[BANISHABLE_IFACE],
+  com_meego_libsocialweb_Banishable_hide_item_async (priv->proxies[BANISHABLE_IFACE],
                                                       uid,
                                                       NULL,
                                                       NULL);
