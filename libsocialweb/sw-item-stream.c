@@ -1,0 +1,720 @@
+/*
+ * libsocialweb - social data store
+ * Copyright (C) 2008 - 2009 Intel Corporation.
+ *
+ * Author: Rob Bradford <rob@linux.intel.com>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU Lesser General Public License,
+ * version 2.1, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include "sw-debug.h"
+#include "sw-item-stream.h"
+#include "sw-item-view-ginterface.h"
+
+#include <libsocialweb/sw-utils.h>
+#include <libsocialweb/sw-core.h>
+
+static void sw_item_view_iface_init (gpointer g_iface, gpointer iface_data);
+G_DEFINE_TYPE_WITH_CODE (SwItemStream, sw_item_stream, G_TYPE_OBJECT,
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_ITEM_VIEW_IFACE,
+                                                sw_item_view_iface_init));
+
+#define GET_PRIVATE(o) \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_ITEM_STREAM, SwItemStreamPrivate))
+
+typedef struct _SwItemStreamPrivate SwItemStreamPrivate;
+
+struct _SwItemStreamPrivate {
+  SwService *service;
+  gchar *object_path;
+  SwSet *pending_items_set;
+
+  /* timeout used for coalescing multiple delayed ready additions */
+  guint pending_timeout_id;
+
+  /* timeout used for ratelimiting checking for changed items */
+  guint refresh_timeout_id;
+
+  GList *changed_items;
+};
+
+enum
+{
+  PROP_0,
+  PROP_SERVICE,
+  PROP_OBJECT_PATH
+};
+
+static void
+sw_item_stream_get_property (GObject    *object,
+                           guint       property_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (object);
+
+  switch (property_id) {
+    case PROP_SERVICE:
+      g_value_set_object (value, priv->service);
+      break;
+    case PROP_OBJECT_PATH:
+      g_value_set_string (value, priv->object_path);
+      break;
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+  }
+}
+
+static void
+sw_item_stream_set_property (GObject      *object,
+                           guint         property_id,
+                           const GValue *value,
+                           GParamSpec   *pspec)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (object);
+
+  switch (property_id) {
+    case PROP_SERVICE:
+      priv->service = g_value_dup_object (value);
+      break;
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+  }
+}
+
+static void
+sw_item_stream_dispose (GObject *object)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (object);
+
+  if (priv->service)
+  {
+    g_object_unref (priv->service);
+    priv->service = NULL;
+  }
+
+  if (priv->pending_items_set)
+  {
+    sw_set_unref (priv->pending_items_set);
+    priv->pending_items_set = NULL;
+  }
+
+  if (priv->pending_timeout_id)
+  {
+    g_source_remove (priv->pending_timeout_id);
+    priv->pending_timeout_id = 0;
+  }
+
+  if (priv->refresh_timeout_id)
+  {
+    g_source_remove (priv->refresh_timeout_id);
+    priv->refresh_timeout_id = 0;
+  }
+
+  G_OBJECT_CLASS (sw_item_stream_parent_class)->dispose (object);
+}
+
+static void
+sw_item_stream_finalize (GObject *object)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (object);
+
+  g_free (priv->object_path);
+
+  G_OBJECT_CLASS (sw_item_stream_parent_class)->finalize (object);
+}
+
+static gchar *
+_make_object_path (SwItemStream *item_view)
+{
+  gchar *path;
+  static gint count = 0;
+
+  path = g_strdup_printf ("/com/meego/libsocialweb/View%d",
+                          count);
+
+  count++;
+
+  return path;
+}
+
+static void
+sw_item_stream_constructed (GObject *object)
+{
+  SwItemStream *item_view = SW_ITEM_STREAM (object);
+  SwItemStreamPrivate *priv = GET_PRIVATE (object);
+  SwCore *core;
+
+  core = sw_core_dup_singleton ();
+
+  priv->object_path = _make_object_path (item_view);
+  dbus_g_connection_register_g_object (sw_core_get_connection (core),
+                                       priv->object_path,
+                                       G_OBJECT (item_view));
+  g_object_unref (core);
+  /* The only reference should be the one on the bus */
+
+  if (G_OBJECT_CLASS (sw_item_stream_parent_class)->constructed)
+    G_OBJECT_CLASS (sw_item_stream_parent_class)->constructed (object);
+}
+
+/* Default implementation for close */
+static void
+sw_item_stream_default_close (SwItemStream *item_view)
+{
+  SwCore *core;
+
+  core = sw_core_dup_singleton ();
+  dbus_g_connection_unregister_g_object (sw_core_get_connection (core),
+                                         G_OBJECT (item_view));
+  g_object_unref (core);
+
+  /* Object is no longer needed */
+  g_object_unref (item_view);
+}
+
+static void
+sw_item_stream_class_init (SwItemStreamClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GParamSpec *pspec;
+
+  g_type_class_add_private (klass, sizeof (SwItemStreamPrivate));
+
+  object_class->get_property = sw_item_stream_get_property;
+  object_class->set_property = sw_item_stream_set_property;
+  object_class->dispose = sw_item_stream_dispose;
+  object_class->finalize = sw_item_stream_finalize;
+  object_class->constructed = sw_item_stream_constructed;
+
+  klass->close = sw_item_stream_default_close;
+
+  pspec = g_param_spec_object ("service",
+                               "service",
+                               "The service this view is using",
+                               SW_TYPE_SERVICE,
+                               G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+  g_object_class_install_property (object_class, PROP_SERVICE, pspec);
+
+  pspec = g_param_spec_string ("object-path",
+                               "Object path",
+                               "The object path of this view",
+                               NULL,
+                               G_PARAM_READABLE);
+  g_object_class_install_property (object_class, PROP_OBJECT_PATH, pspec);
+}
+
+static void
+sw_item_stream_init (SwItemStream *self)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (self);
+
+  priv->pending_items_set = sw_item_set_new ();
+}
+
+/* DBUS interface to class vfunc bindings */
+
+static void
+sw_item_stream_start (SwItemViewIface       *iface,
+                      DBusGMethodInvocation *context)
+{
+  SwItemStream *item_stream = SW_ITEM_STREAM (iface);
+
+  if (SW_ITEM_STREAM_GET_CLASS (iface)->start)
+    SW_ITEM_STREAM_GET_CLASS (iface)->start (item_stream);
+
+  sw_item_view_iface_return_from_start (context);
+}
+
+static void
+sw_item_stream_refresh (SwItemViewIface       *iface,
+                        DBusGMethodInvocation *context)
+{
+  SwItemStream *item_stream = SW_ITEM_STREAM (iface);
+
+  if (SW_ITEM_STREAM_GET_CLASS (iface)->refresh)
+    SW_ITEM_STREAM_GET_CLASS (iface)->refresh (item_stream);
+
+  sw_item_view_iface_return_from_refresh (context);
+}
+
+static void
+sw_item_stream_stop (SwItemViewIface       *iface,
+                   DBusGMethodInvocation *context)
+{
+  SwItemStream *item_stream = SW_ITEM_STREAM (iface);
+
+  if (SW_ITEM_STREAM_GET_CLASS (iface)->stop)
+    SW_ITEM_STREAM_GET_CLASS (iface)->stop (item_stream);
+
+  sw_item_view_iface_return_from_stop (context);
+}
+
+static void
+sw_item_stream_close (SwItemViewIface       *iface,
+                    DBusGMethodInvocation *context)
+{
+  SwItemStream *item_stream = SW_ITEM_STREAM (iface);
+
+  if (SW_ITEM_STREAM_GET_CLASS (iface)->close)
+    SW_ITEM_STREAM_GET_CLASS (iface)->close (item_stream);
+
+  sw_item_view_iface_return_from_close (context);
+}
+
+static void
+sw_item_view_iface_init (gpointer g_iface,
+                         gpointer iface_data)
+{
+  SwItemViewIfaceClass *klass = (SwItemViewIfaceClass*)g_iface;
+  sw_item_view_iface_implement_start (klass, sw_item_stream_start);
+  sw_item_view_iface_implement_refresh (klass, sw_item_stream_refresh);
+  sw_item_view_iface_implement_stop (klass, sw_item_stream_stop);
+  sw_item_view_iface_implement_close (klass, sw_item_stream_close);
+}
+
+static gboolean
+_handle_ready_pending_cb (gpointer data)
+{
+  SwItemStream *item_view = SW_ITEM_STREAM (data);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_view);
+  GList *items_to_send = NULL;
+  GList *pending_items, *l;
+
+  SW_DEBUG (VIEWS, "Delayed ready timeout fired");
+
+  /* FIXME: Reword this to avoid unnecessary list creation ? */
+  pending_items = sw_set_as_list (priv->pending_items_set);
+
+  for (l = pending_items; l; l = l->next)
+  {
+    SwItem *item = SW_ITEM (l->data);
+
+    if (sw_item_get_ready (item))
+    {
+      items_to_send = g_list_prepend (items_to_send, item);
+      sw_set_remove (priv->pending_items_set, (GObject *)item);
+    }
+  }
+
+  sw_item_stream_add_items (item_view, items_to_send);
+
+  g_list_free (pending_items);
+
+  priv->pending_timeout_id = 0;
+
+  return FALSE;
+}
+
+static void
+_item_ready_weak_notify_cb (gpointer  data,
+                            GObject  *dead_object);
+
+static void
+_item_ready_notify_cb (SwItem     *item,
+                       GParamSpec *pspec,
+                       SwItemStream *item_view)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_view);
+
+  if (sw_item_get_ready (item)) {
+    SW_DEBUG (VIEWS, "Item became ready: %s.",
+              sw_item_get (item, "id"));
+    g_signal_handlers_disconnect_by_func (item,
+                                          _item_ready_notify_cb,
+                                          item_view);
+    g_object_weak_unref ((GObject *)item_view,
+                         _item_ready_weak_notify_cb,
+                         item);
+
+    if (!priv->pending_timeout_id)
+    {
+      SW_DEBUG (VIEWS, "Setting up timeout");
+      priv->pending_timeout_id = g_timeout_add_seconds (1,
+                                                        _handle_ready_pending_cb,
+                                                        item_view);
+    } else {
+      SW_DEBUG (VIEWS, "Timeout already set up.");
+    }
+  }
+}
+
+static void
+_item_ready_weak_notify_cb (gpointer  data,
+                            GObject  *dead_object)
+{
+  g_signal_handlers_disconnect_by_func (data,
+                                        _item_ready_notify_cb,
+                                        dead_object);
+}
+
+static void
+_setup_ready_handler (SwItem     *item,
+                      SwItemStream *item_view)
+{
+  g_signal_connect (item,
+                    "notify::ready",
+                    (GCallback)_item_ready_notify_cb,
+                    item_view);
+  g_object_weak_ref ((GObject *)item_view,
+                     _item_ready_weak_notify_cb,
+                     item);
+}
+
+static gboolean
+_item_changed_timeout_cb (gpointer data)
+{
+  SwItemStream *item_view = SW_ITEM_STREAM (data);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_view);
+
+  sw_item_stream_update_items (item_view, priv->changed_items);
+  g_list_foreach (priv->changed_items, (GFunc)g_object_unref, NULL);
+  g_list_free (priv->changed_items);
+  priv->changed_items = NULL;
+
+  priv->refresh_timeout_id = 0;
+
+  return FALSE;
+}
+
+static void
+_item_changed_cb (SwItem       *item,
+                  SwItemStream *item_stream)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
+
+  /* We only care if the item is ready. If it's not then we don't want to be
+   * emitting changed but instead it will be added through the readiness
+   * tracking.
+   */
+  if (!sw_item_get_ready (item))
+    return;
+
+  if (!g_list_find (priv->changed_items, item))
+    priv->changed_items = g_list_append (priv->changed_items, item);
+
+  if (!priv->refresh_timeout_id)
+  {
+    SW_DEBUG (VIEWS, "Item changed, Setting up timeout");
+
+    priv->refresh_timeout_id = g_timeout_add_seconds (10,
+                                                      _item_changed_timeout_cb,
+                                                      item_stream);
+  }
+}
+
+static void
+_item_changed_weak_notify_cb (gpointer  data,
+                              GObject  *dead_object)
+{
+  SwItem *item = (SwItem *)data;
+
+  g_signal_handlers_disconnect_by_func (item,
+                                        _item_changed_cb,
+                                        dead_object);
+  g_object_unref (item);
+}
+
+static void
+_setup_changed_handler (SwItem     *item,
+                        SwItemStream *item_stream)
+{
+  g_signal_connect (item,
+                    "changed",
+                    (GCallback)_item_changed_cb,
+                    item_stream);
+  g_object_weak_ref ((GObject *)item_stream,
+                     _item_changed_weak_notify_cb,
+                     g_object_ref (item));
+}
+
+/* TODO: Work out how to commonalize sw_item_stream_add_items and
+ * sw_item_stream_add_item */
+
+/**
+ * sw_item_stream_add_items
+ * @item_stream: A #SwItemStream
+ * @items: A list of #SwItem objects
+ * 
+ * Add the items supplied in the list from the #SwItemStream. This will cause
+ * signal emissions over the bus.
+ *
+ */
+void
+sw_item_stream_add_items (SwItemStream *item_stream,
+                          GList        *items)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
+  GList *l;
+
+  ptr_array = g_ptr_array_new_with_free_func ((GDestroyNotify)g_value_array_free);
+
+  for (l = items; l; l = l->next)
+  {
+    SwItem *item = SW_ITEM (l->data);
+
+    if (sw_item_get_ready (item))
+    {
+      SW_DEBUG (VIEWS, "Item ready: %s",
+                sw_item_get (item, "id"));
+      value_array = _sw_item_to_value_array (item);
+      g_ptr_array_add (ptr_array, value_array);
+    } else {
+      SW_DEBUG (VIEWS, "Item not ready, setting up handler: %s",
+                sw_item_get (item, "id"));
+      _setup_ready_handler (item, item_stream);
+      sw_set_add (priv->pending_items_set, (GObject *)item);
+    }
+
+    _setup_changed_handler (item, item_stream);
+  }
+
+  SW_DEBUG (VIEWS, "Number of items to be added: %d", ptr_array->len);
+
+  sw_item_view_iface_emit_items_added (item_stream,
+                                       ptr_array);
+
+  g_ptr_array_free (ptr_array, TRUE);
+}
+
+/**
+ * sw_item_stream_add_item
+ * @item_stream: A #SwItemStream
+ * @item: A #SwItem
+ *
+ * Add a single item in the #SwItemStream. This will cause a signal to be
+ * emitted across the bus.
+ */
+void
+sw_item_stream_add_item (SwItemStream *item_stream,
+                         SwItem       *item)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
+
+  ptr_array = g_ptr_array_new_with_free_func ((GDestroyNotify)g_value_array_free);
+
+  if (sw_item_get_ready (item))
+  {
+    SW_DEBUG (VIEWS, "Item ready: %s",
+              sw_item_get (item, "id"));
+    value_array = _sw_item_to_value_array (item);
+    g_ptr_array_add (ptr_array, value_array);
+  } else {
+    SW_DEBUG (VIEWS, "Item not ready, setting up handler: %s",
+              sw_item_get (item, "id"));
+    _setup_ready_handler (item, item_stream);
+    sw_set_add (priv->pending_items_set, (GObject *)item);
+  }
+
+  _setup_changed_handler (item, item_stream);
+
+  sw_item_view_iface_emit_items_added (item_stream,
+                                         ptr_array);
+
+  g_ptr_array_free (ptr_array, TRUE);
+}
+
+/**
+ * sw_item_stream_update_items
+ * @item_stream: A #SwItemStream
+ * @items: A list of #SwItem objects that need updating
+ *
+ * Update the items supplied in the list in the #SwItemStream. This is
+ * will cause signal emissions over the bus.
+ */
+void
+sw_item_stream_update_items (SwItemStream *item_stream,
+                             GList        *items)
+{
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
+  GList *l;
+
+  ptr_array = g_ptr_array_new_with_free_func ((GDestroyNotify)g_value_array_free);
+
+  for (l = items; l; l = l->next)
+  {
+    SwItem *item = SW_ITEM (l->data);
+
+    /*
+     * Item must be ready and also not in the pending items set; we need to
+     * check this to prevent ItemsChanged coming before ItemsAdded
+     */
+    if (sw_item_get_ready (item))
+    {
+      value_array = _sw_item_to_value_array (item);
+      g_ptr_array_add (ptr_array, value_array);
+    }
+  }
+
+  SW_DEBUG (VIEWS, "Number of items to be changed: %d", ptr_array->len);
+
+  if (ptr_array->len > 0)
+    sw_item_view_iface_emit_items_changed (item_stream,
+                                             ptr_array);
+  g_ptr_array_free (ptr_array, TRUE);
+}
+
+
+/**
+ * sw_item_stream_update_item
+ * @item_stream: A #SwItemStream
+ * @item: A #SwItem
+ *
+ * Update a single item in the #SwItemStream. This will cause a signal to be
+ * emitted across the bus.
+ */
+void
+sw_item_stream_update_item (SwItemStream *item_stream,
+                            SwItem       *item)
+{
+
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
+
+  ptr_array = g_ptr_array_new_with_free_func ((GDestroyNotify)g_value_array_free);
+
+  /*
+   * Item must be ready and also not in the pending items set; we need to
+   * check this to prevent ItemsChanged coming before ItemsAdded
+   */
+  if (sw_item_get_ready (item))
+  {
+    value_array = _sw_item_to_value_array (item);
+    g_ptr_array_add (ptr_array, value_array);
+  }
+
+  if (ptr_array->len > 0)
+    sw_item_view_iface_emit_items_changed (item_stream,
+                                           ptr_array);
+  g_ptr_array_free (ptr_array, TRUE);
+}
+
+/**
+ * sw_item_stream_remove_items
+ * @item_stream: A #SwItemStream
+ * @items: A list of #SwItem objects
+ *
+ * Remove the items supplied in the list from the #SwItemStream. This will cause
+ * signal emissions over the bus.
+ *
+ */
+void
+sw_item_stream_remove_items (SwItemStream *item_stream,
+                             GList        *items)
+{
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
+  GList *l;
+  SwItem *item;
+
+  ptr_array = g_ptr_array_new_with_free_func ((GDestroyNotify)g_value_array_free);
+
+  for (l = items; l; l = l->next)
+  {
+    item = SW_ITEM (l->data);
+
+    value_array = g_value_array_new (2);
+
+    value_array = g_value_array_append (value_array, NULL);
+    g_value_init (g_value_array_get_nth (value_array, 0), G_TYPE_STRING);
+    g_value_set_string (g_value_array_get_nth (value_array, 0),
+                        sw_service_get_name (sw_item_get_service (item)));
+
+    value_array = g_value_array_append (value_array, NULL);
+    g_value_init (g_value_array_get_nth (value_array, 1), G_TYPE_STRING);
+    g_value_set_string (g_value_array_get_nth (value_array, 1),
+                        sw_item_get (item, "id"));
+
+    g_ptr_array_add (ptr_array, value_array);
+  }
+
+  sw_item_view_iface_emit_items_removed (item_stream,
+                                           ptr_array);
+
+  g_ptr_array_free (ptr_array, TRUE);
+}
+
+/**
+ * sw_item_stream_remove_item
+ * @item_stream: A #SwItemStream
+ * @item: A #SwItem
+ *
+ * Remove a single item to the #SwItemStream. This will cause a signal to be
+ * emitted across the bus.
+ */
+void
+sw_item_stream_remove_item (SwItemStream *item_stream,
+                            SwItem       *item)
+{
+  GValueArray *value_array;
+  GPtrArray *ptr_array;
+
+  ptr_array = g_ptr_array_new ();
+
+  value_array = g_value_array_new (2);
+
+  value_array = g_value_array_append (value_array, NULL);
+  g_value_init (g_value_array_get_nth (value_array, 0), G_TYPE_STRING);
+  g_value_set_string (g_value_array_get_nth (value_array, 0),
+                      sw_service_get_name (sw_item_get_service (item)));
+
+  value_array = g_value_array_append (value_array, NULL);
+  g_value_init (g_value_array_get_nth (value_array, 1), G_TYPE_STRING);
+  g_value_set_string (g_value_array_get_nth (value_array, 1),
+                      sw_item_get (item, "id"));
+
+  g_ptr_array_add (ptr_array, value_array);
+
+  sw_item_view_iface_emit_items_removed (item_stream,
+                                         ptr_array);
+
+  g_ptr_array_free (ptr_array, TRUE);
+}
+
+/**
+ * sw_item_stream_get_object_path
+ * @item_stream: A #SwItemStream
+ *
+ * Since #SwItemStream is responsible for constructing the object path and
+ * registering the object on the bus. This function is necessary for
+ * #SwCore to be able to return the object path as the result of a
+ * function to open a view.
+ *
+ * Returns: A string providing the object path.
+ */
+const gchar *
+sw_item_stream_get_object_path (SwItemStream *item_view)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_view);
+
+  return priv->object_path;
+}
+
+/**
+ * sw_item_stream_get_service
+ * @item_stream: A #SwItemStream
+ *
+ * Returns: The #SwService that #SwItemStream is for
+ */
+SwService *
+sw_item_stream_get_service (SwItemStream *item_view)
+{
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_view);
+
+  return priv->service;
+}

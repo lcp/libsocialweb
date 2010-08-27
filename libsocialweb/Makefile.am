@@ -23,6 +23,7 @@ libsocialweb_la_SOURCES = sw-types.h \
 		       sw-core.c sw-core.h \
 		       sw-item.c sw-item.h \
 		       sw-item-view.c sw-item-view.h \
+		       sw-item-stream.c sw-item-stream.h \
 		       sw-service.c sw-service.h \
 		       sw-utils.c sw-utils.h \
 		       sw-web.c sw-web.h \
@@ -41,6 +42,7 @@ public_headers = \
 	sw-service.h \
 	sw-online.h \
 	sw-item-view.h \
+	sw-item-stream.h \
 	sw-debug.h \
 	sw-web.h \
 	sw-set.h \
