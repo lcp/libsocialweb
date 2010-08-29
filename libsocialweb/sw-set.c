@@ -362,6 +362,10 @@ test_set_is_empty (void)
 
   g_assert (sw_set_is_empty (set));
 
+  sw_set_add (set, G_OBJECT (obj));
+  sw_set_empty (set);
+  g_assert (sw_set_is_empty (set));
+
   g_object_unref (obj);
   sw_set_unref (set);
 }
@@ -405,6 +409,28 @@ test_set_foreach_remove (void)
   g_object_unref (obj1);
   g_object_unref (obj2);
   sw_set_unref (set);
+}
+
+void
+test_set_basics (void)
+{
+  GType type;
+  SwSet *set;
+
+  type = SW_TYPE_SET;
+
+  g_assert (type == sw_set_get_type ());
+
+  g_assert (g_type_is_a (type, G_TYPE_BOXED));
+
+  set = sw_set_new ();
+  g_assert (set->ref_count == 1);
+
+  sw_set_ref (set);
+  g_assert (set->ref_count == 2);
+
+  sw_set_unref (set);
+  g_assert (set->ref_count == 1);
 }
 
 #endif

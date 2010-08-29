@@ -49,6 +49,7 @@ main (int argc, char *argv[])
 
   test_add ("/set/is_empty", test_set_is_empty);
   test_add ("/set/foreach_remove", test_set_foreach_remove);
+  test_add ("/set/set_basics", test_set_basics);
 
   test_add ("/cache/absolute", test_cache_absolute);
   test_add ("/cache/relative", test_cache_relative);
