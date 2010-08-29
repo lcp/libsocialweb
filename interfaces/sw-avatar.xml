@@ -1,11 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<node name="/Avatar_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+<node name="/Avatar_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
+                           xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
   <interface name="com.meego.libsocialweb.Avatar">
+    <doc:doc>
+      <doc:summary>An interface representing the functionality required to
+        fetch the user's own avatar for an account.</doc:summary>
+    </doc:doc>
     <method name="RequestAvatar" tp:name-for-bindings="Request_Avatar"/>
-
-    <signal name="AvatarRetrieved" tp:name-for-bindings="Avatar_Retrieved">
-      <arg name="path" type="s"/>
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Request that the user's avatar is downloaded from the service.
+            This will cause the #Avatar::AvatarRetrieved signal to be fired when the
+            avatar has been downloaded
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+      <signal name="AvatarRetrieved" tp:name-for-bindings="Avatar_Retrieved">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            This is the signal that will be fired when the avatar has been
+            downloaded by the backend.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+      <arg name="path" type="s">
+        <doc:doc>
+          <doc:summary>The local filename of the downloaded avatar image.</doc:summary>
+        </doc:doc>
+      </arg>
     </signal>
   </interface>
 </node>
