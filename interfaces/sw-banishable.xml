@@ -1,13 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE node SYSTEM "dbus.dtd">
-
-<node name="/Banishable_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+<node name="/Banishable_Iface"
+      xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
+      xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
   <interface name="com.meego.libsocialweb.Banishable">
+    <doc:doc>
+      <doc:summary>An interface for hiding items from a feed from a service.</doc:summary>
+    </doc:doc>
+
     <method name="HideItem" tp:name-for-bindings="Hide_Item">
-      <arg name="uid" type="s" direction="in"/>
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Hide the item from the servive with the given @uid. This means
+            that the item will be removed from any open views and streams,
+            from the cache and will be added to the ban list so that any
+            future fetches of this content will not include it.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+
+      <arg name="uid" type="s" direction="in">
+        <doc:doc>
+          <doc:summary>The uid of the item to ban</doc:summary>
+        </doc:doc>
+      </arg>
     </method>
     <signal name="ItemHidden" tp:name-for-bindings="Item_Hidden">
-      <arg name="uid" type="s"/>
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Fired when a a client requests that an item be banned from the
+            service. It may be that uid is not valid or not present in the
+            view or stream. Client should not misbehave is the uid is unknown
+            to them.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+      <arg name="uid" type="s">
+        <doc:doc>
+          <doc:summary>The uid of the item that has been banned.</doc:summary>
+        </doc:doc>
+      </arg>
     </signal>
   </interface>
 </node>
