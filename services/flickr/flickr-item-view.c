@@ -104,7 +104,7 @@ sw_flickr_item_view_set_property (GObject      *object,
 
   switch (property_id) {
     case PROP_PROXY:
-      priv->proxy = g_value_get_object (value);
+      priv->proxy = g_value_dup_object (value);
       break;
     case PROP_PARAMS:
       priv->params = g_value_dup_boxed (value);
