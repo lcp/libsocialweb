@@ -55,7 +55,7 @@ AM_GLIB_GNU_GETTEXT
 INTLTOOL_SOCIALWEB_KEYS='%.keys: %.keys.in $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; LC_ALL=C $(INTLTOOL_MERGE) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@'
 AC_SUBST(INTLTOOL_SOCIALWEB_KEYS)
 
-GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
+GTK_DOC_CHECK([1.15],[--flavour no-tmpl])
 
 # only check if gtk-doc is enabled
 AS_IF([test "x$enable_gtk_doc" = "xyes"], [AC_CHECK_PROGS(XSLT, [xsltproc])])
