@@ -1,4 +1,4 @@
-noinst_PROGRAMS = test-online test-client-online test-download test-download-async
+noinst_PROGRAMS = test-online test-client-online test-download test-download-async test-upload
 
 test_online_SOURCES = test-online.c
 test_online_CFLAGS = -I$(top_srcdir) $(GOBJECT_CFLAGS)
@@ -15,3 +15,7 @@ test_download_LDADD = $(GOBJECT_LIBS) $(SOUP_LIBS) ../libsocialweb/libsocialweb.
 test_download_async_SOURCES = test-download-async.c
 test_download_async_CFLAGS = -I$(top_srcdir) $(GOBJECT_CFLAGS) $(SOUP_CFLAGS) $(DBUS_GLIB_CFLAGS)
 test_download_async_LDADD = $(GOBJECT_LIBS) $(SOUP_LIBS) ../libsocialweb/libsocialweb.la
+
+test_upload_SOURCES = test-upload.c
+test_upload_CFLAGS = -I$(top_srcdir) $(GOBJECT_CFLAGS) $(SOUP_CFLAGS) $(DBUS_GLIB_CFLAGS)
+test_upload_LDADD = $(GOBJECT_LIBS) $(SOUP_LIBS) ../libsocialweb/libsocialweb.la ../libsocialweb-client/libsocialweb-client.la

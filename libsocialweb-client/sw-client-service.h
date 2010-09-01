@@ -20,6 +20,7 @@
 #define _SW_CLIENT_SERVICE
 
 #include <glib-object.h>
+#include <gio/gio.h>
 #include <libsocialweb-client/sw-item.h>
 #include <libsocialweb-client/sw-client-item-view.h>
 
@@ -111,6 +112,20 @@ sw_client_service_update_status_with_fields (SwClientService                    
                                              const gchar                         *status_msg,
                                              GHashTable                          *fields,
                                              gpointer                             userdata);
+
+gboolean
+sw_client_service_upload_photo (SwClientService                      *service,
+                                const char                           *filename,
+                                const GHashTable                     *fields,
+                                GCancellable                         *cancellable,
+                                GFileProgressCallback                 progress_callback,
+                                gpointer                              progress_callback_data,
+                                GAsyncReadyCallback                   callback,
+                                gpointer                              userdata);
+gboolean
+sw_client_service_upload_photo_finish (SwClientService  *service,
+                                       GAsyncResult     *res,
+                                       GError          **error);
 
 typedef void (*SwClientServiceQueryOpenViewCallback) (SwClientService  *query,
                                                       SwClientItemView *item_view,

@@ -18,6 +18,7 @@
 
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
+#include <gio/gio.h>
 
 #include "sw-client-service.h"
 
@@ -26,6 +27,7 @@
 #include <interfaces/sw-query-bindings.h>
 #include <interfaces/sw-avatar-bindings.h>
 #include <interfaces/sw-banishable-bindings.h>
+#include <interfaces/sw-photo-upload-bindings.h>
 #include <interfaces/sw-marshals.h>
 
 G_DEFINE_TYPE (SwClientService, sw_client_service, G_TYPE_OBJECT)
@@ -52,6 +54,7 @@ typedef enum
   QUERY_IFACE,
   STATUS_UPDATE_IFACE,
   BANISHABLE_IFACE,
+  PHOTO_UPLOAD_IFACE,
   LAST_IFACE
 } SwServiceIface;
 
@@ -69,12 +72,24 @@ static const gchar *interface_names[LAST_IFACE] = {
   "com.meego.libsocialweb.Query",
   "com.meego.libsocialweb.StatusUpdate",
   "com.meego.libsocialweb.Banishable",
+  "com.meego.libsocialweb.PhotoUpload"
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
 #define SW_CLIENT_SERVICE_NAME "com.meego.libsocialweb"
 #define SW_CLIENT_SERVICE_OBJECT "/com/meego/libsocialweb/Service/%s"
+
+#define SW_CLIENT_SERVICE_ERROR sw_client_service_error_quark()
+static GQuark
+sw_client_service_error_quark (void)
+{
+  static GQuark q = 0;
+  if (q == 0) {
+    q = g_quark_from_static_string ("sw-client-service-error-quark");
+  }
+  return q;
+}
 
 static void
 sw_client_service_get_property (GObject    *object,
@@ -190,6 +205,13 @@ sw_client_service_class_init (SwClientServiceClass *klass)
                   NULL,
                   g_cclosure_marshal_VOID__VOID,
                   G_TYPE_NONE, 0);
+
+  dbus_g_object_register_marshaller (sw_marshal_VOID__INT_INT_STRING,
+				     G_TYPE_NONE,
+				     G_TYPE_INT,
+				     G_TYPE_INT,
+				     G_TYPE_STRING,
+				     G_TYPE_INVALID);
 }
 
 static void
@@ -302,6 +324,11 @@ _sw_client_service_setup (SwClientService  *service,
     return FALSE;
   }
 
+  _sw_client_service_setup_proxy_for_iface (service,
+					    service_name,
+					    PHOTO_UPLOAD_IFACE,
+					    NULL);
+
   dbus_g_proxy_add_signal (priv->proxies[AVATAR_IFACE],
                            "AvatarRetrieved",
                            G_TYPE_STRING,
@@ -341,6 +368,15 @@ _sw_client_service_setup (SwClientService  *service,
                                service,
                                NULL);
 
+  if (priv->proxies[PHOTO_UPLOAD_IFACE] != NULL) {
+    dbus_g_proxy_add_signal (priv->proxies[PHOTO_UPLOAD_IFACE],
+			     "PhotoUploadProgress",
+			     G_TYPE_INT,
+			     G_TYPE_INT,
+			     G_TYPE_STRING,
+			     G_TYPE_INVALID);
+  }
+
   return TRUE;
 }
 
@@ -351,6 +387,13 @@ typedef struct
   SwClientService *service;
   GCallback cb;
   gpointer userdata;
+
+  /* Used for photo upload */
+  GFileProgressCallback progress_cb;
+  gpointer progress_cb_data;
+  guint64 filesize;
+  gint opid;
+  GHashTable *fields;
 } SwClientServiceCallClosure;
 
 static void
@@ -443,8 +486,6 @@ _update_status_cb (DBusGProxy *proxy,
   g_slice_free (SwClientServiceCallClosure, closure);
 }
 
-
-
 void
 sw_client_service_update_status (SwClientService                     *service,
                                  SwClientServiceUpdateStatusCallback  cb,
@@ -486,6 +527,186 @@ sw_client_service_update_status_with_fields (SwClientService                    
                                                             closure);
 }
 
+static void
+_upload_photo_progress_cb (DBusGProxy *proxy,
+                           gint opid,
+                           gint progress,
+                           const char *error_message,
+                           gpointer userdata)
+{
+  SwClientServiceCallClosure *closure = (SwClientServiceCallClosure *) userdata;
+
+  if (opid != closure->opid) {
+    /* Ignore, that's not our upload */
+    return;
+  }
+  if (progress == -1) {
+    g_simple_async_report_error_in_idle (G_OBJECT (closure->service),
+                                         (GAsyncReadyCallback) closure->cb,
+                                         closure->userdata,
+                                         SW_CLIENT_SERVICE_ERROR,
+                                         0,
+                                         error_message);
+    g_object_unref (closure->service);
+    g_slice_free (SwClientServiceCallClosure, closure);
+    return;
+  }
+
+  (closure->progress_cb) ((float) progress * closure->filesize,
+                          closure->filesize,
+                          closure->progress_cb_data);
+
+  if (progress == 100) {
+    GSimpleAsyncResult *res;
+    res = g_simple_async_result_new (G_OBJECT (closure->service),
+                                     (GAsyncReadyCallback) closure->cb,
+                                     closure->userdata,
+                                     sw_client_service_upload_photo);
+    g_simple_async_result_set_op_res_gboolean (res, TRUE);
+    g_simple_async_result_complete_in_idle (res);
+    g_object_unref (res);
+    g_object_unref (closure->service);
+    g_slice_free (SwClientServiceCallClosure, closure);
+  }
+}
+
+static void
+_upload_photo_cb (DBusGProxy *proxy,
+                  gint opid,
+                  GError *error,
+                  gpointer userdata)
+{
+  SwClientServiceCallClosure *closure = (SwClientServiceCallClosure *) userdata;
+
+  if (error) {
+    g_simple_async_report_gerror_in_idle (G_OBJECT (closure->service),
+                                          (GAsyncReadyCallback) closure->cb,
+                                          closure->userdata,
+                                          error);
+    g_object_unref (closure->service);
+    g_slice_free (SwClientServiceCallClosure, closure);
+    return;
+  }
+
+  closure->opid = opid;
+
+  /* And now wait for the progress signals */
+}
+
+static void
+got_photo_size_cb (GObject *source_object,
+                   GAsyncResult *res,
+                   gpointer userdata)
+{
+  SwClientServiceCallClosure *closure = (SwClientServiceCallClosure *) userdata;
+  SwClientServicePrivate *priv = GET_PRIVATE (closure->service);
+  GFileInfo *info;
+  char *filename;
+
+  info = g_file_query_info_finish (G_FILE (source_object), res, NULL);
+  if (info == NULL ||
+      g_file_info_get_attribute_uint32 (info, G_FILE_ATTRIBUTE_STANDARD_TYPE) != G_FILE_TYPE_REGULAR) {
+    g_simple_async_report_error_in_idle (G_OBJECT (closure->service),
+                                         (GAsyncReadyCallback) closure->cb,
+                                         closure->userdata,
+                                         SW_CLIENT_SERVICE_ERROR,
+                                         0,
+                                         info ? "File to upload is not a regular file" :
+                                         "Could not get file size information for file");
+    if (info)
+      g_object_unref (info);
+    g_object_unref (closure->service);
+    g_hash_table_unref (closure->fields);
+    g_slice_free (SwClientServiceCallClosure, closure);
+    return;
+  }
+
+  closure->filesize = g_file_info_get_attribute_uint64 (info,
+                                                        G_FILE_ATTRIBUTE_STANDARD_SIZE);
+  g_object_unref (info);
+
+  dbus_g_proxy_connect_signal (priv->proxies[PHOTO_UPLOAD_IFACE], "PhotoUploadProgress",
+                               G_CALLBACK (_upload_photo_progress_cb), closure, NULL);
+
+  filename = g_file_get_path (G_FILE (source_object));
+  com_meego_libsocialweb_PhotoUpload_upload_photo_async (priv->proxies[PHOTO_UPLOAD_IFACE],
+                                                         filename,
+                                                         closure->fields,
+                                                         _upload_photo_cb,
+                                                         closure);
+  g_hash_table_unref (closure->fields);
+  closure->fields = NULL;
+
+  g_free (filename);
+}
+
+gboolean
+sw_client_service_upload_photo (SwClientService                      *service,
+                                const char                           *filename,
+                                const GHashTable                     *fields,
+                                GCancellable                         *cancellable,
+                                GFileProgressCallback                 progress_callback,
+                                gpointer                              progress_callback_data,
+                                GAsyncReadyCallback                   callback,
+                                gpointer                              userdata)
+{
+  SwClientServicePrivate *priv = GET_PRIVATE (service);
+  SwClientServiceCallClosure *closure;
+  GFile *file;
+
+  if (!_sw_client_service_setup_proxy_for_iface (service,
+                                                 priv->name,
+                                                 PHOTO_UPLOAD_IFACE,
+                                                 NULL)) {
+    return FALSE;
+  }
+
+  closure = g_slice_new0 (SwClientServiceCallClosure);
+  closure->progress_cb = progress_callback;
+  closure->progress_cb_data = progress_callback_data;
+  closure->service = g_object_ref (service);
+  closure->userdata = userdata;
+  closure->cb = G_CALLBACK (callback);
+  if (fields)
+    closure->fields = g_hash_table_ref ((GHashTable *) fields);
+  else
+    closure->fields = g_hash_table_new (g_str_hash, g_str_equal);
+
+  file = g_file_new_for_path (filename);
+  g_file_query_info_async (file,
+                           G_FILE_ATTRIBUTE_STANDARD_SIZE","G_FILE_ATTRIBUTE_STANDARD_TYPE,
+                           G_FILE_QUERY_INFO_NONE,
+                           0,
+                           NULL,
+                           got_photo_size_cb,
+                           closure);
+  g_object_unref (file);
+
+  return TRUE;
+}
+
+gboolean
+sw_client_service_upload_photo_finish (SwClientService  *service,
+                                       GAsyncResult     *res,
+                                       GError          **error)
+{
+  GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
+  gboolean ret;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (res,
+							G_OBJECT (service),
+							NULL), FALSE);
+
+  ret = FALSE;
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    goto out;
+
+  ret = g_simple_async_result_get_op_res_gboolean (simple);
+
+out:
+  return ret;
+}
 
 static void
 _request_avatar_cb (DBusGProxy *proxy,
