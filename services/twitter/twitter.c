@@ -48,6 +48,7 @@
 
 #include "twitter.h"
 #include "twitter-item-view.h"
+#include "twitter-item-stream.h"
 
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
@@ -561,7 +562,8 @@ initable_iface_init (gpointer g_iface, gpointer iface_data)
 static const gchar *valid_queries[] = { "feed",
                                         "own",
                                         "friends-only",
-                                        "x-twitter-mentions" };
+                                        "x-twitter-mentions",
+                                        "x-twitter-stream"};
 
 static gboolean
 _check_query_validity (const gchar *query)
@@ -584,7 +586,6 @@ _twitter_query_open_view (SwQueryIface          *self,
                           DBusGMethodInvocation *context)
 {
   SwServiceTwitterPrivate *priv = GET_PRIVATE (self);
-  SwItemView *item_view;
   const gchar *object_path;
 
   if (!_check_query_validity (query))
@@ -597,18 +598,33 @@ _twitter_query_open_view (SwQueryIface          *self,
     return;
   }
 
-  item_view = g_object_new (SW_TYPE_TWITTER_ITEM_VIEW,
-                            "proxy", priv->proxy,
-                            "service", self,
-                            "query", query,
-                            "params", params,
-                            NULL);
+  if (g_str_equal (query, "x-twitter-stream"))
+  {
+    SwItemStream *item_stream;
+    item_stream = g_object_new (SW_TYPE_TWITTER_ITEM_STREAM,
+                                "proxy", priv->proxy,
+                                "service", self,
+                                "query", query,
+                                "params", params,
+                                NULL);
+    object_path = sw_item_stream_get_object_path (item_stream);
+    /* Ensure the object gets disposed when the client goes away */
+    sw_client_monitor_add (dbus_g_method_get_sender (context),
+                         (GObject *)item_stream);
+  } else {
+    SwItemView *item_view;
+    item_view = g_object_new (SW_TYPE_TWITTER_ITEM_VIEW,
+                              "proxy", priv->proxy,
+                              "service", self,
+                              "query", query,
+                              "params", params,
+                              NULL);
+    object_path = sw_item_view_get_object_path (item_view);
+    /* Ensure the object gets disposed when the client goes away */
+    sw_client_monitor_add (dbus_g_method_get_sender (context),
+                          (GObject *)item_view);
+  }
 
-  /* Ensure the object gets disposed when the client goes away */
-  sw_client_monitor_add (dbus_g_method_get_sender (context),
-                         (GObject *)item_view);
-
-  object_path = sw_item_view_get_object_path (item_view);
   sw_query_iface_return_from_open_view (context,
                                         object_path);
 }
