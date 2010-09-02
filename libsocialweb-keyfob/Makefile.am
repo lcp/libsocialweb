@@ -2,8 +2,10 @@ lib_LTLIBRARIES = libsocialweb-keyfob.la
 libsocialweb_keyfob_ladir = $(pkgincludedir)/libsocialweb-keyfob
 
 libsocialweb_keyfob_la_CFLAGS = -I$(top_srcdir) \
-		     $(DBUS_GLIB_CFLAGS) $(KEYRING_CFLAGS) $(REST_CFLAGS)
-libsocialweb_keyfob_la_LIBADD = $(DBUS_GLIB_LIBS) $(KEYRING_LIBS) $(REST_LIBS)
+		     $(DBUS_GLIB_CFLAGS) $(KEYRING_CFLAGS) $(REST_CFLAGS)\
+		     $(GCOV_CFLAGS)
+libsocialweb_keyfob_la_LIBADD = $(DBUS_GLIB_LIBS) $(KEYRING_LIBS) $(REST_LIBS)\
+				$(GCOV_LDFLAGS)
 
 libsocialweb_keyfob_la_SOURCES = \
 	sw-keyfob.h \

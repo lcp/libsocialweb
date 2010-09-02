@@ -25,8 +25,8 @@ GINTERFACE_SOURCES = \
 	$(DBUS_SPECS:.xml=-ginterface.c)
 
 libsocialweb_ginterfaces_la_SOURCES = $(GINTERFACE_SOURCES) $(MARSHALS_SOURCES)
-libsocialweb_ginterfaces_la_LIBADD = $(DBUS_GLIB_LIBS)
-libsocialweb_ginterfaces_la_CFLAGS = $(DBUS_GLIB_CFLAGS)
+libsocialweb_ginterfaces_la_LIBADD = $(DBUS_GLIB_LIBS) $(GCOV_LIBS)
+libsocialweb_ginterfaces_la_CFLAGS = $(DBUS_GLIB_CFLAGS) $(GCOV_CFLAGS)
 
 libsocialweb_ginterfaces_ladir = $(pkgincludedir)/interfaces
 libsocialweb_ginterfaces_la_HEADERS = \

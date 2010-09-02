@@ -1,8 +1,9 @@
 lib_LTLIBRARIES = libsocialweb-keystore.la
 libsocialweb_keystore_ladir = $(pkgincludedir)/libsocialweb-keystore
 
-libsocialweb_keystore_la_CFLAGS = -I$(top_srcdir) $(GIO_CFLAGS) -DG_LOG_DOMAIN=\"libsocialweb-keystore\"
-libsocialweb_keystore_la_LIBADD = $(GIO_LIBS)
+libsocialweb_keystore_la_CFLAGS = -I$(top_srcdir) $(GIO_CFLAGS) -DG_LOG_DOMAIN=\"libsocialweb-keystore\"\
+				  $(GCOV_CFLAGS)
+libsocialweb_keystore_la_LIBADD = $(GIO_LIBS) $(GCOV_LDFLAGS)
 
 libsocialweb_keystore_la_SOURCES = \
 	sw-keystore.c sw-keystore.h

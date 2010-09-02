@@ -7,6 +7,7 @@ libflickr_la_CFLAGS = -I$(top_srcdir) \
 		      $(GCONF_CFLAGS) \
 		      $(SOUP_CFLAGS) \
 		      $(DBUS_GLIB_CFLAGS) \
+		      $(GCOV_CFLAGS)
 		      -DG_LOG_DOMAIN=\"Flickr\"
 libflickr_la_LIBADD = $(top_builddir)/libsocialweb/libsocialweb.la \
 		      $(top_builddir)/libsocialweb-keyfob/libsocialweb-keyfob.la \
@@ -14,7 +15,8 @@ libflickr_la_LIBADD = $(top_builddir)/libsocialweb/libsocialweb.la \
 		      $(REST_LIBS) \
 		      $(GCONF_LIBS) \
 		      $(SOUP_LIBS) \
-		      $(DBUS_GLIB_LIBS)
+		      $(DBUS_GLIB_LIBS) \
+		      $(GCOV_LDFLAGS)
 libflickr_la_LDFLAGS = -module -avoid-version
 
 servicesdata_DATA = flickr.keys

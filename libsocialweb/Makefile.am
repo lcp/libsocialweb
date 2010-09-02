@@ -10,10 +10,12 @@ libsocialweb_ladir = $(pkgincludedir)/libsocialweb
 libsocialweb_la_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/interfaces \
 		     $(DBUS_GLIB_CFLAGS) $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) \
 		     $(NM_CFLAGS) $(GTK_CFLAGS) $(REST_CFLAGS) \
+		     $(GCOV_CFLAGS) \
 		     -DSOCIALWEB_SERVICES_MODULES_DIR=\"$(servicesdir)\"
 
 libsocialweb_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS) $(SOUP_GNOME_LIBS) \
 		      $(NM_LIBS) $(GTK_LIBS) $(REST_LIBS) \
+		      $(GCOV_LDFLAGS) \
 		      $(top_builddir)/interfaces/libsocialweb-ginterfaces.la
 
 libsocialweb_la_SOURCES = sw-types.h \
