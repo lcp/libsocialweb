@@ -432,6 +432,15 @@ sw_item_equal (SwItem *a,
   iter_valid_a = g_hash_table_iter_next (&iter_a, &key_a, &value_a);
   iter_valid_b = g_hash_table_iter_next (&iter_b, &key_b, &value_b);
 
+
+  /* Hash tables are both empty */
+  if (!iter_valid_a && !iter_valid_b)
+    return TRUE;
+
+  /* One hash is empty the other not */
+  if ((iter_valid_a && !iter_valid_b) || (!iter_valid_a && iter_valid_b))
+    return FALSE;
+
   do
   {
     if (!g_str_equal ((gchar *)key_a, (gchar *)key_b))
@@ -444,6 +453,7 @@ sw_item_equal (SwItem *a,
     iter_valid_b = g_hash_table_iter_next (&iter_b, &key_b, &value_b);
   } while (iter_valid_a && iter_valid_b);
 
+  /* Hash tables are of varying length */
   if ((iter_valid_a && !iter_valid_b) || (!iter_valid_a && iter_valid_b))
     return FALSE;
 
