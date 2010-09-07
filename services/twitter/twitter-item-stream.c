@@ -288,7 +288,7 @@ twitter_item_stream_start (SwItemStream *item_stream)
   g_object_set (priv->proxy, "url-format", "http://stream.twitter.com/", NULL);
 
   rest_proxy_call_set_function (call, "1/statuses/filter.json");
-  rest_proxy_call_set_method (call, "GET");
+  rest_proxy_call_set_method (call, "POST");
 
   track_params = g_hash_table_lookup (priv->params, "keywords");
 
