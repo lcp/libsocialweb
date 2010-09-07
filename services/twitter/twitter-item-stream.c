@@ -217,6 +217,7 @@ _call_continous_cb (RestProxyCall *call,
   if (error_in)
   {
     g_critical (G_STRLOC ": Error: %s", error_in->message);
+    return;
   }
 
   if (!priv->cur_buffer)
