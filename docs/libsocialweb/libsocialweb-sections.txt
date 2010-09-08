@@ -56,15 +56,15 @@ SW_ITEM_VIEW_GET_CLASS
 <SECTION>
 <FILE>sw-core</FILE>
 <TITLE>SwCore</TITLE>
-SwCorePrivate
 SwCore
-SwCoreClass
 sw_core_new
 sw_core_run
 sw_core_is_item_banned
 sw_core_dup_singleton
 sw_core_get_connection
 <SUBSECTION Standard>
+SwCoreClass
+SwCorePrivate
 SW_CORE
 SW_IS_CORE
 SW_TYPE_CORE
@@ -77,7 +77,6 @@ SW_CORE_GET_CLASS
 <SECTION>
 <FILE>sw-item</FILE>
 <TITLE>SwItem</TITLE>
-SwItemPrivate
 SwItem
 SwItemClass
 sw_item_new
@@ -99,6 +98,7 @@ sw_item_get_mtime
 sw_item_equal
 sw_item_set_new
 <SUBSECTION Standard>
+SwItemPrivate
 SW_ITEM
 SW_IS_ITEM
 SW_TYPE_ITEM
@@ -139,6 +139,7 @@ sw_web_download_image_async
 <SECTION>
 <FILE>sw-set</FILE>
 <TITLE>SwSet</TITLE>
+SwSet
 SW_TYPE_SET
 sw_set_get_type
 sw_set_new

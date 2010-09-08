@@ -19,6 +19,7 @@
     <xi:include href="xml/sw-debug.xml"/>
     <xi:include href="xml/sw-enum-types.xml"/>
     <xi:include href="xml/sw-item-view.xml"/>
+    <xi:include href="xml/sw-item-stream.xml"/>
     <xi:include href="xml/sw-item.xml"/>
     <xi:include href="xml/sw-module.xml"/>
     <xi:include href="xml/sw-online.xml"/>
