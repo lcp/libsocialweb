@@ -397,7 +397,7 @@ _flickr_upload_photo (SwPhotoUploadIface    *self,
   SwServiceFlickrPrivate *priv = GET_PRIVATE (self);
   GError *error = NULL;
   RestProxyCall *call;
-  static int opid = 0;
+  int opid;
 
   call = flickr_proxy_new_upload_for_file (FLICKR_PROXY (priv->proxy),
                                            filename,
@@ -414,7 +414,7 @@ _flickr_upload_photo (SwPhotoUploadIface    *self,
   MAP_PARAM ("x-flickr-is-friend", "is_friend");
   MAP_PARAM ("x-flickr-is-family", "is_family");
 
-  ++opid;
+  opid = sw_next_opid ();
 
   rest_proxy_call_async (call, on_upload_cb, (GObject *)self, GINT_TO_POINTER (opid), NULL);
 
