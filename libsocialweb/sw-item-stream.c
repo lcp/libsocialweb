@@ -135,7 +135,7 @@ sw_item_stream_finalize (GObject *object)
 }
 
 static gchar *
-_make_object_path (SwItemStream *item_view)
+_make_object_path (SwItemStream *item_stream)
 {
   gchar *path;
   static gint count = 0;
@@ -151,16 +151,16 @@ _make_object_path (SwItemStream *item_view)
 static void
 sw_item_stream_constructed (GObject *object)
 {
-  SwItemStream *item_view = SW_ITEM_STREAM (object);
+  SwItemStream *item_stream = SW_ITEM_STREAM (object);
   SwItemStreamPrivate *priv = GET_PRIVATE (object);
   SwCore *core;
 
   core = sw_core_dup_singleton ();
 
-  priv->object_path = _make_object_path (item_view);
+  priv->object_path = _make_object_path (item_stream);
   dbus_g_connection_register_g_object (sw_core_get_connection (core),
                                        priv->object_path,
-                                       G_OBJECT (item_view));
+                                       G_OBJECT (item_stream));
   g_object_unref (core);
   /* The only reference should be the one on the bus */
 
@@ -170,17 +170,17 @@ sw_item_stream_constructed (GObject *object)
 
 /* Default implementation for close */
 static void
-sw_item_stream_default_close (SwItemStream *item_view)
+sw_item_stream_default_close (SwItemStream *item_stream)
 {
   SwCore *core;
 
   core = sw_core_dup_singleton ();
   dbus_g_connection_unregister_g_object (sw_core_get_connection (core),
-                                         G_OBJECT (item_view));
+                                         G_OBJECT (item_stream));
   g_object_unref (core);
 
   /* Object is no longer needed */
-  g_object_unref (item_view);
+  g_object_unref (item_stream);
 }
 
 static void
@@ -286,8 +286,8 @@ sw_item_view_iface_init (gpointer g_iface,
 static gboolean
 _handle_ready_pending_cb (gpointer data)
 {
-  SwItemStream *item_view = SW_ITEM_STREAM (data);
-  SwItemStreamPrivate *priv = GET_PRIVATE (item_view);
+  SwItemStream *item_stream = SW_ITEM_STREAM (data);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
   GList *items_to_send = NULL;
   GList *pending_items, *l;
 
@@ -307,7 +307,7 @@ _handle_ready_pending_cb (gpointer data)
     }
   }
 
-  sw_item_stream_add_items (item_view, items_to_send);
+  sw_item_stream_add_items (item_stream, items_to_send);
 
   g_list_free (pending_items);
 
@@ -323,17 +323,17 @@ _item_ready_weak_notify_cb (gpointer  data,
 static void
 _item_ready_notify_cb (SwItem     *item,
                        GParamSpec *pspec,
-                       SwItemStream *item_view)
+                       SwItemStream *item_stream)
 {
-  SwItemStreamPrivate *priv = GET_PRIVATE (item_view);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
 
   if (sw_item_get_ready (item)) {
     SW_DEBUG (VIEWS, "Item became ready: %s.",
               sw_item_get (item, "id"));
     g_signal_handlers_disconnect_by_func (item,
                                           _item_ready_notify_cb,
-                                          item_view);
-    g_object_weak_unref ((GObject *)item_view,
+                                          item_stream);
+    g_object_weak_unref ((GObject *)item_stream,
                          _item_ready_weak_notify_cb,
                          item);
 
@@ -342,7 +342,7 @@ _item_ready_notify_cb (SwItem     *item,
       SW_DEBUG (VIEWS, "Setting up timeout");
       priv->pending_timeout_id = g_timeout_add_seconds (1,
                                                         _handle_ready_pending_cb,
-                                                        item_view);
+                                                        item_stream);
     } else {
       SW_DEBUG (VIEWS, "Timeout already set up.");
     }
@@ -360,13 +360,13 @@ _item_ready_weak_notify_cb (gpointer  data,
 
 static void
 _setup_ready_handler (SwItem     *item,
-                      SwItemStream *item_view)
+                      SwItemStream *item_stream)
 {
   g_signal_connect (item,
                     "notify::ready",
                     (GCallback)_item_ready_notify_cb,
-                    item_view);
-  g_object_weak_ref ((GObject *)item_view,
+                    item_stream);
+  g_object_weak_ref ((GObject *)item_stream,
                      _item_ready_weak_notify_cb,
                      item);
 }
@@ -374,10 +374,10 @@ _setup_ready_handler (SwItem     *item,
 static gboolean
 _item_changed_timeout_cb (gpointer data)
 {
-  SwItemStream *item_view = SW_ITEM_STREAM (data);
-  SwItemStreamPrivate *priv = GET_PRIVATE (item_view);
+  SwItemStream *item_stream = SW_ITEM_STREAM (data);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
 
-  sw_item_stream_update_items (item_view, priv->changed_items);
+  sw_item_stream_update_items (item_stream, priv->changed_items);
   g_list_foreach (priv->changed_items, (GFunc)g_object_unref, NULL);
   g_list_free (priv->changed_items);
   priv->changed_items = NULL;
@@ -698,9 +698,9 @@ sw_item_stream_remove_item (SwItemStream *item_stream,
  * Returns: A string providing the object path.
  */
 const gchar *
-sw_item_stream_get_object_path (SwItemStream *item_view)
+sw_item_stream_get_object_path (SwItemStream *item_stream)
 {
-  SwItemStreamPrivate *priv = GET_PRIVATE (item_view);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
 
   return priv->object_path;
 }
@@ -712,9 +712,9 @@ sw_item_stream_get_object_path (SwItemStream *item_view)
  * Returns: The #SwService that #SwItemStream is for
  */
 SwService *
-sw_item_stream_get_service (SwItemStream *item_view)
+sw_item_stream_get_service (SwItemStream *item_stream)
 {
-  SwItemStreamPrivate *priv = GET_PRIVATE (item_view);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
 
   return priv->service;
 }

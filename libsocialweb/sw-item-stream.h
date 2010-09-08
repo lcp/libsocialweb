@@ -49,16 +49,16 @@ typedef struct {
 
 typedef struct {
   GObjectClass parent_class;
-  void (*start) (SwItemStream *item_view);
-  void (*refresh) (SwItemStream *item_view);
-  void (*stop) (SwItemStream *item_view);
-  void (*close) (SwItemStream *item_view);
+  void (*start) (SwItemStream *item_stream);
+  void (*refresh) (SwItemStream *item_stream);
+  void (*stop) (SwItemStream *item_stream);
+  void (*close) (SwItemStream *item_stream);
 } SwItemStreamClass;
 
 GType sw_item_stream_get_type (void);
 
-const gchar *sw_item_stream_get_object_path (SwItemStream *item_view);
-SwService *sw_item_stream_get_service (SwItemStream *item_view);
+const gchar *sw_item_stream_get_object_path (SwItemStream *item_stream);
+SwService *sw_item_stream_get_service (SwItemStream *item_stream);
 
 
 void sw_item_stream_add_items (SwItemStream *item_stream,
