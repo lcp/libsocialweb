@@ -22,3 +22,5 @@
 time_t sw_time_t_from_string (const char *s);
 char * sw_time_t_to_string (time_t t);
 char *sw_hash_string_dict (GHashTable *hash);
+
+int sw_next_opid (void);

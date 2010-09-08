@@ -77,3 +77,18 @@ sw_hash_string_dict (GHashTable *hash)
 
   return md5;
 }
+
+/**
+ * sw_next_opid:
+ *
+ * Get the next operation ID.  Operation IDs are globally unique for a
+ * libsocialweb instance.  In the current implementation, they are simply
+ * incrementing integers.
+ */
+int
+sw_next_opid (void)
+{
+  static volatile gint opid = 1;
+
+  return g_atomic_int_exchange_and_add (&opid, 1);
+}
