@@ -20,12 +20,41 @@
           <doc:para>
             @fields is a set of key-value pairs that are passed to the service.
             None of these are required and not all services support all of the
-            keys.  Defined keys include:
+            keys.  Generic keys are:
           </doc:para>
           <doc:list>
             <doc:item>
               <doc:term>title</doc:term>
               <doc:definition>The photo's title</doc:definition>
+            </doc:item>
+          </doc:list>
+          <doc:para>
+            There are also service-specific keys for accessing features that
+            cannot be abstracted sufficiently.  These are prefixed with
+            "x-[service name]-" to avoid conflicts and make it clear that these
+            have specific semantics.  These are:
+          </doc:para>
+          <doc:list>
+            <doc:item>
+              <doc:term>x-flickr-is-public</doc:term>
+              <doc:definition>
+                Set's the Flickr "is_public" parameter.  1 if the photos should
+                be publically viewable, 0 otherwise.
+              </doc:definition>
+            </doc:item>
+            <doc:item>
+              <doc:term>x-flickr-is-friend</doc:term>
+              <doc:definition>
+                Set's the Flickr "is_friend" parameter.  1 if the photos should
+                be viewable by friends, 0 otherwise.
+              </doc:definition>
+            </doc:item>
+            <doc:item>
+              <doc:term>x-flickr-is-family</doc:term>
+              <doc:definition>
+                Set's the Flickr "is_family" parameter.  1 if the photos should
+                be viewable by family, 0 otherwise.
+              </doc:definition>
             </doc:item>
           </doc:list>
         </doc:description>
