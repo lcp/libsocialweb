@@ -822,7 +822,7 @@ _twitpic_upload_photo (SwPhotoUploadIface    *self,
   RestParam *param;
   GMappedFile *map;
   char *title, *content_type;
-  static int opid = 0;
+  int opid;
 
   map = g_mapped_file_new (filename, FALSE, &error);
   if (error) {
@@ -862,7 +862,8 @@ _twitpic_upload_photo (SwPhotoUploadIface    *self,
 
   g_free (content_type);
 
-  opid++;
+  opid = sw_next_opid ();
+
   rest_proxy_call_async (call,
                          on_upload_cb,
                          (GObject *)self,
