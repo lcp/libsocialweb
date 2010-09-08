@@ -24,7 +24,6 @@
     <xi:include href="xml/sw-online.xml"/>
     <xi:include href="xml/sw-service.xml"/>
     <xi:include href="xml/sw-set.xml"/>
-    <xi:include href="xml/sw-types.xml"/>
     <xi:include href="xml/sw-utils.xml"/>
     <xi:include href="xml/sw-web.xml"/>
   </chapter>
