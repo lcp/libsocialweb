@@ -13,10 +13,17 @@ CREDENTIALS_INVALID
 CAN_UPDATE_STATUS
 CAN_REQUEST_AVATAR
 CAN_GEOTAG
+CAN_UPDATE_STATUS_WITH_GEOTAG
+HAS_AVATAR_IFACE
+HAS_BANISHABLE_IFACE
+HAS_PHOTO_UPLOAD_IFACE
+HAS_QUERY_IFACE
+HAS_UPDATE_STATUS_IFACE
 sw_service_get_name
 sw_service_emit_capabilities_changed
 sw_service_emit_user_changed
 sw_service_is_uid_banned
+sw_service_has_cap
 <SUBSECTION Standard>
 SW_SERVICE
 SW_IS_SERVICE
@@ -170,6 +177,7 @@ sw_cache_drop_all
 sw_time_t_from_string
 sw_time_t_to_string
 sw_hash_string_dict
+sw_next_opid
 </SECTION>
 
 <SECTION>
@@ -226,3 +234,25 @@ sw_keystore_get_key_secret
 sw_keystore_get_key
 </SECTION>
 
+<SECTION>
+<FILE>sw-item-stream</FILE>
+<TITLE>SwItemStream</TITLE>
+SwItemStream
+sw_item_stream_get_object_path
+sw_item_stream_get_service
+sw_item_stream_add_items
+sw_item_stream_add_item
+sw_item_stream_update_items
+sw_item_stream_update_item
+sw_item_stream_remove_items
+sw_item_stream_remove_item
+<SUBSECTION Standard>
+SwItemStreamClass
+SW_ITEM_STREAM
+SW_IS_ITEM_STREAM
+SW_TYPE_ITEM_STREAM
+sw_item_stream_get_type
+SW_ITEM_STREAM_CLASS
+SW_IS_ITEM_STREAM_CLASS
+SW_ITEM_STREAM_GET_CLASS
+</SECTION>
