@@ -378,6 +378,16 @@ on_upload_cb (RestProxyCall *call,
   }
 }
 
+/* If @param_name exists in the DBus parameters, set @flickr_name on the
+   RestProxyCall */
+#define MAP_PARAM(param_name, flickr_name)                      \
+  {                                                             \
+    const char *param;                                          \
+    param = g_hash_table_lookup (params_in, param_name);        \
+    if (param)                                                  \
+      rest_proxy_call_add_param (call, flickr_name, param);     \
+  }
+
 static void
 _flickr_upload_photo (SwPhotoUploadIface    *self,
                       const gchar           *filename,
@@ -387,7 +397,6 @@ _flickr_upload_photo (SwPhotoUploadIface    *self,
   SwServiceFlickrPrivate *priv = GET_PRIVATE (self);
   GError *error = NULL;
   RestProxyCall *call;
-  const char *param;
   static int opid = 0;
 
   call = flickr_proxy_new_upload_for_file (FLICKR_PROXY (priv->proxy),
@@ -400,9 +409,10 @@ _flickr_upload_photo (SwPhotoUploadIface    *self,
   }
 
   /* Now add the parameters that we support */
-  param = g_hash_table_lookup (params_in, "title");
-  if (param)
-    rest_proxy_call_add_param (call, "title", param);
+  MAP_PARAM ("title", "title");
+  MAP_PARAM ("x-flickr-is-public", "is_public");
+  MAP_PARAM ("x-flickr-is-friend", "is_friend");
+  MAP_PARAM ("x-flickr-is-family", "is_family");
 
   ++opid;
 
