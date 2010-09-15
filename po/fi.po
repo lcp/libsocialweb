@@ -66,5 +66,5 @@ msgstr "MySpace"
 # http://www.myspace.com/index.cfm?fuseaction=misc.aboutus
 #: ../services/myspace/myspace.keys.in.h:2
 msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace on online-yhteisö, jossa voit tavata ystäviesi ystäviä. Luo yksityinen MySpace-yhteisö ja jaa valokuvia, päiväkirjoja sekä kiinnostuksenkohteita yhteisten ystävien kasvavassa verkostossa. Tarkista, kuka tuntee kenet tai millaisia yhteyksiä sinulla on."
+msgstr "MySpace on online-yhteisö, jossa voit tavata ystäviesi ystäviä. Luo profiili, jaa valokuvia, ammatti- ja virtuaalivideoita, blogeja ja pikaviestejä ystäviesi kanssa sekä kuuntele musiikkia maailman laajimmassa musiikkiyhteisössä."
 
