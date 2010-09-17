@@ -3,10 +3,4 @@ _Name=Twitter
 _Description=Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?
 Link=http://www.twitter.com/
 AuthType=password
-
-[OAuth]
-BaseURL=http://twitter.com/
-RequestTokenFunction=oauth/request_token
-AuthoriseFunction=oauth/authorize
-AccessTokenFunction=oauth/access_token
-Callback=oob
+AuthPasswordServer=api.twitter.com

@@ -23,7 +23,7 @@
 #include <string.h>
 #include <glib/gi18n.h>
 #include <dbus/dbus-glib-lowlevel.h>
-#include <gconf/gconf-client.h>
+#include <gnome-keyring.h>
 
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-set.h>
@@ -87,58 +87,12 @@ struct _SwServiceTwitterPrivate {
   RestProxy *twitpic_proxy;
   char *user_id;
   char *image_url;
-  GConfClient *gconf;
-  guint gconf_notify_id[2];
   char *username, *password;
   gboolean geotag_enabled;
 };
 
-#define KEY_BASE "/apps/libsocialweb/services/twitter"
-#define KEY_USER KEY_BASE "/user"
-#define KEY_PASS KEY_BASE "/password"
-
 static void online_notify (gboolean online, gpointer user_data);
 static void credentials_updated (SwService *service);
-
-static void
-_gconf_auth_changed_cb (GConfClient *client,
-                        guint        cnxn_id,
-                        GConfEntry  *entry,
-                        gpointer     user_data)
-{
-  SwService *service = SW_SERVICE (user_data);
-
-  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
-  SwServiceTwitterPrivate *priv = twitter->priv;
-
-  const char *username = NULL, *password = NULL;
-  gboolean updated = FALSE;
-
-  if (g_str_equal (entry->key, KEY_USER)) {
-    if (entry->value)
-      username = gconf_value_get_string (entry->value);
-    if (username && username[0] == '\0')
-      username = NULL;
-
-    if (g_strcmp0 (priv->username, username) != 0) {
-      priv->username = g_strdup (username);
-      updated = TRUE;
-    }
-  } else if (g_str_equal (entry->key, KEY_PASS)) {
-    if (entry->value)
-      password = gconf_value_get_string (entry->value);
-    if (password && password[0] == '\0')
-      password = NULL;
-
-    if (g_strcmp0 (priv->password, password) != 0) {
-      priv->password = g_strdup (password);
-      updated = TRUE;
-    }
-  }
-
-  if (updated)
-    credentials_updated (service);
-}
 
 RestXmlNode *
 node_from_call (RestProxyCall *call)
@@ -400,20 +354,70 @@ online_notify (gboolean online, gpointer user_data)
   }
 }
 
+/*
+ * Callback from the keyring lookup in refresh_credentials.
+ */
+static void
+found_password_cb (GnomeKeyringResult  result,
+                   GList              *list,
+                   gpointer            user_data)
+{
+  SwService *service = SW_SERVICE (user_data);
+  SwServiceTwitter *twitter = SW_SERVICE_TWITTER (service);
+  SwServiceTwitterPrivate *priv = twitter->priv;
+
+  if (result == GNOME_KEYRING_RESULT_OK && list != NULL) {
+    GnomeKeyringNetworkPasswordData *data = list->data;
+
+    g_free (priv->username);
+    g_free (priv->password);
+
+    priv->username = g_strdup (data->user);
+    priv->password = g_strdup (data->password);
+
+    /* If we're online, force a reconnect to fetch new credentials */
+    if (sw_is_online ()) {
+      online_notify (FALSE, service);
+      online_notify (TRUE, service);
+    }
+  } else {
+    g_free (priv->username);
+    g_free (priv->password);
+    priv->username = NULL;
+    priv->password = NULL;
+    priv->credentials = OFFLINE;
+
+    if (result != GNOME_KEYRING_RESULT_NO_MATCH) {
+      g_warning (G_STRLOC ": Error getting password: %s", gnome_keyring_result_to_message (result));
+    }
+  }
+
+  sw_service_emit_user_changed (service);
+  sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
+}
+
+/*
+ * The credentials have been updated (or we're starting up), so fetch them from
+ * the keyring.
+ */
+static void
+refresh_credentials (SwServiceTwitter *twitter)
+{
+  gnome_keyring_find_network_password (NULL, NULL,
+                                       "api.twitter.com",
+                                       NULL, NULL, NULL, 0,
+                                       found_password_cb, twitter, NULL);
+}
+
+/*
+ * SwService:credentials_updated vfunc implementation
+ */
 static void
 credentials_updated (SwService *service)
 {
   SW_DEBUG (TWITTER, "Credentials updated");
 
-  /* If we're online, force a reconnect to fetch new credentials */
-  if (sw_is_online ()) {
-    online_notify (FALSE, service);
-    online_notify (TRUE, service);
-  }
-
-  sw_service_emit_user_changed (service);
-  sw_service_emit_capabilities_changed ((SwService *)service,
-                                        get_dynamic_caps (service));
+  refresh_credentials (SW_SERVICE_TWITTER (service));
 }
 
 static const char *
@@ -437,13 +441,6 @@ sw_service_twitter_dispose (GObject *object)
   if (priv->twitpic_proxy) {
     g_object_unref (priv->twitpic_proxy);
     priv->twitpic_proxy = NULL;
-  }
-
-  if (priv->gconf) {
-    gconf_client_notify_remove (priv->gconf, priv->gconf_notify_id[0]);
-    gconf_client_notify_remove (priv->gconf, priv->gconf_notify_id[1]);
-    g_object_unref (priv->gconf);
-    priv->gconf = NULL;
   }
 
   G_OBJECT_CLASS (sw_service_twitter_parent_class)->dispose (object);
@@ -518,31 +515,9 @@ sw_service_twitter_initable (GInitable    *initable,
   sw_keystore_get_key_secret ("twitter", &key, &secret);
   priv->proxy = oauth_proxy_new (key, secret, "https://api.twitter.com/", FALSE);
 
-  priv->gconf = gconf_client_get_default ();
-
-  gconf_client_add_dir (priv->gconf,
-                        KEY_BASE,
-                        GCONF_CLIENT_PRELOAD_ONELEVEL,
-                        NULL);
-
-  priv->gconf_notify_id[0] = gconf_client_notify_add (priv->gconf,
-                                                      KEY_USER,
-                                                      _gconf_auth_changed_cb,
-                                                      twitter,
-                                                      NULL,
-                                                      NULL);
-
-  priv->gconf_notify_id[1] = gconf_client_notify_add (priv->gconf,
-                                                      KEY_PASS,
-                                                      _gconf_auth_changed_cb,
-                                                      twitter,
-                                                      NULL,
-                                                      NULL);
-
-  gconf_client_notify (priv->gconf, KEY_USER);
-  gconf_client_notify (priv->gconf, KEY_PASS);
-
   sw_online_add_notify (online_notify, twitter);
+
+  refresh_credentials (twitter);
 
   priv->inited = TRUE;
 
