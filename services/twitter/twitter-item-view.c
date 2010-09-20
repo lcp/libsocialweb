@@ -27,6 +27,7 @@
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 #include <libsoup/soup.h>
+#include <json-glib/json-glib.h>
 
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb/sw-item.h>
@@ -400,9 +401,93 @@ _got_status_updates_cb (RestProxyCall *call,
                  priv->params,
                  set);
 
-
   sw_set_unref (set);
   rest_xml_node_unref (root);
+}
+
+static void
+_got_trending_topic_updates_cb (RestProxyCall *call,
+                                const GError  *error_in,
+                                GObject       *weak_object,
+                                gpointer       userdata)
+{
+  SwTwitterItemViewPrivate *priv = GET_PRIVATE (weak_object);
+  SwItemView *item_view = SW_ITEM_VIEW (weak_object);
+  SwSet *set;
+  JsonParser *parser;
+  JsonObject *root_o;
+  SwService *service;
+  GError *error = NULL;
+
+  if (error) {
+    g_warning (G_STRLOC ": Error getting trending topic data: %s", error_in->message);
+    return;
+  }
+
+  service = sw_item_view_get_service (SW_ITEM_VIEW (item_view));
+
+  set = sw_item_set_new ();
+  parser = json_parser_new ();
+
+  if (!json_parser_load_from_data (parser,
+                                   rest_proxy_call_get_payload (call),
+                                   rest_proxy_call_get_payload_length (call),
+                                   &error))
+  {
+    g_warning (G_STRLOC ": error parsing json: %s", error->message);
+  } else {
+    JsonNode *root_n;
+    JsonObject *trends_o;
+    JsonArray *trends_a;
+    GList *values;
+    gint i;
+
+    root_n = json_parser_get_root (parser);
+    root_o = json_node_get_object (root_n);
+
+    trends_o = json_object_get_object_member (root_o, "trends");
+
+    /* We have to assume just the one object member */
+    if (json_object_get_size (trends_o) == 1)
+    {
+      values = json_object_get_values (trends_o);
+      trends_a = json_node_get_array ((JsonNode *)(values->data));
+
+      for (i = 0; i < json_array_get_length (trends_a); i++)
+      {
+        JsonObject *trend_o;
+        SwItem *item;
+
+        item = sw_item_new ();
+        sw_item_set_service (item, service);
+
+        trend_o = json_array_get_object_element (trends_a, i);
+
+        sw_item_take (item, "date", sw_time_t_to_string (time(NULL)));
+        sw_item_put (item, "id", json_object_get_string_member (trend_o,
+                                                                "name"));
+        sw_item_put (item, "content", json_object_get_string_member (trend_o,
+                                                                     "name"));
+
+        sw_set_add (set, item);
+        g_object_unref (item);
+      }
+      g_list_free (values);
+    }
+  }
+
+
+  sw_item_view_set_from_set (SW_ITEM_VIEW (item_view),
+                             set);
+
+  /* Save the results of this set to the cache */
+  sw_cache_save (service,
+                 priv->query,
+                 priv->params,
+                 set);
+
+  sw_set_unref (set);
+  g_object_unref (parser);
 }
 
 static void
@@ -420,14 +505,25 @@ _get_status_updates (SwTwitterItemView *item_view)
   else if (g_str_equal (priv->query, "feed") ||
            g_str_equal (priv->query, "friends-only"))
     rest_proxy_call_set_function (call, "statuses/friends_timeline.xml");
+  else if (g_str_equal (priv->query, "x-twitter-trending-topics"))
+    rest_proxy_call_set_function (call, "1/trends/current.json");
   else
     g_error (G_STRLOC ": Unexpected query '%s'", priv->query);
 
-  rest_proxy_call_async (call,
-                         _got_status_updates_cb,
-                         (GObject*)item_view,
-                         NULL,
-                         NULL);
+  if (g_str_equal (priv->query, "x-twitter-trending-topics"))
+  {
+    rest_proxy_call_async (call,
+                           _got_trending_topic_updates_cb,
+                           (GObject*)item_view,
+                           NULL,
+                           NULL);
+  } else {
+    rest_proxy_call_async (call,
+                           _got_status_updates_cb,
+                           (GObject*)item_view,
+                           NULL,
+                           NULL);
+  }
   g_object_unref (call);
 }
 

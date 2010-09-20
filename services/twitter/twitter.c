@@ -563,7 +563,8 @@ static const gchar *valid_queries[] = { "feed",
                                         "own",
                                         "friends-only",
                                         "x-twitter-mentions",
-                                        "x-twitter-stream"};
+                                        "x-twitter-stream",
+                                        "x-twitter-trending-topics"};
 
 static gboolean
 _check_query_validity (const gchar *query)
