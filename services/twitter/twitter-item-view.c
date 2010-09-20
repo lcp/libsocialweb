@@ -251,9 +251,10 @@ _make_item (SwTwitterItemView *item_view,
     sw_item_take (item, "url", url);
 
     g_free (twitpic_id);
-  } else {
-    sw_item_put (item, "content", content);
   }
+
+  sw_item_put (item, "content", content);
+
   g_match_info_free (match_info);
 
   date = rest_xml_node_find (node, "created_at")->content;
