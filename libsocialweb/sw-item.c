@@ -415,10 +415,10 @@ sw_item_equal (SwItem *a,
   SwItemPrivate *priv_b = GET_PRIVATE (b);
   GHashTable *hash_a = priv_a->hash;
   GHashTable *hash_b = priv_b->hash;
-  GHashTableIter iter_a, iter_b;
+  GHashTableIter iter_a;
   gpointer key_a, value_a;
-  gpointer key_b, value_b;
-  gboolean iter_valid_a, iter_valid_b;
+  gpointer value_b;
+  guint size_a, size_b;
 
   if (priv_a->service != priv_b->service)
     return FALSE;
@@ -426,36 +426,34 @@ sw_item_equal (SwItem *a,
   if (priv_a->remaining_fetches != priv_b->remaining_fetches)
     return FALSE;
 
+  size_a = g_hash_table_size (hash_a);
+  size_b = g_hash_table_size (hash_b);
+
+  if (g_hash_table_lookup (hash_a, "cached"))
+    size_a--;
+
+  if (g_hash_table_lookup (hash_b, "cached"))
+    size_b--;
+
+  if (size_a != size_b)
+    return FALSE;
+
   g_hash_table_iter_init (&iter_a, hash_a);
-  g_hash_table_iter_init (&iter_b, hash_b);
 
-  iter_valid_a = g_hash_table_iter_next (&iter_a, &key_a, &value_a);
-  iter_valid_b = g_hash_table_iter_next (&iter_b, &key_b, &value_b);
-
-
-  /* Hash tables are both empty */
-  if (!iter_valid_a && !iter_valid_b)
-    return TRUE;
-
-  /* One hash is empty the other not */
-  if ((iter_valid_a && !iter_valid_b) || (!iter_valid_a && iter_valid_b))
-    return FALSE;
-
-  do
+  while (g_hash_table_iter_next (&iter_a, &key_a, &value_a)) 
   {
-    if (!g_str_equal ((gchar *)key_a, (gchar *)key_b))
+    if (g_str_equal (key_a, "cached"))
+      continue;
+
+    value_b = g_hash_table_lookup (hash_b, key_a);
+
+    if (value_b == NULL)
       return FALSE;
 
-    if (!g_str_equal ((gchar *)value_a, (gchar *)value_b))
+    if (!g_str_equal (value_a, value_b))
       return FALSE;
 
-    iter_valid_a = g_hash_table_iter_next (&iter_a, &key_a, &value_a);
-    iter_valid_b = g_hash_table_iter_next (&iter_b, &key_b, &value_b);
-  } while (iter_valid_a && iter_valid_b);
-
-  /* Hash tables are of varying length */
-  if ((iter_valid_a && !iter_valid_b) || (!iter_valid_a && iter_valid_b))
-    return FALSE;
+  }
 
   return TRUE;
 }
