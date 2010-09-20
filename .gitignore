@@ -29,6 +29,7 @@ tests/test-online
 tests/test-client-online
 tests/test-download
 tests/test-download-async
+tests/test-upload
 interfaces/*-ginterface.[ch]
 *-bindings.h
 *-marshals.[ch]
