@@ -3,3 +3,4 @@ _Name=Vimeo
 _Description=From the beginning, Vimeo was created by filmmakers and video creators who wanted to share their creative work, along with intimate personal moments of their everyday life. As time went on, like-minded people came to the site and built a community of positive, encouraging individuals with a wide range of video interests. We hope that you feel inspired to show us both your creative side as well as your friendly side.
 Link=http://www.vimeo.com/
 AuthType=username
+AuthPasswordServer=vimeo.com

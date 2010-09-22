@@ -22,7 +22,7 @@
 #include <glib/gi18n.h>
 #include <gio/gio.h>
 #include <dbus/dbus-glib-lowlevel.h>
-#include <gconf/gconf-client.h>
+#include <gnome-keyring.h>
 
 #include <libsocialweb/sw-service.h>
 #include <libsocialweb/sw-item.h>
@@ -44,50 +44,12 @@ static void query_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (SwServiceVimeo, sw_service_vimeo, SW_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE, query_iface_init));
 
-
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_VIMEO, SwServiceVimeoPrivate))
 
-#define KEY_BASE "/apps/libsocialweb/services/vimeo"
-#define KEY_USER KEY_BASE "/user"
-
 struct _SwServiceVimeoPrivate {
   RestProxy *proxy;
-  GConfClient *gconf;
-  char *user_id;
-  guint gconf_notify_id;
 };
-
-static void
-_gconf_user_changed_cb (GConfClient *client,
-                        guint        cnxn_id,
-                        GConfEntry  *entry,
-                        gpointer     user_data)
-{
-  SwService *service = SW_SERVICE (user_data);
-  SwServiceVimeo *vimeo = SW_SERVICE_VIMEO (service);
-  SwServiceVimeoPrivate *priv = vimeo->priv;
-  const char *new_user;
-
-  SW_DEBUG (VIMEO, "User changed");
-  if (entry->value) {
-    new_user = gconf_value_get_string (entry->value);
-    if (new_user && new_user[0] == '\0')
-      new_user = NULL;
-  } else {
-    new_user = NULL;
-  }
-
-  if (g_strcmp0 (new_user, priv->user_id) != 0) {
-    g_free (priv->user_id);
-    priv->user_id = g_strdup (new_user);
-    rest_proxy_bind (priv->proxy, priv->user_id);
-
-    SW_DEBUG (VIMEO, "User set to %s", priv->user_id);
-
-    g_signal_emit_by_name (service, "user-changed");
-  }
-}
 
 static const char *
 get_name (SwService *service)
@@ -108,6 +70,57 @@ get_static_caps (SwService *service)
   return caps;
 }
 
+/*
+ * Callback from the keyring lookup in refresh_credentials.
+ */
+static void
+found_password_cb (GnomeKeyringResult  result,
+                   GList              *list,
+                   gpointer            user_data)
+{
+  SwService *service = SW_SERVICE (user_data);
+  SwServiceVimeo *vimeo = SW_SERVICE_VIMEO (service);
+  SwServiceVimeoPrivate *priv = vimeo->priv;
+
+  if (result == GNOME_KEYRING_RESULT_OK && list != NULL) {
+    GnomeKeyringNetworkPasswordData *data = list->data;
+    rest_proxy_bind (priv->proxy, data->user);
+  } else {
+    rest_proxy_bind (priv->proxy, "");
+
+    if (result != GNOME_KEYRING_RESULT_NO_MATCH) {
+      g_warning (G_STRLOC ": Error getting password: %s", gnome_keyring_result_to_message (result));
+    }
+  }
+
+  sw_service_emit_user_changed (service);
+  /* TODO: dynamic caps */
+}
+
+/*
+ * The credentials have been updated (or we're starting up), so fetch them from
+ * the keyring.
+ */
+static void
+refresh_credentials (SwServiceVimeo *vimeo)
+{
+  SW_DEBUG (VIMEO, "Credentials updated");
+
+  gnome_keyring_find_network_password (NULL, NULL,
+                                       "vimeo.com",
+                                       NULL, NULL, NULL, 0,
+                                       found_password_cb, vimeo, NULL);
+}
+
+/*
+ * SwService:credentials_updated vfunc implementation
+ */
+static void
+credentials_updated (SwService *service)
+{
+  refresh_credentials (SW_SERVICE_VIMEO (service));
+}
+
 static void
 sw_service_vimeo_dispose (GObject *object)
 {
@@ -118,26 +131,9 @@ sw_service_vimeo_dispose (GObject *object)
     priv->proxy = NULL;
   }
 
-  if (priv->gconf) {
-    gconf_client_notify_remove (priv->gconf,
-                                priv->gconf_notify_id);
-    gconf_client_remove_dir (priv->gconf, KEY_BASE, NULL);
-    g_object_unref (priv->gconf);
-    priv->gconf = NULL;
-  }
-
   G_OBJECT_CLASS (sw_service_vimeo_parent_class)->dispose (object);
 }
 
-static void
-sw_service_vimeo_finalize (GObject *object)
-{
-  SwServiceVimeoPrivate *priv = ((SwServiceVimeo*)object)->priv;
-
-  g_free (priv->user_id);
-
-  G_OBJECT_CLASS (sw_service_vimeo_parent_class)->finalize (object);
-}
 
 /* Query interface */
 
@@ -211,10 +207,10 @@ sw_service_vimeo_class_init (SwServiceVimeoClass *klass)
   g_type_class_add_private (klass, sizeof (SwServiceVimeoPrivate));
 
   object_class->dispose = sw_service_vimeo_dispose;
-  object_class->finalize = sw_service_vimeo_finalize;
 
   service_class->get_name = get_name;
   service_class->get_static_caps = get_static_caps;
+  service_class->credentials_updated = credentials_updated;
 }
 
 static void
@@ -226,11 +222,5 @@ sw_service_vimeo_init (SwServiceVimeo *self)
 
   priv->proxy = rest_proxy_new ("http://vimeo.com/api/v2/%s/", TRUE);
 
-  priv->gconf = gconf_client_get_default ();
-  gconf_client_add_dir (priv->gconf, KEY_BASE,
-                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  priv->gconf_notify_id = gconf_client_notify_add (priv->gconf, KEY_USER,
-                                                   _gconf_user_changed_cb, self,
-                                                   NULL, NULL);
-  gconf_client_notify (priv->gconf, KEY_USER);
+  refresh_credentials (self);
 }
