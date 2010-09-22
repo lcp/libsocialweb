@@ -7,9 +7,7 @@ pkgconfigdir   = $(libdir)/pkgconfig
 
 DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-gtk-doc \
-	--enable-flickr \
-	--enable-lastfm \
-	--enable-twitter
+	--enable-all-services
 
 EXTRA_DIST = intltool-extract.in intltool-merge.in intltool-update.in
 DISTCLEANFILES = intltool-extract intltool-merge intltool-update
