@@ -21,8 +21,8 @@
 #include <string.h>
 #include <glib/gi18n.h>
 #include <gio/gio.h>
+#include <gnome-keyring.h>
 #include <dbus/dbus-glib-lowlevel.h>
-#include <gconf/gconf-client.h>
 
 #include <libsocialweb/sw-service.h>
 #include <libsocialweb/sw-item.h>
@@ -54,15 +54,12 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceLastfm, sw_service_lastfm, SW_TYPE_SERVICE,
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_LASTFM, SwServiceLastfmPrivate))
 
-#define KEY_BASE "/apps/libsocialweb/services/lastfm"
-#define KEY_USER KEY_BASE "/user"
-
 struct _SwServiceLastfmPrivate {
   RestProxy *proxy;
-  GConfClient *gconf;
-  char *user_id;
-  guint gconf_notify_id;
+  char *username;
 };
+
+static const char ** get_dynamic_caps (SwService *service);
 
 static void
 lastfm_now_playing (SwLastfmIface *self,
@@ -95,6 +92,60 @@ lastfm_submit_track (SwLastfmIface *self,
   sw_lastfm_iface_return_from_submit_track (context);
 }
 
+/*
+ * Callback from the keyring lookup in refresh_credentials.
+ */
+static void
+found_password_cb (GnomeKeyringResult  result,
+                   GList              *list,
+                   gpointer            user_data)
+{
+  SwService *service = SW_SERVICE (user_data);
+  SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (service);
+  SwServiceLastfmPrivate *priv = lastfm->priv;
+
+  if (result == GNOME_KEYRING_RESULT_OK && list != NULL) {
+    GnomeKeyringNetworkPasswordData *data = list->data;
+
+    g_free (priv->username);
+    priv->username = g_strdup (data->user);
+  } else {
+    g_free (priv->username);
+    priv->username = NULL;
+
+    if (result != GNOME_KEYRING_RESULT_NO_MATCH) {
+      g_warning (G_STRLOC ": Error getting password: %s", gnome_keyring_result_to_message (result));
+    }
+  }
+
+  sw_service_emit_user_changed (service);
+  sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
+}
+
+/*
+ * The credentials have been updated (or we're starting up), so fetch them from
+ * the keyring.
+ */
+static void
+refresh_credentials (SwServiceLastfm *lastfm)
+{
+  gnome_keyring_find_network_password (NULL, NULL,
+                                       "ws.audioscrobbler.com",
+                                       NULL, NULL, NULL, 0,
+                                       found_password_cb, lastfm, NULL);
+}
+
+/*
+ * SwService:credentials_updated vfunc implementation
+ */
+static void
+credentials_updated (SwService *service)
+{
+  SW_DEBUG (LASTFM, "Credentials updated");
+
+  refresh_credentials (SW_SERVICE_LASTFM (service));
+}
+
 static const char **
 get_dynamic_caps (SwService *service)
 {
@@ -110,7 +161,7 @@ get_dynamic_caps (SwService *service)
     NULL
   };
 
-  if (priv->user_id)
+  if (priv->username)
   {
     return configured_caps;
   } else {
@@ -132,37 +183,6 @@ get_static_caps (SwService *service)
   return caps;
 }
 
-static void
-_gconf_user_changed_cb (GConfClient *client,
-                        guint        cnxn_id,
-                        GConfEntry  *entry,
-                        gpointer     user_data)
-{
-  SwService *service = SW_SERVICE (user_data);
-  SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (service);
-  SwServiceLastfmPrivate *priv = lastfm->priv;
-  const char *new_user;
-
-  SW_DEBUG (LASTFM, "User changed");
-  if (entry->value) {
-    new_user = gconf_value_get_string (entry->value);
-    if (new_user && new_user[0] == '\0')
-      new_user = NULL;
-  } else {
-    new_user = NULL;
-  }
-
-  if (g_strcmp0 (new_user, priv->user_id) != 0) {
-    g_free (priv->user_id);
-    priv->user_id = g_strdup (new_user);
-
-    SW_DEBUG (LASTFM, "User set to %s", priv->user_id);
-
-    sw_service_emit_user_changed (service);
-    sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
-  }
-}
-
 static const char *
 get_name (SwService *service)
 {
@@ -179,14 +199,6 @@ sw_service_lastfm_dispose (GObject *object)
     priv->proxy = NULL;
   }
 
-  if (priv->gconf) {
-    gconf_client_notify_remove (priv->gconf,
-                                priv->gconf_notify_id);
-    gconf_client_remove_dir (priv->gconf, KEY_BASE, NULL);
-    g_object_unref (priv->gconf);
-    priv->gconf = NULL;
-  }
-
   G_OBJECT_CLASS (sw_service_lastfm_parent_class)->dispose (object);
 }
 
@@ -195,7 +207,7 @@ sw_service_lastfm_finalize (GObject *object)
 {
   SwServiceLastfmPrivate *priv = ((SwServiceLastfm*)object)->priv;
 
-  g_free (priv->user_id);
+  g_free (priv->username);
 
   G_OBJECT_CLASS (sw_service_lastfm_parent_class)->finalize (object);
 }
@@ -208,7 +220,6 @@ sw_service_lastfm_initable (GInitable     *initable,
   SwServiceLastfm *lastfm = SW_SERVICE_LASTFM (initable);
   SwServiceLastfmPrivate *priv = lastfm->priv;
 
-  SW_DEBUG (LASTFM, "%s called", G_STRFUNC);
   if (sw_keystore_get_key ("lastfm") == NULL) {
     g_set_error_literal (error,
                          SW_SERVICE_ERROR,
@@ -222,14 +233,7 @@ sw_service_lastfm_initable (GInitable     *initable,
 
   priv->proxy = rest_proxy_new ("http://ws.audioscrobbler.com/2.0/", FALSE);
 
-  priv->gconf = gconf_client_get_default ();
-  gconf_client_add_dir (priv->gconf, KEY_BASE,
-                        GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  priv->gconf_notify_id = gconf_client_notify_add (priv->gconf, KEY_USER,
-                                                   _gconf_user_changed_cb, lastfm,
-                                                   NULL, NULL);
-
-  gconf_client_notify (priv->gconf, KEY_USER);
+  refresh_credentials (lastfm);
 
   return TRUE;
 }
@@ -332,6 +336,7 @@ sw_service_lastfm_class_init (SwServiceLastfmClass *klass)
   service_class->get_name = get_name;
   service_class->get_dynamic_caps = get_dynamic_caps;
   service_class->get_static_caps = get_static_caps;
+  service_class->credentials_updated = credentials_updated;
 }
 
 static void
@@ -344,5 +349,5 @@ sw_service_lastfm_init (SwServiceLastfm *self)
 const gchar *
 sw_service_lastfm_get_user_id (SwServiceLastfm *service)
 {
-  return service->priv->user_id;
+  return service->priv->username;
 }
