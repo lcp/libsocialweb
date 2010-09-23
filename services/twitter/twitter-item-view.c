@@ -470,7 +470,7 @@ _got_trending_topic_updates_cb (RestProxyCall *call,
         sw_item_put (item, "content", json_object_get_string_member (trend_o,
                                                                      "name"));
 
-        sw_set_add (set, item);
+        sw_set_add (set, (GObject *)item);
         g_object_unref (item);
       }
       g_list_free (values);
