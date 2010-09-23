@@ -224,7 +224,7 @@ _make_item (SwTwitterItemView *item_view,
   sw_item_put (item, "id", url);
   sw_item_take (item, "url", url);
 
-  user_name = rest_xml_node_find (node, "name")->content;
+  user_name = rest_xml_node_find (u_node, "name")->content;
   sw_item_put (item, "author", user_name);
 
   content = rest_xml_node_find (node, "text")->content;
