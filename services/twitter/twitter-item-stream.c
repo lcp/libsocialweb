@@ -183,6 +183,16 @@ _create_item_from_node (JsonNode *node)
                 "date",
                 _make_date (json_object_get_string_member (root_o, "created_at")));
 
+  if (json_object_has_member (user_o, "profile_image_url"))
+  {
+    sw_item_request_image_fetch (item,
+                               TRUE,
+                               "authoricon",
+                               json_object_get_string_member (user_o, "profile_image_url"));
+  }
+
+
+
   if (geo_o)
   {
     JsonArray *coords;
