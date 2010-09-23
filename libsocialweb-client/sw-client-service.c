@@ -28,6 +28,7 @@
 #include <interfaces/sw-avatar-bindings.h>
 #include <interfaces/sw-banishable-bindings.h>
 #include <interfaces/sw-photo-upload-bindings.h>
+#include <interfaces/sw-video-upload-bindings.h>
 #include <interfaces/sw-marshals.h>
 
 G_DEFINE_TYPE (SwClientService, sw_client_service, G_TYPE_OBJECT)
@@ -55,6 +56,7 @@ typedef enum
   STATUS_UPDATE_IFACE,
   BANISHABLE_IFACE,
   PHOTO_UPLOAD_IFACE,
+  VIDEO_UPLOAD_IFACE,
   LAST_IFACE
 } SwServiceIface;
 
@@ -72,7 +74,8 @@ static const gchar *interface_names[LAST_IFACE] = {
   "com.meego.libsocialweb.Query",
   "com.meego.libsocialweb.StatusUpdate",
   "com.meego.libsocialweb.Banishable",
-  "com.meego.libsocialweb.PhotoUpload"
+  "com.meego.libsocialweb.PhotoUpload",
+  "com.meego.libsocialweb.VideoUpload"
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
@@ -388,11 +391,12 @@ typedef struct
   GCallback cb;
   gpointer userdata;
 
-  /* Used for photo upload */
+  /* Used for photo and video upload */
   GFileProgressCallback progress_cb;
   gpointer progress_cb_data;
   guint64 filesize;
   gint opid;
+  SwServiceIface iface;
   GHashTable *fields;
 } SwClientServiceCallClosure;
 
@@ -528,7 +532,7 @@ sw_client_service_update_status_with_fields (SwClientService                    
 }
 
 static void
-_upload_photo_progress_cb (DBusGProxy *proxy,
+_upload_file_progress_cb (DBusGProxy *proxy,
                            gint opid,
                            gint progress,
                            const char *error_message,
@@ -561,7 +565,9 @@ _upload_photo_progress_cb (DBusGProxy *proxy,
     res = g_simple_async_result_new (G_OBJECT (closure->service),
                                      (GAsyncReadyCallback) closure->cb,
                                      closure->userdata,
-                                     sw_client_service_upload_photo);
+                                     closure->iface == PHOTO_UPLOAD_IFACE ?
+                                     sw_client_service_upload_photo :
+                                     sw_client_service_upload_video);
     g_simple_async_result_set_op_res_gboolean (res, TRUE);
     g_simple_async_result_complete_in_idle (res);
     g_object_unref (res);
@@ -571,10 +577,10 @@ _upload_photo_progress_cb (DBusGProxy *proxy,
 }
 
 static void
-_upload_photo_cb (DBusGProxy *proxy,
-                  gint opid,
-                  GError *error,
-                  gpointer userdata)
+_upload_file_cb (DBusGProxy *proxy,
+		 gint opid,
+		 GError *error,
+		 gpointer userdata)
 {
   SwClientServiceCallClosure *closure = (SwClientServiceCallClosure *) userdata;
 
@@ -594,7 +600,7 @@ _upload_photo_cb (DBusGProxy *proxy,
 }
 
 static void
-got_photo_size_cb (GObject *source_object,
+got_file_size_cb (GObject *source_object,
                    GAsyncResult *res,
                    gpointer userdata)
 {
@@ -602,6 +608,7 @@ got_photo_size_cb (GObject *source_object,
   SwClientServicePrivate *priv = GET_PRIVATE (closure->service);
   GFileInfo *info;
   char *filename;
+  const char *signal;
 
   info = g_file_query_info_finish (G_FILE (source_object), res, NULL);
   if (info == NULL ||
@@ -625,19 +632,75 @@ got_photo_size_cb (GObject *source_object,
                                                         G_FILE_ATTRIBUTE_STANDARD_SIZE);
   g_object_unref (info);
 
-  dbus_g_proxy_connect_signal (priv->proxies[PHOTO_UPLOAD_IFACE], "PhotoUploadProgress",
-                               G_CALLBACK (_upload_photo_progress_cb), closure, NULL);
+  signal = (closure->iface == PHOTO_UPLOAD_IFACE ? "PhotoUploadProgress" : "VideoUploadProgress");
+  dbus_g_proxy_connect_signal (priv->proxies[closure->iface], signal,
+			       G_CALLBACK (_upload_file_progress_cb), closure, NULL);
 
   filename = g_file_get_path (G_FILE (source_object));
-  com_meego_libsocialweb_PhotoUpload_upload_photo_async (priv->proxies[PHOTO_UPLOAD_IFACE],
-                                                         filename,
-                                                         closure->fields,
-                                                         _upload_photo_cb,
-                                                         closure);
+  if (closure->iface == PHOTO_UPLOAD_IFACE) {
+    com_meego_libsocialweb_PhotoUpload_upload_photo_async (priv->proxies[PHOTO_UPLOAD_IFACE],
+							   filename,
+							   closure->fields,
+							   _upload_file_cb,
+							   closure);
+  } else {
+    com_meego_libsocialweb_VideoUpload_upload_video_async (priv->proxies[VIDEO_UPLOAD_IFACE],
+							   filename,
+							   closure->fields,
+							   _upload_file_cb,
+							   closure);
+  }
   g_hash_table_unref (closure->fields);
   closure->fields = NULL;
 
   g_free (filename);
+}
+
+gboolean
+_sw_client_service_upload (SwClientService                      *service,
+			   SwServiceIface                        iface,
+			   const char                           *filename,
+			   const GHashTable                     *fields,
+			   GCancellable                         *cancellable,
+			   GFileProgressCallback                 progress_callback,
+			   gpointer                              progress_callback_data,
+			   GAsyncReadyCallback                   callback,
+			   gpointer                              userdata)
+{
+  SwClientServicePrivate *priv = GET_PRIVATE (service);
+  SwClientServiceCallClosure *closure;
+  GFile *file;
+
+  if (!_sw_client_service_setup_proxy_for_iface (service,
+                                                 priv->name,
+                                                 iface,
+                                                 NULL)) {
+    return FALSE;
+  }
+
+  closure = g_slice_new0 (SwClientServiceCallClosure);
+  closure->progress_cb = progress_callback;
+  closure->progress_cb_data = progress_callback_data;
+  closure->service = g_object_ref (service);
+  closure->userdata = userdata;
+  closure->cb = G_CALLBACK (callback);
+  closure->iface = iface;
+  if (fields)
+    closure->fields = g_hash_table_ref ((GHashTable *) fields);
+  else
+    closure->fields = g_hash_table_new (g_str_hash, g_str_equal);
+
+  file = g_file_new_for_path (filename);
+  g_file_query_info_async (file,
+                           G_FILE_ATTRIBUTE_STANDARD_SIZE","G_FILE_ATTRIBUTE_STANDARD_TYPE,
+                           G_FILE_QUERY_INFO_NONE,
+                           0,
+                           NULL,
+                           got_file_size_cb,
+                           closure);
+  g_object_unref (file);
+
+  return TRUE;
 }
 
 gboolean
@@ -650,45 +713,42 @@ sw_client_service_upload_photo (SwClientService                      *service,
                                 GAsyncReadyCallback                   callback,
                                 gpointer                              userdata)
 {
-  SwClientServicePrivate *priv = GET_PRIVATE (service);
-  SwClientServiceCallClosure *closure;
-  GFile *file;
-
-  if (!_sw_client_service_setup_proxy_for_iface (service,
-                                                 priv->name,
-                                                 PHOTO_UPLOAD_IFACE,
-                                                 NULL)) {
-    return FALSE;
-  }
-
-  closure = g_slice_new0 (SwClientServiceCallClosure);
-  closure->progress_cb = progress_callback;
-  closure->progress_cb_data = progress_callback_data;
-  closure->service = g_object_ref (service);
-  closure->userdata = userdata;
-  closure->cb = G_CALLBACK (callback);
-  if (fields)
-    closure->fields = g_hash_table_ref ((GHashTable *) fields);
-  else
-    closure->fields = g_hash_table_new (g_str_hash, g_str_equal);
-
-  file = g_file_new_for_path (filename);
-  g_file_query_info_async (file,
-                           G_FILE_ATTRIBUTE_STANDARD_SIZE","G_FILE_ATTRIBUTE_STANDARD_TYPE,
-                           G_FILE_QUERY_INFO_NONE,
-                           0,
-                           NULL,
-                           got_photo_size_cb,
-                           closure);
-  g_object_unref (file);
-
-  return TRUE;
+	return _sw_client_service_upload (service,
+					  PHOTO_UPLOAD_IFACE,
+					  filename,
+					  fields,
+					  cancellable,
+					  progress_callback,
+					  progress_callback_data,
+					  callback,
+					  userdata);
 }
 
 gboolean
-sw_client_service_upload_photo_finish (SwClientService  *service,
-                                       GAsyncResult     *res,
-                                       GError          **error)
+sw_client_service_upload_video (SwClientService                      *service,
+				const char                           *filename,
+				const GHashTable                     *fields,
+				GCancellable                         *cancellable,
+				GFileProgressCallback                 progress_callback,
+				gpointer                              progress_callback_data,
+				GAsyncReadyCallback                   callback,
+				gpointer                              userdata)
+{
+	return _sw_client_service_upload (service,
+					  VIDEO_UPLOAD_IFACE,
+					  filename,
+					  fields,
+					  cancellable,
+					  progress_callback,
+					  progress_callback_data,
+					  callback,
+					  userdata);
+}
+
+gboolean
+_sw_client_service_upload_finish (SwClientService  *service,
+				  GAsyncResult     *res,
+				  GError          **error)
 {
   GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
   gboolean ret;
@@ -706,6 +766,22 @@ sw_client_service_upload_photo_finish (SwClientService  *service,
 
 out:
   return ret;
+}
+
+gboolean
+sw_client_service_upload_photo_finish (SwClientService  *service,
+                                       GAsyncResult     *res,
+                                       GError          **error)
+{
+  return _sw_client_service_upload_finish (service, res, error);
+}
+
+gboolean
+sw_client_service_upload_video_finish (SwClientService  *service,
+                                       GAsyncResult     *res,
+                                       GError          **error)
+{
+  return _sw_client_service_upload_finish (service, res, error);
 }
 
 static void

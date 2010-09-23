@@ -69,6 +69,7 @@ GType sw_client_service_get_type (void);
 #define HAS_UPDATE_STATUS_IFACE "has-update-status-iface"
 #define HAS_AVATAR_IFACE "has-avatar-iface"
 #define HAS_PHOTO_UPLOAD_IFACE "has-photo-upload-iface"
+#define HAS_VIDEO_UPLOAD_IFACE "has-video-upload-iface"
 #define HAS_BANISHABLE_IFACE "has-banishable-iface"
 #define HAS_QUERY_IFACE "has-query-iface"
 
@@ -124,6 +125,20 @@ sw_client_service_upload_photo (SwClientService                      *service,
                                 gpointer                              userdata);
 gboolean
 sw_client_service_upload_photo_finish (SwClientService  *service,
+                                       GAsyncResult     *res,
+                                       GError          **error);
+
+gboolean
+sw_client_service_upload_video (SwClientService                      *service,
+                                const char                           *filename,
+                                const GHashTable                     *fields,
+                                GCancellable                         *cancellable,
+                                GFileProgressCallback                 progress_callback,
+                                gpointer                              progress_callback_data,
+                                GAsyncReadyCallback                   callback,
+                                gpointer                              userdata);
+gboolean
+sw_client_service_upload_video_finish (SwClientService  *service,
                                        GAsyncResult     *res,
                                        GError          **error);
 

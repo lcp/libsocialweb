@@ -79,6 +79,7 @@ struct _SwServiceClass {
 #define HAS_UPDATE_STATUS_IFACE "has-update-status-iface"
 #define HAS_AVATAR_IFACE "has-avatar-iface"
 #define HAS_PHOTO_UPLOAD_IFACE "has-photo-upload-iface"
+#define HAS_VIDEO_UPLOAD_IFACE "has-video-upload-iface"
 #define HAS_BANISHABLE_IFACE "has-banishable-iface"
 #define HAS_QUERY_IFACE "has-query-iface"
 
