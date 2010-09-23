@@ -420,7 +420,7 @@ _got_trending_topic_updates_cb (RestProxyCall *call,
   SwService *service;
   GError *error = NULL;
 
-  if (error) {
+  if (error_in) {
     g_warning (G_STRLOC ": Error getting trending topic data: %s", error_in->message);
     return;
   }
