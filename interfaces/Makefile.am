@@ -14,8 +14,8 @@ MARSHALS_LISTS = sw-marshals.list
 DBUS_SPECS = sw-core.xml sw-service.xml \
 	     sw-item-view.xml sw-query.xml \
 	     sw-avatar.xml sw-status-update.xml \
-	     sw-photo-upload.xml sw-banishable.xml\
-	     lastfm.xml
+	     sw-photo-upload.xml sw-banishable.xml \
+	     sw-video-upload.xml lastfm.xml
 
 %-ginterface.h %-ginterface.c: %.xml Makefile.am
 	$(AM_V_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"sw-marshals.h"' --filename=$(basename $@) $< Sw_
@@ -34,8 +34,8 @@ libsocialweb_ginterfaces_la_HEADERS = \
 	sw-status-update-ginterface.h \
 	sw-avatar-ginterface.h \
 	sw-photo-upload-ginterface.h \
-	sw-banishable-ginterface.h
-
+	sw-banishable-ginterface.h \
+	sw-video-upload-ginterface.h
 
 %-bindings.h: %.xml
 	$(AM_V_GEN)dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<node name="/Video_Upload_Iface"
+      xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
+      xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+
+  <interface name="com.meego.libsocialweb.VideoUpload">
+    <doc:doc>
+      <doc:summary>An interface for uploading videos.</doc:summary>
+    </doc:doc>
+
+    <method name="UploadVideo" tp:name-for-bindings="Upload_Video">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Upload the video @local_filename.  The upload will be performed
+            asynchronously and @opid can be used to identify the upload in the
+            #VideoUpload::VideoUploadProgress signal.
+          </doc:para>
+          <doc:para>
+            @fields is a set of key-value pairs that are passed to the service.
+            None of these are required and not all services support all of the
+            keys.  Generic keys are:
+          </doc:para>
+          <doc:list>
+            <doc:item>
+              <doc:term>title</doc:term>
+              <doc:definition>The video's title</doc:definition>
+            </doc:item>
+          </doc:list>
+        </doc:description>
+      </doc:doc>
+
+      <arg name="local_filename" type="s" direction="in">
+        <doc:doc>
+          <doc:summary>The local filename of the image to upload.</doc:summary>
+        </doc:doc>
+      </arg>
+
+      <arg name="fields" type="a{ss}" direction="in">
+        <doc:doc>
+          <doc:summary>Key-value pairs containing metadata.</doc:summary>
+        </doc:doc>
+      </arg>
+
+      <arg name="opid" type="i" direction="out">
+        <doc:doc>
+          <doc:summary>Operation identifier, used in the #VideoUpload::VideoUploadProgress signal.</doc:summary>
+        </doc:doc>
+      </arg>
+    </method>
+
+    <signal name="VideoUploadProgress" tp:name-for-bindings="Video_Upload_Progress">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Emitted periodically as the upload is performed.  @progress can go
+            from 0 to 100 as the upload is performed. If there is an error then
+            @progress is -1 and @error_message is set.
+          </doc:para>
+          <doc:para>
+            This signal is guaranteed to be emitted at least once with either
+            @progress at 100 (i.e. upload complete) or an error state.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+
+      <arg name="opid" type="i">
+        <doc:doc>
+          <doc:summary>Operation identifier, as returned by UploadVideo().</doc:summary>
+        </doc:doc>
+      </arg>
+
+      <!-- 100 for complete, -1 for error -->
+      <arg name="progress" type="i">
+        <doc:doc>
+          <doc:summary>Current progress, the normal range being 0 (not started)
+          to 100 (completed), with -1 meaning an error occurred.</doc:summary>
+        </doc:doc>
+      </arg>
+
+      <arg name="error_message" type="s">
+        <doc:doc>
+          <doc:summary>The human-readable error message.  This will be set if @progress is -1.</doc:summary>
+        </doc:doc>
+      </arg>
+    </signal>
+  </interface>
+</node>
