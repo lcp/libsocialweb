@@ -1,17 +1,20 @@
-# 
+#
+# Park Shinjo <peremen@gmail.com>, 2010.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-03-10 10:36+0000\n"
-"PO-Revision-Date: \n"
-"Last-Translator: GLS <tomas.galicia@intel.com>\n"
-"Language-Team: \n"
+"PO-Revision-Date: 2010-07-10 05:51+0900\n"
+"Last-Translator: Park Shinjo <peremen@gmail.com>\n"
+"Language-Team: Korean <peremen@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: Korean\n"
 "X-Poedit-SourceCharset: utf-8\n"
+"X-Generator: Lokalize 1.0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: ../services/lastfm/lastfm.keys.in.h:1
 msgid "Last.fm"
@@ -19,15 +22,15 @@ msgstr "Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
 msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm은 당신이 좋아하는 뮤직 서비스입니다. 당신이 플래이하는 모든 트랙은 당신이 좋아하는 Last.fm 프로파일을 나타낼 것입니다. 이것은 당신과 취향이 같은 다른 사람들은 연결할수 있으며 서로의 뮤직 콜렉션에서 다른 음악을 소개 할수도 있습니다. "
+msgstr "Last.fm은 개인 맞춤형 음악 서비스입니다. 재생하는 곡을 기억하여 Last.fm 프로필에 좋아하는 곡 정보를 업데이트합니다. 나와 같은 곡을 좋아하는 사람을 연결해 주며, 서로가 좋아하는 음악을 추천해 줍니다."
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
-msgstr "Twitter"
+msgstr "트위터"
 
 #: ../services/twitter/twitter.keys.in.h:2
 msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter는 친구, 가족 그리고 돌료와의 소통과 서로의 안부같은  짧은 질문을 자주 주고 받을수 있도록 연결해주는 서비스입니다. "
+msgstr "트위터는 친구, 가족, 동료와 대화하고 빠르게 정보를 교환할 수 있는 네트워크입니다."
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
@@ -35,7 +38,7 @@ msgstr "Flickr"
 
 #: ../services/flickr/flickr.keys.in.h:2
 msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr "Flickr - 최상의 온라인 포토 관리 그리고 응용 프로그램 공유 "
+msgstr "Flickr - 전 세계 최고의 온라인 사진 관리 및 공유 사이트입니다."
 
 #: ../services/myspace/myspace.keys.in.h:1
 msgid "MySpace"
@@ -43,22 +46,23 @@ msgstr "MySpace"
 
 #: ../services/myspace/myspace.keys.in.h:2
 msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace는 가장 인기있는 소셜 포털로 전 세계 사람들과 컨텐츠 그리고 문화를 연결할 수 있습니다.  "
+msgstr "MySpace는 전 세계의 사람, 문화를 잇는 소셜 포털입니다. 프로필을 만들고, 사진과 동영상을 공유하고, 블로그에 글을 쓰고, 친구들과 실시간 메시지를 주고받으며, 음악을 들을 수 있습니다."
 
 #: ../services/digg/digg.keys.in.h:1
 msgid "Digg"
-msgstr "디그"
+msgstr "Digg"
 
 #. Translators "[track title] by [artist]"
 #: ../services/lastfm/lastfm.c:149
 #, c-format
 msgid "%s by %s"
-msgstr "%s x %s"
+msgstr "%s by %s"
 
 #: ../services/digg/digg.keys.in.h:2
 msgid "Digg - to share news, video and images"
-msgstr "디그 - 뉴스, 비디오, 이미지 등을 공유하는 것"
+msgstr "Digg - 뉴스, 동영상, 사진 공유하기"
 
 #: ../services/lastfm/lastfm.c:153
 msgid "Unknown"
 msgstr "알 수 없음"
+
