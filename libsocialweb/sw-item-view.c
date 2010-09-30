@@ -183,7 +183,7 @@ static void
 sw_item_view_constructed (GObject *object)
 {
   SwItemView *item_view = SW_ITEM_VIEW (object);
-  SwItemViewPrivate *priv = GET_PRIVATE (object);
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   SwCore *core;
 
   core = sw_core_dup_singleton ();
@@ -203,7 +203,10 @@ sw_item_view_constructed (GObject *object)
 static void
 sw_item_view_default_close (SwItemView *item_view)
 {
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
   SwCore *core;
+
+  SW_DEBUG (VIEWS, "%s called on %s", G_STRFUNC, priv->object_path);
 
   core = sw_core_dup_singleton ();
   dbus_g_connection_unregister_g_object (sw_core_get_connection (core),
@@ -266,6 +269,9 @@ sw_item_view_start (SwItemViewIface       *iface,
                     DBusGMethodInvocation *context)
 {
   SwItemView *item_view = SW_ITEM_VIEW (iface);
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  SW_DEBUG (VIEWS, "%s called on %s", G_STRFUNC, priv->object_path);
 
   if (SW_ITEM_VIEW_GET_CLASS (iface)->start)
     SW_ITEM_VIEW_GET_CLASS (iface)->start (item_view);
@@ -278,6 +284,9 @@ sw_item_view_refresh (SwItemViewIface       *iface,
                       DBusGMethodInvocation *context)
 {
   SwItemView *item_view = SW_ITEM_VIEW (iface);
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  SW_DEBUG (VIEWS, "%s called on %s", G_STRFUNC, priv->object_path);
 
   if (SW_ITEM_VIEW_GET_CLASS (iface)->refresh)
     SW_ITEM_VIEW_GET_CLASS (iface)->refresh (item_view);
@@ -290,6 +299,9 @@ sw_item_view_stop (SwItemViewIface       *iface,
                    DBusGMethodInvocation *context)
 {
   SwItemView *item_view = SW_ITEM_VIEW (iface);
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  SW_DEBUG (VIEWS, "%s called on %s", G_STRFUNC, priv->object_path);
 
   if (SW_ITEM_VIEW_GET_CLASS (iface)->stop)
     SW_ITEM_VIEW_GET_CLASS (iface)->stop (item_view);
@@ -302,6 +314,9 @@ sw_item_view_close (SwItemViewIface       *iface,
                     DBusGMethodInvocation *context)
 {
   SwItemView *item_view = SW_ITEM_VIEW (iface);
+  SwItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  SW_DEBUG (VIEWS, "%s called on %s", G_STRFUNC, priv->object_path);
 
   if (SW_ITEM_VIEW_GET_CLASS (iface)->close)
     SW_ITEM_VIEW_GET_CLASS (iface)->close (item_view);

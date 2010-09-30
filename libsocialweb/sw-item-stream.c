@@ -172,7 +172,10 @@ sw_item_stream_constructed (GObject *object)
 static void
 sw_item_stream_default_close (SwItemStream *item_stream)
 {
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
   SwCore *core;
+
+  SW_DEBUG (VIEWS, "%s called on %s", G_STRFUNC, priv->object_path);
 
   core = sw_core_dup_singleton ();
   dbus_g_connection_unregister_g_object (sw_core_get_connection (core),
@@ -229,6 +232,9 @@ sw_item_stream_start (SwItemViewIface       *iface,
                       DBusGMethodInvocation *context)
 {
   SwItemStream *item_stream = SW_ITEM_STREAM (iface);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
+
+  SW_DEBUG (VIEWS, "%s called on %s", G_STRFUNC, priv->object_path);
 
   if (SW_ITEM_STREAM_GET_CLASS (iface)->start)
     SW_ITEM_STREAM_GET_CLASS (iface)->start (item_stream);
@@ -241,6 +247,9 @@ sw_item_stream_refresh (SwItemViewIface       *iface,
                         DBusGMethodInvocation *context)
 {
   SwItemStream *item_stream = SW_ITEM_STREAM (iface);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
+
+  SW_DEBUG (VIEWS, "%s called on %s", G_STRFUNC, priv->object_path);
 
   if (SW_ITEM_STREAM_GET_CLASS (iface)->refresh)
     SW_ITEM_STREAM_GET_CLASS (iface)->refresh (item_stream);
@@ -253,6 +262,9 @@ sw_item_stream_stop (SwItemViewIface       *iface,
                    DBusGMethodInvocation *context)
 {
   SwItemStream *item_stream = SW_ITEM_STREAM (iface);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
+
+  SW_DEBUG (VIEWS, "%s called on %s", G_STRFUNC, priv->object_path);
 
   if (SW_ITEM_STREAM_GET_CLASS (iface)->stop)
     SW_ITEM_STREAM_GET_CLASS (iface)->stop (item_stream);
@@ -265,6 +277,9 @@ sw_item_stream_close (SwItemViewIface       *iface,
                     DBusGMethodInvocation *context)
 {
   SwItemStream *item_stream = SW_ITEM_STREAM (iface);
+  SwItemStreamPrivate *priv = GET_PRIVATE (item_stream);
+
+  SW_DEBUG (VIEWS, "%s called on %s", G_STRFUNC, priv->object_path);
 
   if (SW_ITEM_STREAM_GET_CLASS (iface)->close)
     SW_ITEM_STREAM_GET_CLASS (iface)->close (item_stream);
