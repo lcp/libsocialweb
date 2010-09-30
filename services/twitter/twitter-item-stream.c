@@ -272,11 +272,29 @@ _call_continous_cb (RestProxyCall *call,
       {
         g_warning (G_STRLOC ": error parsing json: %s", error->message);
       } else {
-        SwItem *item = _create_item_from_node (json_parser_get_root (priv->parser));
-        SwService *service = sw_item_stream_get_service (SW_ITEM_STREAM (item_stream));
+        SwItem *item;
+        SwService *service;
+        const gchar *content;
+        const gchar *track_params;
 
-        sw_item_set_service (item, service);
-        sw_item_stream_add_item (item_stream, item);
+        item = _create_item_from_node (json_parser_get_root (priv->parser));
+        service = sw_item_stream_get_service (SW_ITEM_STREAM (item_stream));
+
+        /* Check if this item actually matches the track parameter due to
+         * needing to substitute spaces for commas to give a union
+         */
+        content = sw_item_get (item, "content");
+
+        track_params = g_hash_table_lookup (priv->params, "keywords");
+
+        if (strstr (content, track_params))
+        {
+          sw_item_set_service (item, service);
+          sw_item_stream_add_item (item_stream, item);
+          g_object_unref (item);
+        } else {
+          g_object_unref (item);
+        }
       }
 
       priv->cur_buffer = g_string_erase (priv->cur_buffer, 0, message_length);
@@ -292,7 +310,7 @@ twitter_item_stream_start (SwItemStream *item_stream)
 {
   SwTwitterItemStreamPrivate *priv = GET_PRIVATE (item_stream);
   RestProxyCall *call;
-  const gchar *track_params;
+  gchar *track_params;
 
   call = rest_proxy_new_call (priv->proxy);
   g_object_set (priv->proxy, "url-format", "http://stream.twitter.com/", NULL);
@@ -300,13 +318,19 @@ twitter_item_stream_start (SwItemStream *item_stream)
   rest_proxy_call_set_function (call, "1/statuses/filter.json");
   rest_proxy_call_set_method (call, "POST");
 
-  track_params = g_hash_table_lookup (priv->params, "keywords");
+  track_params = g_strdup (g_hash_table_lookup (priv->params, "keywords"));
 
   if (!track_params)
   {
     g_critical (G_STRLOC ": Must have 'keywords' for filter");
     return;
   }
+
+  /*
+   * We have to convert spaces to commas and then filter the received data on
+   * the version with spaces due to limitations in the twitter API
+   */
+  track_params = g_strdelimit (track_params, " ", ',');
 
   rest_proxy_call_add_param (call, "track", track_params);
   rest_proxy_call_add_param (call, "delimited", "length");
@@ -316,6 +340,8 @@ twitter_item_stream_start (SwItemStream *item_stream)
                               (GObject *)item_stream,
                               NULL,
                               NULL);
+
+  g_free (track_params);
 }
 
 static void
