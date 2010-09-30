@@ -58,6 +58,8 @@ GType sw_client_item_view_get_type (void);
 SwClientItemView *_sw_client_item_view_new_for_path (const gchar *item_view_path);
 void sw_client_item_view_start (SwClientItemView *item_view);
 void sw_client_item_view_refresh (SwClientItemView *item_view);
+void sw_client_item_view_stop (SwClientItemView *item_view);
+void sw_client_item_view_close (SwClientItemView *item_view);
 
 G_END_DECLS
 

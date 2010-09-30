@@ -442,14 +442,16 @@ _sw_client_item_view_new_for_path (const gchar *item_view_path)
                        NULL);
 }
 
+/* This is to avoid multiple almost identical callbacks */
 static void
-_sw_client_item_view_start_cb (DBusGProxy *proxy,
-                                   GError     *error,
-                                   gpointer    userdata)
+_sw_client_item_view_generic_cb (DBusGProxy *proxy,
+                                 GError     *error,
+                                 gpointer    userdata)
 {
   if (error)
   {
-    g_warning (G_STRLOC ": Error when starting item_view: %s",
+    g_warning (G_STRLOC ": Error when calling %s: %s",
+               (const gchar *)userdata,
                error->message);
     g_error_free (error);
   }
@@ -461,22 +463,8 @@ sw_client_item_view_start (SwClientItemView *item_view)
   SwClientItemViewPrivate *priv = GET_PRIVATE (item_view);
 
   com_meego_libsocialweb_ItemView_start_async (priv->proxy,
-                                         _sw_client_item_view_start_cb,
-                                         NULL);
-}
-
-
-static void
-_sw_client_item_view_refresh_cb (DBusGProxy *proxy,
-                                     GError     *error,
-                                     gpointer    userdata)
-{
-  if (error)
-  {
-    g_warning (G_STRLOC ": Error when refreshing item_view: %s",
-               error->message);
-    g_error_free (error);
-  }
+                                               _sw_client_item_view_generic_cb,
+                                               (gpointer)G_STRFUNC);
 }
 
 void
@@ -485,7 +473,26 @@ sw_client_item_view_refresh (SwClientItemView *item_view)
   SwClientItemViewPrivate *priv = GET_PRIVATE (item_view);
 
   com_meego_libsocialweb_ItemView_refresh_async (priv->proxy,
-                                           _sw_client_item_view_refresh_cb,
-                                           NULL);
+                                                 _sw_client_item_view_generic_cb,
+                                                 (gpointer)G_STRFUNC);
 }
 
+void
+sw_client_item_view_stop (SwClientItemView *item_view)
+{
+  SwClientItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  com_meego_libsocialweb_ItemView_stop_async (priv->proxy,
+                                              _sw_client_item_view_generic_cb,
+                                              (gpointer)G_STRFUNC);
+}
+
+void
+sw_client_item_view_close (SwClientItemView *item_view)
+{
+  SwClientItemViewPrivate *priv = GET_PRIVATE (item_view);
+
+  com_meego_libsocialweb_ItemView_close_async (priv->proxy,
+                                              _sw_client_item_view_generic_cb,
+                                              (gpointer)G_STRFUNC);
+}
