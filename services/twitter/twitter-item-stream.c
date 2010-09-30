@@ -236,7 +236,6 @@ _call_continous_cb (RestProxyCall *call,
     priv->buf_size = 0;
   }
 
-  g_debug (G_STRLOC ": Adding %d to string buffer", (gint)len);
   priv->cur_buffer = g_string_append_len (priv->cur_buffer,
                                           buf,
                                           len);
@@ -245,7 +244,6 @@ _call_continous_cb (RestProxyCall *call,
   /* Get rid of any preceding new lines */
   while (priv->cur_buffer->str[0]=='\r') {
     priv->cur_buffer = g_string_erase (priv->cur_buffer, 0, 2);
-    g_debug (G_STRLOC ": filtering new lines");
   }
 
   /* Format is <message byte count>\r\n */
@@ -256,12 +254,8 @@ _call_continous_cb (RestProxyCall *call,
                                               '\n');
     gint newline_pos = message_buf - priv->cur_buffer->str;
 
-    g_debug (G_STRLOC ": newline pos = %d, message_length = %d, priv->buf_size = %d",
-             newline_pos, message_length, priv->buf_size);
-
     if (priv->buf_size >= newline_pos + 1 + message_length)
     {
-      g_debug (G_STRLOC ": Consuming data!");
 
       priv->cur_buffer = g_string_erase (priv->cur_buffer, 0, newline_pos + 1);
 
