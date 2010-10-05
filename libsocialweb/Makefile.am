@@ -46,6 +46,7 @@ public_headers = \
 	sw-debug.h \
 	sw-web.h \
 	sw-set.h \
+	sw-cache.h \
 	sw-item.h \
 	sw-module.h \
 	sw-utils.h
