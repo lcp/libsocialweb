@@ -27,7 +27,11 @@ bus.start_service_by_name("com.meego.libsocialweb")
 
 service = bus.get_object("com.meego.libsocialweb", "/com/meego/libsocialweb/Service/%s" % sys.argv[1])
 
-path = service.OpenView("feed", {}, dbus_interface="com.meego.libsocialweb.Query")
+if len(sys.argv) > 2:
+    query = sys.argv[2]
+else:
+    query = "feed"
+path = service.OpenView(query, {}, dbus_interface="com.meego.libsocialweb.Query")
 view = bus.get_object("com.meego.libsocialweb", path)
 view = dbus.Interface(view, "com.meego.libsocialweb.ItemView")
 
