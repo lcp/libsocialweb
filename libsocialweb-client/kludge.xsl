@@ -27,4 +27,13 @@
     </glib:signal>
   </xsl:template>
 
+  <xsl:template match="gi:record[@name='Item']/gi:field[@name='props']">
+    <field name="props" writable="1">
+      <type name="GLib.HashTable" c:type="GHashTable*">
+        <type name="utf8"/>
+        <type name="utf8"/>
+      </type>
+    </field>
+  </xsl:template>
+
 </xsl:stylesheet>
