@@ -25,12 +25,14 @@ src/libsocialweb-core
 libsocialweb-keystore/test-suite
 libsocialweb/sw-enum-types.[ch]
 libsocialweb/stamp-enum-types
+libsocialweb-client/libsocialweb-client-hack-for-vala.h
 tests/test-online
 tests/test-client-online
 tests/test-download
 tests/test-download-async
 tests/test-upload
 interfaces/*-ginterface.[ch]
+vala/libsocialweb-client.vapi
 *-bindings.h
 *-marshals.[ch]
 *.gir

@@ -1,0 +1,4 @@
+
+#undef IN_VALA_INCLUDE
+
+#endif /* _SW_CLIENT_HACK_FOR_VALA */
