@@ -33,6 +33,8 @@ tests/test-upload
 interfaces/*-ginterface.[ch]
 *-bindings.h
 *-marshals.[ch]
+*.gir
+*.typelib
 test-runner
 intltool-*
 po/POTFILES

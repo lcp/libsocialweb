@@ -60,6 +60,8 @@ GTK_DOC_CHECK([1.15],[--flavour no-tmpl])
 # only check if gtk-doc is enabled
 AS_IF([test "x$enable_gtk_doc" = "xyes"], [AC_CHECK_PROGS(XSLT, [xsltproc])])
 
+GOBJECT_INTROSPECTION_CHECK([0.9.6])
+
 PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.14)
 PKG_CHECK_MODULES(GIO, gio-2.0)
 PKG_CHECK_MODULES(GOBJECT, gobject-2.0 >= 2.14)
@@ -174,6 +176,7 @@ AC_SUBST([GCOV_LDFLAGS])
 
 AC_OUTPUT([
         Makefile
+        m4/Makefile
         docs/Makefile
         docs/libsocialweb/Makefile
         docs/libsocialweb-client/Makefile
