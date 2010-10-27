@@ -59,7 +59,11 @@ typedef void (*SwClientIsOnlineCallback) (SwClient *client,
                                           gpointer  userdata);
 
 typedef void (*SwClientGetServicesCallback) (SwClient    *client,
+#ifdef IN_VALA_INCLUDE
+                                             GList       *services,
+#else
                                              const GList *services,
+#endif
                                              gpointer     userdata);
 
 void sw_client_get_services (SwClient                    *client,
