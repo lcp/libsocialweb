@@ -26,6 +26,7 @@ INTROSPECTION_FILES = $(HANDWRITTED_C_SOURCES) \
 
 SocialWebClient-0.25.gir: $(INTROSPECTION_SCANNER) \
 		$(INTROSPECTION_FILES) \
+		kludge.xsl \
 		libsocialweb-client.la
 	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v \
 		--namespace SocialWebClient \
@@ -38,8 +39,10 @@ SocialWebClient-0.25.gir: $(INTROSPECTION_SCANNER) \
 		--libtool="$(top_builddir)/libtool" \
 		--library=libsocialweb-client.la \
 		--warn-all \
-		--output $@ \
+		--output $@.tmp \
 		$(INTROSPECTION_FILES)
+	@xsltproc kludge.xsl $@.tmp > $@
+	@rm -f $@.tmp
 
 girdir = $(datadir)/gir-1.0
 gir_DATA = SocialWebClient-0.25.gir
