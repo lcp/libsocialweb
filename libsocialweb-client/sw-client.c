@@ -188,6 +188,19 @@ _sw_client_get_services_cb (DBusGProxy  *proxy,
   g_free (closure);
 }
 
+/**
+ * SwClientGetServicesCallback:
+ * @client:
+ * @services: (element-type gchar*):
+ * @userdata: (closure):
+ */
+
+/**
+ * sw_client_get_services:
+ * @client:
+ * @cb: (scope async):
+ * @userdata: (closure):
+ */
 void
 sw_client_get_services (SwClient                    *client,
                         SwClientGetServicesCallback  cb,
@@ -206,6 +219,13 @@ sw_client_get_services (SwClient                    *client,
                                               closure);
 }
 
+/**
+ * sw_client_get_service:
+ * @client:
+ * @service_name:
+ *
+ * Returns: (transfer full):
+ */
 SwClientService *
 sw_client_get_service (SwClient    *client,
                        const gchar *service_name)
@@ -257,7 +277,19 @@ _sw_client_is_online_cb (DBusGProxy *proxy,
   g_free (closure);
 }
 
+/**
+ * SwClientIsOnlineCallback:
+ * @client:
+ * @online:
+ * @userdata: (closure):
+ */
 
+/**
+ * sw_client_is_online:
+ * @client:
+ * @cb: (scope async):
+ * @userdata: (closure):
+ */
 void
 sw_client_is_online (SwClient                 *client,
                      SwClientIsOnlineCallback  cb,

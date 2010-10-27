@@ -386,6 +386,11 @@ sw_client_item_view_class_init (SwClientItemViewClass *klass)
                                G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
   g_object_class_install_property (object_class, PROP_OBJECT_PATH, pspec);
 
+  /**
+   * SwClientItemView::items-added:
+   * @self:
+   * @items: (type GLib.List) (element-type Sw.Item):
+   */
   signals[ITEMS_ADDED_SIGNAL] =
     g_signal_new ("items-added",
                   SW_TYPE_CLIENT_ITEM_VIEW,
@@ -397,6 +402,12 @@ sw_client_item_view_class_init (SwClientItemViewClass *klass)
                   G_TYPE_NONE,
                   1,
                   G_TYPE_POINTER);
+
+  /**
+   * SwClientItemView::items-removed:
+   * @self:
+   * @items: (type GLib.List) (element-type Sw.Item):
+   */
   signals[ITEMS_REMOVED_SIGNAL] =
     g_signal_new ("items-removed",
                   SW_TYPE_CLIENT_ITEM_VIEW,
@@ -408,6 +419,12 @@ sw_client_item_view_class_init (SwClientItemViewClass *klass)
                   G_TYPE_NONE,
                   1,
                   G_TYPE_POINTER);
+
+  /**
+   * SwClientItemView::items-changed:
+   * @self:
+   * @items: (type GLib.List) (element-type Sw.Item):
+   */
   signals[ITEMS_CHANGED_SIGNAL] =
     g_signal_new ("items-changed",
                   SW_TYPE_CLIENT_ITEM_VIEW,

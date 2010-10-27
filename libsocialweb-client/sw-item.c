@@ -18,6 +18,15 @@
 
 #include "sw-item.h"
 
+/**
+ * SwItem:
+ * @refcount:
+ * @service:
+ * @uuid:
+ * @date:
+ * @props: (element-type gchar* gchar*):
+ */
+
 SwItem *
 sw_item_new (void)
 {

@@ -428,6 +428,20 @@ _get_capabilities_cb (DBusGProxy *proxy,
   g_slice_free (SwClientServiceCallClosure, closure);
 }
 
+/**
+ * SwClientServiceGetCapabilitiesCallback:
+ * @service:
+ * @caps:
+ * @error:
+ * @userdata: (closure):
+ */
+
+/**
+ * sw_client_service_get_static_capabilities:
+ * @service:
+ * @cb: (scope async):
+ * @userdata: (closure):
+ */
 void
 sw_client_service_get_static_capabilities (SwClientService                        *service,
                                            SwClientServiceGetCapabilitiesCallback  cb,
@@ -446,6 +460,12 @@ sw_client_service_get_static_capabilities (SwClientService                      
                                                                  closure);
 }
 
+/**
+ * sw_client_service_get_dynamic_capabilities:
+ * @service:
+ * @cb: (scope async):
+ * @userdata: (closure):
+ */
 void
 sw_client_service_get_dynamic_capabilities (SwClientService                        *service,
                                             SwClientServiceGetCapabilitiesCallback  cb,
@@ -490,6 +510,20 @@ _update_status_cb (DBusGProxy *proxy,
   g_slice_free (SwClientServiceCallClosure, closure);
 }
 
+/**
+ * SwClientServiceUpdateStatusCallback:
+ * @service:
+ * @error:
+ * @userdata: (closure):
+ */
+
+/**
+ * sw_client_service_update_status:
+ * @service:
+ * @cb: (scope async):
+ * @status_msg:
+ * @userdata: (closure):
+ */
 void
 sw_client_service_update_status (SwClientService                     *service,
                                  SwClientServiceUpdateStatusCallback  cb,
@@ -509,6 +543,14 @@ sw_client_service_update_status (SwClientService                     *service,
   g_hash_table_unref (fields);
 }
 
+/**
+ * sw_client_service_update_status_with_fields:
+ * @service:
+ * @cb: (scope async):
+ * @status_msg:
+ * @fields: (element-type gchar* gchar*):
+ * @userdata: (closure):
+ */
 void
 sw_client_service_update_status_with_fields (SwClientService                     *service,
                                              SwClientServiceUpdateStatusCallback  cb,
@@ -703,6 +745,21 @@ _sw_client_service_upload (SwClientService                      *service,
   return TRUE;
 }
 
+/* FIXME: This function cannot be used by gobject-introspection because of
+ * the progress calback.
+ * It needs a GDestroyNotify argument or a _with_closures() variant that
+ * uses a GClosure *. */
+/**
+ * sw_client_service_upload_photo: (skip)
+ * @service:
+ * @filename:
+ * @fields:
+ * @cancellable:
+ * @progress_callback:
+ * @progress_callback_data:
+ * @callback: (scope async):
+ * @userdata: (closure):
+ */
 gboolean
 sw_client_service_upload_photo (SwClientService                      *service,
                                 const char                           *filename,
@@ -724,6 +781,21 @@ sw_client_service_upload_photo (SwClientService                      *service,
                                           userdata);
 }
 
+/* FIXME: This function cannot be used by gobject-introspection because of
+ * the progress calback.
+ * It needs a GDestroyNotify argument or a _with_closures() variant that
+ * uses a GClosure *. */
+/**
+ * sw_client_service_upload_video: (skip)
+ * @service:
+ * @filename:
+ * @fields:
+ * @cancellable:
+ * @progress_callback:
+ * @progress_callback_data:
+ * @callback: (scope async):
+ * @userdata: (closure):
+ */
 gboolean
 sw_client_service_upload_video (SwClientService                      *service,
                                 const char                           *filename,
@@ -854,6 +926,21 @@ _query_open_view_cb (DBusGProxy *proxy,
   g_slice_free (SwClientServiceCallClosure, closure);
 }
 
+/**
+ * SwClientServiceQueryOpenViewCallback:
+ * @query:
+ * @item_view:
+ * @userdata: (closure):
+ */
+
+/**
+ * sw_client_service_query_open_view:
+ * @service:
+ * @query:
+ * @params: (element-type gchar* gchar*):
+ * @cb: (scope async):
+ * @userdata: (closure):
+ */
 void
 sw_client_service_query_open_view (SwClientService                      *service,
                                    const gchar                          *query,

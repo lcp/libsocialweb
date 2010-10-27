@@ -58,6 +58,7 @@ typedef struct {
 GType sw_client_service_get_type (void);
 
 /* Keep in sync with sw-service.h */
+/* FIXME: These defines without namespace make the g-i scanner complain */
 #define IS_CONFIGURED "is-configured"
 #define CAN_VERIFY_CREDENTIALS "can-verify-credentials"
 #define CREDENTIALS_VALID "credentials-valid"
