@@ -210,11 +210,11 @@ sw_client_service_class_init (SwClientServiceClass *klass)
                   G_TYPE_NONE, 0);
 
   dbus_g_object_register_marshaller (sw_marshal_VOID__INT_INT_STRING,
-				     G_TYPE_NONE,
-				     G_TYPE_INT,
-				     G_TYPE_INT,
-				     G_TYPE_STRING,
-				     G_TYPE_INVALID);
+                                     G_TYPE_NONE,
+                                     G_TYPE_INT,
+                                     G_TYPE_INT,
+                                     G_TYPE_STRING,
+                                     G_TYPE_INVALID);
 }
 
 static void
@@ -328,9 +328,9 @@ _sw_client_service_setup (SwClientService  *service,
   }
 
   _sw_client_service_setup_proxy_for_iface (service,
-					    service_name,
-					    PHOTO_UPLOAD_IFACE,
-					    NULL);
+                                            service_name,
+                                            PHOTO_UPLOAD_IFACE,
+                                            NULL);
 
   dbus_g_proxy_add_signal (priv->proxies[AVATAR_IFACE],
                            "AvatarRetrieved",
@@ -373,11 +373,11 @@ _sw_client_service_setup (SwClientService  *service,
 
   if (priv->proxies[PHOTO_UPLOAD_IFACE] != NULL) {
     dbus_g_proxy_add_signal (priv->proxies[PHOTO_UPLOAD_IFACE],
-			     "PhotoUploadProgress",
-			     G_TYPE_INT,
-			     G_TYPE_INT,
-			     G_TYPE_STRING,
-			     G_TYPE_INVALID);
+                             "PhotoUploadProgress",
+                             G_TYPE_INT,
+                             G_TYPE_INT,
+                             G_TYPE_STRING,
+                             G_TYPE_INVALID);
   }
 
   return TRUE;
@@ -578,9 +578,9 @@ _upload_file_progress_cb (DBusGProxy *proxy,
 
 static void
 _upload_file_cb (DBusGProxy *proxy,
-		 gint opid,
-		 GError *error,
-		 gpointer userdata)
+                 gint opid,
+                 GError *error,
+                 gpointer userdata)
 {
   SwClientServiceCallClosure *closure = (SwClientServiceCallClosure *) userdata;
 
@@ -634,21 +634,21 @@ got_file_size_cb (GObject *source_object,
 
   signal = (closure->iface == PHOTO_UPLOAD_IFACE ? "PhotoUploadProgress" : "VideoUploadProgress");
   dbus_g_proxy_connect_signal (priv->proxies[closure->iface], signal,
-			       G_CALLBACK (_upload_file_progress_cb), closure, NULL);
+                               G_CALLBACK (_upload_file_progress_cb), closure, NULL);
 
   filename = g_file_get_path (G_FILE (source_object));
   if (closure->iface == PHOTO_UPLOAD_IFACE) {
     com_meego_libsocialweb_PhotoUpload_upload_photo_async (priv->proxies[PHOTO_UPLOAD_IFACE],
-							   filename,
-							   closure->fields,
-							   _upload_file_cb,
-							   closure);
+                                                           filename,
+                                                           closure->fields,
+                                                           _upload_file_cb,
+                                                           closure);
   } else {
     com_meego_libsocialweb_VideoUpload_upload_video_async (priv->proxies[VIDEO_UPLOAD_IFACE],
-							   filename,
-							   closure->fields,
-							   _upload_file_cb,
-							   closure);
+                                                           filename,
+                                                           closure->fields,
+                                                           _upload_file_cb,
+                                                           closure);
   }
   g_hash_table_unref (closure->fields);
   closure->fields = NULL;
@@ -658,14 +658,14 @@ got_file_size_cb (GObject *source_object,
 
 gboolean
 _sw_client_service_upload (SwClientService                      *service,
-			   SwServiceIface                        iface,
-			   const char                           *filename,
-			   const GHashTable                     *fields,
-			   GCancellable                         *cancellable,
-			   GFileProgressCallback                 progress_callback,
-			   gpointer                              progress_callback_data,
-			   GAsyncReadyCallback                   callback,
-			   gpointer                              userdata)
+                           SwServiceIface                        iface,
+                           const char                           *filename,
+                           const GHashTable                     *fields,
+                           GCancellable                         *cancellable,
+                           GFileProgressCallback                 progress_callback,
+                           gpointer                              progress_callback_data,
+                           GAsyncReadyCallback                   callback,
+                           gpointer                              userdata)
 {
   SwClientServicePrivate *priv = GET_PRIVATE (service);
   SwClientServiceCallClosure *closure;
@@ -713,49 +713,49 @@ sw_client_service_upload_photo (SwClientService                      *service,
                                 GAsyncReadyCallback                   callback,
                                 gpointer                              userdata)
 {
-	return _sw_client_service_upload (service,
-					  PHOTO_UPLOAD_IFACE,
-					  filename,
-					  fields,
-					  cancellable,
-					  progress_callback,
-					  progress_callback_data,
-					  callback,
-					  userdata);
+        return _sw_client_service_upload (service,
+                                          PHOTO_UPLOAD_IFACE,
+                                          filename,
+                                          fields,
+                                          cancellable,
+                                          progress_callback,
+                                          progress_callback_data,
+                                          callback,
+                                          userdata);
 }
 
 gboolean
 sw_client_service_upload_video (SwClientService                      *service,
-				const char                           *filename,
-				const GHashTable                     *fields,
-				GCancellable                         *cancellable,
-				GFileProgressCallback                 progress_callback,
-				gpointer                              progress_callback_data,
-				GAsyncReadyCallback                   callback,
-				gpointer                              userdata)
+                                const char                           *filename,
+                                const GHashTable                     *fields,
+                                GCancellable                         *cancellable,
+                                GFileProgressCallback                 progress_callback,
+                                gpointer                              progress_callback_data,
+                                GAsyncReadyCallback                   callback,
+                                gpointer                              userdata)
 {
-	return _sw_client_service_upload (service,
-					  VIDEO_UPLOAD_IFACE,
-					  filename,
-					  fields,
-					  cancellable,
-					  progress_callback,
-					  progress_callback_data,
-					  callback,
-					  userdata);
+        return _sw_client_service_upload (service,
+                                          VIDEO_UPLOAD_IFACE,
+                                          filename,
+                                          fields,
+                                          cancellable,
+                                          progress_callback,
+                                          progress_callback_data,
+                                          callback,
+                                          userdata);
 }
 
 gboolean
 _sw_client_service_upload_finish (SwClientService  *service,
-				  GAsyncResult     *res,
-				  GError          **error)
+                                  GAsyncResult     *res,
+                                  GError          **error)
 {
   GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
   gboolean ret;
 
   g_return_val_if_fail (g_simple_async_result_is_valid (res,
-							G_OBJECT (service),
-							NULL), FALSE);
+                                                        G_OBJECT (service),
+                                                        NULL), FALSE);
 
   ret = FALSE;
 
