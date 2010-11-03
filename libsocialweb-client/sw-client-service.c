@@ -910,12 +910,12 @@ load_info (SwClientService *service)
     char *filename, *path;
 
     filename = g_strconcat (priv->name, ".keys", NULL);
-    path = g_build_filename ("libsocialweb", "services", filename, NULL);
+    path = g_build_filename (DATADIR, "libsocialweb", "services", filename, NULL);
     g_free (filename);
 
     keys = g_key_file_new ();
 
-    g_key_file_load_from_data_dirs (keys, path, NULL, G_KEY_FILE_NONE, NULL);
+    g_key_file_load_from_file (keys, path, G_KEY_FILE_NONE, NULL);
     g_free (path);
 
     priv->display_name = g_key_file_get_locale_string (keys, GROUP, "Name", NULL, NULL);
