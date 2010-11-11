@@ -81,7 +81,7 @@ expand_content_files=
 GTKDOC_CFLAGS= -I$(top_srcdir) -I$(top_srcdir)/interfaces \
 		$(DBUS_GLIB_CFLAGS) $(SOUP_CFLAGS) $(SOUP_GNOME_CFLAGS) \
 		$(NM_CFLAGS) $(GTK_CFLAGS) $(REST_CFLAGS)
-GTKDOC_LIBS=$(top_builddir)/libsocialweb/libsocialweb.la
+GTKDOC_LIBS=$(top_builddir)/libsocialweb/libsocialweb.la $(GLIB_LIBS)
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make
