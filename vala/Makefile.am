@@ -19,8 +19,10 @@ libsocialweb-client.vapi: $(top_builddir)/libsocialweb-client/SocialWebClient-0.
 		$< \
 		$(NULL)
 	@mv $@ libsocialweb-client.vapi.tmp
-	$(AM_V_GEN)sed -e \
-		's/SocialWebClient-0.25.h/libsocialweb-client\/libsocialweb-client-hack-for-vala.h/' \
+	$(AM_V_GEN)sed \
+		'-e s/SocialWebClient-0.25.h/libsocialweb-client\/libsocialweb-client-hack-for-vala.h/' \
+		'-e s/namespace Sw/namespace SocialWebClient/' \
+		'-e s/Sw\./SocialWebClient./g' \
 		< libsocialweb-client.vapi.tmp > $@
 	@rm libsocialweb-client.vapi.tmp
 
