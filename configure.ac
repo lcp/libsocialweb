@@ -133,6 +133,7 @@ SOCIALWEB_ENABLE_SERVICE(SmugMug, smugmug, SMUGMUG)
 SOCIALWEB_ENABLE_SERVICE(Twitter, twitter, TWITTER)
 SOCIALWEB_ENABLE_SERVICE(Vimeo, vimeo, VIMEO)
 SOCIALWEB_ENABLE_SERVICE(Youtube, youtube, YOUTUBE)
+SOCIALWEB_ENABLE_SERVICE(Sina, sina, SINA)
 
 servicesdir='${libdir}'/libsocialweb/services
 AC_SUBST(servicesdir)
@@ -192,6 +193,7 @@ AC_OUTPUT([
         services/twitter/Makefile
         services/vimeo/Makefile
         services/youtube/Makefile
+        services/sina/Makefile
         tests/Makefile
         tools/Makefile
         examples/Makefile

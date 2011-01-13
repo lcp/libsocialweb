@@ -16,6 +16,10 @@ if WITH_PLURK
 SUBDIRS += plurk
 endif
 
+if WITH_SINA
+SUBDIRS += sina
+endif
+
 if WITH_SMUGMUG
 SUBDIRS += smugmug
 endif
