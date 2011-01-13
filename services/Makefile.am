@@ -23,3 +23,7 @@ endif
 if WITH_YOUTUBE
 SUBDIRS += youtube
 endif
+
+if WITH_SINA
+SUBDIRS += sina
+endif
