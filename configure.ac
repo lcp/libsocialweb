@@ -129,6 +129,7 @@ SOCIALWEB_ENABLE_SERVICE(Flickr, flickr, FLICKR)
 SOCIALWEB_ENABLE_SERVICE(Last.fm, lastfm, LASTFM)
 SOCIALWEB_ENABLE_SERVICE(Twitter, twitter, TWITTER)
 SOCIALWEB_ENABLE_SERVICE(Vimeo, vimeo, VIMEO)
+SOCIALWEB_ENABLE_SERVICE(Plurk, plurk, PLURK)
 
 servicesdir='${libdir}'/libsocialweb/services
 AC_SUBST(servicesdir)
@@ -184,6 +185,7 @@ AC_OUTPUT([
         services/lastfm/Makefile
         services/twitter/Makefile
         services/vimeo/Makefile
+        services/plurk/Makefile
         tests/Makefile
         tools/Makefile
         examples/Makefile

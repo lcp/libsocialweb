@@ -1,0 +1,6 @@
+[LibSocialWebService]
+_Name=Plurk
+_Description=Plurk is a web site that allows people to share ideas.
+Link=http://www.plurk.com
+AuthType=password
+AuthPasswordServer=www.plurk.com

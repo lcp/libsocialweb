@@ -15,3 +15,7 @@ endif
 if WITH_VIMEO
 SUBDIRS += vimeo
 endif
+
+if WITH_PLURK
+SUBDIRS += plurk
+endif
