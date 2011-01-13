@@ -19,3 +19,7 @@ endif
 if WITH_PLURK
 SUBDIRS += plurk
 endif
+
+if WITH_YOUTUBE
+SUBDIRS += youtube
+endif
