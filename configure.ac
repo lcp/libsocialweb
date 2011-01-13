@@ -69,6 +69,7 @@ PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1)
 PKG_CHECK_MODULES(REST, rest-0.7 rest-extras-0.7 >= 0.7.1)
 PKG_CHECK_MODULES(KEYRING, gnome-keyring-1)
 PKG_CHECK_MODULES(JSON_GLIB, json-glib-1.0)
+PKG_CHECK_MODULES(PANGO, pango)
 
 AC_MSG_CHECKING([how to detect we are online])
 AC_ARG_WITH([online],
@@ -132,6 +133,7 @@ SOCIALWEB_ENABLE_SERVICE(Vimeo, vimeo, VIMEO)
 SOCIALWEB_ENABLE_SERVICE(Plurk, plurk, PLURK)
 SOCIALWEB_ENABLE_SERVICE(Youtube, youtube, YOUTUBE)
 SOCIALWEB_ENABLE_SERVICE(Sina, sina, SINA)
+SOCIALWEB_ENABLE_SERVICE(Myspace, myspace, MYSPACE)
 
 servicesdir='${libdir}'/libsocialweb/services
 AC_SUBST(servicesdir)
@@ -190,6 +192,7 @@ AC_OUTPUT([
         services/plurk/Makefile
         services/youtube/Makefile
         services/sina/Makefile
+        services/myspace/Makefile
         tests/Makefile
         tools/Makefile
         examples/Makefile
