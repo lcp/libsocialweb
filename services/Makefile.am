@@ -27,3 +27,7 @@ endif
 if WITH_VIMEO
 SUBDIRS += vimeo
 endif
+
+if WITH_YOUTUBE
+SUBDIRS += youtube
+endif

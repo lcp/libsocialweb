@@ -132,6 +132,7 @@ SOCIALWEB_ENABLE_SERVICE(Plurk, plurk, PLURK)
 SOCIALWEB_ENABLE_SERVICE(SmugMug, smugmug, SMUGMUG)
 SOCIALWEB_ENABLE_SERVICE(Twitter, twitter, TWITTER)
 SOCIALWEB_ENABLE_SERVICE(Vimeo, vimeo, VIMEO)
+SOCIALWEB_ENABLE_SERVICE(Youtube, youtube, YOUTUBE)
 
 servicesdir='${libdir}'/libsocialweb/services
 AC_SUBST(servicesdir)
@@ -190,6 +191,7 @@ AC_OUTPUT([
 	services/smugmug/Makefile
         services/twitter/Makefile
         services/vimeo/Makefile
+        services/youtube/Makefile
         tests/Makefile
         tools/Makefile
         examples/Makefile
