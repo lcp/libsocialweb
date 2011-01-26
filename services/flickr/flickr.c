@@ -38,6 +38,7 @@
 
 #include <interfaces/sw-query-ginterface.h>
 #include <interfaces/sw-photo-upload-ginterface.h>
+#include <interfaces/sw-video-upload-ginterface.h>
 
 #include "flickr-item-view.h"
 #include "flickr.h"
@@ -46,11 +47,13 @@
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
 static void photo_upload_iface_init (gpointer g_iface, gpointer iface_data);
+static void video_upload_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (SwServiceFlickr, sw_service_flickr, SW_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE, query_iface_init)
-                         G_IMPLEMENT_INTERFACE (SW_TYPE_PHOTO_UPLOAD_IFACE, photo_upload_iface_init));
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_PHOTO_UPLOAD_IFACE, photo_upload_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_VIDEO_UPLOAD_IFACE, video_upload_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_FLICKR, SwServiceFlickrPrivate))
@@ -68,6 +71,7 @@ get_static_caps (SwService *service)
   static const char * caps[] = {
     CAN_VERIFY_CREDENTIALS,
     HAS_PHOTO_UPLOAD_IFACE,
+    HAS_VIDEO_UPLOAD_IFACE,
     HAS_BANISHABLE_IFACE,
     HAS_QUERY_IFACE,
 
@@ -360,8 +364,51 @@ query_iface_init (gpointer g_iface,
                                       _flickr_query_open_view);
 }
 
+/* If @param_name exists in the DBus parameters, set @flickr_name on the
+   RestProxyCall */
+#define MAP_PARAM(param_name, flickr_name)                      \
+  {                                                             \
+    const char *param;                                          \
+    param = g_hash_table_lookup (params_in, param_name);        \
+    if (param)                                                  \
+      rest_proxy_call_add_param (call, flickr_name, param);     \
+  }
+
+static gint
+_flickr_upload (SwServiceFlickr           *self,
+                const gchar               *filename,
+                GHashTable                *params_in,
+                GError                   **error,
+                RestProxyCallAsyncCallback callback)
+{
+  SwServiceFlickrPrivate *priv = GET_PRIVATE (self);
+  RestProxyCall *call;
+  gint opid;
+
+  call = flickr_proxy_new_upload_for_file (FLICKR_PROXY (priv->proxy),
+                                           filename,
+                                           error);
+
+  if (*error != NULL) {
+    return -1;
+  }
+
+  /* Now add the parameters that we support */
+  MAP_PARAM ("title", "title");
+  MAP_PARAM ("x-flickr-is-public", "is_public");
+  MAP_PARAM ("x-flickr-is-friend", "is_friend");
+  MAP_PARAM ("x-flickr-is-family", "is_family");
+
+  opid = sw_next_opid ();
+
+  rest_proxy_call_async (call, callback, (GObject *)self,
+                         GINT_TO_POINTER (opid), NULL);
+
+  return opid;
+}
+
 static void
-on_upload_cb (RestProxyCall *call,
+on_photo_upload_cb (RestProxyCall *call,
               const GError *error,
               GObject *weak_object,
               gpointer user_data)
@@ -378,47 +425,22 @@ on_upload_cb (RestProxyCall *call,
   }
 }
 
-/* If @param_name exists in the DBus parameters, set @flickr_name on the
-   RestProxyCall */
-#define MAP_PARAM(param_name, flickr_name)                      \
-  {                                                             \
-    const char *param;                                          \
-    param = g_hash_table_lookup (params_in, param_name);        \
-    if (param)                                                  \
-      rest_proxy_call_add_param (call, flickr_name, param);     \
-  }
-
 static void
 _flickr_upload_photo (SwPhotoUploadIface    *self,
                       const gchar           *filename,
                       GHashTable            *params_in,
                       DBusGMethodInvocation *context)
 {
-  SwServiceFlickrPrivate *priv = GET_PRIVATE (self);
   GError *error = NULL;
-  RestProxyCall *call;
   int opid;
 
-  call = flickr_proxy_new_upload_for_file (FLICKR_PROXY (priv->proxy),
-                                           filename,
-                                           &error);
+  opid = _flickr_upload (SW_SERVICE_FLICKR (self), filename, params_in,
+                         &error, on_photo_upload_cb);
 
-  if (error) {
+  if (opid == -1)
     dbus_g_method_return_error (context, error);
-    return;
-  }
-
-  /* Now add the parameters that we support */
-  MAP_PARAM ("title", "title");
-  MAP_PARAM ("x-flickr-is-public", "is_public");
-  MAP_PARAM ("x-flickr-is-friend", "is_friend");
-  MAP_PARAM ("x-flickr-is-family", "is_family");
-
-  opid = sw_next_opid ();
-
-  rest_proxy_call_async (call, on_upload_cb, (GObject *)self, GINT_TO_POINTER (opid), NULL);
-
-  sw_photo_upload_iface_return_from_upload_photo (context, opid);
+  else
+    sw_photo_upload_iface_return_from_upload_photo (context, opid);
 }
 
 
@@ -430,6 +452,53 @@ photo_upload_iface_init (gpointer g_iface,
 
   sw_photo_upload_iface_implement_upload_photo (klass,
                                                 _flickr_upload_photo);
+}
+
+static void
+on_video_upload_cb (RestProxyCall *call,
+              const GError *error,
+              GObject *weak_object,
+              gpointer user_data)
+{
+  SwServiceFlickr *flickr = SW_SERVICE_FLICKR (weak_object);
+  int opid = GPOINTER_TO_INT (user_data);
+
+  if (error) {
+    sw_video_upload_iface_emit_video_upload_progress (flickr, opid, -1, error->message);
+    /* TODO: clean up */
+  } else {
+    /* TODO: check flickr error state */
+    sw_video_upload_iface_emit_video_upload_progress (flickr, opid, 100, "");
+  }
+}
+
+static void
+_flickr_upload_video (SwVideoUploadIface    *self,
+                      const gchar           *filename,
+                      GHashTable            *params_in,
+                      DBusGMethodInvocation *context)
+{
+  GError *error = NULL;
+  int opid;
+
+  opid = _flickr_upload (SW_SERVICE_FLICKR (self), filename, params_in,
+                         &error, on_video_upload_cb);
+
+  if (opid == -1)
+    dbus_g_method_return_error (context, error);
+  else
+    sw_video_upload_iface_return_from_upload_video (context, opid);
+}
+
+
+static void
+video_upload_iface_init (gpointer g_iface,
+                         gpointer iface_data)
+{
+  SwVideoUploadIfaceClass *klass = (SwVideoUploadIfaceClass *)g_iface;
+
+  sw_video_upload_iface_implement_upload_video (klass,
+                                                _flickr_upload_video);
 }
 
 
