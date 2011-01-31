@@ -1,5 +1,9 @@
 SUBDIRS = dummy
 
+if WITH_FACEBOOK
+SUBDIRS += facebook
+endif
+
 if WITH_FLICKR
 SUBDIRS += flickr
 endif
