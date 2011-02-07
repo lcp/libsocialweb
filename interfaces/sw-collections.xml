@@ -28,6 +28,45 @@
       </arg>
     </method>
 
+    <method name="Create" tp:name-for-bindings="Create">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Create a new collection.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+
+      <arg name="collection_id" type="s" direction="out">
+        <doc:doc>
+          <doc:summary>
+            The service specific identifier for the new collection.
+          </doc:summary>
+        </doc:doc>
+      </arg>
+
+      <arg name="collection_name" type="s" direction="in">
+        <doc:doc>
+          <doc:summary>The name of the new collection.</doc:summary>
+        </doc:doc>
+      </arg>
+
+      <arg name="supported_types" type="u"
+           tp:type="Collection_Media_Types" direction="in">
+        <doc:doc>
+          <doc:summary>The media types this collection should support.
+          </doc:summary>
+        </doc:doc>
+      </arg>
+
+      <arg name="extra_parameters" type="a{ss}" direction="in">
+        <doc:doc>
+          <doc:summary>Extra, service specific parameters,
+            such as "description".</doc:summary>
+        </doc:doc>
+      </arg>
+    </method>
+
     <tp:struct name="Collection_Details" array-name="Collection_Details_List">
       <tp:member type="s" name="Collection_Id">
         <doc:doc>A service-specific identifier for the collection.</doc:doc>
