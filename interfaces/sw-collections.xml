@@ -28,6 +28,32 @@
       </arg>
     </method>
 
+    <method name="GetDetails" tp:name-for-bindings="Get_Details">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Get details of given collection.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+
+      <arg name="collection_id" type="s" direction="in">
+        <doc:doc>
+          <doc:summary>
+            The service specific identifier of the collection.
+          </doc:summary>
+        </doc:doc>
+      </arg>
+
+      <arg name="collection_list" type="(ssuia{ss})"
+           tp:type="Collection_Details[]" direction="out">
+        <doc:doc>
+          <doc:summary>The <tp:member-ref>Collection_Details</tp:member-ref>
+            of the given collection.</doc:summary>
+        </doc:doc>
+      </arg>
+    </method>
+
     <method name="Create" tp:name-for-bindings="Create">
       <doc:doc>
         <doc:description>
