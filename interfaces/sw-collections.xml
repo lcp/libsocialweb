@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<node name="/Collections_Iface"
+      xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0"
+      xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+  <interface name="com.meego.libsocialweb.Collections">
+    <doc:doc>
+      <doc:summary>An interface representing named collections of
+      photos (eg. albums), videos (eg. channels) or both (eg. Flickr sets).
+      </doc:summary>
+    </doc:doc>
+
+    <method name="GetList" tp:name-for-bindings="Get_List">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Retrieve a list of photo/video collections the user has on the service.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+
+      <arg name="collection_list" type="a(ssuia{ss})"
+           tp:type="Collection_Details[]" direction="out">
+        <doc:doc>
+          <doc:summary>A list of <tp:member-ref>Collection_Details</tp:member-ref>
+            representing remote collections on the service.</doc:summary>
+        </doc:doc>
+      </arg>
+    </method>
+
+    <tp:struct name="Collection_Details" array-name="Collection_Details_List">
+      <tp:member type="s" name="Collection_Id">
+        <doc:doc>A service-specific identifier for the collection.</doc:doc>
+      </tp:member>
+      <tp:member type="s" name="Collection_Name">
+        <doc:doc>The human readable name of the collection.</doc:doc>
+      </tp:member>
+      <tp:member type="u" tp:name="Collection_Media_Types"
+                 name="Supported_Media_Types">
+        <doc:doc>Supported types of media in this collection.</doc:doc>
+      </tp:member>
+      <tp:member type="i" name="Item_Count">
+        <doc:doc>The number of items currently in the collection, or -1 if unknown.</doc:doc></tp:member>
+      <tp:member type="a{ss}" name="Attributes">
+        <doc:doc>Additional collection attributes.</doc:doc>
+      </tp:member>        
+    </tp:struct>
+
+    <tp:flags name="Collection_Media_Types"
+              value-prefix="Collection_Media_Type">
+      <tp:flag name="Photos" value="1"/>
+      <tp:flag name="Videos" value="2"/>
+    </tp:flags>
+
+  </interface>
+</node>

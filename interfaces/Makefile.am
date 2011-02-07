@@ -15,7 +15,8 @@ DBUS_SPECS = sw-core.xml sw-service.xml \
 	     sw-item-view.xml sw-query.xml \
 	     sw-avatar.xml sw-status-update.xml \
 	     sw-photo-upload.xml sw-banishable.xml \
-	     sw-video-upload.xml lastfm.xml
+	     sw-video-upload.xml lastfm.xml \
+	     sw-collections.xml
 
 %-ginterface.h %-ginterface.c: %.xml Makefile.am
 	$(AM_V_GEN)python $(top_srcdir)/tools/glib-ginterface-gen.py --include='"sw-marshals.h"' --filename=$(basename $@) $< Sw_
