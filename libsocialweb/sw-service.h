@@ -31,8 +31,8 @@ G_BEGIN_DECLS
 #define SW_TYPE_SERVICE sw_service_get_type()
 
 typedef enum {
-  SW_SERVICE_ERROR_NO_KEYS,
-  SW_SERVICE_ERROR_INVALID_QUERY
+  SW_SERVICE_ERROR_NO_KEYS, /*< nick=NoKeys >*/
+  SW_SERVICE_ERROR_INVALID_QUERY, /*< nick=InvalidQuery >*/
 } SwServiceError;
 
 #define SW_SERVICE_ERROR sw_service_error_quark ()
