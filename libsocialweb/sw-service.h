@@ -33,6 +33,7 @@ G_BEGIN_DECLS
 typedef enum {
   SW_SERVICE_ERROR_NO_KEYS, /*< nick=NoKeys >*/
   SW_SERVICE_ERROR_INVALID_QUERY, /*< nick=InvalidQuery >*/
+  SW_SERVICE_ERROR_NOT_SUPPORTED /*< nick=NotSupported >*/
 } SwServiceError;
 
 #define SW_SERVICE_ERROR sw_service_error_quark ()
