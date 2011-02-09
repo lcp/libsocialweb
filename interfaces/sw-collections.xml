@@ -19,7 +19,7 @@
         </doc:description>
       </doc:doc>
 
-      <arg name="collection_list" type="a(ssuia{ss})"
+      <arg name="collection_list" type="a(sssuia{ss})"
            tp:type="Collection_Details[]" direction="out">
         <doc:doc>
           <doc:summary>A list of <tp:member-ref>Collection_Details</tp:member-ref>
@@ -45,7 +45,7 @@
         </doc:doc>
       </arg>
 
-      <arg name="collection_list" type="(ssuia{ss})"
+      <arg name="collection_details" type="(sssuia{ss})"
            tp:type="Collection_Details[]" direction="out">
         <doc:doc>
           <doc:summary>The <tp:member-ref>Collection_Details</tp:member-ref>
@@ -85,6 +85,14 @@
         </doc:doc>
       </arg>
 
+      <arg name="collection_parent" type="s" direction="in">
+        <doc:doc>
+          <doc:summary>The service specific identifier of the new
+          collection's parent or an empty string for a top-level
+          collection.</doc:summary>
+        </doc:doc>
+      </arg>
+
       <arg name="extra_parameters" type="a{ss}" direction="in">
         <doc:doc>
           <doc:summary>Extra, service specific parameters,
@@ -100,6 +108,10 @@
       <tp:member type="s" name="Collection_Name">
         <doc:doc>The human readable name of the collection.</doc:doc>
       </tp:member>
+      <tp:member type="s" name="Collection_Parent">
+        <doc:doc>A service-specific identifier for the collection's
+        parent, or an empty string for a top-level collection.</doc:doc>
+      </tp:member>
       <tp:member type="u" tp:name="Collection_Media_Types"
                  name="Supported_Media_Types">
         <doc:doc>Supported types of media in this collection.</doc:doc>
@@ -108,13 +120,14 @@
         <doc:doc>The number of items currently in the collection, or -1 if unknown.</doc:doc></tp:member>
       <tp:member type="a{ss}" name="Attributes">
         <doc:doc>Additional collection attributes.</doc:doc>
-      </tp:member>        
+      </tp:member>
     </tp:struct>
 
     <tp:flags name="Collection_Media_Types"
               value-prefix="Collection_Media_Type">
-      <tp:flag name="Photos" value="1"/>
-      <tp:flag name="Videos" value="2"/>
+      <tp:flag name="Collections" value="1"/>
+      <tp:flag name="Photos" value="2"/>
+      <tp:flag name="Videos" value="4"/>
     </tp:flags>
 
   </interface>
