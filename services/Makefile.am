@@ -19,3 +19,7 @@ endif
 if WITH_VIMEO
 SUBDIRS += vimeo
 endif
+
+if WITH_SMUGMUG
+SUBDIRS += smugmug
+endif

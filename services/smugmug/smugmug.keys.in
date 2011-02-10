@@ -1,0 +1,11 @@
+[LibSocialWebService]
+_Name=SmugMug
+_Description=Your Photos Look Better Here. Billions of happy photos. Millions of passionate customers.
+Link=http://www.smugmug.com/
+AuthType=oauth
+
+[OAuth]
+BaseURL=http://api.smugmug.com/services/oauth/
+RequestTokenFunction=getRequestToken.mg
+AuthoriseFunction=authorize.mg
+AccessTokenFunction=getAccessToken.mg
