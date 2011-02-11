@@ -7,5 +7,5 @@ AuthType=oauth
 [OAuth]
 BaseURL=http://api.smugmug.com/services/oauth/
 RequestTokenFunction=getRequestToken.mg
-AuthoriseFunction=authorize.mg
+AuthoriseFunction=authorize.mg?Access=Full&Permissions=Add
 AccessTokenFunction=getAccessToken.mg
