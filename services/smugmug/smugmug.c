@@ -42,17 +42,22 @@
 #include <rest/rest-xml-parser.h>
 
 #include <interfaces/sw-collections-ginterface.h>
+#include <interfaces/sw-photo-upload-ginterface.h>
 
 #include "smugmug.h"
 
 #define OAUTH_URL "http://api.smugmug.com/services/oauth/"
 #define REST_URL "https://secure.smugmug.com/services/api/rest/1.2.2/"
+#define UPLOAD_URL "http://upload.smugmug.com/photos/xmladd.mg"
 
 static void collections_iface_init (gpointer g_iface, gpointer iface_data);
+static void photo_upload_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (SwServiceSmugmug, sw_service_smugmug, SW_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (SW_TYPE_COLLECTIONS_IFACE,
-                                                collections_iface_init));
+                                                collections_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_PHOTO_UPLOAD_IFACE,
+                                                photo_upload_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_SMUGMUG, SwServiceSmugmugPrivate))
@@ -82,6 +87,7 @@ static const char **
 get_static_caps (SwService *service)
 {
   static const char * caps[] = {
+    HAS_PHOTO_UPLOAD_IFACE,
     HAS_BANISHABLE_IFACE,
 
     NULL
@@ -226,6 +232,111 @@ node_from_call (RestProxyCall *call)
   return node;
 }
 
+static gint
+_upload_file (SwServiceSmugmug *self,
+              MediaType upload_type,
+              const gchar *filename,
+              GHashTable *extra_fields,
+              RestProxyCallAsyncCallback upload_cb,
+              GError **error)
+{
+  SwServiceSmugmugPrivate *priv = self->priv;
+  RestProxyCall *call;
+  RestParam *param;
+  gchar *basename;
+  gchar *content_type;
+  gchar *bytecount;
+  GMappedFile *map;
+  gint opid;
+  GHashTableIter iter;
+  gpointer key, value;
+  GChecksum *checksum;
+
+  g_return_val_if_fail (priv->upload_proxy != NULL, -1);
+
+  /* Open the file */
+  map = g_mapped_file_new (filename, FALSE, error);
+  if (*error != NULL) {
+    g_warning ("Error opening file %s: %s", filename, (*error)->message);
+    return -1;
+  }
+
+  /* Get the file information */
+  basename = g_path_get_basename (filename);
+  content_type = g_content_type_guess (
+      filename,
+      (const guchar*) g_mapped_file_get_contents (map),
+      g_mapped_file_get_length (map),
+      NULL);
+
+  call = rest_proxy_new_call (priv->upload_proxy);
+
+  bytecount = g_strdup_printf ("%lud",
+                               (guint64) g_mapped_file_get_length (map));
+
+  checksum = g_checksum_new (G_CHECKSUM_MD5);
+  g_checksum_update (checksum, (guchar *) g_mapped_file_get_contents (map),
+                     g_mapped_file_get_length (map));
+
+  rest_proxy_call_add_param (call, "MD5Sum", g_checksum_get_string (checksum));
+  rest_proxy_call_add_param (call, "ResponseType", "REST");
+  rest_proxy_call_add_param (call, "ByteCount", bytecount);
+
+  g_hash_table_iter_init (&iter, extra_fields);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      const gchar *param_key = key;
+      const gchar *param_value = value;
+
+      if (g_strcmp0 (param_key, "collection") == 0)
+        {
+          const gchar *sep = g_strrstr (param_value, "_");
+
+          if (sep == NULL)
+            g_warning ("'collections' param not valid (%s)", param_value);
+          else
+            rest_proxy_call_add_param (call, "AlbumID", sep + 1);
+        }
+      else if (upload_type != VIDEO && g_strcmp0 (param_key, "title") == 0)
+        {
+          rest_proxy_call_add_param (call, "Caption", param_value);
+        }
+      else
+        {
+          rest_proxy_call_add_param (call, param_key, param_value);
+        }
+    }
+
+  param = rest_param_new_with_owner (basename,
+                                     g_mapped_file_get_contents (map),
+                                     g_mapped_file_get_length (map),
+                                     content_type,
+                                     basename,
+                                     map,
+                                     (GDestroyNotify)g_mapped_file_unref);
+
+  rest_proxy_call_add_param_full (call, param);
+
+
+
+  rest_proxy_call_set_method (call, "POST");
+
+  opid = sw_next_opid ();
+
+  rest_proxy_call_async (call,
+                         upload_cb,
+                         G_OBJECT (self),
+                         GINT_TO_POINTER (opid),
+                         NULL);
+
+  g_free (basename);
+  g_free (content_type);
+  g_free (bytecount);
+  g_checksum_free (checksum);
+
+  return opid;
+}
+
 /* Collections Interface */
 
 static GValueArray *
@@ -245,9 +356,9 @@ _extract_collection_details_from_xml (RestXmlNode *album)
   g_value_take_string (value,
                        g_strdup_printf ("%s_%s",
                                         (gchar *) g_hash_table_lookup (album->attrs,
-                                                             "id"),
+                                                             "Key"),
                                         (gchar *) g_hash_table_lookup (album->attrs,
-                                                             "Key")));
+                                                             "id")));
 
   value_array = g_value_array_append (value_array, NULL);
   value = g_value_array_get_nth (value_array, 1);
@@ -354,8 +465,8 @@ _create_album_cb (RestProxyCall *call,
   gchar *id;
 
   id = g_strdup_printf ("%s_%s",
-                        (gchar *) g_hash_table_lookup (album->attrs, "id"),
-                        (gchar *) g_hash_table_lookup (album->attrs, "Key"));
+                        (gchar *) g_hash_table_lookup (album->attrs, "Key"),
+                        (gchar *) g_hash_table_lookup (album->attrs, "id"));
 
   sw_collections_iface_return_from_create (context, id);
 
@@ -442,8 +553,8 @@ _smugmug_collections_get_details (SwCollectionsIface *self,
 
   call = rest_proxy_new_call (priv->rest_proxy);
   rest_proxy_call_add_param (call, "method", "smugmug.albums.getInfo");
-  rest_proxy_call_add_param (call, "AlbumID", id[0]);
-  rest_proxy_call_add_param (call, "AlbumKey", id[1]);
+  rest_proxy_call_add_param (call, "AlbumID", id[1]);
+  rest_proxy_call_add_param (call, "AlbumKey", id[0]);
 
   rest_proxy_call_async (call,
                          (RestProxyCallAsyncCallback) _get_album_details_cb,
@@ -466,6 +577,55 @@ collections_iface_init (gpointer g_iface,
 
   sw_collections_iface_implement_get_details (klass,
                                               _smugmug_collections_get_details);
+}
+
+/* Photo Upload Interface */
+
+static void
+_upload_photo_cb (RestProxyCall *call,
+                  const GError  *error,
+                  GObject       *weak_object,
+                  gpointer       user_data)
+{
+  SwServiceSmugmug *self = SW_SERVICE_SMUGMUG (weak_object);
+  int opid = GPOINTER_TO_INT (user_data);
+
+  if (error) {
+    sw_photo_upload_iface_emit_photo_upload_progress (self, opid, -1,
+        error->message);
+  } else {
+    sw_photo_upload_iface_emit_photo_upload_progress (self, opid, 100, "");
+  }
+}
+
+static void
+_smugmug_upload_photo (SwPhotoUploadIface    *self,
+                       const gchar           *filename,
+                       GHashTable            *fields,
+                       DBusGMethodInvocation *context)
+{
+  GError *error = NULL;
+  gint opid = _upload_file (SW_SERVICE_SMUGMUG (self), PHOTO, filename, fields,
+                       (RestProxyCallAsyncCallback) _upload_photo_cb, &error);
+
+  if (error) {
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
+    return;
+  }
+
+  sw_photo_upload_iface_return_from_upload_photo (context, opid);
+}
+
+static void
+photo_upload_iface_init (gpointer g_iface,
+                         gpointer iface_data)
+{
+  SwPhotoUploadIfaceClass *klass = (SwPhotoUploadIfaceClass *) g_iface;
+
+  sw_photo_upload_iface_implement_upload_photo (klass,
+                                                _smugmug_upload_photo);
+
 }
 
 static void
