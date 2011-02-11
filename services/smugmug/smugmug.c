@@ -43,6 +43,7 @@
 
 #include <interfaces/sw-collections-ginterface.h>
 #include <interfaces/sw-photo-upload-ginterface.h>
+#include <interfaces/sw-video-upload-ginterface.h>
 
 #include "smugmug.h"
 
@@ -52,12 +53,15 @@
 
 static void collections_iface_init (gpointer g_iface, gpointer iface_data);
 static void photo_upload_iface_init (gpointer g_iface, gpointer iface_data);
+static void video_upload_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (SwServiceSmugmug, sw_service_smugmug, SW_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (SW_TYPE_COLLECTIONS_IFACE,
                                                 collections_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_PHOTO_UPLOAD_IFACE,
-                                                photo_upload_iface_init));
+                                                photo_upload_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_VIDEO_UPLOAD_IFACE,
+                                                video_upload_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_SMUGMUG, SwServiceSmugmugPrivate))
@@ -88,6 +92,7 @@ get_static_caps (SwService *service)
 {
   static const char * caps[] = {
     HAS_PHOTO_UPLOAD_IFACE,
+    HAS_VIDEO_UPLOAD_IFACE,
     HAS_BANISHABLE_IFACE,
 
     NULL
@@ -301,7 +306,7 @@ _upload_file (SwServiceSmugmug *self,
         {
           rest_proxy_call_add_param (call, "Caption", param_value);
         }
-      else
+      else if (strlen (param_value) > 0)
         {
           rest_proxy_call_add_param (call, param_key, param_value);
         }
@@ -317,11 +322,11 @@ _upload_file (SwServiceSmugmug *self,
 
   rest_proxy_call_add_param_full (call, param);
 
-
-
   rest_proxy_call_set_method (call, "POST");
 
   opid = sw_next_opid ();
+
+  SW_DEBUG (SMUGMUG, "Uploading %s (%s)", basename, bytecount);
 
   rest_proxy_call_async (call,
                          upload_cb,
@@ -625,6 +630,55 @@ photo_upload_iface_init (gpointer g_iface,
 
   sw_photo_upload_iface_implement_upload_photo (klass,
                                                 _smugmug_upload_photo);
+
+}
+
+/* Video Upload Interface */
+
+static void
+_upload_video_cb (RestProxyCall *call,
+                  const GError  *error,
+                  GObject       *weak_object,
+                  gpointer       user_data)
+{
+  SwServiceSmugmug *self = SW_SERVICE_SMUGMUG (weak_object);
+  int opid = GPOINTER_TO_INT (user_data);
+
+  if (error) {
+    sw_video_upload_iface_emit_video_upload_progress (self, opid, -1,
+        error->message);
+  } else {
+    sw_video_upload_iface_emit_video_upload_progress (self, opid, 100, "");
+  }
+}
+
+static void
+_smugmug_upload_video (SwVideoUploadIface    *self,
+                       const gchar           *filename,
+                       GHashTable            *fields,
+                       DBusGMethodInvocation *context)
+{
+  GError *error = NULL;
+  gint opid = _upload_file (SW_SERVICE_SMUGMUG (self), VIDEO, filename, fields,
+                       (RestProxyCallAsyncCallback) _upload_video_cb, &error);
+
+  if (error) {
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
+    return;
+  }
+
+  sw_video_upload_iface_return_from_upload_video (context, opid);
+}
+
+static void
+video_upload_iface_init (gpointer g_iface,
+                         gpointer iface_data)
+{
+  SwVideoUploadIfaceClass *klass = (SwVideoUploadIfaceClass *) g_iface;
+
+  sw_video_upload_iface_implement_upload_video (klass,
+                                                _smugmug_upload_video);
 
 }
 
