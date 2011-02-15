@@ -24,3 +24,4 @@ char * sw_time_t_to_string (time_t t);
 char *sw_hash_string_dict (GHashTable *hash);
 
 int sw_next_opid (void);
+gchar *sw_unescape_entities (gchar *string);
