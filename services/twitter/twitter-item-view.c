@@ -32,6 +32,7 @@
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-cache.h>
+#include <libsocialweb/sw-utils.h>
 
 #include "twitter-item-view.h"
 
@@ -253,7 +254,8 @@ _make_item (SwTwitterItemView *item_view,
     g_free (twitpic_id);
   }
 
-  sw_item_put (item, "content", content);
+  /* sw_unescape_entities works in place */
+  sw_item_put (item, "content", sw_unescape_entities ((gchar *)content));
 
   g_match_info_free (match_info);
 
