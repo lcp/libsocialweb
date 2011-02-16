@@ -562,7 +562,10 @@ _facebook_status_update_update_status (SwStatusUpdateIface   *self,
                          (GObject *)facebook,
                          NULL,
                          NULL);
+
   sw_status_update_iface_return_from_update_status (context);
+
+  g_object_unref (call);
 }
 
 static void
@@ -654,6 +657,7 @@ _upload_file (SwServiceFacebook           *self,
 
   g_free (basename);
   g_free (content_type);
+  g_object_unref (call);
 
   return opid;
 }
@@ -891,6 +895,8 @@ _facebook_collections_get_list (SwCollectionsIface    *self,
                          (GObject *)facebook,
                          context,
                          NULL);
+
+  g_object_unref (call);
 }
 
 static void
@@ -968,6 +974,8 @@ _facebook_collections_create (SwCollectionsIface    *self,
                          (GObject *)facebook,
                          context,
                          NULL);
+
+  g_object_unref (call);
 }
 
 static void
@@ -1017,6 +1025,8 @@ _facebook_collections_get_details (SwCollectionsIface    *self,
                          (GObject *)facebook,
                          context,
                          NULL);
+
+  g_object_unref (call);
 }
 
 static void
