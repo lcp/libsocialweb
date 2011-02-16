@@ -1,6 +1,6 @@
 m4_define([api_major], [0])
 m4_define([api_minor], [25])
-m4_define([api_micro], [9])
+m4_define([api_micro], [10])
 m4_define([sw_version], [api_major.api_minor.api_micro])
 
 AC_PREREQ([2.63])
