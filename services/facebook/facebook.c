@@ -77,6 +77,15 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceFacebook,
 
 #define GET_PRIVATE(o) (((SwServiceFacebook *) o)->priv)
 
+/* Inspired by services/flickr/flickr.c
+   TODO: This is a useful macro, it should live in lsw */
+#define MAP_PARAM(_call, _fields, _lsw_param, _service_param)      \
+  {                                                                \
+    const char *param = g_hash_table_lookup (_fields, _lsw_param); \
+    if (param)                                                     \
+      rest_proxy_call_add_param (_call, _service_param, param);    \
+  }
+
 enum {
   COLLECTION = 1,
   PHOTO = 2,
@@ -567,12 +576,12 @@ status_update_iface_init (gpointer g_iface,
 }
 
 static gint
-_upload_file (SwServiceFacebook *self,
-    MediaType upload_type,
-    const gchar *filename,
-    GHashTable *extra_fields,
-    RestProxyCallAsyncCallback upload_cb,
-    GError **error)
+_upload_file (SwServiceFacebook           *self,
+              MediaType                    upload_type,
+              const gchar                 *filename,
+              GHashTable                  *fields,
+              RestProxyCallAsyncCallback   upload_cb,
+              GError                     **error)
 {
   SwServiceFacebookPrivate *priv = self->priv;
   RestProxyCall *call;
@@ -581,8 +590,6 @@ _upload_file (SwServiceFacebook *self,
   gchar *content_type;
   GMappedFile *map;
   gint opid;
-  GHashTableIter iter;
-  gpointer key, value;
 
   g_return_val_if_fail (priv->proxy != NULL, -1);
 
@@ -601,38 +608,29 @@ _upload_file (SwServiceFacebook *self,
       g_mapped_file_get_length (map),
       NULL);
 
-  if (upload_type == PHOTO)
-    {
-      const gchar *album = g_hash_table_lookup (extra_fields, "collection");
-      gchar *function = g_strdup_printf ("%s/photos",
-                                         album != NULL ? album : "me");
+  if (upload_type == PHOTO) {
+    const gchar *album = g_hash_table_lookup (fields, "collection");
+    gchar *function = g_strdup_printf ("%s/photos",
+                                       album != NULL ? album : "me");
 
-      call = rest_proxy_new_call (priv->proxy);
-      rest_proxy_call_set_function (call, function);
+    call = rest_proxy_new_call (priv->proxy);
+    rest_proxy_call_set_function (call, function);
 
-      g_free (function);
-    }
-  else
-    {
-      call = rest_proxy_new_call (priv->video_proxy);
-      rest_proxy_call_set_function (call,
-          "restserver.php?method=video.upload");
-      rest_proxy_call_add_param (call, "access_token",
-          oauth2_proxy_get_access_token (OAUTH2_PROXY (priv->proxy)));
-      rest_proxy_call_add_param (call, "format", "json");
-    }
+    MAP_PARAM (call, fields, "title", "message");
 
-  g_hash_table_iter_init (&iter, extra_fields);
-  while (g_hash_table_iter_next (&iter, &key, &value))
-    {
-      const gchar *param_key = key;
-      const gchar *param_value = value;
+    g_free (function);
+  } else {
+    call = rest_proxy_new_call (priv->video_proxy);
+    rest_proxy_call_set_function (call,
+                                  "restserver.php?method=video.upload");
+    rest_proxy_call_add_param (call, "access_token",
+                               oauth2_proxy_get_access_token (OAUTH2_PROXY (priv->proxy)));
+    rest_proxy_call_add_param (call, "format", "json");
 
-      if (upload_type != VIDEO && g_strcmp0 (param_key, "title") == 0)
-        param_key = "message";
-
-      rest_proxy_call_add_param (call, param_key, param_value);
-    }
+    MAP_PARAM (call, fields, "title", "title");
+    MAP_PARAM (call, fields, "description", "description");
+    MAP_PARAM (call, fields, "x-facebook-privacy", "privacy");
+  }
 
   param = rest_param_new_with_owner (basename,
                                      g_mapped_file_get_contents (map),
@@ -671,7 +669,7 @@ _upload_photo_cb (RestProxyCall *call,
 
   if (error) {
     sw_photo_upload_iface_emit_photo_upload_progress (facebook, opid, -1,
-        error->message);
+                                                      error->message);
   } else {
     sw_photo_upload_iface_emit_photo_upload_progress (facebook, opid, 100, "");
   }
@@ -688,7 +686,7 @@ _facebook_photo_upload_upload_photo (SwPhotoUploadIface    *self,
   GError *error = NULL;
 
   opid = _upload_file (facebook, PHOTO, filename, fields,
-      (RestProxyCallAsyncCallback) _upload_photo_cb, &error);
+                       (RestProxyCallAsyncCallback) _upload_photo_cb, &error);
 
   if (error) {
     dbus_g_method_return_error (context, error);
@@ -705,8 +703,8 @@ photo_upload_iface_init (gpointer g_iface,
 {
   SwPhotoUploadIfaceClass *klass = (SwPhotoUploadIfaceClass*)g_iface;
 
-  sw_photo_upload_iface_implement_upload_photo (
-          klass, _facebook_photo_upload_upload_photo);
+  sw_photo_upload_iface_implement_upload_photo (klass,
+                                                _facebook_photo_upload_upload_photo);
 }
 
 static void
@@ -720,7 +718,7 @@ _upload_video_cb (RestProxyCall *call,
 
   if (error) {
     sw_video_upload_iface_emit_video_upload_progress (facebook, opid, -1,
-        error->message);
+                                                      error->message);
   } else {
     sw_video_upload_iface_emit_video_upload_progress (facebook, opid, 100, "");
   }
@@ -737,7 +735,7 @@ _facebook_video_upload_upload_video (SwVideoUploadIface    *self,
   GError *error = NULL;
 
   opid = _upload_file (facebook, VIDEO, filename, fields,
-      (RestProxyCallAsyncCallback) _upload_video_cb, &error);
+                       (RestProxyCallAsyncCallback) _upload_video_cb, &error);
 
   if (error) {
     dbus_g_method_return_error (context, error);
@@ -755,7 +753,8 @@ video_upload_iface_init (gpointer g_iface,
   SwVideoUploadIfaceClass *klass = (SwVideoUploadIfaceClass*)g_iface;
 
   sw_video_upload_iface_implement_upload_video (
-          klass, _facebook_video_upload_upload_video);
+                                                klass,
+                                                _facebook_video_upload_upload_video);
 }
 
 const char *
@@ -804,6 +803,7 @@ _extract_collection_details_from_json (JsonNode *node)
   value_array = g_value_array_append (value_array, NULL);
   value = g_value_array_get_nth (value_array, 4);
   g_value_init (value, G_TYPE_INT);
+
   if (json_object_has_member (obj, "count"))
     g_value_set_int (value, json_object_get_int_member (obj, "count"));
   else
@@ -811,15 +811,16 @@ _extract_collection_details_from_json (JsonNode *node)
 
   attribs = g_hash_table_new (g_str_hash, g_str_equal);
   g_hash_table_insert (attribs, "privacy",
-      (gpointer) json_object_get_string_member (obj, "privacy"));
+                       (gpointer) json_object_get_string_member (obj,
+                                                                 "privacy"));
   g_hash_table_insert (attribs, "link",
-      (gpointer) json_object_get_string_member (obj, "link"));
+                       (gpointer) json_object_get_string_member (obj, "link"));
 
   value_array = g_value_array_append (value_array, NULL);
   value = g_value_array_get_nth (value_array, 5);
   g_value_init (value, dbus_g_type_get_map ("GHashTable",
-          G_TYPE_STRING,
-          G_TYPE_STRING));
+                                            G_TYPE_STRING,
+                                            G_TYPE_STRING));
   g_value_take_boxed (value, attribs);
 
   return value_array;
@@ -827,13 +828,13 @@ _extract_collection_details_from_json (JsonNode *node)
 
 static void
 _albums_foreach(JsonArray *array,
-                guint index,
-                JsonNode *node,
-                gpointer user_data)
+                guint      index,
+                JsonNode  *node,
+                gpointer   user_data)
 {
   GPtrArray *rv = (GPtrArray *) user_data;
-  GValueArray *collection_details = _extract_collection_details_from_json (
-      node);
+  GValueArray *collection_details =
+    _extract_collection_details_from_json (node);
 
   g_ptr_array_add (rv, collection_details);
 }
@@ -848,17 +849,16 @@ _list_albums_cb (RestProxyCall *call,
   GError *err = NULL;
   JsonNode *node;
   JsonArray *array;
-  GPtrArray *rv = g_ptr_array_new_with_free_func (
-      (GDestroyNotify )g_value_array_free);
+  GPtrArray *rv =
+    g_ptr_array_new_with_free_func ((GDestroyNotify )g_value_array_free);
 
   node = json_node_from_call (call, &err);
 
-  if (err != NULL)
-    {
-      dbus_g_method_return_error (context, err);
-      g_error_free (err);
-      return;
-    }
+  if (err != NULL) {
+    dbus_g_method_return_error (context, err);
+    g_error_free (err);
+    return;
+  }
 
   array = json_object_get_array_member (json_node_get_object (node), "data");
 
@@ -874,7 +874,7 @@ _list_albums_cb (RestProxyCall *call,
 }
 
 static void
-_facebook_collections_get_list (SwCollectionsIface *self,
+_facebook_collections_get_list (SwCollectionsIface    *self,
                                 DBusGMethodInvocation *context)
 {
   SwServiceFacebook *facebook = SW_SERVICE_FACEBOOK (self);
@@ -895,9 +895,9 @@ _facebook_collections_get_list (SwCollectionsIface *self,
 
 static void
 _create_album_cb (RestProxyCall *call,
-    const GError  *error,
-    GObject       *weak_object,
-    gpointer       user_data)
+                  const GError  *error,
+                  GObject       *weak_object,
+                  gpointer       user_data)
 {
   DBusGMethodInvocation *context = (DBusGMethodInvocation *) user_data;
   GError *err = NULL;
@@ -907,12 +907,11 @@ _create_album_cb (RestProxyCall *call,
 
   node = json_node_from_call (call, &err);
 
-  if (err != NULL)
-    {
-      dbus_g_method_return_error (context, err);
-      g_error_free (err);
-      return;
-    }
+  if (err != NULL) {
+    dbus_g_method_return_error (context, err);
+    g_error_free (err);
+    return;
+  }
 
   obj = json_node_get_object (node);
 
@@ -926,12 +925,12 @@ _create_album_cb (RestProxyCall *call,
 }
 
 static void
-_facebook_collections_create (SwCollectionsIface *self,
-    const gchar *collection_name,
-    MediaType supported_types,
-    const gchar *collection_parent,
-    GHashTable *extra_parameters,
-    DBusGMethodInvocation *context)
+_facebook_collections_create (SwCollectionsIface    *self,
+                              const gchar           *collection_name,
+                              MediaType              supported_types,
+                              const gchar           *collection_parent,
+                              GHashTable            *extra_fields,
+                              DBusGMethodInvocation *context)
 {
   SwServiceFacebook *facebook = SW_SERVICE_FACEBOOK (self);
   SwServiceFacebookPrivate *priv = facebook->priv;
@@ -939,36 +938,36 @@ _facebook_collections_create (SwCollectionsIface *self,
 
   g_return_if_fail (priv->proxy != NULL);
 
-  if (strlen (collection_parent) != 0)
-    {
-      GError error = {SW_SERVICE_ERROR,
-                      SW_SERVICE_ERROR_NOT_SUPPORTED,
-                      "Facebook does not support nested albums."};
-      dbus_g_method_return_error (context, &error);
-      return;
-    }
+  if (strlen (collection_parent) != 0) {
+    GError error = {SW_SERVICE_ERROR,
+                    SW_SERVICE_ERROR_NOT_SUPPORTED,
+                    "Facebook does not support nested albums."};
+    dbus_g_method_return_error (context, &error);
+    return;
+  }
 
-  if (supported_types != PHOTO)
-    {
-      GError error = {SW_SERVICE_ERROR,
-                      SW_SERVICE_ERROR_NOT_SUPPORTED,
-                      "Facebook albums can only contain photos."};
-      dbus_g_method_return_error (context, &error);
-      return;
-    }
+  if (supported_types != PHOTO) {
+    GError error = {SW_SERVICE_ERROR,
+                    SW_SERVICE_ERROR_NOT_SUPPORTED,
+                    "Facebook albums can only contain photos."};
+    dbus_g_method_return_error (context, &error);
+    return;
+  }
 
   call = rest_proxy_new_call (priv->proxy);
 
   rest_proxy_call_set_function (call, "me/albums");
 
+  MAP_PARAM (call, extra_fields, "x-facebook-privacy", "privacy");
+
   rest_proxy_call_add_param (call, "name", collection_name);
   rest_proxy_call_set_method (call, "POST");
 
   rest_proxy_call_async (call,
-      (RestProxyCallAsyncCallback)_create_album_cb,
-      (GObject *)facebook,
-      context,
-      NULL);
+                         (RestProxyCallAsyncCallback)_create_album_cb,
+                         (GObject *)facebook,
+                         context,
+                         NULL);
 }
 
 static void
@@ -984,27 +983,25 @@ _get_album_details_cb (RestProxyCall *call,
 
   node = json_node_from_call (call, &err);
 
-  if (err != NULL)
-    {
-      dbus_g_method_return_error (context, err);
-      g_error_free (err);
-      return;
-    }
+  if (err != NULL) {
+    dbus_g_method_return_error (context, err);
+    g_error_free (err);
+    return;
+  }
 
   collection_details = _extract_collection_details_from_json (node);
 
   sw_collections_iface_return_from_get_details (context,
-      collection_details);
+                                                collection_details);
 
   g_value_array_free (collection_details);
-
   json_node_free (node);
 }
 
 static void
-_facebook_collections_get_details (SwCollectionsIface *self,
-    const gchar *collection_id,
-    DBusGMethodInvocation *context)
+_facebook_collections_get_details (SwCollectionsIface    *self,
+                                   const gchar           *collection_id,
+                                   DBusGMethodInvocation *context)
 {
   SwServiceFacebook *facebook = SW_SERVICE_FACEBOOK (self);
   SwServiceFacebookPrivate *priv = facebook->priv;
@@ -1029,11 +1026,11 @@ collections_iface_init (gpointer g_iface,
   SwCollectionsIfaceClass *klass = (SwCollectionsIfaceClass *) g_iface;
 
   sw_collections_iface_implement_get_list (klass,
-      _facebook_collections_get_list);
+                                           _facebook_collections_get_list);
 
   sw_collections_iface_implement_create (klass,
-      _facebook_collections_create);
+                                         _facebook_collections_create);
 
   sw_collections_iface_implement_get_details (klass,
-      _facebook_collections_get_details);
+                                              _facebook_collections_get_details);
 }

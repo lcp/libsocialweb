@@ -110,7 +110,7 @@ json_node_from_call (RestProxyCall *call, GError** error)
       inner_object = json_node_get_object (inner);
 
     if (inner_object && json_object_has_member (inner_object, "message"))
-      error_message = get_child_node_value (inner, "mesage");
+      error_message = get_child_node_value (inner, "message");
   }
 
   if (error_message) {
