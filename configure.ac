@@ -69,7 +69,6 @@ PKG_CHECK_MODULES(DBUS_GLIB, dbus-glib-1)
 PKG_CHECK_MODULES(REST, rest-0.7 rest-extras-0.7 >= 0.7.1)
 PKG_CHECK_MODULES(KEYRING, gnome-keyring-1)
 PKG_CHECK_MODULES(JSON_GLIB, json-glib-1.0)
-PKG_CHECK_MODULES(PANGO, pango)
 
 AC_MSG_CHECKING([how to detect we are online])
 AC_ARG_WITH([online],
