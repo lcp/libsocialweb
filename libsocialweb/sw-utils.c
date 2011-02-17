@@ -175,7 +175,7 @@ sw_unescape_entities (gchar *string)
               g_memmove (p + replacement_length, p + bucket_i + 2, len + 1);
             }
 
-            p = p + replacement_length;
+            p = p + replacement_length - 1;
         }
     }
 
