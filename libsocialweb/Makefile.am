@@ -49,7 +49,8 @@ public_headers = \
 	sw-cache.h \
 	sw-item.h \
 	sw-module.h \
-	sw-utils.h
+	sw-utils.h \
+	sw-client-monitor.h
 
 libsocialweb_la_HEADERS = $(public_headers) sw-enum-types.h
 

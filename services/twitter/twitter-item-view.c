@@ -32,6 +32,7 @@
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-cache.h>
+#include <libsocialweb/sw-utils.h>
 
 #include "twitter-item-view.h"
 
@@ -253,7 +254,8 @@ _make_item (SwTwitterItemView *item_view,
     g_free (twitpic_id);
   }
 
-  sw_item_put (item, "content", content);
+  /* sw_unescape_entities works in place */
+  sw_item_put (item, "content", sw_unescape_entities ((gchar *)content));
 
   g_match_info_free (match_info);
 
@@ -624,9 +626,23 @@ _service_capabilities_changed_cb (SwService    *service,
                                   const gchar **caps,
                                   SwItemView   *item_view)
 {
+  SwTwitterItemViewPrivate *priv = GET_PRIVATE ((SwTwitterItemView*) item_view);
+
   if (sw_service_has_cap (caps, CREDENTIALS_VALID))
   {
     twitter_item_view_refresh (item_view);
+    if (!priv->timeout_id)
+    {
+      priv->timeout_id = g_timeout_add_seconds (UPDATE_TIMEOUT,
+                                                (GSourceFunc)_update_timeout_cb,
+                                                item_view);
+    }
+  } else {
+    if (priv->timeout_id)
+    {
+      g_source_remove (priv->timeout_id);
+      priv->timeout_id = 0;
+    }
   }
 }
 

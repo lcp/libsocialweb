@@ -16,9 +16,18 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _SW_CLIENT_MONITOR
+#define _SW_CLIENT_MONITOR
+
 #include <glib-object.h>
 #include <dbus/dbus-glib.h>
+
+G_BEGIN_DECLS
 
 void sw_client_monitor_init (DBusGConnection *connection);
 void sw_client_monitor_add (char *sender, GObject *object);
 void sw_client_monitor_remove (char *sender, GObject *object);
+
+G_END_DECLS
+
+#endif /* _SW_CLIENT_MONITOR */

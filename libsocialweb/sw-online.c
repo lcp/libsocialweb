@@ -222,9 +222,9 @@ online_init (void)
   }
 
   proxy = dbus_g_proxy_new_for_name (conn,
-                                     "org.moblin.connman",
+                                     "net.connman",
                                      "/",
-                                     "org.moblin.connman.Manager");
+                                     "net.connman.Manager");
 
   dbus_g_object_register_marshaller (g_cclosure_marshal_VOID__STRING,
                                      G_TYPE_NONE, G_TYPE_STRING,

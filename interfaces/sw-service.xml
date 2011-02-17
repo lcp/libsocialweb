@@ -39,6 +39,10 @@
               <doc:definition>The service supports the #Query interface.</doc:definition>
             </doc:item>
             <doc:item>
+              <doc:term>has-collections-iface</doc:term>
+              <doc:definition>The service supports the #Collections interface.</doc:definition>
+            </doc:item>
+            <doc:item>
               <doc:term>can-verify-credentials</doc:term>
               <doc:definition>The credentials-invalid and credentials-valid dynamic capabilities are available.</doc:definition>
             </doc:item>

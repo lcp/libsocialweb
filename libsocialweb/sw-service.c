@@ -108,7 +108,9 @@ sw_service_class_init (SwServiceClass *klass)
   object_class->dispose = sw_service_dispose;
   object_class->constructed = sw_service_constructed;
 
-  dbus_g_error_domain_register (SW_SERVICE_ERROR, NULL, SW_TYPE_SERVICE_ERROR);
+  dbus_g_error_domain_register (SW_SERVICE_ERROR,
+                                "com.meego.libsocialweb.ServiceError",
+                                SW_TYPE_SERVICE_ERROR);
 }
 
 static void
