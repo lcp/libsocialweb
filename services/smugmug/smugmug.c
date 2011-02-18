@@ -66,6 +66,8 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceSmugmug, sw_service_smugmug, SW_TYPE_SERVICE,
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_SMUGMUG, SwServiceSmugmugPrivate))
 
+#define ALBUM_PREFIX "smugmug-"
+
 struct _SwServiceSmugmugPrivate {
   const gchar *api_key;
   const gchar *api_secret;
@@ -360,7 +362,8 @@ _extract_collection_details_from_xml (RestXmlNode *album)
   value = g_value_array_get_nth (value_array, 0);
   g_value_init (value, G_TYPE_STRING);
   g_value_take_string (value,
-                       g_strdup_printf ("%s_%s",
+                       g_strdup_printf ("%s%s_%s",
+                                        ALBUM_PREFIX,
                                         (gchar *) g_hash_table_lookup (album->attrs,
                                                              "Key"),
                                         (gchar *) g_hash_table_lookup (album->attrs,
@@ -470,7 +473,7 @@ _create_album_cb (RestProxyCall *call,
   RestXmlNode *album = rest_xml_node_find (root, "Album");
   gchar *id;
 
-  id = g_strdup_printf ("%s_%s",
+  id = g_strdup_printf ("%s%s_%s", ALBUM_PREFIX,
                         (gchar *) g_hash_table_lookup (album->attrs, "Key"),
                         (gchar *) g_hash_table_lookup (album->attrs, "id"));
 
