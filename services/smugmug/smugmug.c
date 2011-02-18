@@ -338,6 +338,7 @@ _upload_file (SwServiceSmugmug *self,
   g_free (content_type);
   g_free (bytecount);
   g_checksum_free (checksum);
+  g_object_unref (call);
 
   return opid;
 }
@@ -513,6 +514,7 @@ _smugmug_collections_create (SwCollectionsIface *self,
                          context,
                          NULL);
 
+  g_object_unref (call);
 }
 
 static void
@@ -566,6 +568,8 @@ _smugmug_collections_get_details (SwCollectionsIface *self,
                          (GObject *) smugmug,
                          context,
                          NULL);
+
+  g_object_unref (call);
 }
 
 static void
