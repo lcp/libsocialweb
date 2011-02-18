@@ -589,12 +589,12 @@ _upload_file (SwServiceFacebook           *self,
               GError                     **error)
 {
   SwServiceFacebookPrivate *priv = self->priv;
-  RestProxyCall *call;
+  RestProxyCall *call = NULL;
   RestParam *param;
-  gchar *basename;
-  gchar *content_type;
-  GMappedFile *map;
-  gint opid;
+  gchar *basename = NULL;
+  gchar *content_type = NULL;
+  GMappedFile *map = NULL;
+  gint opid = -1;
 
   g_return_val_if_fail (priv->proxy != NULL, -1);
 
@@ -602,7 +602,7 @@ _upload_file (SwServiceFacebook           *self,
   map = g_mapped_file_new (filename, FALSE, error);
   if (*error != NULL) {
     g_warning ("Error opening file %s: %s", filename, (*error)->message);
-    return -1;
+    goto OUT;
   }
 
   /* Get the file information */
@@ -615,9 +615,22 @@ _upload_file (SwServiceFacebook           *self,
 
   if (upload_type == PHOTO) {
     const gchar *album = g_hash_table_lookup (fields, "collection");
-    gchar *function = g_strdup_printf ("%s/photos",
-                                       album != NULL ?
-                                       album + strlen (ALBUM_PREFIX) : "me");
+    gchar *function;
+
+    if (album != NULL) {
+      if (!g_str_has_prefix(album, ALBUM_PREFIX)) {
+        g_set_error (error,
+                     SW_SERVICE_ERROR,
+                     SW_SERVICE_ERROR_NOT_SUPPORTED,
+                     "Facebook collection ID %s must start with '%s'",
+                     album, ALBUM_PREFIX);
+        goto OUT;
+      }
+
+      function = g_strdup_printf ("%s/photos", album + strlen (ALBUM_PREFIX));
+    } else {
+      function = g_strdup ("me/photos");
+    }
 
     call = rest_proxy_new_call (priv->proxy);
     rest_proxy_call_set_function (call, function);
@@ -625,7 +638,7 @@ _upload_file (SwServiceFacebook           *self,
     MAP_PARAM (call, fields, "title", "message");
 
     g_free (function);
-  } else {
+  } else if (upload_type == VIDEO ) {
     call = rest_proxy_new_call (priv->video_proxy);
     rest_proxy_call_set_function (call,
                                   "restserver.php?method=video.upload");
@@ -636,7 +649,12 @@ _upload_file (SwServiceFacebook           *self,
     MAP_PARAM (call, fields, "title", "title");
     MAP_PARAM (call, fields, "description", "description");
     MAP_PARAM (call, fields, "x-facebook-privacy", "privacy");
+  } else {
+    g_warning ("invalid upload_type: %d", upload_type);
+    goto OUT;
   }
+
+  g_mapped_file_ref (map);
 
   param = rest_param_new_with_owner (basename,
                                      g_mapped_file_get_contents (map),
@@ -644,7 +662,7 @@ _upload_file (SwServiceFacebook           *self,
                                      content_type,
                                      basename,
                                      map,
-                                     (GDestroyNotify)g_mapped_file_unref);
+                                     (GDestroyNotify) g_mapped_file_unref);
 
   rest_proxy_call_add_param_full (call, param);
 
@@ -658,9 +676,16 @@ _upload_file (SwServiceFacebook           *self,
                          GINT_TO_POINTER (opid),
                          NULL);
 
+
+ OUT:
   g_free (basename);
   g_free (content_type);
-  g_object_unref (call);
+
+  if (call != NULL)
+    g_object_unref (call);
+
+  if (map != NULL)
+    g_mapped_file_unref (map);
 
   return opid;
 }
@@ -790,7 +815,7 @@ _extract_collection_details_from_json (JsonNode *node)
   value_array = g_value_array_append (value_array, NULL);
   value = g_value_array_get_nth (value_array, 0);
   g_value_init (value, G_TYPE_STRING);
-  album_id = g_strdup_printf ("facebook-%s",
+  album_id = g_strdup_printf ("%s%s", ALBUM_PREFIX,
                               json_object_get_string_member (obj, "id"));
   g_value_take_string (value, album_id);
 
@@ -927,7 +952,7 @@ _create_album_cb (RestProxyCall *call,
 
   obj = json_node_get_object (node);
 
-  id = g_strdup_printf ("facebook-%ld",
+  id = g_strdup_printf ("%s%ld", ALBUM_PREFIX,
                         json_object_get_int_member (obj, "id"));
 
   sw_collections_iface_return_from_create (context, id);
@@ -1025,10 +1050,13 @@ _facebook_collections_get_details (SwCollectionsIface    *self,
   g_return_if_fail (priv->proxy != NULL);
 
   if (!g_str_has_prefix(collection_id, ALBUM_PREFIX)) {
-    GError error = {SW_SERVICE_ERROR,
-                    SW_SERVICE_ERROR_NOT_SUPPORTED,
-                    "Facebook collection IDs must start with 'facebook-'"};
-    dbus_g_method_return_error (context, &error);
+    GError *error =
+      g_error_new (SW_SERVICE_ERROR,
+                   SW_SERVICE_ERROR_NOT_SUPPORTED,
+                   "Facebook collection ID (%s) must start with '%s'",
+                   collection_id, ALBUM_PREFIX);
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
     return;
   }
 
