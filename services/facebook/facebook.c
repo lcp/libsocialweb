@@ -820,10 +820,10 @@ _extract_collection_details_from_json (JsonNode *node)
     g_value_set_int (value, 0);
 
   attribs = g_hash_table_new (g_str_hash, g_str_equal);
-  g_hash_table_insert (attribs, "privacy",
+  g_hash_table_insert (attribs, "x-facebook-privacy",
                        (gpointer) json_object_get_string_member (obj,
                                                                  "privacy"));
-  g_hash_table_insert (attribs, "link",
+  g_hash_table_insert (attribs, "url",
                        (gpointer) json_object_get_string_member (obj, "link"));
 
   value_array = g_value_array_append (value_array, NULL);
