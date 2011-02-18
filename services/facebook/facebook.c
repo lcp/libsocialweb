@@ -86,6 +86,8 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceFacebook,
       rest_proxy_call_add_param (_call, _service_param, param);    \
   }
 
+#define ALBUM_PREFIX "facebook-"
+
 enum {
   COLLECTION = 1,
   PHOTO = 2,
@@ -614,7 +616,8 @@ _upload_file (SwServiceFacebook           *self,
   if (upload_type == PHOTO) {
     const gchar *album = g_hash_table_lookup (fields, "collection");
     gchar *function = g_strdup_printf ("%s/photos",
-                                       album != NULL ? album : "me");
+                                       album != NULL ?
+                                       album + strlen (ALBUM_PREFIX) : "me");
 
     call = rest_proxy_new_call (priv->proxy);
     rest_proxy_call_set_function (call, function);
@@ -776,6 +779,7 @@ _extract_collection_details_from_json (JsonNode *node)
   GHashTable *attribs;
   GValue *value = NULL;
   JsonObject *obj;
+  gchar *album_id;
 
   g_return_val_if_fail (json_node_get_node_type (node) == JSON_NODE_OBJECT,
                         NULL);
@@ -786,7 +790,9 @@ _extract_collection_details_from_json (JsonNode *node)
   value_array = g_value_array_append (value_array, NULL);
   value = g_value_array_get_nth (value_array, 0);
   g_value_init (value, G_TYPE_STRING);
-  g_value_set_static_string (value, json_object_get_string_member (obj, "id"));
+  album_id = g_strdup_printf ("facebook-%s",
+                              json_object_get_string_member (obj, "id"));
+  g_value_take_string (value, album_id);
 
   value_array = g_value_array_append (value_array, NULL);
   value = g_value_array_get_nth (value_array, 1);
@@ -921,7 +927,8 @@ _create_album_cb (RestProxyCall *call,
 
   obj = json_node_get_object (node);
 
-  id = g_strdup_printf ("%ld", json_object_get_int_member (obj, "id"));
+  id = g_strdup_printf ("facebook-%ld",
+                        json_object_get_int_member (obj, "id"));
 
   sw_collections_iface_return_from_create (context, id);
 
@@ -1017,8 +1024,16 @@ _facebook_collections_get_details (SwCollectionsIface    *self,
 
   g_return_if_fail (priv->proxy != NULL);
 
+  if (!g_str_has_prefix(collection_id, ALBUM_PREFIX)) {
+    GError error = {SW_SERVICE_ERROR,
+                    SW_SERVICE_ERROR_NOT_SUPPORTED,
+                    "Facebook collection IDs must start with 'facebook-'"};
+    dbus_g_method_return_error (context, &error);
+    return;
+  }
+
   call = rest_proxy_new_call (priv->proxy);
-  rest_proxy_call_set_function (call, collection_id);
+  rest_proxy_call_set_function (call, collection_id + strlen(ALBUM_PREFIX));
 
   rest_proxy_call_async (call,
                          (RestProxyCallAsyncCallback)_get_album_details_cb,
