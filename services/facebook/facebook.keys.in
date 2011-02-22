@@ -1,0 +1,11 @@
+[LibSocialWebService]
+_Name=Facebook
+_Description=Facebook helps you connect and share with the people in your life.
+Link=http://www.facebook.com/
+AuthType=oauth2-facebook
+
+[OAuth2]
+BaseUri=https://graph.facebook.com
+BaseVideoUri=https://api-video.facebook.com
+AuthEndpoint=https://graph.facebook.com/oauth/authorize
+AuthRedirectUri=http://www.facebook.com/connect/login_success.html

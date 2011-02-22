@@ -1,5 +1,9 @@
 SUBDIRS = dummy
 
+if WITH_FACEBOOK
+SUBDIRS += facebook
+endif
+
 if WITH_FLICKR
 SUBDIRS += flickr
 endif
@@ -30,4 +34,7 @@ endif
 
 if WITH_MYSPACE
 SUBDIRS += myspace
+
+if WITH_SMUGMUG
+SUBDIRS += smugmug
 endif

@@ -125,6 +125,7 @@ AS_IF(
 AC_ARG_ENABLE([all-services],[AS_HELP_STRING([--enable-all-services], [enable every service])],
               [], [enable_all_services=no])
 
+SOCIALWEB_ENABLE_SERVICE(Facebook, facebook, FACEBOOK)
 SOCIALWEB_ENABLE_SERVICE(Flickr, flickr, FLICKR)
 SOCIALWEB_ENABLE_SERVICE(Last.fm, lastfm, LASTFM)
 SOCIALWEB_ENABLE_SERVICE(Twitter, twitter, TWITTER)
@@ -133,6 +134,7 @@ SOCIALWEB_ENABLE_SERVICE(Plurk, plurk, PLURK)
 SOCIALWEB_ENABLE_SERVICE(Youtube, youtube, YOUTUBE)
 SOCIALWEB_ENABLE_SERVICE(Sina, sina, SINA)
 SOCIALWEB_ENABLE_SERVICE(Myspace, myspace, MYSPACE)
+SOCIALWEB_ENABLE_SERVICE(SumMug, smugmug, SMUGMUG)
 
 servicesdir='${libdir}'/libsocialweb/services
 AC_SUBST(servicesdir)
@@ -184,6 +186,7 @@ AC_OUTPUT([
         src/Makefile
         services/Makefile
         services/dummy/Makefile
+        services/facebook/Makefile
         services/flickr/Makefile
         services/lastfm/Makefile
         services/twitter/Makefile
@@ -192,6 +195,7 @@ AC_OUTPUT([
         services/youtube/Makefile
         services/sina/Makefile
         services/myspace/Makefile
+	services/smugmug/Makefile
         tests/Makefile
         tools/Makefile
         examples/Makefile
