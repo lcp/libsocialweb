@@ -128,10 +128,10 @@ AC_ARG_ENABLE([all-services],[AS_HELP_STRING([--enable-all-services], [enable ev
 SOCIALWEB_ENABLE_SERVICE(Facebook, facebook, FACEBOOK)
 SOCIALWEB_ENABLE_SERVICE(Flickr, flickr, FLICKR)
 SOCIALWEB_ENABLE_SERVICE(Last.fm, lastfm, LASTFM)
+SOCIALWEB_ENABLE_SERVICE(Plurk, plurk, PLURK)
+SOCIALWEB_ENABLE_SERVICE(SmugMug, smugmug, SMUGMUG)
 SOCIALWEB_ENABLE_SERVICE(Twitter, twitter, TWITTER)
 SOCIALWEB_ENABLE_SERVICE(Vimeo, vimeo, VIMEO)
-SOCIALWEB_ENABLE_SERVICE(SumMug, smugmug, SMUGMUG)
-SOCIALWEB_ENABLE_SERVICE(Plurk, plurk, PLURK)
 
 servicesdir='${libdir}'/libsocialweb/services
 AC_SUBST(servicesdir)
