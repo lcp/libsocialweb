@@ -13,7 +13,9 @@ pkgconfigdir   = $(libdir)/pkgconfig
 
 DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-gtk-doc \
-	--enable-all-services
+	--enable-all-services \
+	--enable-introspection \
+	--enable-vala-bindings
 
 EXTRA_DIST = intltool-extract.in intltool-merge.in intltool-update.in
 DISTCLEANFILES = intltool-extract intltool-merge intltool-update
