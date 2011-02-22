@@ -7,3 +7,4 @@ services/flickr/flickr.c
 services/flickr/flickr.keys.in
 services/vimeo/vimeo.keys.in
 services/facebook/facebook.keys.in
+services/smugmug/smugmug.keys.in
