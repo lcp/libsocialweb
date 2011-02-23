@@ -500,6 +500,7 @@ _myspace_status_update_update_status (SwStatusUpdateIface   *self,
   SwServiceMySpacePrivate *priv = myspace->priv;
   RestProxyCall *call;
   gchar *request_body;
+  gchar *escaped_msg;
 
   if (!priv->user_id)
     return;
@@ -508,11 +509,15 @@ _myspace_status_update_update_status (SwStatusUpdateIface   *self,
   rest_proxy_call_set_method (call, "PUT");
   rest_proxy_call_set_function (call, "1.0/statusmood/@me/@self");
 
-  request_body = g_strdup_printf ("{ \"status\":\"%s\" }", msg);
+  escaped_msg = g_markup_escape_text (msg, -1);
+  request_body = g_strdup_printf ("{ \"status\":\"%s\" }", escaped_msg);
   rest_proxy_call_set_body (call, request_body);
 
   rest_proxy_call_async (call, _update_status_cb, (GObject *)self, NULL, NULL);
   sw_status_update_iface_return_from_update_status (context);
+
+  g_free (request_body);
+  g_free (escaped_msg);
 }
 
 static void
