@@ -99,6 +99,21 @@ gboolean sw_service_is_uid_banned (SwService   *service,
                                    const gchar *uid);
 
 gboolean sw_service_has_cap (const char **caps, const char *cap);
+
+typedef struct {
+  char *lsw_param;
+  char *service_param;
+} ParameterNameMapping;
+
+typedef void (*SwServiceSetParamFunc) (gpointer object,
+                                       const gchar *param_name,
+                                       const gchar *patam_value);
+
+void sw_service_map_params (const ParameterNameMapping *mapping,
+                            GHashTable                 *parameters,
+                            SwServiceSetParamFunc       set_param_func,
+                            gpointer                    remote_call_object);
+
 G_END_DECLS
 
 #endif /* _SW_SERVICE */

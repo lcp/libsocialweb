@@ -259,4 +259,20 @@ sw_service_has_cap (const char **caps, const char *cap)
   return FALSE;
 }
 
+void
+sw_service_map_params (const ParameterNameMapping *mapping,
+                       GHashTable                 *parameters,
+                       SwServiceSetParamFunc       set_param_func,
+                       gpointer                    remote_call_object)
+{
+  const ParameterNameMapping *param;
 
+  g_return_if_fail (set_param_func != NULL);
+
+  for (param=mapping; param->lsw_param != NULL; param++) {
+    const char *value = g_hash_table_lookup (parameters, param->lsw_param);
+    if (value != NULL)
+      set_param_func (remote_call_object, param->service_param, value);
+  }
+
+}
