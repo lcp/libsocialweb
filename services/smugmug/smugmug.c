@@ -103,6 +103,53 @@ get_static_caps (SwService *service)
   return caps;
 }
 
+static RestXmlNode *
+node_from_call (RestProxyCall *call, GError **error)
+{
+  static RestXmlParser *parser = NULL;
+  RestXmlNode *node;
+
+  if (call == NULL)
+    return NULL;
+
+  if (parser == NULL)
+    parser = rest_xml_parser_new ();
+
+  if (!SOUP_STATUS_IS_SUCCESSFUL (rest_proxy_call_get_status_code (call))) {
+    g_set_error (error, SW_SERVICE_ERROR, SW_SERVICE_ERROR_REMOTE_ERROR,
+                 "HTTP error: %s (%d)",
+                 rest_proxy_call_get_status_message (call),
+                 rest_proxy_call_get_status_code (call));
+    return NULL;
+  }
+
+  node = rest_xml_parser_parse_from_data (parser,
+                                          rest_proxy_call_get_payload (call),
+                                          rest_proxy_call_get_payload_length (call));
+
+  /* Invalid XML, or incorrect root */
+  if (node == NULL || !g_str_equal (node->name, "rsp")) {
+    g_set_error (error, SW_SERVICE_ERROR, SW_SERVICE_ERROR_REMOTE_ERROR,
+                 "malformed remote response: %s",
+                 rest_proxy_call_get_payload (call));
+    if (node)
+      rest_xml_node_unref (node);
+    return NULL;
+  }
+
+  if (g_strcmp0 (rest_xml_node_get_attr (node, "stat"), "ok") != 0) {
+    RestXmlNode *err;
+    err = rest_xml_node_find (node, "err");
+    g_set_error (error, SW_SERVICE_ERROR, SW_SERVICE_ERROR_REMOTE_ERROR,
+                 "remote SmugMug error: %s", err ?
+                 rest_xml_node_get_attr (err, "msg") : "unknown");
+    rest_xml_node_unref (node);
+    return NULL;
+  }
+
+  return node;
+}
+
 static void
 got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
 {
@@ -192,51 +239,6 @@ sw_service_smugmug_dispose (GObject *object)
   }
 
   G_OBJECT_CLASS (sw_service_smugmug_parent_class)->dispose (object);
-}
-
-static RestXmlNode *
-node_from_call (RestProxyCall *call)
-{
-  static RestXmlParser *parser = NULL;
-  RestXmlNode *node;
-
-  if (call == NULL)
-    return NULL;
-
-  if (parser == NULL)
-    parser = rest_xml_parser_new ();
-
-  if (!SOUP_STATUS_IS_SUCCESSFUL (rest_proxy_call_get_status_code (call))) {
-    g_warning (G_STRLOC ": error from SmugMug: %s (%d)",
-               rest_proxy_call_get_status_message (call),
-               rest_proxy_call_get_status_code (call));
-    return NULL;
-  }
-
-  node = rest_xml_parser_parse_from_data (parser,
-                                          rest_proxy_call_get_payload (call),
-                                          rest_proxy_call_get_payload_length (call));
-  g_object_unref (call);
-
-  /* Invalid XML, or incorrect root */
-  if (node == NULL || !g_str_equal (node->name, "rsp")) {
-    g_warning (G_STRLOC ": cannot make SmugMug call");
-    /* TODO: display the payload if its short */
-    if (node) rest_xml_node_unref (node);
-    return NULL;
-  }
-
-  if (g_strcmp0 (rest_xml_node_get_attr (node, "stat"), "ok") != 0) {
-    RestXmlNode *err;
-    err = rest_xml_node_find (node, "err");
-    if (err)
-      g_warning (G_STRLOC ": cannot make SmugMug call: %s",
-                 rest_xml_node_get_attr (err, "msg"));
-    rest_xml_node_unref (node);
-    return NULL;
-  }
-
-  return node;
 }
 
 static gint
@@ -417,14 +419,27 @@ _list_albums_cb (RestProxyCall *call,
                  gpointer       user_data)
 {
   DBusGMethodInvocation *context = (DBusGMethodInvocation *) user_data;
-  RestXmlNode *root;
+  RestXmlNode *root = NULL;
   RestXmlNode *album;
-  GPtrArray *rv = g_ptr_array_new_with_free_func (
-      (GDestroyNotify )g_value_array_free);
+  GPtrArray *rv;
+  GError *err = NULL;
 
-  root = node_from_call (call);
+  if (error != NULL)
+    err = g_error_new (SW_SERVICE_ERROR, SW_SERVICE_ERROR_REMOTE_ERROR,
+                       "rest call failed: %s", error->message);
 
-  g_return_if_fail (root != NULL);
+  if (err == NULL)
+    root = node_from_call (call, &err);
+
+  if (err != NULL) {
+    dbus_g_method_return_error (context, err);
+    g_error_free (err);
+    if (root != NULL)
+      rest_xml_node_unref (root);
+    return;
+  }
+
+  rv = g_ptr_array_new_with_free_func ((GDestroyNotify )g_value_array_free);
 
   album = rest_xml_node_find (root, "Album");
 
@@ -469,9 +484,27 @@ _create_album_cb (RestProxyCall *call,
     gpointer       user_data)
 {
   DBusGMethodInvocation *context = (DBusGMethodInvocation *) user_data;
-  RestXmlNode *root = node_from_call (call);
-  RestXmlNode *album = rest_xml_node_find (root, "Album");
+  RestXmlNode *root = NULL;
+  RestXmlNode *album;
   gchar *id;
+  GError *err = NULL;
+
+  if (error != NULL)
+    err = g_error_new (SW_SERVICE_ERROR, SW_SERVICE_ERROR_REMOTE_ERROR,
+                       "rest call failed: %s", error->message);
+
+  if (err == NULL)
+    root = node_from_call (call, &err);
+
+  if (err != NULL) {
+    dbus_g_method_return_error (context, err);
+    g_error_free (err);
+    if (root != NULL)
+      rest_xml_node_unref (root);
+    return;
+  }
+
+  album = rest_xml_node_find (root, "Album");
 
   id = g_strdup_printf ("%s%s_%s", ALBUM_PREFIX,
                         (gchar *) g_hash_table_lookup (album->attrs, "Key"),
@@ -528,8 +561,26 @@ _get_album_details_cb (RestProxyCall *call,
 {
   DBusGMethodInvocation *context = (DBusGMethodInvocation *) user_data;
   GValueArray *collection_details;
-  RestXmlNode *root = node_from_call (call);
-  RestXmlNode *album = rest_xml_node_find (root, "Album");
+  RestXmlNode *root = NULL;
+  RestXmlNode *album;
+  GError *err = NULL;
+
+  if (error != NULL)
+    err = g_error_new (SW_SERVICE_ERROR, SW_SERVICE_ERROR_REMOTE_ERROR,
+                       "rest call failed: %s", error->message);
+
+  if (err == NULL)
+    root = node_from_call (call, &err);
+
+  if (err != NULL) {
+    dbus_g_method_return_error (context, err);
+    g_error_free (err);
+    if (root != NULL)
+      rest_xml_node_unref (root);
+    return;
+  }
+
+  album = rest_xml_node_find (root, "Album");
 
   collection_details = _extract_collection_details_from_xml (album);
 
