@@ -75,6 +75,9 @@ struct _SwServiceSmugmugPrivate {
   RestProxy *rest_proxy;
   RestProxy *upload_proxy;
   RestProxy *auth_proxy;
+
+  gboolean configured;
+  gboolean authorized;
 };
 
 enum {
@@ -101,6 +104,31 @@ get_static_caps (SwService *service)
   };
 
   return caps;
+}
+
+static const char **
+get_dynamic_caps (SwService *service)
+{
+  SwServiceSmugmugPrivate *priv = GET_PRIVATE (service);
+  static const char *configured_caps[] = {
+    IS_CONFIGURED,
+    NULL
+  };
+
+  static const char *authorized_caps[] = {
+    IS_CONFIGURED,
+    CREDENTIALS_VALID,
+    NULL
+  };
+
+  static const char *no_caps[] = { NULL };
+
+  if (priv->authorized)
+    return authorized_caps;
+  else if (priv->configured)
+    return configured_caps;
+  else
+    return no_caps;
 }
 
 static RestXmlNode *
@@ -151,12 +179,42 @@ node_from_call (RestProxyCall *call, GError **error)
 }
 
 static void
-got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
+_check_access_token_cb (RestProxyCall *call,
+                        const GError  *error,
+                        GObject       *weak_object,
+                        gpointer       user_data)
 {
-  SwServiceSmugmug *self = (SwServiceSmugmug *) user_data;
+  RestXmlNode *root;
+  GError *err = NULL;
+  SwServiceSmugmug *self = SW_SERVICE_SMUGMUG (weak_object);
+  SwService *service = SW_SERVICE (self);
   SwServiceSmugmugPrivate *priv = self->priv;
 
-  SW_DEBUG (SMUGMUG, "%sauthorized", authorised ? "" : "un");
+  root = node_from_call (call, &err);
+
+  priv->authorized = (root != NULL);
+
+  if (!priv->authorized) {
+    g_assert (err != NULL);
+    SW_DEBUG (SMUGMUG, "Invalid access token: %s", err->message);
+    g_error_free (err);
+  } else {
+    rest_xml_node_unref (root);
+  }
+
+  sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
+}
+
+static void
+got_tokens_cb (RestProxy *proxy, gboolean got_tokens, gpointer user_data)
+{
+  SwServiceSmugmug *self = (SwServiceSmugmug *) user_data;
+  SwService *service = SW_SERVICE (self);
+  SwServiceSmugmugPrivate *priv = self->priv;
+
+  priv->configured = got_tokens;
+
+  SW_DEBUG (SMUGMUG, "Got tokens: %s", got_tokens ? "yes" : "no");
 
   if (priv->rest_proxy != NULL)
     g_object_unref (priv->rest_proxy);
@@ -164,7 +222,8 @@ got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
   if (priv->upload_proxy != NULL)
     g_object_unref (priv->upload_proxy);
 
-  if (authorised) {
+  if (got_tokens) {
+    RestProxyCall *call;
     const gchar *token = oauth_proxy_get_token ((OAuthProxy *) proxy);
     const gchar *token_secret =
       oauth_proxy_get_token_secret ((OAuthProxy *) proxy);
@@ -182,17 +241,37 @@ got_tokens_cb (RestProxy *proxy, gboolean authorised, gpointer user_data)
                                                      token_secret,
                                                      UPLOAD_URL,
                                                      FALSE);
+
+    call = rest_proxy_new_call (priv->rest_proxy);
+    rest_proxy_call_add_param (call, "method",
+                               "smugmug.auth.checkAccessToken");
+
+    rest_proxy_call_async (call,
+                           _check_access_token_cb,
+                           G_OBJECT (self),
+                           NULL,
+                           NULL);
+
+    SW_DEBUG (SMUGMUG, "refcount %d", G_OBJECT (call)->ref_count);
+
+    g_object_unref (call);
   }
+
+  sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
 }
 
 static void
 online_notify (gboolean online, gpointer user_data)
 {
   SwServiceSmugmug *self = (SwServiceSmugmug *) user_data;
+  SwService *service = SW_SERVICE (self);
   SwServiceSmugmugPrivate *priv = self->priv;
 
   if (online) {
     sw_keyfob_oauth ((OAuthProxy *) priv->auth_proxy, got_tokens_cb, self);
+  } else {
+    priv->authorized = FALSE;
+    sw_service_emit_capabilities_changed (service, get_dynamic_caps (service));
   }
 }
 
@@ -201,12 +280,19 @@ online_notify (gboolean online, gpointer user_data)
  * the keyring.
  */
 static void
-refresh_credentials (SwServiceSmugmug *smugmug)
+refresh_credentials (SwServiceSmugmug *self)
 {
+  SwService *service = SW_SERVICE (self);
+  SwServiceSmugmugPrivate *priv = self->priv;
+
   SW_DEBUG (SMUGMUG, "Credentials updated");
 
-  online_notify (FALSE, (SwService *) smugmug);
-  online_notify (TRUE, (SwService *) smugmug);
+  priv->configured = FALSE;
+
+  sw_service_emit_user_changed (service);
+
+  online_notify (FALSE, service);
+  online_notify (TRUE, service);
 }
 
 /*
@@ -752,6 +838,7 @@ sw_service_smugmug_class_init (SwServiceSmugmugClass *klass)
 
   service_class->get_name = get_name;
   service_class->get_static_caps = get_static_caps;
+  service_class->get_dynamic_caps = get_dynamic_caps;
   service_class->credentials_updated = credentials_updated;
 }
 
