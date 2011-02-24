@@ -36,7 +36,8 @@ libsocialweb_ginterfaces_la_HEADERS = \
 	sw-avatar-ginterface.h \
 	sw-photo-upload-ginterface.h \
 	sw-banishable-ginterface.h \
-	sw-video-upload-ginterface.h
+	sw-video-upload-ginterface.h \
+	sw-collections-ginterface.h
 
 %-bindings.h: %.xml
 	$(AM_V_GEN)dbus-binding-tool --mode=glib-client --output=$@ --prefix=$(subst -,_,$*) $^
