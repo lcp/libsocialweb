@@ -12,6 +12,10 @@ if WITH_LASTFM
 SUBDIRS += lastfm
 endif
 
+if WITH_PHOTOBUCKET
+SUBDIRS += photobucket
+endif
+
 if WITH_PLURK
 SUBDIRS += plurk
 endif

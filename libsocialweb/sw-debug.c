@@ -38,6 +38,7 @@ sw_debug_init (const char *string)
     { "vimeo", SW_DEBUG_VIMEO },
     { "flickr", SW_DEBUG_FLICKR },
     { "smugmug", SW_DEBUG_SMUGMUG },
+    { "photobucket", SW_DEBUG_PHOTOBUCKET },
     { "client-monitor", SW_DEBUG_CLIENT_MONITOR }
   };
 

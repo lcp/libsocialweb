@@ -1,0 +1,11 @@
+[LibSocialWebService]
+_Name=Photobucket
+_Description=Snap and show it off! Photobucket makes it easy to share your photos and videos anywhere.
+Link=http://www.photobucket.com/
+AuthType=oauth
+
+[OAuth]
+BaseURL=http://api.photobucket.com/
+RequestTokenFunction=login/request
+AuthoriseFunction=http://photobucket.com/apilogin/login
+AccessTokenFunction=login/access
