@@ -1,28 +1,87 @@
 #
-# Pavel, 2010.
+# Pavel <>, 2010.
+# Marek Černocký <marek@manet.cz>, 2011.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-03-08 10:36+0000\n"
-"PO-Revision-Date: 2010-07-06 17:00+0200\n"
-"Last-Translator: Pavel\n"
-"Language-Team: Czech <kde-i18n-doc@kde.org>\n"
+"POT-Creation-Date: 2011-02-25 15:33+0000\n"
+"PO-Revision-Date: 2011-02-27 13:51+0100\n"
+"Last-Translator: Marek Černocký <marek@manet.cz>\n"
+"Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n!=1;\n"
-"X-Poedit-Language: German\n"
-"X-Poedit-SourceCharset: utf-8\n"
-"X-Generator: Lokalize 1.0\n"
+"Language: cs\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2\n"
+
+#: ../services/facebook/facebook.keys.in.h:1
+msgid "Facebook"
+msgstr "Facebook"
+
+#: ../services/facebook/facebook.keys.in.h:2
+msgid "Facebook helps you connect and share with the people in your life."
+msgstr ""
+"Facebook vám pomůže spojit se s lidmi vstupujícími do vašeho života a sdílet "
+"s nimi."
+
+#: ../services/flickr/flickr.keys.in.h:1
+msgid "Flickr"
+msgstr "Flickr"
+
+#: ../services/flickr/flickr.keys.in.h:2
+msgid ""
+"Flickr - almost certainly the best online photo management and sharing "
+"application in the world."
+msgstr ""
+"Flickr je skoro jistě nejlepším programem na světě pro správu fotografií a "
+"sdílení fotografií s ostatními lidmi."
+
+#. Translators "[track title] by [artist]"
+#: ../services/lastfm/lastfm-item-view.c:361
+#, c-format
+msgid "%s by %s"
+msgstr "%s od %s"
+
+#: ../services/lastfm/lastfm-item-view.c:365
+msgid "Unknown"
+msgstr "Neznámý"
 
 #: ../services/lastfm/lastfm.keys.in.h:1
 msgid "Last.fm"
 msgstr "Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
-msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm je služba internetového rádia, která se učí, co se vám líbí. Každá hraná skladba poví vašemu profilu u Last.fm něco o tom, co se vám líbí. Last.fm vás může spojit s dlšími lidmi, kteří mají podobné hudební chutě co vy a doporučit písničky z jejich a vaší hudební sbírky."
+msgid ""
+"Last.fm is a music service that learns what you love. Every track you play "
+"will tell your Last.fm profile something about what you like. It can connect "
+"you to other people who like what you like - and recommend songs from their "
+"music collections and yours too."
+msgstr ""
+"Last.fm je služba internetového rádia, která se učí, co se vám líbí. Každá "
+"hraná skladba poví vašemu profilu u Last.fm něco o tom, co se vám líbí. Last."
+"fm vás může spojit s dalšími lidmi, kteří mají podobné hudební chutě co vy a "
+"doporučit písničky z jejich a vaší hudební sbírky."
+
+#: ../services/smugmug/smugmug.keys.in.h:1
+msgid "SmugMug"
+msgstr "SmugMug"
+
+#: ../services/smugmug/smugmug.keys.in.h:2
+msgid ""
+"Your Photos Look Better Here. Billions of happy photos. Millions of "
+"passionate customers."
+msgstr ""
+"Vaše fotky zde budou vypadat lépe. Miliardy šťastných fotografií. Milióny "
+"zapálených zákazníků."
+
+#. This format is for tweets announcing twitpic URLs, "[tweet] [url]".
+#: ../services/twitter/twitter.c:772
+#, c-format
+#| msgid "%s by %s"
+msgid "%s %s"
+msgstr "%s %s"
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
@@ -32,40 +91,75 @@ msgstr "Twitter"
 # allows to communicate with one another by frequently sending short messages
 # answering one simple question: What are you doing?"
 #: ../services/twitter/twitter.keys.in.h:2
-msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter je společenskou sítí pro přátele, rodinu a spolupracovníky, kterým umožňuje dorozumívat se a zůstat spojeni navzájem, přičemž se často a rychle odpovídá na jednoduché otázky: Co teď děláš?"
+msgid ""
+"Twitter is a service for friends, family, and co–workers to communicate and "
+"stay connected through the exchange of quick, frequent answers to one simple "
+"question: What are you doing?"
+msgstr ""
+"Twitter je společenskou sítí pro přátele, rodinu a spolupracovníky, kterým "
+"umožňuje dorozumívat se a zůstat navzájem ve spojení, přičemž se často a "
+"rychle odpovídá na jednoduché otázky: Co teď děláš?"
 
-#: ../services/flickr/flickr.keys.in.h:1
-msgid "Flickr"
-msgstr "Flickr"
+#: ../services/vimeo/vimeo.keys.in.h:1
+msgid ""
+"From the beginning, Vimeo was created by filmmakers and video creators who "
+"wanted to share their creative work, along with intimate personal moments of "
+"their everyday life. As time went on, like-minded people came to the site "
+"and built a community of positive, encouraging individuals with a wide range "
+"of video interests. We hope that you feel inspired to show us both your "
+"creative side as well as your friendly side."
+msgstr ""
+"Vimeo bylo ze začátku zaměřeno na tvůrce filmů a autory videonahrávek, kteří "
+"chtějí sdílet svá díla, včetně těch ze svého soukromí každodenního života. "
+"Jak šel čas, přidávali se další stejně smýšlející lidé a vytvořili komunitu "
+"zapálených jedinců s širokou škálou zájmů o video. Doufáme, že jste "
+"inspirováni k tomu, abyste nám ukázali svého tvůrčího ducha i společenskou "
+"povahu."
 
-#: ../services/flickr/flickr.keys.in.h:2
-msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr "Flickr je skoro jistě nejlepším programem na světě pro správu fotografií a sdílení fotografií s ostatními lidmi."
+#: ../services/vimeo/vimeo.keys.in.h:2
+msgid "Vimeo"
+msgstr "Vimeo"
 
-#: ../services/myspace/myspace.keys.in.h:1
-msgid "MySpace"
-msgstr "MySpace"
+#: ../services/plurk/plurk.keys.in.h:1
+msgid "Plurk"
+msgstr "Plurk"
 
-#: ../services/myspace/myspace.keys.in.h:2
-msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace je vedoucí společenskou sítí, která dohromady spojuje lidi, obsah a kultury z celého světa. Vytvořte profil, zveřejňujte fotografie, videa, pište záznamy do svého deníku, povídejte si se svými přáteli a poslouchejte hudbu v největším hudebním společenství."
+#: ../services/plurk/plurk.keys.in.h:2
+msgid "Plurk is a web site that allows people to share ideas."
+msgstr "Plurk je webový server, který umožňuje lidem sdílet nápady."
 
-#: ../services/digg/digg.keys.in.h:1
-msgid "Digg"
-msgstr "Digg"
+#: ../services/sina/sina.keys.in.h:1
+msgid "Sina"
+msgstr "Sina"
 
-#. Translators "[track title] by [artist]"
-#: ../services/lastfm/lastfm.c:149
-#, c-format
-msgid "%s by %s"
-msgstr "%s od %s"
+#: ../services/sina/sina.keys.in.h:2
+msgid "Sina microblogging"
+msgstr "Mikroblogovací služba Sina."
 
-#: ../services/digg/digg.keys.in.h:2
-msgid "Digg - to share news, video and images"
-msgstr "Digg - pro sdílení zpráv, videí a obrázků"
+#: ../services/youtube/youtube.keys.in.h:1
+msgid "Youtube"
+msgstr "Youtube"
 
-#: ../services/lastfm/lastfm.c:153
-msgid "Unknown"
-msgstr "Neznámý"
+#: ../services/youtube/youtube.keys.in.h:2
+msgid "Youtube is a popular video sharing website"
+msgstr "Youtube je populární webový server pro sdílení videí."
 
+#~ msgid "MySpace"
+#~ msgstr "MySpace"
+
+#~ msgid ""
+#~ "MySpace is a leading social portal for connecting people, content, and "
+#~ "culture from around the world. Create a profile, share photos, "
+#~ "professional and viral videos, blog, instant message your friends, and "
+#~ "listen to music on the world’s largest music community."
+#~ msgstr ""
+#~ "MySpace je vedoucí společenskou sítí, která dohromady spojuje lidi, obsah "
+#~ "a kultury z celého světa. Vytvořte profil, zveřejňujte fotografie, videa, "
+#~ "pište záznamy do svého deníku, povídejte si se svými přáteli a "
+#~ "poslouchejte hudbu v největším hudebním společenství."
+
+#~ msgid "Digg"
+#~ msgstr "Digg"
+
+#~ msgid "Digg - to share news, video and images"
+#~ msgstr "Digg - pro sdílení zpráv, videí a obrázků"
