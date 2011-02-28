@@ -74,6 +74,7 @@ static const ParameterNameMapping upload_params[] = {
   { "x-flickr-safety-level", "safety_level" },
   { "x-flickr-content-type", "content_type" },
   { "x-flickr-hidden", "hidden" },
+  { "x-flickr-tags", "tags" },
   { NULL, NULL }
 };
 
