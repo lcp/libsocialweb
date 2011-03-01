@@ -66,8 +66,6 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceSmugmug, sw_service_smugmug, SW_TYPE_SERVICE,
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_SMUGMUG, SwServiceSmugmugPrivate))
 
-#define ALBUM_PREFIX "smugmug-"
-
 struct _SwServiceSmugmugPrivate {
   const gchar *api_key;
   const gchar *api_secret;
@@ -78,6 +76,18 @@ struct _SwServiceSmugmugPrivate {
 
   gboolean configured;
   gboolean authorized;
+};
+
+#define ALBUM_PREFIX "smugmug-"
+
+static const ParameterNameMapping upload_params[] = {
+  { "title", "Caption" },
+  { "x-smugmug-hidden", "Hidden" },
+  { "x-smugmug-altitude", "Altitude" },
+  { "x-smugmug-latitude", "Latitude" },
+  { "x-smugmug-longitude", "Longitude" },
+  { "x-smugmug-keywords", "Keywords" },
+  { NULL, NULL }
 };
 
 enum {
@@ -336,16 +346,15 @@ _upload_file (SwServiceSmugmug *self,
               GError **error)
 {
   SwServiceSmugmugPrivate *priv = self->priv;
-  RestProxyCall *call;
+  RestProxyCall *call = NULL;
   RestParam *param;
-  gchar *basename;
-  gchar *content_type;
-  gchar *bytecount;
-  GMappedFile *map;
-  gint opid;
-  GHashTableIter iter;
-  gpointer key, value;
-  GChecksum *checksum;
+  gchar *basename = NULL;
+  gchar *content_type = NULL;
+  gchar *bytecount = NULL;
+  gchar *collection_id = NULL;
+  GMappedFile *map = NULL;
+  gint opid = -1;
+  GChecksum *checksum = NULL;
 
   g_return_val_if_fail (priv->upload_proxy != NULL, -1);
 
@@ -353,7 +362,7 @@ _upload_file (SwServiceSmugmug *self,
   map = g_mapped_file_new (filename, FALSE, error);
   if (*error != NULL) {
     g_warning ("Error opening file %s: %s", filename, (*error)->message);
-    return -1;
+    goto OUT;
   }
 
   /* Get the file information */
@@ -377,30 +386,29 @@ _upload_file (SwServiceSmugmug *self,
   rest_proxy_call_add_param (call, "ResponseType", "REST");
   rest_proxy_call_add_param (call, "ByteCount", bytecount);
 
-  g_hash_table_iter_init (&iter, extra_fields);
-  while (g_hash_table_iter_next (&iter, &key, &value))
-    {
-      const gchar *param_key = key;
-      const gchar *param_value = value;
+  collection_id = g_hash_table_lookup (extra_fields, "collection");
 
-      if (g_strcmp0 (param_key, "collection") == 0)
-        {
-          const gchar *sep = g_strrstr (param_value, "_");
+  if (collection_id == NULL) {
+    g_set_error (error, SW_SERVICE_ERROR, SW_SERVICE_ERROR_NOT_SUPPORTED,
+                 "must provide a collection ID");
+    goto OUT;
+  } else if (!g_str_has_prefix (collection_id, ALBUM_PREFIX) ||
+             g_strstr_len (collection_id, -1, "_") == NULL) {
+    g_set_error (error, SW_SERVICE_ERROR, SW_SERVICE_ERROR_NOT_SUPPORTED,
+                 "collection (%s) must be in the format: %salbumkey_albumid",
+                 collection_id, ALBUM_PREFIX);
+    goto OUT;
+  } else {
+    rest_proxy_call_add_param (call, "AlbumID",
+                               g_strstr_len (collection_id, -1, "_") + 1);
+  }
 
-          if (sep == NULL)
-            g_warning ("'collections' param not valid (%s)", param_value);
-          else
-            rest_proxy_call_add_param (call, "AlbumID", sep + 1);
-        }
-      else if (upload_type != VIDEO && g_strcmp0 (param_key, "title") == 0)
-        {
-          rest_proxy_call_add_param (call, "Caption", param_value);
-        }
-      else if (strlen (param_value) > 0)
-        {
-          rest_proxy_call_add_param (call, param_key, param_value);
-        }
-    }
+
+  sw_service_map_params (upload_params, extra_fields,
+                         (SwServiceSetParamFunc) rest_proxy_call_add_param,
+                         call);
+
+  g_mapped_file_ref (map);
 
   param = rest_param_new_with_owner (basename,
                                      g_mapped_file_get_contents (map),
@@ -424,11 +432,16 @@ _upload_file (SwServiceSmugmug *self,
                          GINT_TO_POINTER (opid),
                          NULL);
 
+ OUT:
   g_free (basename);
   g_free (content_type);
   g_free (bytecount);
-  g_checksum_free (checksum);
-  g_object_unref (call);
+  if (checksum != NULL)
+    g_checksum_free (checksum);
+  if (call != NULL)
+    g_object_unref (call);
+  if (map != NULL)
+    g_mapped_file_unref (map);
 
   return opid;
 }

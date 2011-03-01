@@ -65,6 +65,19 @@ struct _SwServiceFlickrPrivate {
   gboolean authorised; /* Set if the tokens are valid */
 };
 
+static const ParameterNameMapping upload_params[] = {
+  { "title", "title" },
+  { "description", "description" },
+  { "x-flickr-is-public", "is_public" },
+  { "x-flickr-is-friend", "is_friend" },
+  { "x-flickr-is-family", "is_family" },
+  { "x-flickr-safety-level", "safety_level" },
+  { "x-flickr-content-type", "content_type" },
+  { "x-flickr-hidden", "hidden" },
+  { "x-flickr-tags", "tags" },
+  { NULL, NULL }
+};
+
 static const char **
 get_static_caps (SwService *service)
 {
@@ -364,16 +377,6 @@ query_iface_init (gpointer g_iface,
                                       _flickr_query_open_view);
 }
 
-/* If @param_name exists in the DBus parameters, set @flickr_name on the
-   RestProxyCall */
-#define MAP_PARAM(param_name, flickr_name)                      \
-  {                                                             \
-    const char *param;                                          \
-    param = g_hash_table_lookup (params_in, param_name);        \
-    if (param)                                                  \
-      rest_proxy_call_add_param (call, flickr_name, param);     \
-  }
-
 static gint
 _flickr_upload (SwServiceFlickr           *self,
                 const gchar               *filename,
@@ -393,11 +396,9 @@ _flickr_upload (SwServiceFlickr           *self,
     return -1;
   }
 
-  /* Now add the parameters that we support */
-  MAP_PARAM ("title", "title");
-  MAP_PARAM ("x-flickr-is-public", "is_public");
-  MAP_PARAM ("x-flickr-is-friend", "is_friend");
-  MAP_PARAM ("x-flickr-is-family", "is_family");
+  sw_service_map_params (upload_params, params_in,
+                         (SwServiceSetParamFunc) rest_proxy_call_add_param,
+                         call);
 
   opid = sw_next_opid ();
 

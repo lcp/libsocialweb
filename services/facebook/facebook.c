@@ -77,23 +77,6 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceFacebook,
 
 #define GET_PRIVATE(o) (((SwServiceFacebook *) o)->priv)
 
-/* Inspired by services/flickr/flickr.c
-   TODO: This is a useful macro, it should live in lsw */
-#define MAP_PARAM(_call, _fields, _lsw_param, _service_param)      \
-  {                                                                \
-    const char *param = g_hash_table_lookup (_fields, _lsw_param); \
-    if (param)                                                     \
-      rest_proxy_call_add_param (_call, _service_param, param);    \
-  }
-
-#define ALBUM_PREFIX "facebook-"
-
-enum {
-  COLLECTION = 1,
-  PHOTO = 2,
-  VIDEO = 4
-} typedef MediaType;
-
 struct _SwServiceFacebookPrivate {
   gboolean inited;
   gboolean online;
@@ -104,6 +87,31 @@ struct _SwServiceFacebookPrivate {
   char *profile_url;
   char *pic_square;
 };
+
+static const ParameterNameMapping photo_upload_params[] = {
+  { "title", "message" },
+  { NULL, NULL }
+};
+
+static const ParameterNameMapping video_upload_params[] = {
+  { "title", "title" },
+  { "description", "description" },
+  { "x-facebook-privacy", "privacy" },
+  { NULL, NULL }
+};
+
+static const ParameterNameMapping album_create_params[] = {
+  { "x-facebook-privacy", "privacy" },
+  { NULL, NULL }
+}
+  ;
+#define ALBUM_PREFIX "facebook-"
+
+enum {
+  COLLECTION = 1,
+  PHOTO = 2,
+  VIDEO = 4
+} typedef MediaType;
 
 static GList *service_list;
 static const char **
@@ -617,6 +625,8 @@ _upload_file (SwServiceFacebook           *self,
     const gchar *album = g_hash_table_lookup (fields, "collection");
     gchar *function;
 
+    call = rest_proxy_new_call (priv->proxy);
+
     if (album != NULL) {
       if (!g_str_has_prefix(album, ALBUM_PREFIX)) {
         g_set_error (error,
@@ -628,16 +638,16 @@ _upload_file (SwServiceFacebook           *self,
       }
 
       function = g_strdup_printf ("%s/photos", album + strlen (ALBUM_PREFIX));
+      rest_proxy_call_set_function (call, function);
+
+      g_free (function);
     } else {
-      function = g_strdup ("me/photos");
+      rest_proxy_call_set_function (call, "me/photos");
     }
 
-    call = rest_proxy_new_call (priv->proxy);
-    rest_proxy_call_set_function (call, function);
-
-    MAP_PARAM (call, fields, "title", "message");
-
-    g_free (function);
+    sw_service_map_params (photo_upload_params, fields,
+                           (SwServiceSetParamFunc) rest_proxy_call_add_param,
+                           call);
   } else if (upload_type == VIDEO ) {
     call = rest_proxy_new_call (priv->video_proxy);
     rest_proxy_call_set_function (call,
@@ -646,9 +656,9 @@ _upload_file (SwServiceFacebook           *self,
                                oauth2_proxy_get_access_token (OAUTH2_PROXY (priv->proxy)));
     rest_proxy_call_add_param (call, "format", "json");
 
-    MAP_PARAM (call, fields, "title", "title");
-    MAP_PARAM (call, fields, "description", "description");
-    MAP_PARAM (call, fields, "x-facebook-privacy", "privacy");
+    sw_service_map_params (video_upload_params, fields,
+                           (SwServiceSetParamFunc) rest_proxy_call_add_param,
+                           call);
   } else {
     g_warning ("invalid upload_type: %d", upload_type);
     goto OUT;
@@ -978,16 +988,16 @@ _facebook_collections_create (SwCollectionsIface    *self,
 
   if (strlen (collection_parent) != 0) {
     GError error = {SW_SERVICE_ERROR,
-                    SW_SERVICE_ERROR_NOT_SUPPORTED,
-                    "Facebook does not support nested albums."};
+                  SW_SERVICE_ERROR_NOT_SUPPORTED,
+                  "Facebook does not support nested albums."};
     dbus_g_method_return_error (context, &error);
     return;
   }
 
   if (supported_types != PHOTO) {
     GError error = {SW_SERVICE_ERROR,
-                    SW_SERVICE_ERROR_NOT_SUPPORTED,
-                    "Facebook albums can only contain photos."};
+                  SW_SERVICE_ERROR_NOT_SUPPORTED,
+                  "Facebook albums can only contain photos."};
     dbus_g_method_return_error (context, &error);
     return;
   }
@@ -996,7 +1006,9 @@ _facebook_collections_create (SwCollectionsIface    *self,
 
   rest_proxy_call_set_function (call, "me/albums");
 
-  MAP_PARAM (call, extra_fields, "x-facebook-privacy", "privacy");
+  sw_service_map_params (album_create_params, extra_fields,
+                         (SwServiceSetParamFunc) rest_proxy_call_add_param,
+                         call);
 
   rest_proxy_call_add_param (call, "name", collection_name);
   rest_proxy_call_set_method (call, "POST");

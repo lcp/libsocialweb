@@ -24,6 +24,8 @@ sw_service_emit_capabilities_changed
 sw_service_emit_user_changed
 sw_service_is_uid_banned
 sw_service_has_cap
+SwServiceSetParamFunc
+sw_service_map_params
 <SUBSECTION Standard>
 SW_SERVICE
 SW_IS_SERVICE
