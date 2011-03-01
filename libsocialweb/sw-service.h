@@ -84,6 +84,7 @@ struct _SwServiceClass {
 #define HAS_VIDEO_UPLOAD_IFACE "has-video-upload-iface"
 #define HAS_BANISHABLE_IFACE "has-banishable-iface"
 #define HAS_QUERY_IFACE "has-query-iface"
+#define HAS_COLLECTIONS_IFACE "has-collections-iface"
 
 #define CAN_UPDATE_STATUS_WITH_GEOTAG "can-update-status-with-geotag"
 
