@@ -124,6 +124,7 @@ get_static_caps (SwService *service)
     HAS_QUERY_IFACE,
     HAS_PHOTO_UPLOAD_IFACE,
     HAS_VIDEO_UPLOAD_IFACE,
+    HAS_COLLECTIONS_IFACE,
 
     /* deprecated */
     CAN_UPDATE_STATUS,
