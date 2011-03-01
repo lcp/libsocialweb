@@ -259,6 +259,19 @@ sw_service_has_cap (const char **caps, const char *cap)
   return FALSE;
 }
 
+/**
+ * sw_service_map_params:
+ * @mapping: An array of #ParameterNameMapping pairs.
+ * @parameters: The #GHashtable of given parameters.
+ * @set_param_func: A #SwServiceSetParamFunc that sets a name/value association
+ *  on the given object.
+ * @remote_call_object: The remote call or hash table object that
+ *  @set_param_func takes as a first parameter.
+ *
+ * Re-map a group of parameters with alternative parameter names.
+ * Used for converting lsw parameter names to service-specific ones.
+ */
+
 void
 sw_service_map_params (const ParameterNameMapping *mapping,
                        GHashTable                 *parameters,

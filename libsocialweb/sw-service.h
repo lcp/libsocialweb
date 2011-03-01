@@ -105,9 +105,21 @@ typedef struct {
   char *service_param;
 } ParameterNameMapping;
 
+/**
+ * SwServiceSetParamFunc:
+ * @object: A remote call or hash object that can store key/value pairs.
+ * @param_name: The parameter name.
+ * @param_value: The parameter value.
+ *
+ * This type signature reflects a function that sets a name/value association
+ * on a given object. Functions such as g_hash_table_insert and
+ * rest_proxy_call_add_param are good examples.
+ */
+
+
 typedef void (*SwServiceSetParamFunc) (gpointer object,
                                        const gchar *param_name,
-                                       const gchar *patam_value);
+                                       const gchar *param_value);
 
 void sw_service_map_params (const ParameterNameMapping *mapping,
                             GHashTable                 *parameters,
