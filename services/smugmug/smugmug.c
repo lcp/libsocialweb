@@ -703,7 +703,18 @@ _smugmug_collections_get_details (SwCollectionsIface *self,
 
   g_return_if_fail (priv->rest_proxy != NULL);
 
-  id = g_strsplit (collection_id, "_", 2);
+  if (!g_str_has_prefix(collection_id, ALBUM_PREFIX)) {
+    GError *error =
+      g_error_new (SW_SERVICE_ERROR,
+                   SW_SERVICE_ERROR_NOT_SUPPORTED,
+                   "SmugMug collection ID (%s) must start with '%s'",
+                   collection_id, ALBUM_PREFIX);
+    dbus_g_method_return_error (context, error);
+    g_error_free (error);
+    return;
+  }
+
+  id = g_strsplit (collection_id + strlen (ALBUM_PREFIX), "_", 2);
 
   if (g_strv_length (id) != 2) {
     g_warning ("invalid collection id");
