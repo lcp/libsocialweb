@@ -1,12 +1,13 @@
 #  Tomás Galicia <tomas.galicia@intel.com>
-#  Djavan Fagundes <djavan@syst.com.br>
+#  Djavan Fagundes <djavan@syst.com.br>, 2010.
+#  Felipe Borges <felipe10borges@gmail.com>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-04-28 09:43+0000\n"
+"POT-Creation-Date: 2011-02-25 15:33+0000\n"
 "PO-Revision-Date: \n"
-"Last-Translator: Djavan Fagundes <djavan@syst.com.br>\n"
+"Last-Translator: Felipe Borges <felipe10borges@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,21 +15,35 @@ msgstr ""
 "X-Poedit-Language: Portuguese\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ../services/digg/digg.keys.in.h:1
-msgid "Digg"
-msgstr "Digg"
+#: ../services/facebook/facebook.keys.in.h:1
+msgid "Facebook"
+msgstr "Facebook"
 
-#: ../services/digg/digg.keys.in.h:2
-msgid "Digg - to share news, video and images"
-msgstr "Digg - para compartilhar notícias, vídeos e imagens"
+#: ../services/facebook/facebook.keys.in.h:2
+msgid "Facebook helps you connect and share with the people in your life."
+msgstr ""
+"No Facebook você pode se conectar e compartilhar o que quiser com quem é "
+"importante em sua vida."
+
+#: ../services/flickr/flickr.keys.in.h:1
+msgid "Flickr"
+msgstr "Flickr"
+
+#: ../services/flickr/flickr.keys.in.h:2
+msgid ""
+"Flickr - almost certainly the best online photo management and sharing "
+"application in the world."
+msgstr ""
+"O Flickr - é com certeza o melhor aplicativo de gerenciamento e "
+"compartilhamento de fotos online do mundo."
 
 #. Translators "[track title] by [artist]"
-#: ../services/lastfm/lastfm.c:149
+#: ../services/lastfm/lastfm-item-view.c:361
 #, c-format
 msgid "%s by %s"
 msgstr "%s por %s"
 
-#: ../services/lastfm/lastfm.c:153
+#: ../services/lastfm/lastfm-item-view.c:365
 msgid "Unknown"
 msgstr "Desconhecido"
 
@@ -43,10 +58,28 @@ msgid ""
 "you to other people who like what you like - and recommend songs from their "
 "music collections and yours too."
 msgstr ""
-"O Last.fm é um serviço de música que vai aprendendo o que você curte. Cada trilha que "
-"você reproduzir, vai ajudando a montar o seu perfil Last.fm. "
-"Ele pode te conectar com pessoas que gostam do que você gosta - e recomenda "
+"O Last.fm é um serviço de música que vai aprendendo o que você curte. Cada "
+"trilha que você reproduzir, vai ajudando a montar o seu perfil Last.fm. Ele "
+"pode te conectar com pessoas que gostam do que você gosta - e recomenda "
 "canções de sua coleção para eles e vice-versa."
+
+#: ../services/smugmug/smugmug.keys.in.h:1
+msgid "SmugMug"
+msgstr "SmugMug"
+
+#: ../services/smugmug/smugmug.keys.in.h:2
+msgid ""
+"Your Photos Look Better Here. Billions of happy photos. Millions of "
+"passionate customers."
+msgstr ""
+"Suas fotos ficam melhores aqui. Bilhões de fotos alegres. Milhões de "
+"usuários apaixonados."
+
+#. This format is for tweets announcing twitpic URLs, "[tweet] [url]".
+#: ../services/twitter/twitter.c:772
+#, c-format
+msgid "%s %s"
+msgstr "%s %s"
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
@@ -58,34 +91,51 @@ msgid ""
 "stay connected through the exchange of quick, frequent answers to one simple "
 "question: What are you doing?"
 msgstr ""
-"O Twitter é um serviço para amigos, família e colegas de trabalho para comunicarem-se "
-"e manter conectado através da troca rápidas e frequentes de respostas a uma "
-"pergunta básica: O que você está fazendo?"
+"O Twitter é um serviço para amigos, família e colegas de trabalho para "
+"comunicarem-se e manter conectado através da troca rápidas e frequentes de "
+"respostas a uma pergunta básica: O que você está fazendo?"
 
-#: ../services/flickr/flickr.keys.in.h:1
-msgid "Flickr"
-msgstr "Flickr"
-
-#: ../services/flickr/flickr.keys.in.h:2
+#: ../services/vimeo/vimeo.keys.in.h:1
 msgid ""
-"Flickr - almost certainly the best online photo management and sharing "
-"application in the world."
+"From the beginning, Vimeo was created by filmmakers and video creators who "
+"wanted to share their creative work, along with intimate personal moments of "
+"their everyday life. As time went on, like-minded people came to the site "
+"and built a community of positive, encouraging individuals with a wide range "
+"of video interests. We hope that you feel inspired to show us both your "
+"creative side as well as your friendly side."
 msgstr ""
-"O Flickr - é com certeza o melhor aplicativo de gerenciamento e "
-"compartilhamento de fotos online do mundo."
+"Desde o início, o Vimeo foi criado por cineasta e criadores de vídeos que "
+"queriam compartilhar seus trabalhos juntamente com momentos pessoais de suas "
+"vidas. Com o passar do tempo, pessoas parecidas chegaram ao site e "
+"construíram uma comunidade, encorajando indivíduos com uma vasta gama de "
+"interesses. Nos desejamos que você se sinta inspirado a mostrar-nos o seu "
+"lado criativo, bem como o seu lado amigável."
 
-#: ../services/myspace/myspace.keys.in.h:1
-msgid "MySpace"
-msgstr "MySpace"
+#: ../services/vimeo/vimeo.keys.in.h:2
+msgid "Vimeo"
+msgstr "Vimeo"
 
-#: ../services/myspace/myspace.keys.in.h:2
-msgid ""
-"MySpace is a leading social portal for connecting people, content, and "
-"culture from around the world. Create a profile, share photos, professional "
-"and viral videos, blog, instant message your friends, and listen to music on "
-"the world’s largest music community."
-msgstr ""
-"MySpace é um portal social para conexão de pessoas, conteúdo e cultura de "
-"todo o mundo. Crie um perfil, compartilhe fotos, vídeos profissionais e "
-"virais, blog, mande mensagens instantâneas e ouça músicas da maior "
-"comunidade de música do mundo."
+#: ../services/plurk/plurk.keys.in.h:1
+msgid "Plurk"
+msgstr "Plurk"
+
+#: ../services/plurk/plurk.keys.in.h:2
+msgid "Plurk is a web site that allows people to share ideas."
+msgstr "Plurk é um site que possibilita que as pessoas compartilhem ideias."
+
+#: ../services/sina/sina.keys.in.h:1
+msgid "Sina"
+msgstr "Sina"
+
+#: ../services/sina/sina.keys.in.h:2
+msgid "Sina microblogging"
+msgstr "Sina microblogging"
+
+#: ../services/youtube/youtube.keys.in.h:1
+msgid "Youtube"
+msgstr "Youtube"
+
+#: ../services/youtube/youtube.keys.in.h:2
+msgid "Youtube is a popular video sharing website"
+msgstr "O Youtube é um site popular de compartilhamento de vídeos"
+
