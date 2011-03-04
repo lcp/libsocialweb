@@ -51,20 +51,20 @@
 #define REST_URL "https://secure.smugmug.com/services/api/rest/1.2.2/"
 #define UPLOAD_URL "http://upload.smugmug.com/photos/xmladd.mg"
 
+static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void collections_iface_init (gpointer g_iface, gpointer iface_data);
 static void photo_upload_iface_init (gpointer g_iface, gpointer iface_data);
 static void video_upload_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (SwServiceSmugmug, sw_service_smugmug, SW_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                initable_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_COLLECTIONS_IFACE,
                                                 collections_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_PHOTO_UPLOAD_IFACE,
                                                 photo_upload_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_VIDEO_UPLOAD_IFACE,
                                                 video_upload_iface_init));
-
-#define GET_PRIVATE(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_SMUGMUG, SwServiceSmugmugPrivate))
 
 struct _SwServiceSmugmugPrivate {
   const gchar *api_key;
@@ -76,6 +76,7 @@ struct _SwServiceSmugmugPrivate {
 
   gboolean configured;
   gboolean authorized;
+  gboolean inited;
 };
 
 #define ALBUM_PREFIX "smugmug-"
@@ -119,7 +120,8 @@ get_static_caps (SwService *service)
 static const char **
 get_dynamic_caps (SwService *service)
 {
-  SwServiceSmugmugPrivate *priv = GET_PRIVATE (service);
+  SwServiceSmugmugPrivate *priv = SW_SERVICE_SMUGMUG (service)->priv;
+
   static const char *configured_caps[] = {
     IS_CONFIGURED,
     NULL
@@ -853,19 +855,49 @@ sw_service_smugmug_class_init (SwServiceSmugmugClass *klass)
   service_class->credentials_updated = credentials_updated;
 }
 
-static void
-sw_service_smugmug_init (SwServiceSmugmug *self)
+static gboolean
+sw_service_smugmug_initable (GInitable     *initable,
+                             GCancellable  *cancellable,
+                             GError       **error)
 {
-  SwServiceSmugmugPrivate *priv;
+  SwServiceSmugmug *self = SW_SERVICE_SMUGMUG (initable);
+  SwServiceSmugmugPrivate *priv = self->priv;
 
-  priv = self->priv = GET_PRIVATE (self);
+  if (priv->inited)
+    return TRUE;
 
   sw_keystore_get_key_secret ("smugmug", &priv->api_key, &priv->api_secret);
 
+  if (priv->api_key == NULL || priv->api_secret == NULL) {
+    g_set_error_literal (error,
+                         SW_SERVICE_ERROR,
+                         SW_SERVICE_ERROR_NO_KEYS,
+                         "No API or secret key configured");
+    return FALSE;
+  }
+
+  priv->inited = TRUE;
+
   priv->auth_proxy = oauth_proxy_new (priv->api_key, priv->api_secret,
                                       OAUTH_URL, FALSE);
-
   sw_online_add_notify (online_notify, self);
-
   refresh_credentials (self);
+
+  return TRUE;
+}
+
+static void
+initable_iface_init (gpointer g_iface, gpointer iface_data)
+{
+  GInitableIface *klass = (GInitableIface *)g_iface;
+
+  klass->init = sw_service_smugmug_initable;
+}
+
+static void
+sw_service_smugmug_init (SwServiceSmugmug *self)
+{
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+                                            SW_TYPE_SERVICE_SMUGMUG,
+                                            SwServiceSmugmugPrivate);
 }
