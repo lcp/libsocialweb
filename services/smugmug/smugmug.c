@@ -262,8 +262,6 @@ got_tokens_cb (RestProxy *proxy, gboolean got_tokens, gpointer user_data)
                            NULL,
                            NULL);
 
-    SW_DEBUG (SMUGMUG, "refcount %d", G_OBJECT (call)->ref_count);
-
     g_object_unref (call);
   }
 
