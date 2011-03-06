@@ -1,39 +1,48 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Swedish translation for libsocialweb
+# Copyright (C) 2010, 2011 Free Software Foundation, Inc.
+# This file is distributed under the same license as the libsocialweb package.
+# Annika <AnnikaNbpt@gmail.com>, 2010.
+# Daniel Nylander <po@danielnylander.se>, 2011.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: MediaMonkey 2.2\n"
+"Project-Id-Version: libsocialweb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-03-10 10:36+0000\n"
-"PO-Revision-Date: 2010-03-10 12:48-0500\n"
-"Last-Translator: Annika <AnnikaNbpt@gmail.com>\n"
-"Language-Team: \n"
+"POT-Creation-Date: 2011-03-06 20:34+0100\n"
+"PO-Revision-Date: 2011-03-06 20:39+0100\n"
+"Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
+"Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n!=1;\n"
 "X-Poedit-Language: Swedish\n"
-"X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: C:\\Clients\\Intel\\Moblin\\PART 2\n"
 
-#: ../services/digg/digg.keys.in.h:1
-msgid "Digg"
-msgstr "Digg"
+#: ../services/facebook/facebook.keys.in.h:1
+msgid "Facebook"
+msgstr "Facebook"
 
-#: ../services/digg/digg.keys.in.h:2
-msgid "Digg - to share news, video and images"
-msgstr "Digg - dela med dig av nyheter, video och bilder"
+#: ../services/facebook/facebook.keys.in.h:2
+msgid "Facebook helps you connect and share with the people in your life."
+msgstr "Facebook hjälper dig att komma i kontakt med och dela med personer i ditt liv."
+
+#: ../services/flickr/flickr.keys.in.h:1
+msgid "Flickr"
+msgstr "Flickr"
+
+#: ../services/flickr/flickr.keys.in.h:2
+msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
+msgstr "Flickr - nästan helt säkert det bästa nätprogrammet i världen för att hantera och dela foton."
 
 #. Translators "[track title] by [artist]"
-#: ../services/lastfm/lastfm.c:149
+#: ../services/lastfm/lastfm-item-view.c:361
 #, c-format
 msgid "%s by %s"
 msgstr "%s av %s"
 
-#: ../services/lastfm/lastfm.c:153
+#: ../services/lastfm/lastfm-item-view.c:365
 msgid "Unknown"
 msgstr "Okänt"
 
@@ -43,7 +52,21 @@ msgstr "Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
 msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm är en musiktjänst som lär sig vad du diggar. Varje spår du spelar upp talar om för din Last.fm-profil vad du tycker om. Den kan sammanföra dig med andra som gillar vad du gillar - och rekommendera låtar från deras musiksamlingar och även dina."
+msgstr "Last.fm är en musiktjänst som lär sig vad du tycker om. Varje spår du spelar upp talar om för din Last.fm-profil vad du tycker om. Den kan sammanföra dig med andra som gillar vad du gillar - och rekommendera låtar från deras musiksamlingar och även dina."
+
+#: ../services/smugmug/smugmug.keys.in.h:1
+msgid "SmugMug"
+msgstr "SmugMug"
+
+#: ../services/smugmug/smugmug.keys.in.h:2
+msgid "Your Photos Look Better Here. Billions of happy photos. Millions of passionate customers."
+msgstr "Dina foton ser bättre ut här. Miljarder av glada foton. Miljoner av passionerade kunder."
+
+#. This format is for tweets announcing twitpic URLs, "[tweet] [url]".
+#: ../services/twitter/twitter.c:772
+#, c-format
+msgid "%s %s"
+msgstr "%s %s"
 
 #: ../services/twitter/twitter.keys.in.h:1
 msgid "Twitter"
@@ -53,19 +76,52 @@ msgstr "Twitter"
 msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
 msgstr "Twitter är en tjänst för kompisar, familj och kollegor för att kommunicera och hålla kontakten genom att utbyta snabba, täta svar på en enkel fråga: Vad gör du?"
 
-#: ../services/flickr/flickr.keys.in.h:1
-msgid "Flickr"
-msgstr "Flickr"
+#: ../services/vimeo/vimeo.keys.in.h:1
+msgid "From the beginning, Vimeo was created by filmmakers and video creators who wanted to share their creative work, along with intimate personal moments of their everyday life. As time went on, like-minded people came to the site and built a community of positive, encouraging individuals with a wide range of video interests. We hope that you feel inspired to show us both your creative side as well as your friendly side."
+msgstr "Från början skapades Vimeo av filmskapare och videokreatörer som ville dela med sig av sina kreativa arbeten, tillsammans med personliga ögonblick i sina vardagliga liv. Tiden gick och liksinnade personer kom till webbplatsen och byggde en gemenskap av positiva, bidragande individer med en stor blandning av videointressen. Vi hoppas att du känner dig inspirerad att visa oss både din kreativa sidan såväl som din vänliga sida."
 
-#: ../services/flickr/flickr.keys.in.h:2
-msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr "Flickr - nästan helt säkert det bästa online-programmet i världen för att hantera och dela foton."
+#: ../services/vimeo/vimeo.keys.in.h:2
+msgid "Vimeo"
+msgstr "Vimeo"
 
-#: ../services/myspace/myspace.keys.in.h:1
-msgid "MySpace"
-msgstr "MySpace"
+#: ../services/plurk/plurk.keys.in.h:1
+msgid "Plurk"
+msgstr "Plurk"
 
-#: ../services/myspace/myspace.keys.in.h:2
-msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace är en ledande social portal som sammanför människor, innehåll och kultur från hela världen. Skapa en profil, dela foton, professionella och virala videoklipp, blogga, skicka snabbmeddelanden till dina kompisar och lyssna på musik i världens största musikgrupp."
+#: ../services/plurk/plurk.keys.in.h:2
+msgid "Plurk is a web site that allows people to share ideas."
+msgstr "Plurk är en webbplats som låter användarna dela sina idéer."
+
+#: ../services/sina/sina.keys.in.h:1
+msgid "Sina"
+msgstr "Sina"
+
+#: ../services/sina/sina.keys.in.h:2
+msgid "Sina microblogging"
+msgstr "Mikrobloggningsplatsen Sina"
+
+#: ../services/youtube/youtube.keys.in.h:1
+msgid "Youtube"
+msgstr "Youtube"
+
+#: ../services/youtube/youtube.keys.in.h:2
+msgid "Youtube is a popular video sharing website"
+msgstr "Youtube är en populär webbplats för att dela videoklipp"
+
+#~ msgid "Digg"
+#~ msgstr "Digg"
+#~ msgid "Digg - to share news, video and images"
+#~ msgstr "Digg - dela med dig av nyheter, video och bilder"
+#~ msgid "MySpace"
+#~ msgstr "MySpace"
+#~ msgid ""
+#~ "MySpace is a leading social portal for connecting people, content, and "
+#~ "culture from around the world. Create a profile, share photos, "
+#~ "professional and viral videos, blog, instant message your friends, and "
+#~ "listen to music on the world’s largest music community."
+#~ msgstr ""
+#~ "MySpace är en ledande social portal som sammanför människor, innehåll och "
+#~ "kultur från hela världen. Skapa en profil, dela foton, professionella och "
+#~ "virala videoklipp, blogga, skicka snabbmeddelanden till dina kompisar och "
+#~ "lyssna på musik i världens största musikgrupp."
 
