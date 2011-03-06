@@ -45,8 +45,7 @@
         </doc:doc>
       </arg>
 
-      <arg name="collection_details" type="(sssuia{ss})"
-           tp:type="Collection_Details[]" direction="out">
+      <arg name="collection_details" type="(sssuia{ss})"           tp:type="Collection_Details[]" direction="out">
         <doc:doc>
           <doc:summary>The <tp:member-ref>Collection_Details</tp:member-ref>
             of the given collection.</doc:summary>
@@ -97,6 +96,28 @@
         <doc:doc>
           <doc:summary>Extra, service specific parameters,
             such as "description".</doc:summary>
+        </doc:doc>
+      </arg>
+    </method>
+
+    <method name="GetCreatableTypes"
+            tp:name-for-bindings="Get_Creatable_Types">
+      <doc:doc>
+        <doc:description>
+          <doc:para>
+            Retrieve a list of collection types a user can create on
+            this service.
+          </doc:para>
+        </doc:description>
+      </doc:doc>
+
+      <arg name="media_types_list" type="au"
+           tp:type="Collection_Media_Types[]" direction="out">
+        <doc:doc>
+          <doc:summary>A list of
+            <tp:member-ref>Collection_Media_Types</tp:member-ref>
+            bitfields of supported collection types we could create.
+          </doc:summary>
         </doc:doc>
       </arg>
     </method>
