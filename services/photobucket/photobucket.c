@@ -47,11 +47,15 @@
 
 #include "photobucket.h"
 
+static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void collections_iface_init (gpointer g_iface, gpointer iface_data);
 static void photo_upload_iface_init (gpointer g_iface, gpointer iface_data);
 static void video_upload_iface_init (gpointer g_iface, gpointer iface_data);
 
-G_DEFINE_TYPE_WITH_CODE (SwServicePhotobucket, sw_service_photobucket, SW_TYPE_SERVICE,
+G_DEFINE_TYPE_WITH_CODE (SwServicePhotobucket, sw_service_photobucket,
+                         SW_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                initable_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_COLLECTIONS_IFACE,
                                                 collections_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_PHOTO_UPLOAD_IFACE,
@@ -86,6 +90,7 @@ struct _SwServicePhotobucketPrivate {
   RestProxy *silo_proxy;
   gchar *uid;
   gboolean configured;
+  gboolean inited;
 };
 
 enum {
@@ -117,7 +122,7 @@ get_static_caps (SwService *service)
 static const char **
 get_dynamic_caps (SwService *service)
 {
-  SwServicePhotobucketPrivate *priv = GET_PRIVATE (service);
+  SwServicePhotobucketPrivate *priv = SW_SERVICE_PHOTOBUCKET (service)->priv;
   static const char *configured_caps[] = {
     IS_CONFIGURED,
     NULL
@@ -887,17 +892,30 @@ sw_service_photobucket_class_init (SwServicePhotobucketClass *klass)
   service_class->credentials_updated = credentials_updated;
 }
 
-static void
-sw_service_photobucket_init (SwServicePhotobucket *self)
+static gboolean
+sw_service_photobucket_initable (GInitable     *initable,
+                                 GCancellable  *cancellable,
+                                 GError       **error)
 {
-  SwServicePhotobucketPrivate *priv;
+  SwServicePhotobucket *self = SW_SERVICE_PHOTOBUCKET (initable);
+  SwServicePhotobucketPrivate *priv = self->priv;
   const gchar *api_key;
   const gchar *api_secret;
   SoupURI *url;
 
-  priv = self->priv = GET_PRIVATE (self);
+  if (priv->inited)
+    return TRUE;
 
   sw_keystore_get_key_secret ("photobucket", &api_key, &api_secret);
+
+  if (api_key == NULL || api_secret == NULL) {
+    g_set_error_literal (error, SW_SERVICE_ERROR,
+                         SW_SERVICE_ERROR_NO_KEYS,
+                         "No API or secret key configured");
+    return FALSE;
+  }
+
+  priv->inited = TRUE;
 
   priv->proxy = oauth_proxy_new (api_key, api_secret, ENTRYPOINT_URL, FALSE);
 
@@ -913,4 +931,22 @@ sw_service_photobucket_init (SwServicePhotobucket *self)
   refresh_credentials (self);
 
   soup_uri_free (url);
+
+  return TRUE;
+}
+
+static void
+initable_iface_init (gpointer g_iface, gpointer iface_data)
+{
+  GInitableIface *klass = (GInitableIface *)g_iface;
+
+  klass->init = sw_service_photobucket_initable;
+}
+
+static void
+sw_service_photobucket_init (SwServicePhotobucket *self)
+{
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+                                            SW_TYPE_SERVICE_PHOTOBUCKET,
+                                            SwServicePhotobucketPrivate);
 }
