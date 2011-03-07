@@ -908,7 +908,9 @@ _query_open_view_cb (DBusGProxy *proxy,
 
   if (error)
   {
-    g_warning (G_STRLOC ": Error callling OpenView: %s",
+    SwClientServicePrivate *priv = GET_PRIVATE (closure->service);
+    g_warning (G_STRLOC ": Error calling OpenView on service %s: %s",
+               priv->name,
                error->message);
     g_error_free (error);
   } else {
