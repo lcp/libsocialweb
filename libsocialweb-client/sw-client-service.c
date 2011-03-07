@@ -929,7 +929,7 @@ _query_open_view_cb (DBusGProxy *proxy,
 /**
  * SwClientServiceQueryOpenViewCallback:
  * @query:
- * @item_view:
+ * @item_view: (allow-none):
  * @userdata: (closure):
  */
 
