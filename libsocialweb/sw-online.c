@@ -105,6 +105,10 @@ sw_is_online (void)
 #if WITH_ONLINE_NM
 #include <libnm-glib/nm-client.h>
 
+#if !defined(NM_CHECK_VERSION)
+#define NM_CHECK_VERSION(x,y,z) 0
+#endif
+
 /*
  * Use NMClient since it correctly handles the NetworkManager service
  * appearing and disappearing, as can happen at boot time, or during
@@ -148,19 +152,24 @@ online_init (void)
 gboolean
 sw_is_online (void)
 {
-  NMState state = NM_STATE_UNKNOWN;
-
   if (!online_init ())
     return TRUE;
 
-  g_object_get (G_OBJECT (client), NM_CLIENT_STATE, &state, NULL);
-
-  switch (state) {
+  switch (nm_client_get_state (client)) {
+#if NM_CHECK_VERSION(0,8,992)
+  case NM_STATE_CONNECTED_LOCAL:
+  case NM_STATE_CONNECTED_SITE:
+  case NM_STATE_CONNECTED_GLOBAL:
+#else
   case NM_STATE_CONNECTED:
+#endif
     return TRUE;
   case NM_STATE_CONNECTING:
   case NM_STATE_ASLEEP:
   case NM_STATE_DISCONNECTED:
+#if NM_CHECK_VERSION(0,8,992)
+  case NM_STATE_DISCONNECTING:
+#endif
   case NM_STATE_UNKNOWN:
   default:
     return FALSE;
