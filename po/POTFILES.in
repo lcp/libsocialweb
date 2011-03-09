@@ -8,6 +8,7 @@ services/smugmug/smugmug.keys.in
 services/twitter/twitter.c
 services/twitter/twitter.keys.in
 services/vimeo/vimeo.keys.in
+services/photobucket/photobucket.keys.in
 services/plurk/plurk.keys.in
 services/sina/sina.keys.in
 services/youtube/youtube.keys.in
