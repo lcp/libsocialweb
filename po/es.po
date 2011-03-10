@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-02-25 15:33+0000\n"
-"PO-Revision-Date: 2011-02-26 15:35+0100\n"
+"POT-Creation-Date: 2011-03-09 23:30+0000\n"
+"PO-Revision-Date: 2011-03-10 15:11+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -84,7 +84,6 @@ msgstr ""
 #. This format is for tweets announcing twitpic URLs, "[tweet] [url]".
 #: ../services/twitter/twitter.c:772
 #, c-format
-#| msgid "%s by %s"
 msgid "%s %s"
 msgstr "%s %s"
 
@@ -124,6 +123,18 @@ msgstr ""
 #: ../services/vimeo/vimeo.keys.in.h:2
 msgid "Vimeo"
 msgstr "Vimeo"
+
+#: ../services/photobucket/photobucket.keys.in.h:1
+msgid "Photobucket"
+msgstr "Photobucket"
+
+#: ../services/photobucket/photobucket.keys.in.h:2
+msgid ""
+"Snap and show it off! Photobucket makes it easy to share your photos and "
+"videos anywhere."
+msgstr ""
+"Capturar y mostrar ahora. Photobucket hace que compartir sus fotos y vídeos "
+"en cualquier sitio sea fácil."
 
 #: ../services/plurk/plurk.keys.in.h:1
 msgid "Plurk"
