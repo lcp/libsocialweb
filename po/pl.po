@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libsocialweb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-09 22:01+0100\n"
-"PO-Revision-Date: 2011-03-09 22:02+0100\n"
+"POT-Creation-Date: 2011-03-10 13:17+0100\n"
+"PO-Revision-Date: 2011-03-10 13:26+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -101,7 +101,7 @@ msgstr ""
 "za pomocą częstego (i zwięzłego) odpowiadania na jedno proste pytanie: co "
 "robisz?"
 
-# pd: no need to be so chatty
+# no need to be so chatty
 #: ../services/vimeo/vimeo.keys.in.h:1
 msgid ""
 "From the beginning, Vimeo was created by filmmakers and video creators who "
@@ -117,6 +117,18 @@ msgstr ""
 #: ../services/vimeo/vimeo.keys.in.h:2
 msgid "Vimeo"
 msgstr "Vimeo"
+
+#: ../services/photobucket/photobucket.keys.in.h:1
+msgid "Photobucket"
+msgstr "Photobucket"
+
+#: ../services/photobucket/photobucket.keys.in.h:2
+msgid ""
+"Snap and show it off! Photobucket makes it easy to share your photos and "
+"videos anywhere."
+msgstr ""
+"Serwis Photobucket ułatwia dzielenie się zdjęciami i nagraniami wideo w "
+"każdym miejscu."
 
 #: ../services/plurk/plurk.keys.in.h:1
 msgid "Plurk"
