@@ -10,15 +10,29 @@
     <method name="Close" tp:name-for-bindings="Close"/>
 
     <signal name="ItemsAdded" tp:name-for-bindings="Items_Added">
-      <arg name="items" type="a(ssxa{ss})"/>
+      <arg name="items" type="a(ssxa{ss})">
+        <tp:docstring>
+          Array of items added. It contains: service, id, time, hash of
+          attributes.
+        </tp:docstring>
+      </arg>
     </signal>
 
     <signal name="ItemsRemoved" tp:name-for-bindings="Items_Removed">
-      <arg name="items" type="a(ss)"/>
+      <arg name="items" type="a(ss)">
+        <tp:docstring>
+          Array of items removed. It contains: service, id.
+        </tp:docstring>
+      </arg>
     </signal>
 
     <signal name="ItemsChanged"  tp:name-for-bindings="Items_Changed">
-      <arg name="items" type="a(ssxa{ss})"/>
+      <arg name="items" type="a(ssxa{ss})">
+        <tp:docstring>
+          Array of items changed. It contains: service, id, time, hash of
+          attributes.
+        </tp:docstring>
+      </arg>
     </signal>
 
   </interface>
