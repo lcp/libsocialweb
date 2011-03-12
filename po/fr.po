@@ -1,64 +1,177 @@
-# 
+# French translation of libsocialweb.
+# Copyright (C) 2011 Listed translators
+# This file is distributed under the same license as the libsocialweb package.
+#
+# GLS <tomas.galicia@intel.com>, 2011
+# Claude Paroz <claude@2xlibre.net>, 2011
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: libsocialweb master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-12-02 17:42+0000\n"
-"PO-Revision-Date: \n"
-"Last-Translator: GLS <tomas.galicia@intel.com>\n"
-"Language-Team: \n"
+"POT-Creation-Date: 2011-03-09 23:30+0000\n"
+"PO-Revision-Date: 2011-03-12 15:21+0100\n"
+"Last-Translator: Claude Paroz <claude@2xlibre.net>\n"
+"Language-Team: GNOME French Team <gnomefr@traduc.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: French\n"
-"X-Poedit-SourceCharset: utf-8\n"
 
-#: ../services/lastfm/lastfm.keys.in.h:1
-msgid "Last.fm"
-msgstr "Last.fm"
+#: ../services/facebook/facebook.keys.in.h:1
+msgid "Facebook"
+msgstr "Facebook"
 
-#: ../services/lastfm/lastfm.keys.in.h:2
-msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr "Last.fm est un service musical qui apprend ce que vous aimez... Chaque morceau écouté fournit des informations sur vos goûts à votre profil Last.fm. Votre profil vous permet de nouer le contact avec des utilisateurs partageant vos goûts musicaux et de recevoir des recommandations de vos bibliothèques musicales respectives. "
-
-#: ../services/twitter/twitter.keys.in.h:1
-msgid "Twitter"
-msgstr "Twitter"
-
-#: ../services/twitter/twitter.keys.in.h:2
-msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr "Twitter est un outil de réseau social qui permet à ses utilisateurs de signaler à leurs amis, famille, et collègues ce qu'ils sont en train de faire, au moyen de messages courts et fréquents."
+#: ../services/facebook/facebook.keys.in.h:2
+msgid "Facebook helps you connect and share with the people in your life."
+msgstr ""
+"Facebook vous permet de rester en contact avec les personnes qui comptent "
+"dans votre vie."
 
 #: ../services/flickr/flickr.keys.in.h:1
 msgid "Flickr"
 msgstr "Flickr"
 
 #: ../services/flickr/flickr.keys.in.h:2
-msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr "Flickr - probablement la meilleure application de gestion et de partage de photos en ligne au monde."
-
-#: ../services/myspace/myspace.keys.in.h:1
-msgid "MySpace"
-msgstr "MySpace"
-
-#: ../services/myspace/myspace.keys.in.h:2
-msgid "MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community."
-msgstr "MySpace est un service de réseau social permettant de connecter des gens, des contenus et des cutures à travers le monde. Crée ton profil et commence à partager des photos, des vidéos, des blogs et des messages instantanés avec tes amis, ou écouter de la musique au sein de la plus large communauté musicale au monde."
-
-#: ../services/digg/digg.keys.in.h:1
-msgid "Digg"
-msgstr "Digg"
+msgid ""
+"Flickr - almost certainly the best online photo management and sharing "
+"application in the world."
+msgstr ""
+"Flickr - probablement la meilleure application de gestion et de partage de "
+"photos en ligne au monde."
 
 #. Translators "[track title] by [artist]"
-#: ../services/lastfm/lastfm.c:145
+#: ../services/lastfm/lastfm-item-view.c:361
 #, c-format
 msgid "%s by %s"
 msgstr "%s par %s"
 
-#: ../services/digg/digg.keys.in.h:2
-msgid "Digg - to share news, video and images"
-msgstr "Digg - pour partager nouvelles, vidéos et photos "
-
-#: ../services/lastfm/lastfm.c:149
+#: ../services/lastfm/lastfm-item-view.c:365
 msgid "Unknown"
 msgstr "Inconnu"
+
+#: ../services/lastfm/lastfm.keys.in.h:1
+msgid "Last.fm"
+msgstr "Last.fm"
+
+#: ../services/lastfm/lastfm.keys.in.h:2
+msgid ""
+"Last.fm is a music service that learns what you love. Every track you play "
+"will tell your Last.fm profile something about what you like. It can connect "
+"you to other people who like what you like - and recommend songs from their "
+"music collections and yours too."
+msgstr ""
+"Last.fm est un service musical qui apprend ce que vous aimez... Chaque "
+"morceau écouté fournit des informations sur vos goûts à votre profil Last."
+"fm. Votre profil vous permet de nouer contact avec des utilisateurs "
+"partageant vos goûts musicaux et de recevoir des recommandations de vos "
+"bibliothèques musicales respectives."
+
+#: ../services/smugmug/smugmug.keys.in.h:1
+msgid "SmugMug"
+msgstr "SmugMug"
+
+#: ../services/smugmug/smugmug.keys.in.h:2
+msgid ""
+"Your Photos Look Better Here. Billions of happy photos. Millions of "
+"passionate customers."
+msgstr ""
+"Vos photos sont encore plus belles ici. Des milliards de photos heureuses. "
+"Des millions de clients passionnés."
+
+#. This format is for tweets announcing twitpic URLs, "[tweet] [url]".
+#: ../services/twitter/twitter.c:772
+#, c-format
+msgid "%s %s"
+msgstr "%s %s"
+
+#: ../services/twitter/twitter.keys.in.h:1
+msgid "Twitter"
+msgstr "Twitter"
+
+#: ../services/twitter/twitter.keys.in.h:2
+msgid ""
+"Twitter is a service for friends, family, and co–workers to communicate and "
+"stay connected through the exchange of quick, frequent answers to one simple "
+"question: What are you doing?"
+msgstr ""
+"Twitter est un outil de réseau social qui permet à ses utilisateurs de "
+"signaler à leurs amis, famille, et collègues ce qu'ils sont en train de "
+"faire, au moyen de messages courts et fréquents."
+
+#: ../services/vimeo/vimeo.keys.in.h:1
+msgid ""
+"From the beginning, Vimeo was created by filmmakers and video creators who "
+"wanted to share their creative work, along with intimate personal moments of "
+"their everyday life. As time went on, like-minded people came to the site "
+"and built a community of positive, encouraging individuals with a wide range "
+"of video interests. We hope that you feel inspired to show us both your "
+"creative side as well as your friendly side."
+msgstr ""
+"Dès le départ, Vimeo a été créé par des producteurs de films et de vidéos qui "
+"souhaitaient partager leurs créations ainsi que des épisodes personnels de "
+"leur vie de tous les jours. Avec le temps, des personnes ayant des intérêts "
+"similaires ont rejoint le site pour construire une communauté à l'esprit "
+"positif et motivant, avec un large éventail d'intérêts pour la vidéo. Nous "
+"espérons que vous vous sentez inspiré afin de démontrer vos qualités créatives "
+"et chaleureuses."
+
+#: ../services/vimeo/vimeo.keys.in.h:2
+msgid "Vimeo"
+msgstr "Vimeo"
+
+#: ../services/photobucket/photobucket.keys.in.h:1
+msgid "Photobucket"
+msgstr "Photobucket"
+
+#: ../services/photobucket/photobucket.keys.in.h:2
+msgid ""
+"Snap and show it off! Photobucket makes it easy to share your photos and "
+"videos anywhere."
+msgstr ""
+"Photographiez et publiez ! Photobucket facilite le partage universel de "
+"vos photos et vidéos."
+
+#: ../services/plurk/plurk.keys.in.h:1
+msgid "Plurk"
+msgstr "Plurk"
+
+#: ../services/plurk/plurk.keys.in.h:2
+msgid "Plurk is a web site that allows people to share ideas."
+msgstr "Plurk est un site Web qui permet aux gens de partager leurs idées."
+
+#: ../services/sina/sina.keys.in.h:1
+msgid "Sina"
+msgstr "Sina"
+
+#: ../services/sina/sina.keys.in.h:2
+msgid "Sina microblogging"
+msgstr "Microblogage Sina"
+
+#: ../services/youtube/youtube.keys.in.h:1
+msgid "Youtube"
+msgstr "Youtube"
+
+#: ../services/youtube/youtube.keys.in.h:2
+msgid "Youtube is a popular video sharing website"
+msgstr "Youtube est un célèbre site Web de partage de vidéos"
+
+#~ msgid "MySpace"
+#~ msgstr "MySpace"
+
+#~ msgid ""
+#~ "MySpace is a leading social portal for connecting people, content, and "
+#~ "culture from around the world. Create a profile, share photos, "
+#~ "professional and viral videos, blog, instant message your friends, and "
+#~ "listen to music on the world’s largest music community."
+#~ msgstr ""
+#~ "MySpace est un service de réseau social permettant de connecter des gens, "
+#~ "des contenus et des cutures à travers le monde. Crée ton profil et "
+#~ "commence à partager des photos, des vidéos, des blogs et des messages "
+#~ "instantanés avec tes amis, ou écouter de la musique au sein de la plus "
+#~ "large communauté musicale au monde."
+
+#~ msgid "Digg"
+#~ msgstr "Digg"
+
+#~ msgid "Digg - to share news, video and images"
+#~ msgstr "Digg - pour partager nouvelles, vidéos et photos "
