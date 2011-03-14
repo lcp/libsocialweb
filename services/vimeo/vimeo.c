@@ -31,6 +31,7 @@
 #include <libsocialweb/sw-call-list.h>
 #include <libsocialweb/sw-debug.h>
 #include <libsocialweb/sw-client-monitor.h>
+#include <libsocialweb/sw-online.h>
 #include <libsocialweb-keyfob/sw-keyfob.h>
 #include <libsocialweb-keystore/sw-keystore.h>
 
@@ -42,10 +43,12 @@
 #include "vimeo.h"
 #include "vimeo-item-view.h"
 
+static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
-G_DEFINE_TYPE_WITH_CODE (SwServiceVimeo, sw_service_vimeo, SW_TYPE_SERVICE,
-                         G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE, query_iface_init));
 
+G_DEFINE_TYPE_WITH_CODE (SwServiceVimeo, sw_service_vimeo, SW_TYPE_SERVICE,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE, query_iface_init));
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_VIMEO, SwServiceVimeoPrivate))
 
@@ -356,22 +359,50 @@ sw_service_vimeo_class_init (SwServiceVimeoClass *klass)
   service_class->credentials_updated = credentials_updated;
 }
 
-static void
-sw_service_vimeo_init (SwServiceVimeo *self)
+static gboolean
+sw_service_vimeo_initable (GInitable     *initable,
+                             GCancellable  *cancellable,
+                             GError       **error)
 {
-  SwServiceVimeoPrivate *priv;
+  SwServiceVimeo *self = SW_SERVICE_VIMEO (initable);
+  SwServiceVimeoPrivate *priv = self->priv;
   const gchar *api_key;
   const gchar *api_secret;
 
-  priv = self->priv = GET_PRIVATE (self);
+  if (priv->inited)
+    return TRUE;
 
   sw_keystore_get_key_secret ("vimeo", &api_key, &api_secret);
+
   if (api_key == NULL || api_secret == NULL) {
-    g_warning ("Could not get API key or secret");
+    g_set_error_literal (error,
+                         SW_SERVICE_ERROR,
+                         SW_SERVICE_ERROR_NO_KEYS,
+                         "No API or secret key configured");
+    return FALSE;
   }
+
+  priv->inited = TRUE;
 
   priv->proxy = oauth_proxy_new (api_key, api_secret, "http://vimeo.com/", FALSE);
   priv->simple_proxy = rest_proxy_new ("http://vimeo.com/api/v2/%s/", TRUE);
 
+  sw_online_add_notify (online_notify, self);
   refresh_credentials (self);
+
+  return TRUE;
+}
+
+static void
+initable_iface_init (gpointer g_iface, gpointer iface_data)
+{
+  GInitableIface *klass = (GInitableIface *)g_iface;
+
+  klass->init = sw_service_vimeo_initable;
+}
+
+static void
+sw_service_vimeo_init (SwServiceVimeo *self)
+{
+  self->priv = GET_PRIVATE (self);
 }
