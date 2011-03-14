@@ -7,6 +7,8 @@ libvimeo_la_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/interfaces $(REST_CFLAGS) $
 		     $(DBUS_GLIB_CFLAGS) -DG_LOG_DOMAIN=\"Vimeo\" \
 		     $(GCOV_CFLAGS)
 libvimeo_la_LIBADD = $(top_builddir)/libsocialweb/libsocialweb.la $(top_builddir)/interfaces/libsocialweb-ginterfaces.la \
+		     $(top_builddir)/libsocialweb-keystore/libsocialweb-keystore.la \
+		     $(top_builddir)/libsocialweb-keyfob/libsocialweb-keyfob.la \
 		     $(REST_LIBS) $(KEYRING_LIBS) $(DBUS_GLIB_LIBS) \
 		     $(GCOV_LDFLAGS)
 libvimeo_la_LDFLAGS = -module -avoid-version
