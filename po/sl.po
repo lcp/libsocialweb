@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libsocialweb master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-02-25 15:33+0000\n"
-"PO-Revision-Date: 2011-02-26 09:06+0100\n"
+"POT-Creation-Date: 2011-03-12 15:29+0000\n"
+"PO-Revision-Date: 2011-03-15 21:50+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -35,7 +35,7 @@ msgstr "Flickr"
 
 #: ../services/flickr/flickr.keys.in.h:2
 msgid "Flickr - almost certainly the best online photo management and sharing application in the world."
-msgstr ""
+msgstr "Flickr - odličen spletni upravljalnik slikovnega materiala za prikazovanje in izmenjavo."
 
 #. Translators "[track title] by [artist]"
 #: ../services/lastfm/lastfm-item-view.c:361
@@ -53,7 +53,7 @@ msgstr "Last.fm"
 
 #: ../services/lastfm/lastfm.keys.in.h:2
 msgid "Last.fm is a music service that learns what you love. Every track you play will tell your Last.fm profile something about what you like. It can connect you to other people who like what you like - and recommend songs from their music collections and yours too."
-msgstr ""
+msgstr "Last.fm je spletna glasbena stroitev za poosebljanje predvajane glasbe. Vsaka skladba, ki se predvaja z vašim računom, pove kakšne zvrsti glasbe radi poslušate.  S povezovanjem z drugimi uporabniki, ki poslušajo podobne zvrsti, sistem predlaga skladbe, ki jih morda še niste slišali."
 
 #: ../services/smugmug/smugmug.keys.in.h:1
 msgid "SmugMug"
@@ -61,7 +61,7 @@ msgstr "SmugMug"
 
 #: ../services/smugmug/smugmug.keys.in.h:2
 msgid "Your Photos Look Better Here. Billions of happy photos. Millions of passionate customers."
-msgstr ""
+msgstr "Fotografije tu so videti lepše. Milijarde dobrih slik. Milijoni zadovoljnih uporabnikov."
 
 #. This format is for tweets announcing twitpic URLs, "[tweet] [url]".
 #: ../services/twitter/twitter.c:772
@@ -75,15 +75,24 @@ msgstr "Twitter"
 
 #: ../services/twitter/twitter.keys.in.h:2
 msgid "Twitter is a service for friends, family, and co–workers to communicate and stay connected through the exchange of quick, frequent answers to one simple question: What are you doing?"
-msgstr ""
+msgstr "Twitter je storitev za prijatelje, družino in sodelavce, ki lahko ohranjajo stalen stik s kratkimi, pogostimi odgovori na enostavno vprašanje: Kaj ravnokar počnete?"
 
 #: ../services/vimeo/vimeo.keys.in.h:1
+#, fuzzy
 msgid "From the beginning, Vimeo was created by filmmakers and video creators who wanted to share their creative work, along with intimate personal moments of their everyday life. As time went on, like-minded people came to the site and built a community of positive, encouraging individuals with a wide range of video interests. We hope that you feel inspired to show us both your creative side as well as your friendly side."
-msgstr ""
+msgstr "Vimeo so ustvarili filmarji in programerji z namenom izmenjave video posnetkov."
 
 #: ../services/vimeo/vimeo.keys.in.h:2
 msgid "Vimeo"
 msgstr "Vimeo"
+
+#: ../services/photobucket/photobucket.keys.in.h:1
+msgid "Photobucket"
+msgstr "Photobucket"
+
+#: ../services/photobucket/photobucket.keys.in.h:2
+msgid "Snap and show it off! Photobucket makes it easy to share your photos and videos anywhere."
+msgstr "Kliknite in pokažite! Program Photobucket omogoča hitro izmenjavo fotografij in posnetkov."
 
 #: ../services/plurk/plurk.keys.in.h:1
 msgid "Plurk"
@@ -91,7 +100,7 @@ msgstr "Plurk"
 
 #: ../services/plurk/plurk.keys.in.h:2
 msgid "Plurk is a web site that allows people to share ideas."
-msgstr ""
+msgstr "Plurk je spletišče za izmenjavo idej."
 
 #: ../services/sina/sina.keys.in.h:1
 msgid "Sina"
@@ -99,7 +108,7 @@ msgstr "Sina"
 
 #: ../services/sina/sina.keys.in.h:2
 msgid "Sina microblogging"
-msgstr ""
+msgstr "Mikrobloganje Sina"
 
 #: ../services/youtube/youtube.keys.in.h:1
 msgid "Youtube"
