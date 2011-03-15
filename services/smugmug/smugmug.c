@@ -738,6 +738,22 @@ _smugmug_collections_get_details (SwCollectionsIface *self,
 }
 
 static void
+_smugmug_collections_get_creatable_types (SwCollectionsIface    *self,
+                                              DBusGMethodInvocation *context)
+{
+  GArray *creatable_types = g_array_sized_new (TRUE, TRUE,
+                                               sizeof (guint), 1);
+  guint v =  PHOTO | VIDEO;
+
+  g_array_append_val (creatable_types, v);
+
+  sw_collections_iface_return_from_get_creatable_types (context,
+                                                        creatable_types);
+
+  g_array_free (creatable_types, TRUE);
+}
+
+static void
 collections_iface_init (gpointer g_iface,
                         gpointer iface_data)
 {
@@ -751,6 +767,9 @@ collections_iface_init (gpointer g_iface,
 
   sw_collections_iface_implement_get_details (klass,
                                               _smugmug_collections_get_details);
+
+  sw_collections_iface_implement_get_creatable_types (klass,
+                                                      _smugmug_collections_get_creatable_types);
 }
 
 /* Photo Upload Interface */
