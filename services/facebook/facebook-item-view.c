@@ -402,7 +402,8 @@ load_from_cache (SwItemView *self)
 
   set = sw_cache_load (sw_item_view_get_service (self),
                        priv->query,
-                       priv->params);
+                       priv->params,
+                       sw_item_set_new);
 
   if (set != NULL)
     {

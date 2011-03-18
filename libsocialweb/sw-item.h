@@ -76,7 +76,7 @@ void sw_item_request_image_fetch (SwItem      *item,
                                   const gchar *key,
                                   const gchar *url);
 
-const char * sw_item_get (SwItem *item, const char *key);
+const char * sw_item_get (const SwItem *item, const char *key);
 
 int sw_item_compare_date_older (SwItem *a, SwItem *b);
 

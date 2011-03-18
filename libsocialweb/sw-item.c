@@ -1,6 +1,7 @@
 /*
  * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
+ * Copyright (C) 2011 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
@@ -16,12 +17,18 @@
  * Inc., 51 Franklin St - Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string.h>
 #include <libsocialweb/sw-utils.h>
 #include <libsocialweb/sw-web.h>
 #include "sw-item.h"
+#include "sw-cache.h"
+#include "sw-cacheable.h"
 #include "sw-debug.h"
 
-G_DEFINE_TYPE (SwItem, sw_item, G_TYPE_OBJECT)
+static void sw_item_cacheable_init (SwCacheableInterface *iface,
+    gpointer user_data);
+G_DEFINE_TYPE_WITH_CODE (SwItem, sw_item, G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE (SW_TYPE_CACHEABLE, sw_item_cacheable_init))
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_ITEM, SwItemPrivate))
@@ -178,7 +185,7 @@ sw_item_take (SwItem *item, const char *key, char *value)
 }
 
 const char *
-sw_item_get (SwItem *item, const char *key)
+sw_item_get (const SwItem *item, const char *key)
 {
   g_return_val_if_fail (SW_IS_ITEM (item), NULL);
   g_return_val_if_fail (key, NULL);
@@ -458,3 +465,50 @@ sw_item_equal (SwItem *a,
   return TRUE;
 }
 
+static const gchar *
+sw_item_get_id (SwCacheable *cacheable)
+{
+  SwItem *self = SW_ITEM (cacheable);
+  return sw_item_get (self, "id");
+}
+
+static void
+sw_item_save_into_cache (SwCacheable *cacheable, GKeyFile *keys,
+                         const gchar *group)
+{
+  SwItem *item = SW_ITEM (cacheable);
+  const char *key;
+  const gpointer value;
+  GHashTableIter iter;
+
+  /* Set a magic field saying that this item is cached */
+  g_key_file_set_string (keys, group, "cached", "1");
+  g_key_file_set_string (keys, group, "type", "item");
+
+  g_hash_table_iter_init (&iter, sw_item_peek_hash (item));
+  while (g_hash_table_iter_next (&iter, (gpointer)&key, &value)) {
+    char *new_value;
+    /*
+     * We make relative paths when saving so that the cache files are portable
+     * between users.  This normally doesn't happen but it's useful and the
+     * preloaded cache depends on this.
+     */
+    new_value = make_relative_path (key, value);
+    if (new_value) {
+      g_key_file_set_string (keys, group, key, new_value);
+      g_free (new_value);
+    } else {
+      g_key_file_set_string (keys, group, key, value);
+    }
+  }
+
+}
+
+static void
+sw_item_cacheable_init (SwCacheableInterface *iface,
+                           gpointer user_data)
+{
+  iface->get_id = sw_item_get_id;
+  iface->is_ready = sw_item_get_ready;
+  iface->save_into_cache = sw_item_save_into_cache;
+}

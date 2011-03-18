@@ -21,9 +21,13 @@
 #include <libsocialweb/sw-utils.h>
 #include <libsocialweb/sw-web.h>
 #include "sw-contact.h"
+#include "sw-cacheable.h"
 #include "sw-debug.h"
 
-G_DEFINE_TYPE (SwContact, sw_contact, G_TYPE_OBJECT)
+static void sw_contact_cacheable_init (SwCacheableInterface *iface,
+    gpointer user_data);
+G_DEFINE_TYPE_WITH_CODE (SwContact, sw_contact, G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE (SW_TYPE_CACHEABLE, sw_contact_cacheable_init))
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_CONTACT, SwContactPrivate))
@@ -491,3 +495,39 @@ sw_contact_equal (SwContact *a,
   return TRUE;
 }
 
+static const gchar *
+sw_contact_get_id (SwCacheable *cacheable)
+{
+  SwContact *self = SW_CONTACT (cacheable);
+  return sw_contact_get (self, "id");
+}
+
+static void
+sw_contact_save_into_cache (SwCacheable *cacheable, GKeyFile *keys,
+                            const gchar *group)
+{
+  SwContact *contact = SW_CONTACT (cacheable);
+  const char *key;
+  const gpointer value;
+  GHashTableIter iter;
+
+  /* Set a magic field saying that this contact is cached */
+  g_key_file_set_string (keys, group, "cached", "1");
+  g_key_file_set_string (keys, group, "type", "contact");
+
+  g_hash_table_iter_init (&iter, sw_contact_peek_hash (contact));
+  while (g_hash_table_iter_next (&iter, (gpointer)&key, &value)) {
+    g_key_file_set_string_list (keys, group, key, value,
+        g_strv_length (value));
+  }
+
+}
+
+static void
+sw_contact_cacheable_init (SwCacheableInterface *iface,
+                           gpointer user_data)
+{
+  iface->get_id = sw_contact_get_id;
+  iface->is_ready = sw_contact_get_ready;
+  iface->save_into_cache = sw_contact_save_into_cache;
+}

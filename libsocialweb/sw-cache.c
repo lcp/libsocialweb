@@ -1,6 +1,7 @@
 /*
  * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
+ * Copyright (C) 2011 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
@@ -20,7 +21,9 @@
 #include <glib/gstdio.h>
 
 #include "sw-cache.h"
+#include "sw-cacheable.h"
 #include "sw-item.h"
+#include "sw-contact.h"
 #include "sw-utils.h"
 
 /*
@@ -75,7 +78,7 @@ get_cache_filename (SwService   *service,
 /*
  * Make an absolute path relative, for when saving it to the cache.
  */
-static char *
+char *
 make_relative_path (const char *key, const char *value)
 {
   if (g_str_equal (key, "authoricon") || g_str_equal (key, "thumbnail")) {
@@ -102,43 +105,15 @@ make_absolute_path (const char *key, const char *value)
 }
 
 /*
- * Create a new group in the keyfile based on the SwItem.
+ * Create a new group in the keyfile based on the SwCacheable.
  */
 static void
 set_keyfile_from_item (gpointer data, gpointer user_data)
 {
-  SwItem *item = data;
+  SwCacheable *cacheable = data;
   GKeyFile *keys = user_data;
-  const char *group, *key, *value;
-  GHashTableIter iter;
 
-  group = sw_item_get (item, "id");
-  if (group == NULL)
-    return;
-
-  /* Skip items that are not ready. Their properties will not be intact */
-  if (!sw_item_get_ready (item))
-    return;
-
-  /* Set a magic field saying that this item is cached */
-  g_key_file_set_string (keys, group, "cached", "1");
-
-  g_hash_table_iter_init (&iter, sw_item_peek_hash (item));
-  while (g_hash_table_iter_next (&iter, (gpointer)&key, (gpointer)&value)) {
-    char *new_value;
-    /*
-     * We make relative paths when saving so that the cache files are portable
-     * between users.  This normally doesn't happen but it's useful and the
-     * preloaded cache depends on this.
-     */
-    new_value = make_relative_path (key, value);
-    if (new_value) {
-      g_key_file_set_string (keys, group, key, new_value);
-      g_free (new_value);
-    } else {
-      g_key_file_set_string (keys, group, key, value);
-    }
-  }
+  sw_cacheable_save_into_cache (cacheable, keys);
 }
 
 /**
@@ -192,50 +167,68 @@ sw_cache_save (SwService   *service,
  * From @keyfile load the items in @group and create a new #Switem for
  * @service.
  */
-static SwItem *
+static SwCacheable *
 load_item_from_keyfile (SwService  *service,
                         GKeyFile   *keyfile,
                         const char *group)
 {
-  SwItem *item = NULL;
+  SwCacheable *cacheable = NULL;
   char **keys;
   gsize i, count;
 
   keys = g_key_file_get_keys (keyfile, group, &count, NULL);
   if (keys) {
-    item = sw_item_new ();
-    sw_item_set_service (item, service);
-    for (i = 0; i < count; i++) {
-      char *value, *new_value;
+    const gchar *type = g_key_file_get_string (keyfile, group, "type",
+        NULL);
 
-      value = g_key_file_get_string (keyfile, group, keys[i], NULL);
-      /*
-       * Make the cached relative paths absolute so that the client doesn't have
-       * to know any internal details.
-       */
-      new_value = make_absolute_path (keys[i], value);
+    if (!type || g_str_equal (type, "item")) {
+      cacheable = SW_CACHEABLE (sw_item_new ());
+      sw_item_set_service (SW_ITEM (cacheable), service);
+      for (i = 0; i < count; i++) {
+        char *value, *new_value;
 
-      if (new_value) {
-        sw_item_take (item, keys[i], new_value);
-        g_free (value);
-      } else {
-        sw_item_take (item, keys[i], value);
+        value = g_key_file_get_string (keyfile, group, keys[i], NULL);
+        /*
+         * Make the cached relative paths absolute so that the client doesn't have
+         * to know any internal details.
+         */
+        new_value = make_absolute_path (keys[i], value);
+
+        if (new_value) {
+          sw_item_take (SW_ITEM (cacheable), keys[i], new_value);
+          g_free (value);
+        } else {
+          sw_item_take (SW_ITEM (cacheable), keys[i], value);
+        }
+      }
+    } else if (g_str_equal (type, "contact")) {
+      cacheable = SW_CACHEABLE (sw_contact_new ());
+      sw_contact_set_service (SW_CONTACT (cacheable), service);
+      for (i = 0; i < count; i++) {
+        char **str_array;
+        int j;
+
+        str_array = g_key_file_get_string_list (keyfile, group, keys[i], NULL,
+            NULL);
+        for (j = 0 ; str_array && str_array[j] ; j++) {
+          sw_contact_put (SW_CONTACT (cacheable), keys[i], str_array[j]);
+        }
+        g_strfreev (str_array);
       }
     }
   }
 
   g_strfreev (keys);
 
-  if (sw_service_is_uid_banned (service,
-                                sw_item_get (item,
-                                             "id")))
+  if (cacheable && sw_service_is_uid_banned (service,
+        sw_cacheable_get_id (cacheable)))
   {
-    g_object_unref (item);
+    g_object_unref (cacheable);
 
     return NULL;
   }
 
-  return item;
+  return cacheable;
 }
 
 /**
@@ -251,7 +244,8 @@ load_item_from_keyfile (SwService  *service,
 SwSet *
 sw_cache_load (SwService   *service,
                const gchar *query,
-               GHashTable  *params)
+               GHashTable  *params,
+               SwSet* (*set_constr)())
 {
   char *filename;
   GKeyFile *keys;
@@ -273,10 +267,10 @@ sw_cache_load (SwService   *service,
     groups = g_key_file_get_groups (keys, &count);
 
     if (count) {
-      set = sw_item_set_new ();
+      set = set_constr ();
 
       for (i = 0; i < count; i++) {
-        SwItem *item;
+        SwCacheable *item;
 
         /* May be null if it's banned */
         item = load_item_from_keyfile (service, keys, groups[i]);

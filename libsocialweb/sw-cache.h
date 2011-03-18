@@ -31,13 +31,16 @@ void sw_cache_save (SwService   *service,
 
 SwSet *sw_cache_load (SwService   *service,
                       const gchar *query,
-                      GHashTable  *params);
+                      GHashTable  *params,
+                      SwSet* (*set_constr)());
 
 void sw_cache_drop (SwService   *service,
                     const gchar *query,
                     GHashTable  *params);
 
 void sw_cache_drop_all (SwService *service);
+
+char *make_relative_path (const char *key, const char *value);
 
 G_END_DECLS
 

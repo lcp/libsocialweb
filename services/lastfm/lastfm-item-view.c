@@ -583,7 +583,8 @@ _load_from_cache (SwLastfmItemView *item_view)
 
   set = sw_cache_load (sw_item_view_get_service (SW_ITEM_VIEW (item_view)),
                        priv->query,
-                       priv->params);
+                       priv->params,
+                       sw_item_set_new);
 
   if (set)
   {
