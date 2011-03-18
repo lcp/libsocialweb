@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: libsocialweb master\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-03-12 15:29+0000\n"
-"PO-Revision-Date: 2011-03-15 21:50+0100\n"
+"PO-Revision-Date: 2011-03-18 14:15+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: \n"
@@ -78,9 +78,8 @@ msgid "Twitter is a service for friends, family, and co–workers to communicate
 msgstr "Twitter je storitev za prijatelje, družino in sodelavce, ki lahko ohranjajo stalen stik s kratkimi, pogostimi odgovori na enostavno vprašanje: Kaj ravnokar počnete?"
 
 #: ../services/vimeo/vimeo.keys.in.h:1
-#, fuzzy
 msgid "From the beginning, Vimeo was created by filmmakers and video creators who wanted to share their creative work, along with intimate personal moments of their everyday life. As time went on, like-minded people came to the site and built a community of positive, encouraging individuals with a wide range of video interests. We hope that you feel inspired to show us both your creative side as well as your friendly side."
-msgstr "Vimeo so ustvarili filmarji in programerji z namenom izmenjave video posnetkov."
+msgstr "Vimeo so ustvarili filmarji in programerji z namenom izmenjave video posnetkov. S časom se je projekt razširil v skupnost s širokim pogledom na obdelavo posnetkov in pozitivnim odnosom do izmenjave znanja in izdelkov."
 
 #: ../services/vimeo/vimeo.keys.in.h:2
 msgid "Vimeo"
