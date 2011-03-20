@@ -37,16 +37,19 @@
 #include <libsocialweb-keystore/sw-keystore.h>
 #include <libsocialweb/sw-client-monitor.h>
 
+#include <rest-extras/youtube-proxy.h>
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 
 #include <interfaces/sw-query-ginterface.h>
+#include <interfaces/sw-video-upload-ginterface.h>
 
 #include "youtube.h"
 #include "youtube-item-view.h"
 
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
+static void video_upload_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (SwServiceYoutube,
                          sw_service_youtube,
@@ -54,10 +57,20 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceYoutube,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 initable_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE,
-                                                query_iface_init));
+                                                query_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_VIDEO_UPLOAD_IFACE,
+                                                video_upload_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_YOUTUBE, SwServiceYoutubePrivate))
+
+static const ParameterNameMapping upload_params[] = {
+  { "title", "title" },
+  { "description", "description" },
+  { "x-youtube-category", "category" },
+  { "x-youtube-keywords", "keywords" },
+  { NULL, NULL }
+};
 
 struct _SwServiceYoutubePrivate {
   gboolean inited;
@@ -68,6 +81,7 @@ struct _SwServiceYoutubePrivate {
   } credentials;
   RestProxy *proxy;
   RestProxy *auth_proxy;
+  RestProxy *upload_proxy;
   char *username;
   char *password;
   char *developer_key;
@@ -85,6 +99,7 @@ get_static_caps (SwService *service)
     CAN_VERIFY_CREDENTIALS,
     HAS_QUERY_IFACE,
     HAS_BANISHABLE_IFACE,
+    HAS_VIDEO_UPLOAD_IFACE,
 
     NULL
   };
@@ -162,6 +177,8 @@ _got_user_auth (RestProxyCall *call,
       g_strcmp0 (tokens[2], "YouTubeUser") == 0) {
     priv->user_auth = g_strdup (tokens[1]);
     /*Alright! we got the auth!!!*/
+    youtube_proxy_set_user_auth (YOUTUBE_PROXY (priv->upload_proxy),
+                                 priv->user_auth);
     priv->nickname = g_strdup (tokens[3]);
     priv->credentials = CREDS_VALID;
   } else {
@@ -297,6 +314,11 @@ sw_service_youtube_dispose (GObject *object)
     priv->auth_proxy = NULL;
   }
 
+  if (priv->upload_proxy) {
+    g_object_unref (priv->upload_proxy);
+    priv->upload_proxy = NULL;
+  }
+
   G_OBJECT_CLASS (sw_service_youtube_parent_class)->dispose (object);
 }
 
@@ -368,6 +390,7 @@ sw_service_youtube_initable (GInitable    *initable,
 
   priv->proxy = rest_proxy_new ("http://gdata.youtube.com/feeds/api/", FALSE);
   priv->auth_proxy = rest_proxy_new ("https://www.google.com/youtube/accounts/", FALSE);
+  priv->upload_proxy = youtube_proxy_new (key);
 
   priv->developer_key = (char *)key;
   priv->credentials = OFFLINE;
@@ -451,4 +474,69 @@ query_iface_init (gpointer g_iface,
   SwQueryIfaceClass *klass = (SwQueryIfaceClass*)g_iface;
 
   sw_query_iface_implement_open_view (klass, _youtube_query_open_view);
+}
+
+/* Video upload iface */
+
+static void
+_video_upload_cb (YoutubeProxy   *proxy,
+                  const gchar   *payload,
+                  const GError  *error,
+                  GObject       *weak_object,
+                  gpointer       user_data)
+{
+  SwServiceYoutube *self = SW_SERVICE_YOUTUBE (weak_object);
+  int opid = GPOINTER_TO_INT (user_data);
+
+  if (error) {
+    sw_video_upload_iface_emit_video_upload_progress (self, opid, -1,
+        error->message);
+  } else {
+    sw_video_upload_iface_emit_video_upload_progress (self, opid, 100, "");
+  }
+}
+
+static void
+_youtube_upload_video (SwVideoUploadIface    *iface,
+                       const gchar           *filename,
+                       GHashTable            *fields,
+                       DBusGMethodInvocation *context)
+{
+  SwServiceYoutube *self = SW_SERVICE_YOUTUBE (iface);
+  SwServiceYoutubePrivate *priv = self->priv;
+  GError *error = NULL;
+  GHashTable *native_fields = g_hash_table_new (g_str_hash, g_str_equal);
+  gint opid = sw_next_opid ();
+
+  sw_video_upload_iface_return_from_upload_video (context, opid);
+
+  sw_service_map_params (upload_params, fields,
+                         (SwServiceSetParamFunc) g_hash_table_insert,
+                         native_fields);
+
+  /* HACK: Seems like <yt:incomplete/> does not work well with categories */
+  if (g_hash_table_lookup (native_fields, "category") == NULL)
+    g_hash_table_insert (native_fields, "category", "People");
+
+  if (!youtube_proxy_upload_async (YOUTUBE_PROXY (priv->upload_proxy),
+                                   filename, native_fields, TRUE,
+                                   _video_upload_cb, G_OBJECT (self),
+                                   GINT_TO_POINTER (opid), &error)) {
+    sw_video_upload_iface_emit_video_upload_progress (self, opid, -1,
+                                                      error->message);
+    g_error_free (error);
+  }
+
+  g_hash_table_unref (native_fields);
+}
+
+static void
+video_upload_iface_init (gpointer g_iface,
+                         gpointer iface_data)
+{
+  SwVideoUploadIfaceClass *klass = (SwVideoUploadIfaceClass *) g_iface;
+
+  sw_video_upload_iface_implement_upload_video (klass,
+                                                _youtube_upload_video);
+
 }
