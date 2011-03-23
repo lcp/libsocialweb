@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<node name="/Contacts_Query_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">>
+  <interface name="com.meego.libsocialweb.ContactsQuery">
+    <method name="OpenView" tp:name-for-bindings="Open_View">
+      <arg name="query" type="s" direction="in"/>
+      <arg name="params" type="a{ss}" direction="in"/>
+      <arg name="view" type="o" direction="out"/>
+    </method>
+  </interface>
+</node>

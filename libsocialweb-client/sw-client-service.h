@@ -73,6 +73,7 @@ GType sw_client_service_get_type (void);
 #define HAS_VIDEO_UPLOAD_IFACE "has-video-upload-iface"
 #define HAS_BANISHABLE_IFACE "has-banishable-iface"
 #define HAS_QUERY_IFACE "has-query-iface"
+#define HAS_CONTACTS_QUERY_IFACE "has-contacts-query-iface"
 
 #define CAN_UPDATE_STATUS_WITH_GEOTAG "can-update-status-with-geotag"
 

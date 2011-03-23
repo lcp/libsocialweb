@@ -13,6 +13,7 @@ MARSHALS_LISTS = sw-marshals.list
 
 DBUS_SPECS = sw-core.xml sw-service.xml \
 	     sw-item-view.xml sw-query.xml \
+	     sw-contacts-query.xml \
 	     sw-avatar.xml sw-status-update.xml \
 	     sw-photo-upload.xml sw-banishable.xml \
 	     sw-video-upload.xml lastfm.xml \
@@ -32,6 +33,7 @@ libsocialweb_ginterfaces_la_CFLAGS = $(DBUS_GLIB_CFLAGS) $(GCOV_CFLAGS)
 libsocialweb_ginterfaces_ladir = $(pkgincludedir)/interfaces
 libsocialweb_ginterfaces_la_HEADERS = \
 	sw-query-ginterface.h \
+	sw-contacts-query-ginterface.h \
 	sw-status-update-ginterface.h \
 	sw-avatar-ginterface.h \
 	sw-photo-upload-ginterface.h \

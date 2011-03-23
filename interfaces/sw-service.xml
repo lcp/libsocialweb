@@ -39,6 +39,10 @@
               <doc:definition>The service supports the #Query interface.</doc:definition>
             </doc:item>
             <doc:item>
+              <doc:term>has-contacts-query-iface</doc:term>
+              <doc:definition>The service supports the #ContactsQuery interface.</doc:definition>
+            </doc:item>
+            <doc:item>
               <doc:term>has-collections-iface</doc:term>
               <doc:definition>The service supports the #Collections interface.</doc:definition>
             </doc:item>
