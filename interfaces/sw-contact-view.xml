@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<node name="/Contact_View_Iface" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">>
+  <interface name="com.meego.libsocialweb.ContactView">
+    <method name="Start" tp:name-for-bindings="Start"/>
+
+    <method name="Refresh"  tp:name-for-bindings="Refresh"/>
+
+    <method name="Stop"  tp:name-for-bindings="Stop"/>
+
+    <method name="Close" tp:name-for-bindings="Close"/>
+
+    <signal name="ContactsAdded" tp:name-for-bindings="Contacts_Added">
+      <arg name="contacts" type="a(ssxa{sas})">
+        <tp:docstring>
+          Array of contacts added. It contains: service, id, time, hash of
+          attributes.
+        </tp:docstring>
+      </arg>
+    </signal>
+
+    <signal name="ContactsRemoved" tp:name-for-bindings="Contacts_Removed">
+      <arg name="contacts" type="a(sas)">
+        <tp:docstring>
+          Array of contacts removed. It contains: service, id.
+        </tp:docstring>
+      </arg>
+    </signal>
+
+    <signal name="ContactsChanged"  tp:name-for-bindings="Contacts_Changed">
+      <arg name="contacts" type="a(ssxa{sas})">
+        <tp:docstring>
+          Array of contacts changed. It contains: service, id, time, hash of
+          attributes.
+        </tp:docstring>
+      </arg>
+    </signal>
+
+  </interface>
+</node>

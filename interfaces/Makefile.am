@@ -12,8 +12,8 @@ MARSHALS_SOURCES = \
 MARSHALS_LISTS = sw-marshals.list
 
 DBUS_SPECS = sw-core.xml sw-service.xml \
-	     sw-item-view.xml sw-query.xml \
-	     sw-contacts-query.xml \
+	     sw-item-view.xml sw-contact-view.xml \
+	     sw-query.xml sw-contacts-query.xml \
 	     sw-avatar.xml sw-status-update.xml \
 	     sw-photo-upload.xml sw-banishable.xml \
 	     sw-video-upload.xml lastfm.xml \
