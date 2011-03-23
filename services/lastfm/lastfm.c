@@ -36,18 +36,23 @@
 #include <rest/rest-proxy.h>
 #include <rest/rest-xml-parser.h>
 
+#include <interfaces/sw-contacts-query-ginterface.h>
 #include <interfaces/sw-query-ginterface.h>
 #include <interfaces/lastfm-ginterface.h>
 
 #include "lastfm.h"
+#include "lastfm-contact-view.h"
 #include "lastfm-item-view.h"
 
 static void lastfm_iface_init (gpointer g_iface, gpointer iface_data);
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
+static void contacts_query_iface_init (gpointer g_iface, gpointer iface_data);
 G_DEFINE_TYPE_WITH_CODE (SwServiceLastfm, sw_service_lastfm, SW_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_LASTFM_IFACE, lastfm_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_CONTACTS_QUERY_IFACE,
+                                                contacts_query_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE, query_iface_init));
 
 
@@ -174,6 +179,7 @@ get_static_caps (SwService *service)
 {
   static const char * caps[] = {
     CAN_VERIFY_CREDENTIALS,
+    HAS_CONTACTS_QUERY_IFACE,
     HAS_QUERY_IFACE,
     HAS_BANISHABLE_IFACE,
 
@@ -260,19 +266,57 @@ lastfm_iface_init (gpointer g_iface,
 /* Query interface */
 
 static const gchar *valid_queries[] = { "feed" };
+static const gchar *valid_contact_queries[] = { "people" };
 
 static gboolean
-_check_query_validity (const gchar *query)
+_check_query_validity (const gchar *query, const gchar *list[])
 {
   gint i = 0;
 
-  for (i = 0; i < G_N_ELEMENTS(valid_queries); i++)
+  for (i = 0; i < G_N_ELEMENTS(list); i++)
   {
-    if (g_str_equal (query, valid_queries[i]))
+    if (g_str_equal (query, list[i]))
       return TRUE;
   }
 
   return FALSE;
+}
+
+static void
+_lastfm_contacts_query_open_view (SwContactsQueryIface          *self,
+                                  const gchar           *query,
+                                  GHashTable            *params,
+                                  DBusGMethodInvocation *context)
+{
+  SwServiceLastfmPrivate *priv = GET_PRIVATE (self);
+  SwContactView *contact_view;
+  const gchar *object_path;
+
+  if (!_check_query_validity (query, valid_contact_queries))
+  {
+    dbus_g_method_return_error (context,
+                                g_error_new (SW_SERVICE_ERROR,
+                                             SW_SERVICE_ERROR_INVALID_QUERY,
+                                             "Query '%s' is invalid",
+                                             query));
+    return;
+  }
+
+  contact_view = g_object_new (SW_TYPE_LASTFM_CONTACT_VIEW,
+                               "proxy", priv->proxy,
+                               "service", self,
+                               "query", query,
+                               "params", params,
+                               NULL);
+
+  /* Ensure the object gets disposed when the client goes away */
+  sw_client_monitor_add (dbus_g_method_get_sender (context),
+                         (GObject *)contact_view);
+
+
+  object_path = sw_contact_view_get_object_path (contact_view);
+  sw_contacts_query_iface_return_from_open_view (context,
+                                                 object_path);
 }
 
 static void
@@ -285,7 +329,7 @@ _lastfm_query_open_view (SwQueryIface          *self,
   SwItemView *item_view;
   const gchar *object_path;
 
-  if (!_check_query_validity (query))
+  if (!_check_query_validity (query, valid_queries))
   {
     dbus_g_method_return_error (context,
                                 g_error_new (SW_SERVICE_ERROR,
@@ -310,6 +354,16 @@ _lastfm_query_open_view (SwQueryIface          *self,
   object_path = sw_item_view_get_object_path (item_view);
   sw_query_iface_return_from_open_view (context,
                                         object_path);
+}
+
+static void
+contacts_query_iface_init (gpointer g_iface,
+                           gpointer iface_data)
+{
+  SwContactsQueryIfaceClass *klass = (SwContactsQueryIfaceClass*)g_iface;
+
+  sw_contacts_query_iface_implement_open_view (klass,
+      _lastfm_contacts_query_open_view);
 }
 
 static void

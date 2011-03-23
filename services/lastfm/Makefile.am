@@ -1,6 +1,7 @@
 services_LTLIBRARIES = liblastfm.la
 liblastfm_la_SOURCES = module.c \
 		       lastfm.c lastfm.h \
+		       lastfm-contact-view.c lastfm-contact-view.h \
 		       lastfm-item-view.c lastfm-item-view.h
 
 liblastfm_la_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/interfaces $(REST_CFLAGS) \
