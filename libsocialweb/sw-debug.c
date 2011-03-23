@@ -32,6 +32,7 @@ sw_debug_init (const char *string)
     { "views", SW_DEBUG_VIEWS },
     { "online", SW_DEBUG_ONLINE },
     { "item", SW_DEBUG_ITEM },
+    { "contact", SW_DEBUG_CONTACT },
     { "twitter", SW_DEBUG_TWITTER },
     { "lastfm", SW_DEBUG_LASTFM },
     { "core", SW_DEBUG_CORE },

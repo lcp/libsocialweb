@@ -23,15 +23,16 @@ typedef enum {
   SW_DEBUG_VIEWS = 1 << 1,
   SW_DEBUG_ONLINE = 1 << 2,
   SW_DEBUG_ITEM = 1 << 3,
-  SW_DEBUG_TWITTER = 1 << 4,
-  SW_DEBUG_LASTFM = 1 << 5,
-  SW_DEBUG_CORE = 1 << 6,
-  SW_DEBUG_VIMEO = 1 << 7,
-  SW_DEBUG_FLICKR = 1 << 8,
-  SW_DEBUG_SMUGMUG = 1 << 9,
-  SW_DEBUG_PHOTOBUCKET = 1 << 10,
-  SW_DEBUG_FACEBOOK = 1 << 11,
-  SW_DEBUG_CLIENT_MONITOR = 1 << 12
+  SW_DEBUG_CONTACT = 1 << 4,
+  SW_DEBUG_TWITTER = 1 << 5,
+  SW_DEBUG_LASTFM = 1 << 6,
+  SW_DEBUG_CORE = 1 << 7,
+  SW_DEBUG_VIMEO = 1 << 8,
+  SW_DEBUG_FLICKR = 1 << 9,
+  SW_DEBUG_SMUGMUG = 1 << 10,
+  SW_DEBUG_PHOTOBUCKET = 1 << 11,
+  SW_DEBUG_FACEBOOK = 1 << 12,
+  SW_DEBUG_CLIENT_MONITOR = 1 << 13
 } SwDebugFlags;
 
 extern guint sw_debug_flags;

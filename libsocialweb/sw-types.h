@@ -29,6 +29,8 @@ typedef struct _SwSet SwSet;
 
 typedef struct _SwItem SwItem;
 
+typedef struct _SwContact SwContact;
+
 typedef struct _SwCore SwCore;
 
 G_END_DECLS

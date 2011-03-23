@@ -21,6 +21,8 @@ libsocialweb_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS) $(SOUP_GNOME_LIBS) \
 libsocialweb_la_SOURCES = sw-types.h \
 		       sw-debug.c sw-debug.h \
 		       sw-core.c sw-core.h \
+		       sw-contact.c sw-contact.h \
+		       sw-contact-view.c sw-contact-view.h \
 		       sw-item.c sw-item.h \
 		       sw-item-view.c sw-item-view.h \
 		       sw-item-stream.c sw-item-stream.h \
@@ -41,12 +43,14 @@ public_headers = \
 	sw-types.h \
 	sw-service.h \
 	sw-online.h \
+	sw-contact-view.h \
 	sw-item-view.h \
 	sw-item-stream.h \
 	sw-debug.h \
 	sw-web.h \
 	sw-set.h \
 	sw-cache.h \
+	sw-contact.h \
 	sw-item.h \
 	sw-module.h \
 	sw-utils.h \
