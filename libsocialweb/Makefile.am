@@ -20,6 +20,7 @@ libsocialweb_la_LIBADD = $(DBUS_GLIB_LIBS) $(SOUP_LIBS) $(SOUP_GNOME_LIBS) \
 
 libsocialweb_la_SOURCES = sw-types.h \
 		       sw-debug.c sw-debug.h \
+		       sw-cacheable.c sw-cacheable.h \
 		       sw-core.c sw-core.h \
 		       sw-contact.c sw-contact.h \
 		       sw-contact-view.c sw-contact-view.h \
@@ -39,6 +40,7 @@ libsocialweb_la_SOURCES = sw-types.h \
 		       sw-enum-types.h sw-enum-types.c
 
 public_headers = \
+	sw-cacheable.h \
 	sw-core.h \
 	sw-types.h \
 	sw-service.h \
