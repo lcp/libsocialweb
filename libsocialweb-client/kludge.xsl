@@ -27,7 +27,32 @@
     </glib:signal>
   </xsl:template>
 
+  <xsl:template match="glib:signal[@name='contacts-added' or
+    @name='contacts-changed' or @name='contacts-removed']">
+    <glib:signal name="{@name}">
+      <return-value transfer-ownership="none">
+        <type name="none"/>
+      </return-value>
+      <parameters>
+        <parameter name="contacts" transfer-ownership="none">
+          <type name="GLib.List" c:type="GList*">
+            <type name="SocialWebClient.Contact" c:type="SwContact*"/>
+          </type>
+        </parameter>
+      </parameters>
+    </glib:signal>
+  </xsl:template>
+
   <xsl:template match="gi:record[@name='Item']/gi:field[@name='props']">
+    <field name="props" writable="1">
+      <type name="GLib.HashTable" c:type="GHashTable*">
+        <type name="utf8"/>
+        <type name="utf8"/>
+      </type>
+    </field>
+  </xsl:template>
+
+  <xsl:template match="gi:record[@name='Contact']/gi:field[@name='props']">
     <field name="props" writable="1">
       <type name="GLib.HashTable" c:type="GHashTable*">
         <type name="utf8"/>

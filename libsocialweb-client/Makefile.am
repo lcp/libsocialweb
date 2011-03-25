@@ -8,14 +8,15 @@ libsocialweb_client_la_CFLAGS = -I$(top_srcdir) $(DBUS_GLIB_CFLAGS) $(GIO_CFLAGS
 libsocialweb_client_la_LIBADD = $(DBUS_GLIB_LIBS) $(GIO_LIBS) $(top_builddir)/interfaces/libsocialweb-bindings.la
 libsocialweb_client_la_LDFLAGS = -version-info $(LIBSOCIALWEB_CLIENT_CURRENT):$(LIBSOCIALWEB_CLIENT_REVISION):$(LIBSOCIALWEB_CLIENT_AGE)
 HANDWRITTED_H_SOURCES = sw-client.h \
-			      sw-item.h sw-client-service.h \
-			      sw-client-lastfm.h sw-client-item-view.h
+			      sw-item.h sw-contact.h sw-client-service.h \
+			      sw-client-lastfm.h \
+			      sw-client-item-view.h sw-client-contact-view.h
 libsocialweb_client_la_HEADERS = $(HANDWRITTED_H_SOURCES)
 nodist_libsocialweb_client_la_HEADERS =
 HANDWRITTED_C_SOURCES = sw-client.c \
-			      sw-item.c sw-client-service.c \
+			      sw-item.c sw-contact.c sw-client-service.c \
 			      sw-client-lastfm.c \
-			      sw-client-item-view.c
+			      sw-client-item-view.c sw-client-contact-view.c
 PRIVATE_H_SOURCES = sw-client-service-private.h
 libsocialweb_client_la_SOURCES = $(HANDWRITTED_C_SOURCES) \
 			      $(PRIVATE_H_SOURCES) \
