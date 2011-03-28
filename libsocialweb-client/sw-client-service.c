@@ -24,6 +24,7 @@
 
 #include <interfaces/sw-service-bindings.h>
 #include <interfaces/sw-status-update-bindings.h>
+#include <interfaces/sw-contacts-query-bindings.h>
 #include <interfaces/sw-query-bindings.h>
 #include <interfaces/sw-avatar-bindings.h>
 #include <interfaces/sw-banishable-bindings.h>
@@ -53,6 +54,7 @@ typedef enum
   SERVICE_IFACE,
   AVATAR_IFACE,
   QUERY_IFACE,
+  CONTACTS_QUERY_IFACE,
   STATUS_UPDATE_IFACE,
   BANISHABLE_IFACE,
   PHOTO_UPLOAD_IFACE,
@@ -72,6 +74,7 @@ static const gchar *interface_names[LAST_IFACE] = {
   "com.meego.libsocialweb.Service",
   "com.meego.libsocialweb.Avatar",
   "com.meego.libsocialweb.Query",
+  "com.meego.libsocialweb.ContactsQuery",
   "com.meego.libsocialweb.StatusUpdate",
   "com.meego.libsocialweb.Banishable",
   "com.meego.libsocialweb.PhotoUpload",
@@ -982,6 +985,98 @@ sw_client_service_query_open_view (SwClientService                      *service
                                                  params,
                                                  _query_open_view_cb,
                                                  closure);
+
+  if (tmp_params)
+    g_hash_table_unref (tmp_params);
+}
+
+static void
+_contacts_query_open_view_cb (DBusGProxy *proxy,
+                              gchar      *view_path,
+                              GError     *error,
+                              gpointer    userdata)
+{
+  SwClientContactView *contact_view = NULL;
+  SwClientServiceContactsQueryOpenViewCallback cb;
+  SwClientServiceCallClosure *closure = (SwClientServiceCallClosure *)userdata;
+
+  if (error)
+  {
+    SwClientServicePrivate *priv = GET_PRIVATE (closure->service);
+    g_warning (G_STRLOC ": Error calling OpenView on service %s: %s",
+               priv->name,
+               error->message);
+    g_error_free (error);
+  } else {
+    contact_view = _sw_client_contact_view_new_for_path (view_path);
+    g_free (view_path);
+  }
+
+  cb = (SwClientServiceContactsQueryOpenViewCallback)closure->cb;
+
+  cb (closure->service,
+      contact_view,
+      closure->userdata);
+
+  g_object_unref (closure->service);
+  g_slice_free (SwClientServiceCallClosure, closure);
+}
+
+/**
+ * SwClientServiceContactsQueryOpenViewCallback:
+ * @query:
+ * @contact_view: (allow-none):
+ * @userdata: (closure):
+ */
+
+/**
+ * sw_client_service_contacts_query_open_view:
+ * @service:
+ * @query:
+ * @params: (element-type gchar* gchar*):
+ * @cb: (scope async):
+ * @userdata: (closure):
+ */
+void
+sw_client_service_contacts_query_open_view (SwClientService        *service,
+       const gchar                     *query,
+       GHashTable                      *params,
+       SwClientServiceContactsQueryOpenViewCallback  cb,
+       gpointer                         userdata)
+{
+  SwClientServicePrivate *priv = GET_PRIVATE (service);
+  SwClientServiceCallClosure *closure;
+  GError *error = NULL;
+  GHashTable *tmp_params = NULL;
+
+  if (!_sw_client_service_setup_proxy_for_iface (service,
+                                                 priv->name,
+                                                 CONTACTS_QUERY_IFACE,
+                                                 &error))
+  {
+    g_critical (G_STRLOC ": Unable to setup proxy on Query interface: %s",
+                error->message);
+    g_clear_error (&error);
+    return;
+  }
+
+  closure = g_slice_new0 (SwClientServiceCallClosure);
+  closure->service = g_object_ref (service);
+  closure->cb = (GCallback)cb;
+  closure->userdata = userdata;
+
+  if (!params)
+  {
+    tmp_params = g_hash_table_new (g_str_hash, g_str_equal);
+    params = tmp_params;
+  }
+
+  com_meego_libsocialweb_ContactsQuery_open_view_async
+          (priv->proxies [CONTACTS_QUERY_IFACE],
+           query,
+           params,
+           _contacts_query_open_view_cb,
+           closure);
 
   if (tmp_params)
     g_hash_table_unref (tmp_params);

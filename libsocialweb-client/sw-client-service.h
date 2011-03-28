@@ -23,6 +23,8 @@
 #include <gio/gio.h>
 #include <libsocialweb-client/sw-item.h>
 #include <libsocialweb-client/sw-client-item-view.h>
+#include <libsocialweb-client/sw-contact.h>
+#include <libsocialweb-client/sw-client-contact-view.h>
 
 G_BEGIN_DECLS
 
@@ -154,6 +156,19 @@ sw_client_service_query_open_view (SwClientService                      *service
                                    GHashTable                           *params,
                                    SwClientServiceQueryOpenViewCallback  cb,
                                    gpointer                              userdata);
+
+typedef void (*SwClientServiceContactsQueryOpenViewCallback)
+        (SwClientService       *query,
+         SwClientContactView   *contact_view,
+         gpointer               userdata);
+
+void
+sw_client_service_contacts_query_open_view
+        (SwClientService                      *service,
+         const gchar                          *query,
+         GHashTable                           *params,
+         SwClientServiceContactsQueryOpenViewCallback  cb,
+         gpointer                              userdata);
 
 void
 sw_client_service_banishable_hide_item (SwClientService *service,
