@@ -4,6 +4,7 @@ libfacebook_la_SOURCES = \
 	module.c \
 	facebook.c facebook.h \
 	facebook-util.c facebook-util.h \
+	facebook-contact-view.c facebook-contact-view.h \
 	facebook-item-view.c facebook-item-view.h
 
 libfacebook_la_CFLAGS = \

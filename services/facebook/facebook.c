@@ -29,6 +29,7 @@
 
 #include "facebook.h"
 #include "facebook-util.h"
+#include "facebook-contact-view.h"
 #include "facebook-item-view.h"
 
 #include <json-glib/json-glib.h>
@@ -46,10 +47,12 @@
 #include <interfaces/sw-status-update-ginterface.h>
 #include <interfaces/sw-photo-upload-ginterface.h>
 #include <interfaces/sw-video-upload-ginterface.h>
+#include <interfaces/sw-contacts-query-ginterface.h>
 #include <interfaces/sw-query-ginterface.h>
 #include <interfaces/sw-collections-ginterface.h>
 
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
+static void contacts_query_iface_init (gpointer g_iface, gpointer iface_data);
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
 static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
 static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
@@ -62,6 +65,8 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceFacebook,
                          SW_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 initable_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_CONTACTS_QUERY_IFACE,
+                                                contacts_query_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE,
                                                 query_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_AVATAR_IFACE,
@@ -121,6 +126,7 @@ get_static_caps (SwService *service)
     HAS_UPDATE_STATUS_IFACE,
     HAS_AVATAR_IFACE,
     HAS_BANISHABLE_IFACE,
+    HAS_CONTACTS_QUERY_IFACE,
     HAS_QUERY_IFACE,
     HAS_PHOTO_UPLOAD_IFACE,
     HAS_VIDEO_UPLOAD_IFACE,
@@ -462,6 +468,42 @@ initable_iface_init (gpointer g_iface, gpointer iface_data)
 
 /* Query interface */
 static void
+_facebook_contacts_query_open_view (SwContactsQueryIface  *self,
+                                    const gchar           *query,
+                                    GHashTable            *params,
+                                    DBusGMethodInvocation *context)
+{
+  SwServiceFacebookPrivate *priv = GET_PRIVATE (self);
+  SwContactView *contact_view;
+  const gchar *object_path;
+
+  g_debug ("query = '%s'", query);
+  if (!g_str_equal (query, "people"))
+  {
+    dbus_g_method_return_error (context,
+                                g_error_new (SW_SERVICE_ERROR,
+                                             SW_SERVICE_ERROR_INVALID_QUERY,
+                                             "Query '%s' is invalid",
+                                             query));
+    return;
+  }
+
+  contact_view = g_object_new (SW_TYPE_FACEBOOK_CONTACT_VIEW,
+                               "service", self,
+                               "proxy", priv->proxy,
+                               "query", query,
+                               "params", params,
+                               NULL);
+  object_path = sw_contact_view_get_object_path (contact_view);
+
+  /* Ensure the object gets disposed when the client goes away */
+  sw_client_monitor_add (dbus_g_method_get_sender (context),
+                         (GObject *) contact_view);
+
+  sw_contacts_query_iface_return_from_open_view (context, object_path);
+}
+
+static void
 _facebook_query_open_view (SwQueryIface          *self,
                            const gchar           *query,
                            GHashTable            *params,
@@ -486,6 +528,14 @@ _facebook_query_open_view (SwQueryIface          *self,
                          (GObject *) item_view);
 
   sw_query_iface_return_from_open_view (context, object_path);
+}
+
+static void
+contacts_query_iface_init (gpointer g_iface, gpointer iface_data)
+{
+  SwContactsQueryIfaceClass *klass = (SwContactsQueryIfaceClass*) g_iface;
+
+  sw_contacts_query_iface_implement_open_view (klass, _facebook_contacts_query_open_view);
 }
 
 static void
