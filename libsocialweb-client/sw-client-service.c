@@ -431,7 +431,7 @@ _get_capabilities_cb (DBusGProxy *proxy,
 /**
  * SwClientServiceGetCapabilitiesCallback:
  * @service:
- * @caps:
+ * @caps: (transfer none) (array zero-terminated=1) (element-type char*):
  * @error:
  * @userdata: (closure):
  */
@@ -1028,6 +1028,12 @@ sw_client_service_get_display_name (SwClientService *service)
   return priv->display_name;
 }
 
+/**
+ * sw_client_service_has_cap:
+ * @caps: (transfer none) (array zero-terminated=1) (element-type char*):
+ * @cap:
+ * Returns:
+ */
 gboolean
 sw_client_service_has_cap (const char **caps, const char *cap)
 {
