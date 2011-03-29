@@ -135,7 +135,7 @@ _facebook_status_node_to_item (SwItemView *self,
   JsonObject *status_object;
   JsonNode *from, *to;
 
-  if (!json_node_get_node_type (status_node) == JSON_NODE_OBJECT)
+  if (json_node_get_node_type (status_node) != JSON_NODE_OBJECT)
     return NULL;
 
   status_object = json_node_get_object (status_node);
