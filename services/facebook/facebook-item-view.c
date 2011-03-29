@@ -27,6 +27,7 @@
 #include "facebook.h"
 #include "facebook-util.h"
 
+#include <libsocialweb/sw-debug.h>
 #include <libsocialweb/sw-item.h>
 #include <libsocialweb/sw-set.h>
 #include <libsocialweb/sw-cache.h>
@@ -206,7 +207,7 @@ _facebook_status_node_to_item (SwItemView *self,
   post_time = get_child_node_value (status_node, "created_time");
   if (post_time == NULL)
     {
-      g_debug ("Got status update without a date");
+      SW_DEBUG (FACEBOOK, "Got status update without a date");
       g_object_unref (item);
 
       return NULL;
@@ -218,7 +219,7 @@ _facebook_status_node_to_item (SwItemView *self,
   uid = get_child_node_value (status_node, "id");
   if (uid == NULL)
     {
-      g_debug ("Got status update without an id");
+      SW_DEBUG (FACEBOOK, "Got status update without an id");
       g_object_unref (item);
 
       return NULL;
@@ -231,7 +232,7 @@ _facebook_status_node_to_item (SwItemView *self,
   message = get_child_node_value (status_node, "message");
   if (message == NULL || message[0] == '\0')
     {
-      g_debug ("Got status update without a message");
+      SW_DEBUG (FACEBOOK, "Got status update without a message");
       g_free (message);
       g_object_unref (item);
 
@@ -249,7 +250,7 @@ _facebook_status_node_to_item (SwItemView *self,
 
   if (name == NULL)
     {
-      g_debug ("Got status update without an author name");
+      SW_DEBUG (FACEBOOK, "Got status update without an author name");
       g_object_unref (item);
 
       return NULL;
@@ -560,7 +561,7 @@ facebook_item_view_start (SwItemView *self)
     }
   else
     {
-      g_debug ("Starting up the Facebook view");
+      SW_DEBUG (FACEBOOK, "Starting up the Facebook view");
 
       priv->running = g_timeout_add_seconds (UPDATE_TIMEOUT,
                                              _update_timeout_cb,
@@ -582,7 +583,7 @@ facebook_item_view_stop (SwItemView *self)
     }
   else
     {
-      g_debug ("Stopping the Facebook view");
+      SW_DEBUG (FACEBOOK, "Stopping the Facebook view");
 
       g_source_remove (priv->running);
       priv->running = 0;
@@ -593,7 +594,7 @@ facebook_item_view_stop (SwItemView *self)
 static void
 facebook_item_view_refresh (SwItemView *self)
 {
-  g_debug ("Forced a refresh of the Facebook view");
+  SW_DEBUG (FACEBOOK, "Forced a refresh of the Facebook view");
 
   get_status_updates (self);
 }
