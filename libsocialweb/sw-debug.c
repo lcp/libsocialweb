@@ -40,6 +40,7 @@ sw_debug_init (const char *string)
     { "flickr", SW_DEBUG_FLICKR },
     { "smugmug", SW_DEBUG_SMUGMUG },
     { "photobucket", SW_DEBUG_PHOTOBUCKET },
+    { "facebook", SW_DEBUG_FACEBOOK },
     { "client-monitor", SW_DEBUG_CLIENT_MONITOR }
   };
 
