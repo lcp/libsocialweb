@@ -1,7 +1,8 @@
 services_LTLIBRARIES = libflickr.la
 libflickr_la_SOURCES = module.c \
 		       flickr.c flickr.h \
-		       flickr-item-view.c flickr-item-view.h
+		       flickr-item-view.c flickr-item-view.h \
+		       flickr-contact-view.c flickr-contact-view.h
 libflickr_la_CFLAGS = -I$(top_srcdir) \
 		      $(REST_CFLAGS) \
 		      $(GCONF_CFLAGS) \

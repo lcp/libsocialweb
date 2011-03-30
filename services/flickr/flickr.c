@@ -1,6 +1,7 @@
 /*
  * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
+ * Copyright (C) 2011 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
@@ -36,24 +37,33 @@
 #include <rest-extras/flickr-proxy.h>
 #include <rest/rest-xml-parser.h>
 
+#include <interfaces/sw-contacts-query-ginterface.h>
 #include <interfaces/sw-query-ginterface.h>
 #include <interfaces/sw-photo-upload-ginterface.h>
 #include <interfaces/sw-video-upload-ginterface.h>
 
 #include "flickr-item-view.h"
+#include "flickr-contact-view.h"
 #include "flickr.h"
 
 
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
+static void contacts_query_iface_init (gpointer g_iface, gpointer iface_data);
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
 static void photo_upload_iface_init (gpointer g_iface, gpointer iface_data);
 static void video_upload_iface_init (gpointer g_iface, gpointer iface_data);
 
 G_DEFINE_TYPE_WITH_CODE (SwServiceFlickr, sw_service_flickr, SW_TYPE_SERVICE,
-                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init)
-                         G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE, query_iface_init)
-                         G_IMPLEMENT_INTERFACE (SW_TYPE_PHOTO_UPLOAD_IFACE, photo_upload_iface_init)
-                         G_IMPLEMENT_INTERFACE (SW_TYPE_VIDEO_UPLOAD_IFACE, video_upload_iface_init));
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                initable_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_CONTACTS_QUERY_IFACE,
+                                                contacts_query_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE,
+                                                query_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_PHOTO_UPLOAD_IFACE,
+                                                photo_upload_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_VIDEO_UPLOAD_IFACE,
+                                                video_upload_iface_init));
 
 #define GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), SW_TYPE_SERVICE_FLICKR, SwServiceFlickrPrivate))
@@ -87,6 +97,7 @@ get_static_caps (SwService *service)
     HAS_VIDEO_UPLOAD_IFACE,
     HAS_BANISHABLE_IFACE,
     HAS_QUERY_IFACE,
+    HAS_CONTACTS_QUERY_IFACE,
 
     NULL
   };
@@ -317,14 +328,17 @@ const static gchar *valid_queries[] = { "feed",
                                         "friends-only",
                                         "x-flickr-search" };
 
+static const gchar *valid_contact_queries[] = { "people" };
+
+
 static gboolean
-_check_query_validity (const gchar *query)
+_check_query_validity (const gchar *query, const gchar *list[])
 {
   gint i = 0;
 
-  for (i = 0; i < G_N_ELEMENTS (valid_queries); i++)
+  for (i = 0; i < G_N_ELEMENTS (list); i++)
   {
-    if (g_str_equal (query, valid_queries[i]))
+    if (g_str_equal (query, list[i]))
       return TRUE;
   }
 
@@ -341,7 +355,7 @@ _flickr_query_open_view (SwQueryIface          *self,
   SwItemView *item_view;
   const gchar *object_path;
 
-  if (!_check_query_validity (query))
+  if (!_check_query_validity (query, valid_queries))
   {
     dbus_g_method_return_error (context,
                                 g_error_new (SW_SERVICE_ERROR,
@@ -365,6 +379,51 @@ _flickr_query_open_view (SwQueryIface          *self,
   object_path = sw_item_view_get_object_path (item_view);
   sw_query_iface_return_from_open_view (context,
                                         object_path);
+}
+
+static void
+_flickr_contacts_query_open_view (SwContactsQueryIface  *self,
+                                  const gchar           *query,
+                                  GHashTable            *params,
+                                  DBusGMethodInvocation *context)
+{
+  SwServiceFlickrPrivate *priv = GET_PRIVATE (self);
+  SwContactView *contact_view;
+  const gchar *object_path;
+
+  if (!_check_query_validity (query, valid_contact_queries))
+  {
+    dbus_g_method_return_error (context,
+                                g_error_new (SW_SERVICE_ERROR,
+                                             SW_SERVICE_ERROR_INVALID_QUERY,
+                                             "Query '%s' is invalid",
+                                             query));
+    return;
+  }
+
+  contact_view = g_object_new (SW_TYPE_FLICKR_CONTACT_VIEW,
+                            "proxy", priv->proxy,
+                            "service", self,
+                            "query", query,
+                            "params", params,
+                            NULL);
+
+  /* Ensure the object gets disposed when the client goes away */
+  sw_client_monitor_add (dbus_g_method_get_sender (context),
+                         (GObject *)contact_view);
+
+  object_path = sw_contact_view_get_object_path (contact_view);
+  sw_contacts_query_iface_return_from_open_view (context, object_path);
+}
+
+static void
+contacts_query_iface_init (gpointer g_iface,
+                           gpointer iface_data)
+{
+  SwContactsQueryIfaceClass *klass = (SwContactsQueryIfaceClass*)g_iface;
+
+  sw_contacts_query_iface_implement_open_view (klass,
+      _flickr_contacts_query_open_view);
 }
 
 static void
