@@ -19,7 +19,7 @@
     </signal>
 
     <signal name="ContactsRemoved" tp:name-for-bindings="Contacts_Removed">
-      <arg name="contacts" type="a(sas)">
+      <arg name="contacts" type="a(ss)">
         <tp:docstring>
           Array of contacts removed. It contains: service, id.
         </tp:docstring>
