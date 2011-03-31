@@ -2,6 +2,7 @@ services/facebook/facebook.keys.in
 services/flickr/flickr.c
 services/flickr/flickr.keys.in
 services/lastfm/lastfm-item-view.c
+services/lastfm/lastfm-contact-view.c
 services/lastfm/lastfm.c
 services/lastfm/lastfm.keys.in
 services/smugmug/smugmug.keys.in
