@@ -1,5 +1,6 @@
 services_LTLIBRARIES = libtwitter.la
 libtwitter_la_SOURCES = module.c twitter.c twitter.h \
+			twitter-contact-view.h twitter-contact-view.c \
 			twitter-item-view.h twitter-item-view.c \
 			twitter-item-stream.h twitter-item-stream.c
 libtwitter_la_CFLAGS = -I$(top_srcdir) $(REST_CFLAGS) \

@@ -1,6 +1,7 @@
 /*
  * libsocialweb - social data store
  * Copyright (C) 2008 - 2009 Intel Corporation.
+ * Copyright (C) 2011 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU Lesser General Public License,
@@ -40,6 +41,7 @@
 #include <rest/rest-xml-parser.h>
 #include <libsoup/soup.h>
 
+#include <interfaces/sw-contacts-query-ginterface.h>
 #include <interfaces/sw-query-ginterface.h>
 #include <interfaces/sw-avatar-ginterface.h>
 #include <interfaces/sw-status-update-ginterface.h>
@@ -47,10 +49,12 @@
 
 
 #include "twitter.h"
+#include "twitter-contact-view.h"
 #include "twitter-item-view.h"
 #include "twitter-item-stream.h"
 
 static void initable_iface_init (gpointer g_iface, gpointer iface_data);
+static void contacts_query_iface_init (gpointer g_iface, gpointer iface_data);
 static void query_iface_init (gpointer g_iface, gpointer iface_data);
 static void avatar_iface_init (gpointer g_iface, gpointer iface_data);
 static void status_update_iface_init (gpointer g_iface, gpointer iface_data);
@@ -61,6 +65,8 @@ G_DEFINE_TYPE_WITH_CODE (SwServiceTwitter,
                          SW_TYPE_SERVICE,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 initable_iface_init)
+                         G_IMPLEMENT_INTERFACE (SW_TYPE_CONTACTS_QUERY_IFACE,
+                                                contacts_query_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_QUERY_IFACE,
                                                 query_iface_init)
                          G_IMPLEMENT_INTERFACE (SW_TYPE_AVATAR_IFACE,
@@ -134,6 +140,7 @@ get_static_caps (SwService *service)
     HAS_UPDATE_STATUS_IFACE,
     HAS_AVATAR_IFACE,
     HAS_BANISHABLE_IFACE,
+    HAS_CONTACTS_QUERY_IFACE,
     HAS_QUERY_IFACE,
     CAN_UPDATE_STATUS_WITH_GEOTAG,
 
@@ -541,14 +548,16 @@ static const gchar *valid_queries[] = { "feed",
                                         "x-twitter-stream",
                                         "x-twitter-trending-topics"};
 
+static const gchar *valid_contact_queries[] = { "people" };
+
 static gboolean
-_check_query_validity (const gchar *query)
+_check_query_validity (const gchar *query, const gchar *list[])
 {
   gint i = 0;
 
-  for (i = 0; i < G_N_ELEMENTS(valid_queries); i++)
+  for (i = 0; i < G_N_ELEMENTS(list); i++)
   {
-    if (g_str_equal (query, valid_queries[i]))
+    if (g_str_equal (query, list[i]))
       return TRUE;
   }
 
@@ -564,7 +573,7 @@ _twitter_query_open_view (SwQueryIface          *self,
   SwServiceTwitterPrivate *priv = GET_PRIVATE (self);
   const gchar *object_path;
 
-  if (!_check_query_validity (query))
+  if (!_check_query_validity (query, valid_queries))
   {
     dbus_g_method_return_error (context,
                                 g_error_new (SW_SERVICE_ERROR,
@@ -603,6 +612,51 @@ _twitter_query_open_view (SwQueryIface          *self,
 
   sw_query_iface_return_from_open_view (context,
                                         object_path);
+}
+
+static void
+_twitter_contacts_query_open_view (SwContactsQueryIface  *self,
+                                   const gchar           *query,
+                                   GHashTable            *params,
+                                   DBusGMethodInvocation *context)
+{
+  SwServiceTwitterPrivate *priv = GET_PRIVATE (self);
+  const gchar *object_path;
+  SwContactView *contact_view;
+
+  if (!_check_query_validity (query, valid_contact_queries))
+  {
+    dbus_g_method_return_error (context,
+                                g_error_new (SW_SERVICE_ERROR,
+                                             SW_SERVICE_ERROR_INVALID_QUERY,
+                                             "Query '%s' is invalid",
+                                             query));
+    return;
+  }
+
+  contact_view = g_object_new (SW_TYPE_TWITTER_CONTACT_VIEW,
+                               "proxy", priv->proxy,
+                               "service", self,
+                               "query", query,
+                               "params", params,
+                               NULL);
+  object_path = sw_contact_view_get_object_path (contact_view);
+  /* Ensure the object gets disposed when the client goes away */
+  sw_client_monitor_add (dbus_g_method_get_sender (context),
+                        (GObject *)contact_view);
+
+  sw_contacts_query_iface_return_from_open_view (context,
+      object_path);
+}
+
+static void
+contacts_query_iface_init (gpointer g_iface,
+                           gpointer iface_data)
+{
+  SwContactsQueryIfaceClass *klass = (SwContactsQueryIfaceClass*)g_iface;
+
+  sw_contacts_query_iface_implement_open_view (klass,
+      _twitter_contacts_query_open_view);
 }
 
 static void
@@ -846,6 +900,13 @@ _twitpic_upload_photo (SwPhotoUploadIface    *self,
                          GINT_TO_POINTER (opid),
                          NULL);
   sw_photo_upload_iface_return_from_upload_photo (context, opid);
+}
+
+const char *
+sw_service_twitter_get_username (SwServiceTwitter *self)
+{
+  SwServiceTwitterPrivate *priv = self->priv;
+  return priv->username;
 }
 
 static void

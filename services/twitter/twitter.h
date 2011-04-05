@@ -53,6 +53,8 @@ typedef struct {
 
 GType sw_service_twitter_get_type (void);
 
+const char *sw_service_twitter_get_username (SwServiceTwitter *self);
+
 G_END_DECLS
 
 #endif /* _SW_SERVICE_TWITTER */
