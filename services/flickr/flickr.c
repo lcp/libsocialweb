@@ -437,11 +437,11 @@ query_iface_init (gpointer g_iface,
 }
 
 static gint
-_flickr_upload (SwServiceFlickr           *self,
-                const gchar               *filename,
-                GHashTable                *params_in,
-                GError                   **error,
-                RestProxyCallAsyncCallback callback)
+_flickr_upload (SwServiceFlickr              *self,
+                const gchar                  *filename,
+                GHashTable                   *params_in,
+                GError                      **error,
+                RestProxyCallUploadCallback   callback)
 {
   SwServiceFlickrPrivate *priv = GET_PRIVATE (self);
   RestProxyCall *call;
@@ -461,17 +461,19 @@ _flickr_upload (SwServiceFlickr           *self,
 
   opid = sw_next_opid ();
 
-  rest_proxy_call_async (call, callback, (GObject *)self,
-                         GINT_TO_POINTER (opid), NULL);
+  rest_proxy_call_upload (call, callback, (GObject *)self,
+                          GINT_TO_POINTER (opid), NULL);
 
   return opid;
 }
 
 static void
 on_photo_upload_cb (RestProxyCall *call,
-              const GError *error,
-              GObject *weak_object,
-              gpointer user_data)
+                    gsize          total,
+                    gsize          uploaded,
+                    const GError  *error,
+                    GObject       *weak_object,
+                    gpointer       user_data)
 {
   SwServiceFlickr *flickr = SW_SERVICE_FLICKR (weak_object);
   int opid = GPOINTER_TO_INT (user_data);
@@ -481,7 +483,9 @@ on_photo_upload_cb (RestProxyCall *call,
     /* TODO: clean up */
   } else {
     /* TODO: check flickr error state */
-    sw_photo_upload_iface_emit_photo_upload_progress (flickr, opid, 100, "");
+    gint percent = (gdouble) uploaded / (gdouble) total * 100;
+    sw_photo_upload_iface_emit_photo_upload_progress (flickr, opid,
+                                                      percent, "");
   }
 }
 
@@ -516,9 +520,11 @@ photo_upload_iface_init (gpointer g_iface,
 
 static void
 on_video_upload_cb (RestProxyCall *call,
-              const GError *error,
-              GObject *weak_object,
-              gpointer user_data)
+                    gsize          total,
+                    gsize          uploaded,
+                    const GError  *error,
+                    GObject       *weak_object,
+                    gpointer       user_data)
 {
   SwServiceFlickr *flickr = SW_SERVICE_FLICKR (weak_object);
   int opid = GPOINTER_TO_INT (user_data);
@@ -528,7 +534,9 @@ on_video_upload_cb (RestProxyCall *call,
     /* TODO: clean up */
   } else {
     /* TODO: check flickr error state */
-    sw_video_upload_iface_emit_video_upload_progress (flickr, opid, 100, "");
+    gint percent = (gdouble) uploaded / (gdouble) total * 100;
+    sw_video_upload_iface_emit_video_upload_progress (flickr, opid,
+                                                      percent, "");
   }
 }
 
