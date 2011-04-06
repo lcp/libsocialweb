@@ -607,7 +607,6 @@ sw_contact_view_remove_contacts (SwContactView *contact_view,
 
   for (l = contacts; l; l = l->next)
   {
-    int values_type = 0;
     contact = SW_CONTACT (l->data);
 
     value_array = g_value_array_new (2);
@@ -622,7 +621,6 @@ sw_contact_view_remove_contacts (SwContactView *contact_view,
     g_value_set_string (g_value_array_get_nth (value_array, 1),
                         sw_contact_get (contact, "id"));
 
-    g_object_get (contact, "values-type", &values_type, NULL);
     g_ptr_array_add (contacts_ptr_array, value_array);
   }
 
