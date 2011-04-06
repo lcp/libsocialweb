@@ -291,7 +291,7 @@ _sw_contacts_removed_get_container_type (void)
   return dbus_g_type_get_collection ("GPtrArray",
       dbus_g_type_get_struct ("GValueArray",
           G_TYPE_STRING,
-          G_TYPE_STRV,
+          G_TYPE_STRING,
           G_TYPE_INVALID));
 }
 
