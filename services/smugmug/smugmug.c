@@ -343,7 +343,7 @@ _upload_file (SwServiceSmugmug *self,
               MediaType upload_type,
               const gchar *filename,
               GHashTable *extra_fields,
-              RestProxyCallAsyncCallback upload_cb,
+              RestProxyCallUploadCallback upload_cb,
               GError **error)
 {
   SwServiceSmugmugPrivate *priv = self->priv;
@@ -427,11 +427,11 @@ _upload_file (SwServiceSmugmug *self,
 
   SW_DEBUG (SMUGMUG, "Uploading %s (%s)", basename, bytecount);
 
-  rest_proxy_call_async (call,
-                         upload_cb,
-                         G_OBJECT (self),
-                         GINT_TO_POINTER (opid),
-                         NULL);
+  rest_proxy_call_upload (call,
+                          upload_cb,
+                          G_OBJECT (self),
+                          GINT_TO_POINTER (opid),
+                          NULL);
 
  OUT:
   g_free (basename);
@@ -776,6 +776,8 @@ collections_iface_init (gpointer g_iface,
 
 static void
 _upload_photo_cb (RestProxyCall *call,
+                  gsize          total,
+                  gsize          uploaded,
                   const GError  *error,
                   GObject       *weak_object,
                   gpointer       user_data)
@@ -787,7 +789,8 @@ _upload_photo_cb (RestProxyCall *call,
     sw_photo_upload_iface_emit_photo_upload_progress (self, opid, -1,
         error->message);
   } else {
-    sw_photo_upload_iface_emit_photo_upload_progress (self, opid, 100, "");
+    gint percent = (gdouble) uploaded / (gdouble) total * 100;
+    sw_photo_upload_iface_emit_photo_upload_progress (self, opid, percent, "");
   }
 }
 
@@ -799,7 +802,7 @@ _smugmug_upload_photo (SwPhotoUploadIface    *self,
 {
   GError *error = NULL;
   gint opid = _upload_file (SW_SERVICE_SMUGMUG (self), PHOTO, filename, fields,
-                       (RestProxyCallAsyncCallback) _upload_photo_cb, &error);
+                       (RestProxyCallUploadCallback) _upload_photo_cb, &error);
 
   if (error) {
     dbus_g_method_return_error (context, error);
@@ -825,6 +828,8 @@ photo_upload_iface_init (gpointer g_iface,
 
 static void
 _upload_video_cb (RestProxyCall *call,
+                  gsize          total,
+                  gsize          uploaded,
                   const GError  *error,
                   GObject       *weak_object,
                   gpointer       user_data)
@@ -836,7 +841,8 @@ _upload_video_cb (RestProxyCall *call,
     sw_video_upload_iface_emit_video_upload_progress (self, opid, -1,
         error->message);
   } else {
-    sw_video_upload_iface_emit_video_upload_progress (self, opid, 100, "");
+    gint percent = (gdouble) uploaded / (gdouble) total * 100;
+    sw_video_upload_iface_emit_video_upload_progress (self, opid, percent, "");
   }
 }
 
@@ -848,7 +854,7 @@ _smugmug_upload_video (SwVideoUploadIface    *self,
 {
   GError *error = NULL;
   gint opid = _upload_file (SW_SERVICE_SMUGMUG (self), VIDEO, filename, fields,
-                       (RestProxyCallAsyncCallback) _upload_video_cb, &error);
+                       (RestProxyCallUploadCallback) _upload_video_cb, &error);
 
   if (error) {
     dbus_g_method_return_error (context, error);
