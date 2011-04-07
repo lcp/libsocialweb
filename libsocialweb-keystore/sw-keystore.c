@@ -104,15 +104,19 @@ load_keys_from_dir (GHashTable *hash, const char *base_dir, gboolean is_base)
     data->key = g_data_input_stream_read_line (dstream, NULL, NULL, NULL);
     if (data->key) {
       g_strstrip (data->key);
-      if (data->key[0] == '\0')
+      if (data->key[0] == '\0') {
+        free (data->key);
         data->key = NULL;
+      }
     }
 
     data->secret = g_data_input_stream_read_line (dstream, NULL, NULL, NULL);
     if (data->secret) {
       g_strstrip (data->secret);
-      if (data->secret[0] == '\0')
-        data->secret = NULL;
+      if (data->secret[0] == '\0') {
+          free (data->secret);
+          data->secret = NULL;
+        }
     }
 
     g_hash_table_insert (hash, g_strdup (name), data);
