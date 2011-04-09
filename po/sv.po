@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libsocialweb\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-06 20:34+0100\n"
-"PO-Revision-Date: 2011-03-06 20:39+0100\n"
+"POT-Creation-Date: 2011-04-09 10:24+0200\n"
+"PO-Revision-Date: 2011-04-09 10:24+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: \n"
@@ -38,11 +38,13 @@ msgstr "Flickr - nästan helt säkert det bästa nätprogrammet i världen för 
 
 #. Translators "[track title] by [artist]"
 #: ../services/lastfm/lastfm-item-view.c:361
+#: ../services/lastfm/lastfm-contact-view.c:356
 #, c-format
 msgid "%s by %s"
 msgstr "%s av %s"
 
 #: ../services/lastfm/lastfm-item-view.c:365
+#: ../services/lastfm/lastfm-contact-view.c:360
 msgid "Unknown"
 msgstr "Okänt"
 
@@ -63,7 +65,7 @@ msgid "Your Photos Look Better Here. Billions of happy photos. Millions of passi
 msgstr "Dina foton ser bättre ut här. Miljarder av glada foton. Miljoner av passionerade kunder."
 
 #. This format is for tweets announcing twitpic URLs, "[tweet] [url]".
-#: ../services/twitter/twitter.c:772
+#: ../services/twitter/twitter.c:826
 #, c-format
 msgid "%s %s"
 msgstr "%s %s"
@@ -83,6 +85,14 @@ msgstr "Från början skapades Vimeo av filmskapare och videokreatörer som vill
 #: ../services/vimeo/vimeo.keys.in.h:2
 msgid "Vimeo"
 msgstr "Vimeo"
+
+#: ../services/photobucket/photobucket.keys.in.h:1
+msgid "Photobucket"
+msgstr "Photobucket"
+
+#: ../services/photobucket/photobucket.keys.in.h:2
+msgid "Snap and show it off! Photobucket makes it easy to share your photos and videos anywhere."
+msgstr "Ta bilden och visa upp den! Photobucket gör det enkelt att dela dina foton och videor överallt."
 
 #: ../services/plurk/plurk.keys.in.h:1
 msgid "Plurk"
