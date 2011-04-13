@@ -798,6 +798,8 @@ on_upload_tweet_cb (RestProxyCall *call,
 
 static void
 on_upload_cb (RestProxyCall *call,
+              gsize          total,
+              gsize          uploaded,
               const GError *error,
               GObject *weak_object,
               gpointer user_data)
@@ -806,6 +808,7 @@ on_upload_cb (RestProxyCall *call,
   RestXmlNode *root;
   char *tweet;
   int opid = GPOINTER_TO_INT (user_data);
+  gint percent;
 
   if (error) {
     sw_photo_upload_iface_emit_photo_upload_progress (twitter, opid, -1, error->message);
@@ -833,7 +836,9 @@ on_upload_cb (RestProxyCall *call,
   rest_proxy_call_add_param (call, "status", tweet);
   rest_proxy_call_async (call, on_upload_tweet_cb, (GObject *)twitter, NULL, NULL);
 
-  sw_photo_upload_iface_emit_photo_upload_progress (twitter, opid, 100, "");
+  percent = (gdouble) uploaded / (gdouble) total * 100;
+  sw_photo_upload_iface_emit_photo_upload_progress (twitter, opid, percent,
+                                                    "");
 
   rest_xml_node_unref (root);
   g_free (tweet);
@@ -894,11 +899,11 @@ _twitpic_upload_photo (SwPhotoUploadIface    *self,
 
   opid = sw_next_opid ();
 
-  rest_proxy_call_async (call,
-                         on_upload_cb,
-                         (GObject *)self,
-                         GINT_TO_POINTER (opid),
-                         NULL);
+  rest_proxy_call_upload (call,
+                          on_upload_cb,
+                          (GObject *)self,
+                          GINT_TO_POINTER (opid),
+                          NULL);
   sw_photo_upload_iface_return_from_upload_photo (context, opid);
 }
 

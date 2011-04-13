@@ -481,6 +481,8 @@ query_iface_init (gpointer g_iface,
 static void
 _video_upload_cb (YoutubeProxy   *proxy,
                   const gchar   *payload,
+                  gsize          total,
+                  gsize          uploaded,
                   const GError  *error,
                   GObject       *weak_object,
                   gpointer       user_data)
@@ -492,7 +494,8 @@ _video_upload_cb (YoutubeProxy   *proxy,
     sw_video_upload_iface_emit_video_upload_progress (self, opid, -1,
         error->message);
   } else {
-    sw_video_upload_iface_emit_video_upload_progress (self, opid, 100, "");
+    gint percent = (gdouble) uploaded / (gdouble) total * 100;
+    sw_video_upload_iface_emit_video_upload_progress (self, opid, percent, "");
   }
 }
 
