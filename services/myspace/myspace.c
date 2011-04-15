@@ -490,6 +490,26 @@ _update_status_cb (RestProxyCall *call,
   }
 }
 
+gchar *request_body = NULL;
+
+static gboolean
+_myspace_serialize_params (RestProxyCall *call,
+                           gchar **content_type,
+                           gchar **content,
+                           gsize *content_len,
+                           GError **error)
+{
+  static gsize len;
+  len = strlen (request_body);
+
+  *content_type = g_strdup ("text/plain");
+  *content = g_strdup (request_body);
+  *content_len = len;
+  error = NULL;
+
+  return TRUE;
+}
+
 static void
 _myspace_status_update_update_status (SwStatusUpdateIface   *self,
                                       const gchar           *msg,
@@ -499,21 +519,23 @@ _myspace_status_update_update_status (SwStatusUpdateIface   *self,
   SwServiceMySpace *myspace = (SwServiceMySpace *)self;
   SwServiceMySpacePrivate *priv = myspace->priv;
   RestProxyCall *call;
-  gchar *request_body;
+  RestProxyCallClass *call_class;
   gchar *escaped_msg;
 
   if (!priv->user_id)
     return;
 
   call = rest_proxy_new_call (priv->proxy);
+  call_class = REST_PROXY_CALL_GET_CLASS (call);
   rest_proxy_call_set_method (call, "PUT");
   rest_proxy_call_set_function (call, "1.0/statusmood/@me/@self");
 
   escaped_msg = g_markup_escape_text (msg, -1);
   request_body = g_strdup_printf ("{ \"status\":\"%s\" }", escaped_msg);
-  rest_proxy_call_set_body (call, request_body);
+  call_class->serialize_params = _myspace_serialize_params;
 
   rest_proxy_call_async (call, _update_status_cb, (GObject *)self, NULL, NULL);
+  call_class->serialize_params = NULL;
   sw_status_update_iface_return_from_update_status (context);
 
   g_free (request_body);
