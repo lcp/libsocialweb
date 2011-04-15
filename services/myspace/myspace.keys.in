@@ -1,0 +1,12 @@
+[LibSocialWebService]
+_Name=MySpace
+_Description=MySpace is a leading social portal for connecting people, content, and culture from around the world. Create a profile, share photos, professional and viral videos, blog, instant message your friends, and listen to music on the world’s largest music community.
+Link=http://www.myspace.com/
+AuthType=oauth
+
+[OAuth]
+BaseURL=http://api.myspace.com/
+RequestTokenFunction=request_token
+AuthoriseFunction=authorize
+AccessTokenFunction=access_token
+Callback=http://www.novell.com/

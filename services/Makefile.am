@@ -12,6 +12,10 @@ if WITH_LASTFM
 SUBDIRS += lastfm
 endif
 
+if WITH_MYSPACE
+SUBDIRS += myspace
+endif
+
 if WITH_PHOTOBUCKET
 SUBDIRS += photobucket
 endif
